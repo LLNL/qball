@@ -726,6 +726,15 @@ void ChargeDensity::update_nlcc() {
 ////////////////////////////////////////////////////////////////////////////////
 void ChargeDensity::add_nlccden()
 {
+   if (rhognlcc_.size() != rhog.size())
+      update_nlcc();
+   else if (rhornlcc_.size() != rhor.size())
+      update_nlcc();
+   else if (rhognlcc_[0].size() != rhog[0].size())
+      update_nlcc();
+   else if (rhornlcc_[0].size() != rhor[0].size())
+      update_nlcc();
+   
    const int ngwl = vbasis_->localsize();
    for (int ispin=0; ispin<wf_.nspin(); ispin++)
    {

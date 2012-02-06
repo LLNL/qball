@@ -87,6 +87,11 @@ int LoadCmd::action(int argc, char **argv) {
       
     // ewd:  read rhor_last from file, send to appropriate pes
     ChargeDensity cd_(*s);
+
+    //ewd DEBUG
+    cd_.update_usfns();
+    cd_.update_density();
+    
     const Context* wfctxt = s->wf.wfcontext();
     const Context* vctxt = &cd_.vcontext();
     FourierTransform* ft_ = cd_.vft();

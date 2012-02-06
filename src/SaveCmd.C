@@ -376,7 +376,9 @@ int SaveCmd::action(int argc, char **argv) {
         cd_.rhog[ispin][i] = s->rhog_last[ispin][i];
     cd_.update_rhor();
     */
-
+    // if ultrasoft, calculate position-dependent functions
+    if (s->ctrl.ultrasoft)
+       cd_.update_usfns();
     cd_.update_density();
 
     const Context* wfctxt = s->wf.spincontext(0);
