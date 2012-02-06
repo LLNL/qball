@@ -1,0 +1,1107 @@
+------------------------------------------------------------------------------------------------	
+version:  2.0.0      date: 02/3/2012 
+------------------------------------------------------------------------------------------------
+
+02/3/12
+	Major new code release.  Code rewritten to support ultrasoft
+	pseudopotentials with variable memory allocation.  Users can
+	define storage used by ultrasoft calculation with the memory
+	variable.  Other new features include non-linear core corrections,
+	a randomize_vel command.
+			
+------------------------------------------------------------------------------------------------	
+version:  1.61.1      date: 08/30/2010 
+------------------------------------------------------------------------------------------------
+
+08/30
+	Added Hubbard U output, warning that forces and stress not yet implemented.  
+			
+------------------------------------------------------------------------------------------------	
+version:  1.61.0      date: 08/26/2010 
+------------------------------------------------------------------------------------------------
+
+08/26
+	Implemented DFT+U: added hubbard_u variable, and verified that
+	code reproduces PWSCF results for FeO with k-points and spin.
+		
+------------------------------------------------------------------------------------------------	
+version:  1.60.0      date: 05/12/2010 
+------------------------------------------------------------------------------------------------
+
+05/12
+	Added a run_timer variable, to let users set total run time limit.
+	Code automatically decreases niter or nitscf when it detects the
+	current values will prevent run command from completing in time.
+		
+------------------------------------------------------------------------------------------------	
+version:  1.59.2      date: 03/01/2010 
+------------------------------------------------------------------------------------------------
+
+03/01
+	Fixed bug in Anderson ndim charge mixing with spin enabled: charge
+	density not updating correctly on inactive spin contexts.
+	
+02/26
+	Updated Makefile, rewrote printeig, printocc functions in
+	Wavefunction to properly print from any combination of spin and
+	k-points.
+	
+------------------------------------------------------------------------------------------------	
+version:  1.59.1      date: 02/19/2010 
+------------------------------------------------------------------------------------------------
+
+02/19
+	New Makefile, which allows simultaneous compilation on different
+	platforms from the same source directory.
+	
+------------------------------------------------------------------------------------------------	
+version:  1.59.0      date: 02/10/2010 
+------------------------------------------------------------------------------------------------
+
+02/10
+	Implemented multidimensional Anderson accelerated charge mixing
+	w. Tikhonov regularization from the Davis version of Qbox
+	(1.50.4).  Currently only works w. nspin = 1.
+
+------------------------------------------------------------------------------------------------	
+version:  1.58.2      date: 02/09/2010 
+------------------------------------------------------------------------------------------------
+
+02/09
+	Fixed bug where occupation in nspin > 1 case was insufficiently
+	constrained, and could set occupations corresponding to
+	non-integer total charge in each spin channel.  
+
+02/09
+	Changed Wavefunction.printocc and printeig to print out
+	information for both spin channels, albeit on different processors
+	(output may get mixed on some systems).  Needs to be rewritten.
+
+------------------------------------------------------------------------------------------------	
+version:  1.58.1      date: 01/29/2010 
+------------------------------------------------------------------------------------------------
+
+01/29
+	Wrote qb-nruns-list, which allows user to input a single argument,
+	namely a file containing a list of input filenames, to avoid the
+	mpirun argument character limit that gets hit with large numbers
+	of input files.
+	
+01/26
+	Added warning message when scf convergence threshold set but ionic
+	iteration completes without triggering it.  Useful for monitoring long MD runs. 
+	
+------------------------------------------------------------------------------------------------	
+version:  1.58.0      date: 01/25/2010 
+------------------------------------------------------------------------------------------------
+
+01/25
+	Change save/load binary formats (for both states and dump formats)
+	to no longer include filename as first line of the file (needed to
+	get around bug in BG/L xlc compiler, but makes portability
+	difficult, as filename assumed to stay of fixed length).
+	
+------------------------------------------------------------------------------------------------	
+version:  1.57.1      date: 01/21/2010 
+------------------------------------------------------------------------------------------------
+
+01/21
+	Changed Makefile to auto-detect architecture from hostname.
+	
+------------------------------------------------------------------------------------------------	
+version:  1.57.0      date: 01/14/2010 
+------------------------------------------------------------------------------------------------
+
+01/14
+	Incorporated Francois' latest ConstraintSet (with uninitialized
+	ndof_ bug fix), and the BMDIonicStepper algorithm for structural
+	relaxation.
+	
+------------------------------------------------------------------------------------------------	
+version:  1.56.1      date: 01/08/2010 
+------------------------------------------------------------------------------------------------
+
+01/08
+	Improved ParallelOptimizer and added reshape option to gamma-point
+	Wavefunction.diag, along with timers for Wavefunction.diag in
+	BOSampleStepper.
+	
+------------------------------------------------------------------------------------------------	
+version:  1.56.0      date: 01/07/2010 
+------------------------------------------------------------------------------------------------
+
+01/07
+	Modified interface to EnergyFunctional and Preconditioner to allow
+	construction with any Wavefunction reference, not just s_.wf.
+	ParallelOptimizer can now create a full set of standalone
+	simulation objects for timing before s_.wf is allocated.	
+	
+------------------------------------------------------------------------------------------------	
+version:  1.55.1      date: 12/18/2009 
+------------------------------------------------------------------------------------------------
+
+12/18
+	Disabled validation in XML parser, which was failing due to the
+	official quantum-simulation.org namespaces not having a delta_spin
+	variable.
+	
+------------------------------------------------------------------------------------------------	
+version:  1.55.0      date: 12/18/2009 
+------------------------------------------------------------------------------------------------
+
+12/18
+	Rewrote initialization of parallel wavefunction data so parallel
+	allocation is delayed until data is actually loaded or initialized
+	(from randomize_wf or run -atomic_density).  Before this, the data
+	was allocated at the outset and then reallocated every time a
+	variable like nrowmax or ecut was set.
+	
+------------------------------------------------------------------------------------------------	
+version:  1.54.0      date: 12/10/2009 
+------------------------------------------------------------------------------------------------
+
+12/10
+	Fixed bug introduced in spin rewrite (1.52.0) where forces and
+	stress were incorrectly being summed over all processors instead
+	of only over k-points and spin.
+	
+------------------------------------------------------------------------------------------------	
+version:  1.53.4      date: 12/7/2009 
+------------------------------------------------------------------------------------------------
+
+12/7
+	Fixed bug in load -states (introduced with spin) where eigenvalues
+	and occupation weren't being read.
+	
+------------------------------------------------------------------------------------------------	
+version:  1.53.3      date: 11/30/2009 
+------------------------------------------------------------------------------------------------
+
+11/30
+	Implemented PBErev functional as described in Phys Rev Lett 80, 890 (1998).
+	
+------------------------------------------------------------------------------------------------	
+version:  1.53.2      date: 11/11/2009 
+------------------------------------------------------------------------------------------------
+
+11/11
+	Fixed bug in Wavefunction constructor where kptproc0 and
+	nkplocproc0 information was not being copied.
+	
+------------------------------------------------------------------------------------------------	
+version:  1.53.1      date: 10/07/2009 
+------------------------------------------------------------------------------------------------
+
+10/07
+	Incorporated fixed size to pzheev in Matrix.C from Francois'
+	version, which prevents crash in heev.
+
+	Added mysdctxt_ array to Wavefunction to allow nkp loops with
+	kptactive() to know which sdcontext to use.
+	
+------------------------------------------------------------------------------------------------	
+version:  1.53.0      date: 10/02/2009 
+------------------------------------------------------------------------------------------------
+
+10/02
+	Added JDWavefunctionStepper and run -atomic_density options from
+	Francois' version 1.50.0 of Qbox.
+	
+------------------------------------------------------------------------------------------------	
+version:  1.52.2      date: 10/02/2009 
+------------------------------------------------------------------------------------------------
+
+10/02
+	Improved performance of isosurface checkpointing by replacing
+	direct ofstream output of data with conversion to const char*.
+
+	Fixed saveden command for non-mixed case.
+	
+------------------------------------------------------------------------------------------------	
+version:  1.52.1      date: 9/28/2009 
+------------------------------------------------------------------------------------------------
+
+09/28
+	Added MLWF and MLWFC option to WfDiag.h, so Wannier centers /
+	transforms can be computed and/or applied every ionic iteration.
+	Functionality was already in BOSampleStepper, just not added to
+	interface.
+	
+------------------------------------------------------------------------------------------------	
+version:  1.52.0      date: 9/25/2009 
+------------------------------------------------------------------------------------------------
+
+09/25
+	Added spin polarization, controlled with spin variable (e.g. set
+	spin 1.0).  Added SlaterDet.copyTo function to allow reshaping of
+	wf data from larger contexts to smaller ones, needed for loading
+	nspin=2 XML checkpoint data.
+
+	Added error exit to BOSampleStepper when PSDA is used with nite=1
+	and empty states, since PSDAWavefunctionStepper calculates acceleration between 
+	current wf (diagonalized) and stored copy (unrotated).
+		
+------------------------------------------------------------------------------------------------	
+version:  1.51.1      date: 7/23/2009 
+------------------------------------------------------------------------------------------------
+
+07/23
+	Fixed bug which caused a core dump when loading wavefunction
+	velocity from an xml checkpoint.
+	
+------------------------------------------------------------------------------------------------	
+version:  1.51.0      date: 7/21/2009 
+------------------------------------------------------------------------------------------------
+
+07/21
+	Added SaveESPCmd, which prints out the electrostatic (electronic +
+	ionic) potential on a grid.
+	
+------------------------------------------------------------------------------------------------	
+version:  1.50.0      date: 5/20/2009 
+------------------------------------------------------------------------------------------------
+
+05/20
+	Fixed bug for MD w. nparallelkpts > 1, where gram in
+	BOSampleStepper was called on inactive kpoints.
+	
+------------------------------------------------------------------------------------------------	
+version:  1.49.1      date: 4/23/2009 
+------------------------------------------------------------------------------------------------
+
+04/23
+	Restored case where nite == 1 automatically disables charge mixing.  
+	
+------------------------------------------------------------------------------------------------	
+version:  1.49.0      date: 4/22/2009 
+------------------------------------------------------------------------------------------------
+
+04/22
+	Added "off" option to charge_mixing variable, after Patrick Huang
+	found poor convergence compared with earlier version with run 3
+	100 1 (i.e. charge mixing off).
+	
+------------------------------------------------------------------------------------------------	
+version:  1.48.0      date: 4/15/2009 
+------------------------------------------------------------------------------------------------
+
+04/15
+	Added save -vmd command to print out wf and density visualization data in VMD CUBE format.  
+	
+------------------------------------------------------------------------------------------------	
+version:  1.47.2      date: 4/5/2009 
+------------------------------------------------------------------------------------------------
+
+04/05
+	Fixed bug in qbLink, where EnthalpyPressure was undefined (causing
+	an error on uP) due to qbLink.C not including EnthalpyPressure.h,
+	where default value is set.
+
+04/03
+	Made small changes for compatibility with Xerces-3 and gcc 4.3, as
+	suggested by Alfredo Correa.
+	
+------------------------------------------------------------------------------------------------	
+version:  1.47.1      date: 3/26/2009 
+------------------------------------------------------------------------------------------------
+
+03/26
+	Put printing of eigenvalues and occupation back into BOSampleStepper.
+	
+------------------------------------------------------------------------------------------------	
+version:  1.47.0      date: 3/25/2009 
+------------------------------------------------------------------------------------------------
+
+03/25
+	Incorporated Francois' revamped BOSampleStepper, and added
+	constraints from his version.  Also changed EnergyFunctional so
+	that our image calculation of esr more closely matches his.  Did a
+	variety of tests to confirm that the results are unchanged from
+	verison 1.46.5.
+	
+------------------------------------------------------------------------------------------------	
+version:  1.46.5      date: 3/6/2009 
+------------------------------------------------------------------------------------------------
+
+03/6
+	Fixed bug in save -casino, where the k-point information was being
+	printed after every state, which is incorrect and can't be read by
+	CASINO.
+	
+------------------------------------------------------------------------------------------------	
+version:  1.46.4      date: 2/20/2009 
+------------------------------------------------------------------------------------------------
+
+02/20
+	Fixed bug in qbLink where enthalpy functional include files were
+	not included and default value was not set, allowing undefined
+	enthalpy pressures to be applied on uP.
+	
+	
+------------------------------------------------------------------------------------------------	
+version:  1.46.3      date: 2/17/2009 
+------------------------------------------------------------------------------------------------
+
+02/17
+	Fixed bug in qbLink where forces were incorrect, due to
+	s_.wf.context being rectangular instead of single-row like in qb.C
+	--> force averaging in EnergyFunctional was wrong.
+	
+------------------------------------------------------------------------------------------------	
+version:  1.46.2      date: 2/16/2009 
+------------------------------------------------------------------------------------------------
+
+02/16
+	Added set_th_time, set_th_temp and set_dt functions to qbLink.
+	
+------------------------------------------------------------------------------------------------	
+version:  1.46.1      date: 2/11/2009 
+------------------------------------------------------------------------------------------------
+
+02/11
+	Fixed bug in save -xml when wf velocity is present.  nkptloc_list_
+	array was not being copied in Wavefunction copy constructor.	
+	
+------------------------------------------------------------------------------------------------	
+version:  1.46.0      date: 1/06/2009 
+------------------------------------------------------------------------------------------------
+
+01/06
+	Fixed bug in NonLocalPotential.C where MPI_Allreduce is called on
+	process columns with nstloc = 0, causing a crash on systems which
+	rigorously adhere to MPI standard, e.g. BG/L.
+		
+------------------------------------------------------------------------------------------------	
+version:  1.45.2      date: 12/10/2008 
+------------------------------------------------------------------------------------------------
+
+12/10
+	Fixed bug in save -casino when nkp > 1.
+		
+------------------------------------------------------------------------------------------------	
+version:  1.45.1      date: 11/21/2008 
+------------------------------------------------------------------------------------------------
+
+11/11
+	Fixed bug in save -casino, which caused a crash due to MPI buffers
+	filling up for large systems.  
+	
+------------------------------------------------------------------------------------------------	
+version:  1.45.0      date: 11/11/2008 
+------------------------------------------------------------------------------------------------
+
+11/11
+	Added real-space wf extrapolation to BOSampleStepper (currently disabled).
+
+	Added get/set_fion_ext commands to AtomSet and qbLink.
+
+------------------------------------------------------------------------------------------------	
+version:  1.44.0      date:  
+------------------------------------------------------------------------------------------------
+
+9/29
+	Got save/load -xml commands working with new xml file structure.
+	Tested against save/load -states and got same results (once mixed
+	charge density removed from checkpoint directory).
+
+------------------------------------------------------------------------------------------------	
+version:  1.43.0      date:  9/24/2008
+------------------------------------------------------------------------------------------------
+
+9/24
+	Added save -casino option, to write out wavefunctions in format to
+	be used as CASINO Diffusion Monte Carlo trial functions.
+
+9/24	
+	Implemented niter = 0 option to run command, allowing users to
+	minimize wavefunction without moving the atoms and print out all
+	energies and forces at the end (modeled after Francois' version).
+	
+------------------------------------------------------------------------------------------------	
+version:  1.42.0      date:  9/19/2008
+------------------------------------------------------------------------------------------------
+
+9/19
+	In the middle of rewriting code to use Francois' parallel xml
+	format.  Need to read in data on default context, then
+	redistribute.  Wrote SlaterDet.reshape command to allow
+	redistribution of data to different contexts, i.e. can call
+	set_nrowmax without wiping out wavefunction data.
+
+	Changed save/load format of mixed charge density from reciprocal
+	to real space, to avoid discrepancies when basis distribution
+	changes for different contexts.
+	
+------------------------------------------------------------------------------------------------	
+version:  1.41.0      date:  9/15/2008
+------------------------------------------------------------------------------------------------
+
+9/15
+	Changed MDIonicStepper to use erand48 instead of drand48, which
+	will allow restarts to resume the random number stream where it
+	last left off, to prevent a bias in Andersen and Lowe thermostats.
+	
+------------------------------------------------------------------------------------------------	
+version:  1.40.0      date:  8/12/2008
+------------------------------------------------------------------------------------------------
+
+8/12
+	Enabled charge mixing in BOSampleStepper at all times, not just when nite > 1.
+	
+------------------------------------------------------------------------------------------------	
+version:  1.39.4      date:  7/28/2008
+------------------------------------------------------------------------------------------------
+
+7/28
+	Added get_cell function to qbLink.
+		
+------------------------------------------------------------------------------------------------	
+version:  1.39.3      date:  7/18/2008
+------------------------------------------------------------------------------------------------
+
+7/18
+	Added na_mm, nsp_mm, mass, mass_mm, atomic_number, and
+	atomic_number_mm functions to qbLink.
+		
+------------------------------------------------------------------------------------------------	
+version:  1.39.2      date:  7/15/2008
+------------------------------------------------------------------------------------------------
+
+7/15
+	Added get_stress functions to qbLink.  Also, fixed bug in
+	runBOSteps to allow successive run statements (couldn't keep
+	reusing same BOSampleStepper, had to create a new one each time).
+		
+------------------------------------------------------------------------------------------------	
+version:  1.39.1      date:  7/5/2008
+------------------------------------------------------------------------------------------------
+
+7/5
+	Fixed bug in SlaterDet.resize that was causing a crash with load -xml
+	for some systems.
+		
+------------------------------------------------------------------------------------------------	
+version:  1.39.0      date:  7/2/2008
+------------------------------------------------------------------------------------------------
+
+7/2
+	Rewrote Context and qbLink to allow creation of qbLink objects on a subset of pes.
+		
+------------------------------------------------------------------------------------------------	
+version:  1.38.2      date:  5/29/2008
+------------------------------------------------------------------------------------------------
+
+5/29
+	Implememented Francois's SlaterDet.resize modifications, allowing
+	ecut and nempty to be changed without reseting the Wavefunction.
+
+	Removed psda_enhancement_factor from PSDAWavefunctionStepper.C,
+	which was causing instability in gold test calculation.
+	
+------------------------------------------------------------------------------------------------	
+version:  1.38.1      date:  5/28/2008
+------------------------------------------------------------------------------------------------
+
+5/28
+	Fixed bug with new method of storing mixed charge density between
+	ionic iterations when cell dynamics are on, which can cause
+	non-integer electronic charge.  Now, stored mixing is not used
+	when cell_dyn != LOCKED.  Also, there's a check that rhog size
+	doesn't change between ionic iterations (i.e. ref_cell is being
+	used)
+	
+------------------------------------------------------------------------------------------------	
+version:  1.38.0      date:  5/13/2008
+------------------------------------------------------------------------------------------------
+
+5/13
+	Implemented compute_mlwf command using objects from Francois'
+	latest version of the Davis Qbox code (rel 1.43.2).  Currently
+	only works for k=0.
+	
+5/12
+	Fixed bug in savesys command when a0x > 99.999 a.u.
+	
+------------------------------------------------------------------------------------------------	
+version:  1.37.1      date:  5/5/2008
+------------------------------------------------------------------------------------------------
+
+5/5
+	Implemented a Hugoniostat to automatically adjust temperature to
+	keep system on the hugoniot line, defined by E-E_0 +
+	0.5*(V-V_0)(P-P_0) = 0.
+		
+------------------------------------------------------------------------------------------------	
+version:  1.37.0      date:  4/16/2008
+------------------------------------------------------------------------------------------------
+
+4/16
+	Modified PSDAWavefunctionStepper.C to be more stable and converge
+	faster for metals.  Partially and unoccupied states were
+	dominating the calculation of the extrapolation parameter once the
+	system started to become converged, leading to saturation of theta
+	and an effectively constant acceleration.  Reweighting the
+	extrapolation with an occupation prefactor has made the algorithm
+	more stable and significantly faster for metals: twice as fast as
+	the old PSDA for a disordered 108-atom gold calculation, and five
+	times as fast as PSD.
+	
+------------------------------------------------------------------------------------------------	
+version:  1.36.5      date:  4/10/2008
+------------------------------------------------------------------------------------------------
+
+4/10
+	Implemented the PBEsol functional, a modified PBE-GGA designed to more
+	accurately capture exchange-correlation effects for solids and
+	surfaces than standard PBE.  PBEsol is expected to do worse than
+	PBE for individual atoms and molecules.  See PRL 100, 136406
+	(2008).
+
+------------------------------------------------------------------------------------------------	
+version:  1.36.4      date:  4/7/2008
+------------------------------------------------------------------------------------------------
+
+4/7
+	Changed Sample and save/load commands (-states, -dump) to store
+	mixed charge density to prevent discontinuity on checkpointing for
+	systems sensitive to charge mixing paramters, e.g. transition
+	metals.
+
+4/1
+	Changed PSDAWavefunctionStepper to output Anderson extrapolation
+	theta, but only for first k-point.
+	
+2/26
+	Changed step function in EnthalpyFunctional to be symmetric about rho=threshold.
+	
+2/21
+	Changed text output to use a Context.oncoutpe, which allows one to
+	define a non-zero process for printing output.
+	
+1/21
+	Fixed bug in threshold_force, due to EnergyFunctional.energy
+	zeroing fion in calls with compute_forces=false.
+	
+------------------------------------------------------------------------------------------------	
+version:  1.36.3      date:  1/16/2008
+------------------------------------------------------------------------------------------------
+	
+1/16
+	Implemented electronic enthalpy functional (PRL 94, 145501 (2005))
+	for finite systems under pressure.
+		
+------------------------------------------------------------------------------------------------	
+version:  1.36.2      date:  1/11/2008
+------------------------------------------------------------------------------------------------
+	
+1/11
+	Fixed bug where multiple run consecutive statements with
+	threshold_scf could cause a hang, due to energy at itscf=0 being
+	nan on some processors, for some platforms.
+	
+1/7
+	Added ekin calculation to MDIonicStepper.compute_rp to avoid zero
+	ekin/temp_ion values at start of a run.
+	
+------------------------------------------------------------------------------------------------	
+version:  1.36.1      date:  12/18/2007
+------------------------------------------------------------------------------------------------
+
+12/18
+	Added -rescale/-norescale option to lock command, to allow users
+	to control whether locked atom positions are rescaled when the
+	cell changes shape.
+	
+------------------------------------------------------------------------------------------------	
+version:  1.36.0      date:  11/29/2007
+------------------------------------------------------------------------------------------------
+
+11/29
+	Added qbLink interface, a static library which can provide full
+	Qbox functionality to other codes, allowing for mixed-physics
+	calculations e.g. thermodynamic integration.  Cout is redirected
+	to a separate file (filename set in qbLink constructor) during
+	Qbox operations.
+	
+------------------------------------------------------------------------------------------------	
+version:  1.35.1      date:  10/24/2007
+------------------------------------------------------------------------------------------------
+
+10/24
+	Implemented Lowe and Andersen thermostats using code from
+	Francois.  MDIonicStepper was changed so that thermostats and
+	center of mass velocity subtraction occurs within compute_vp, and
+	velocity changes are applied to v0 (v(t)) rather than vhalf
+	(v(t-0.5dt)) as before.
+
+10/24
+	Fixed bug in ThresholdScf in which convergence was incorrectly
+	detected with nsteps = 2.  Rewrote SimpleConvergenceDetector to
+	only look for convergence when the history list size was >=
+	nsteps.
+
+------------------------------------------------------------------------------------------------	
+version:  1.34.2      date:  10/23/2007
+------------------------------------------------------------------------------------------------
+
+10/23
+	Added ignorelock flag to AtomSet.set_positions interface, so that
+	CellStepper can uniformly rescale all atom positions, including locked atoms.
+	
+------------------------------------------------------------------------------------------------	
+version:  1.34.1      date:  10/19/2007
+------------------------------------------------------------------------------------------------
+
+10/19
+	Moved charge mixing arrays outside ionic iteration loop in
+	BOSampleStepper, so charge mixing doesn't have to start from
+	scratch every ionic iteration, slowing MD convergence.
+
+	
+------------------------------------------------------------------------------------------------	
+version:  1.33.9      date:  10/18/2007
+------------------------------------------------------------------------------------------------
+
+10/18
+	Added -vel option to save and load command, to allow for saving
+	and loading of wavefunction velocities with -dump and -states
+	options.
+	
+------------------------------------------------------------------------------------------------	
+version:  1.33.8      date:  10/4/2007
+------------------------------------------------------------------------------------------------
+
+10/4
+	Added Lock and Unlock commands to prevent velocities and positions from being
+	updated.  Both individual atom names or species can be given as
+	arguments.
+	
+------------------------------------------------------------------------------------------------	
+version:  1.33.7      date:  9/28/2007
+------------------------------------------------------------------------------------------------
+
+9/28
+	Changed Wavefunction.read_states to fix bug where charge becomes
+	non-integer when k=0.
+
+	Added rmax in Species to increase vnlg resolution.
+	
+8/23
+	Changed default nsteps for threshold_scf, threshold_force and
+	threshold_stress from 1 to 2, to prevent premature exit.
+	
+8/16
+	Changed conversion from a.u. to GPa from 29421.5 to 29421.0120
+	(calculated from high precision NIST values)
+	
+------------------------------------------------------------------------------------------------	
+version:  1.33.6      date:  8/3/2007
+------------------------------------------------------------------------------------------------	
+8/3
+	Added fixed-volume cell_lock options.  Initial attempts to achieve
+	a null trace A^-1*sigma*A^-T matrix were unstable, so now we
+	simply apply all other constraints, then rescale the resulting
+	(non-fixed) lattice vectors.
+	
+------------------------------------------------------------------------------------------------	
+version:  1.33.5      date:  7/31/2007
+------------------------------------------------------------------------------------------------	
+7/31
+	Force nrowmax to always be greater than npcol in
+	ParallelOptimizer.  Changed Matrix.C to only use zheev with
+	single-col contexts, not single-row (which was causing a glibc
+	free error)
+	
+7/18
+        Finished writing qb-setupkpts.C, to calculate k-point grids and symmetry from a .sys 
+	file.  Went through Matrix.C and Wavefunction.C to add #ifdef statements to allow for
+	serial compilation.  
+	
+		
+------------------------------------------------------------------------------------------------	
+version:  1.33.4      date:  7/16/2007
+------------------------------------------------------------------------------------------------	
+7/16
+        Added convergence threshold variables for force and stress convergence.  
+	Rewrote convergence detection into ConvergenceDetector and SimpleConvergenceDetector
+	classes.  
+	
+7/16
+	Added option to allow user to set Ewald width for a given species, using 
+	an extra (optional) argument to the species command.
+	
+		
+------------------------------------------------------------------------------------------------	
+version:  1.33.3      date:  7/12/2007
+------------------------------------------------------------------------------------------------	
+7/12
+	Fixed bug in Matrix.C, where diagonalizations on single-row or
+	single-col contexts would sometimes fail, resulting in non-integer
+	charge.  Calling zheev in that case fixes the problem.
+	
+------------------------------------------------------------------------------------------------	
+version:  1.33.2      date:  6/22/2007
+------------------------------------------------------------------------------------------------	
+6/22
+	Fixed bug with ecuts:  confinement stress not being averaged over symmetry.
+	
+
+------------------------------------------------------------------------------------------------	
+version:  1.33.1      date:  6/5/2007
+------------------------------------------------------------------------------------------------	
+6/5
+	Added paropt command, which chooses the parallel parameters which
+	will minimize the run time for a given distribution of iterations.  
+	
+5/29
+	Fixed bug where smearing_ngauss was not set within the fermi_temp
+	variable, causing the default smearing (Gaussian) to be used.
+	Changed the default smearing (within Smearing.h) to fermi, and
+	added the type of smearing to the output of mu in
+	Wavefunction.update_occ.
+	
+------------------------------------------------------------------------------------------------	
+version:  1.32.10      date:  5/17/2007
+------------------------------------------------------------------------------------------------	
+5/17
+	Fixed bug where <pv> was being printed using s_.ctrl.ext_stress
+	(GPa), not sigma_ext (converted in SampleStepper.C to a.u.),
+	making <pv> wrong by a factor of 29421.
+
+5/16
+	Added center_of_mass variable to allow one to rescale the particle
+	velocities to keep the center of mass fixed.
+
+------------------------------------------------------------------------------------------------	
+version:  1.32.9      date:  5/15/2007
+------------------------------------------------------------------------------------------------	
+5/15
+	Changed isosurface output of wavefunctions to print |wf|^2,
+	i.e. the contribution of each state to the total density.
+
+5/10
+	Added <run> tag to output file, to aid in xml parsing.  
+
+5/9
+	Disabled schema validation in SpeciesReader.C, to prevent file not
+	found errors for sample.xsd when Qbox is compiled with USE_XERCES,
+	but binary checkpointing is used.
+	
+5/8
+	Cleaned up output file, so all text output is in proper xml
+	format.  Errors are currently labeled with <ERROR> tags, warnings
+	with <WARNING> tags.
+
+
+------------------------------------------------------------------------------------------------	
+version:  1.32.8      date:  5/2/2007
+------------------------------------------------------------------------------------------------	
+
+5/2
+	Fixed bug in load -states (Wavefunction.read_states) that caused a
+	hang when some processes in a column had data size = 0.
+
+5/2
+	Added timers to save and load commands to allow for comparison of
+	different checkpointing methods.
+
+------------------------------------------------------------------------------------------------	
+version:  1.32.7      date:  5/1/2007
+------------------------------------------------------------------------------------------------	
+
+5/1
+	Added support for isosurface output of both density and wave
+	function to save and saveden commands.  Currently only gOpenMol
+	and Molmol formats are supported.  The Gaussian "cube" format
+	requires values on a grid with z varying fastest, which requires a
+	lot more communication and more complicated implementation, so it
+	has not been implemented yet.	
+
+------------------------------------------------------------------------------------------------	
+version:  1.32.6      date:  4/30/2007
+------------------------------------------------------------------------------------------------	
+
+4/30
+	Added conditional test before calling MPI_Comm_free in Context.C
+	to check that comm_ != MPI_COMM_NULL.  Subcommunicators must be
+	created from all processes in the main communicator, but will be
+	set to MPI_COMM_NULL for all processes not in subcommunicator.
+	Although it doesn't cause an error on all platforms (e.g. thunder,
+	bgl), calling MPI_Comm_free with MPI_COMM_NULL is incorrect, and
+	will cause a crash on atlas and purple.
+	
+------------------------------------------------------------------------------------------------	
+version:  1.32.5      date:  4/20/2007
+------------------------------------------------------------------------------------------------	
+
+4/20
+	Rewrote SlaterDet constructor so that single-column contexts are passed as an argument.
+	This prevents an MPI error on Thunder when many k-points are used:  "No more available
+	contexts."  
+	
+------------------------------------------------------------------------------------------------	
+version:  1.32.4      date:  4/19/2007
+------------------------------------------------------------------------------------------------	
+
+4/19
+	Fixed bug:  empirical potential energy added to econst.  Correction for double-counting 
+	for empirical potential and forces added.
+	
+
+------------------------------------------------------------------------------------------------	
+version:  1.32.3      date:  4/17/2007
+------------------------------------------------------------------------------------------------	
+
+4/17
+	Fixed bug:  empirical forces now evaluated within periodic boundary conditions.
+
+	Added r12 repulsive potential (simply a Lennard-Jones potential without the r6 term).
+
+------------------------------------------------------------------------------------------------	
+version:  1.32.2      date:  4/16/2007
+------------------------------------------------------------------------------------------------	
+
+4/16
+	Rewrote AtomSet.get_positions interface to fix bug and ensure correct atom set is 
+	always returned.  Fixed printsys command so that empirical_potential command is 
+	printed correctly.
+
+	
+	
+------------------------------------------------------------------------------------------------	
+version:  1.32.1      date:  4/16/2007
+------------------------------------------------------------------------------------------------	
+
+4/16
+	Fixed bugs in AtomSet.get_positions and SampleStepper that excluded MM atoms 
+	from stress calculations.
+	
+------------------------------------------------------------------------------------------------	
+version:  1.32.0      date:  4/11/2007
+------------------------------------------------------------------------------------------------	
+
+4/11
+	Implemented classical atoms and empirical interactions.  The short-term 
+	goal is to allow for an atomistic pressure medium for nanostructures, 
+	but the implementation was designed to allow for general interactions.  
+	
+3/27
+	Reimplemented fermi_temp variable to maintain backward
+	compatibility with older Qbox input files and Francois' version of
+	the code.  Set fermi_temp reads in smearing width in Kelvin and
+	converts it to Ry.
+	
+3/14
+	dt_inv set to 0.0 when dt=0.0, to avoid singularity in wfv and
+	divergence in subsequent run commands.  This bug only occurs when
+	one runs with dt=0.0 to relax wave function and print forces, and
+	then sets dt > 0.0 to relax atoms in the same input file. 
+	
+	
+------------------------------------------------------------------------------------------------	
+version:  1.31.8      date:  2/28/2007
+------------------------------------------------------------------------------------------------	
+	
+2/28
+	Added cell_stepfreq keyword, to allow one to relax the atoms for
+	several iterations before updating the cell.
+
+
+------------------------------------------------------------------------------------------------	
+version:  1.31.7      date:  2/28/2007
+------------------------------------------------------------------------------------------------	
+
+2/28
+	Removed automatic updating of Ewald parameters every time cell is
+	resized, which was causing a positive drift in the Hartree
+	contribution to the stress.
+
+------------------------------------------------------------------------------------------------	
+version:  1.31.6      date:  2/21/2007
+------------------------------------------------------------------------------------------------	
+
+2/21
+	Fixed bug in Species.initialize that was setting the grid too
+	large after multiple calls.
+	
+	
+------------------------------------------------------------------------------------------------	
+version:  1.31.5      date:  2/17/2007
+------------------------------------------------------------------------------------------------	
+
+2/17
+	Rewrote Basis and KpointCmd to store k-points in crystal
+	coordinates instead of Cartesian so that variable cell
+	calculations still use the appropriate k-point grid.
+   
+	
+------------------------------------------------------------------------------------------------	
+version:  1.31.4      date:  2/15/2007
+------------------------------------------------------------------------------------------------	
+
+2/15
+	Added occupation and eigenvalue info to save/load -states when
+	nempty > 0.
+	
+------------------------------------------------------------------------------------------------	
+version:  1.31.3      date:  2/13/2007
+------------------------------------------------------------------------------------------------	
+
+2/13
+	Fixed bug in save -states, where only real part of wave function
+	was being saved.  
+	
+------------------------------------------------------------------------------------------------	
+version:  1.31.2      date:  2/12/2007
+------------------------------------------------------------------------------------------------	
+
+2/12
+	Rewrote load/save -states to Fourier transform wave function to
+	real space before saving.
+	
+------------------------------------------------------------------------------------------------	
+version:  1.31.1      date:  2/8/2007
+------------------------------------------------------------------------------------------------	
+
+2/8
+	Implemented load/save -states to allow for restarting on arbitrary
+	context shapes.  (Previous checkpoint load/save support required
+	restarting on an identical parallel layout.)
+
+	Added save/load -xml switch, to allow checkpointing with original
+	Qbox xml format.  Can only be used with one k-point.
+	
+------------------------------------------------------------------------------------------------	
+version:  1.31.0      date:  1/24/2007
+------------------------------------------------------------------------------------------------	
+
+1/24
+	Added complex linear algebra support to routines used by PSDA, to
+	allow one to use PSDA with k-points.  
+    
+	Improved automatic Ewald parameter selection.  Parameters are now
+	chosen so that both real-space and reciprocal space sums are
+	well-converged, and small enough that all ionic charge is enclosed
+	within cell.  Reciprocal sum threshold scaled by rcps/zval,
+	similar to approach used by PWSCF, after testing showed a single
+	threshold was insufficient for different species.
+	
+1/23
+	Changed Symmetry object to use double arguments instead of ints,
+	to allow for non-cubic operations.  
+
+12/22
+	Added saveden command, with rudimentary text output.  Still need
+	to add binary output, and density loading capability.
+	
+------------------------------------------------------------------------------------------------	
+version:  1.30.0      date:  12/20/2006
+------------------------------------------------------------------------------------------------	
+
+12/20
+	Added iprint variable to control output of eigenvalues and
+	occupation numbers.  
+
+	Fixed symmetry-averaging of forces for non-cubic cells (error in
+	conversion to crystal coordinates before applying transform).  
+
+	Changed dt_inv to 1E20 when dt=0.0 and compute_forces=true to
+	prevent divergence.
+    
+	
+
+------------------------------------------------------------------------------------------------	
+version:  1.29.0      date:  12/08/2006
+------------------------------------------------------------------------------------------------	
+
+12/8
+	Forces with f-projectors are now working and have been tested with
+	a 2-atom tantalum calculation.  
+	
+
+10/20
+ 	Added default values to ExtStress.  
+
+	Added simple thresholds to scf and non-scf electronic iteration
+	loops, with input variables scf_threshold and nonscf_threshold.
+      
+	
+------------------------------------------------------------------------------------------------	
+version:  1.28.0      date:  9/19/2006
+------------------------------------------------------------------------------------------------	
+
+9/19
+	Forces are now averaged over symmetry-equivalent atoms, when
+	symmetry command is used.  Tests against PWSCF show agreement
+	within 3.0E-7 a.u.
+
+7/14	
+	Added savesys command to allow for MD restart on platforms without
+	xml support (e.g. BG/L)
+	
+------------------------------------------------------------------------------------------------	
+version:  1.27.0      date:  6/14/2006
+------------------------------------------------------------------------------------------------	
+
+6/14    
+	Methfessel-Paxton charge smearing implemented.  Charge smearing
+	now enabled with the smearing keyword, and the width set with the
+	smearing_width keyword (in Ry).  The fermi_temp keyword has been
+	disabled.
+
+	To run with Fermi smearing:
+	  set smearing fermi
+	  set smearing_width [fermi temperature in Rydbergs]
+	To run with Methfessel-Paxton smearing, with four terms in the expansion:
+	  set smearing gaussian 4
+	  set smearing_width [width in Ry]
+	To run with simple Gaussian smearing
+	  set smearing gaussian 0
+	  set smearing_width [width in Ry]
+	
+5/17	
+	Eigenvalue printing for multiple k-points now synchronized to
+	print from pe 0 to prevent overlapping output from other
+	contexts.  
+
+5/3	
+	Added reshape_context variable, to toggle automatic reshaping of
+	context for square matrix operations in SlaterDet.gram and
+	Wavefunction.diag.  This can improve performance for very
+	rectangular contexts on large numbers of processors,
+	e.g. BlueGene/L.  
+
+4/5	
+	Added charge_mixing keywords, to allow user to disable Anderson
+	mixing and use simple mixing instead.  
+	
+	
+------------------------------------------------------------------------------------------------	
+version:  1.26.0      date:  3/24/2006
+------------------------------------------------------------------------------------------------	
+
+3/24    
+	Charge symmetrization implemented, though not fully tested yet.
+	
+3/21   	
+	Symmetry command added, and Symmetry and SymmetrySet objects created.
+
+	
+------------------------------------------------------------------------------------------------	
+version:  1.25.0      date:  3/8/2006
+------------------------------------------------------------------------------------------------	
+
+3/8    	
+	Support for forces, empty states and total energies with k-points
+	implemented, and rigorously tested against PWSCF.  Symmetry
+	averaging not yet supported. 
+
+
+------------------------------------------------------------------------------------------------	
+version:  1.24.0e     date:  8/18/2005
+------------------------------------------------------------------------------------------------	
+
+8/18	
+	Starting version for k-point rewrite.  Gamma-point version of
+	Qbox, written by Francois Gygi and thoroughly tested and verified.
+	
