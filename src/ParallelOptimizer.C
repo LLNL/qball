@@ -14,6 +14,7 @@
 #include "SDWavefunctionStepper.h"
 #include "PSDWavefunctionStepper.h"
 #include "PSDAWavefunctionStepper.h"
+#include "JDWavefunctionStepper.h"
 #include "Preconditioner.h"
 
 #include <iostream>
@@ -149,7 +150,7 @@ void ParallelOptimizer::optimize(int niter, int nitscf, int nite) {
 
   double nrowtime = kpttime;  // best timing so far
   bool improve = true;
-  bool reshape = true;
+  bool reshape = false;
   list<int>::reverse_iterator lit = nrow_factors.rbegin();
   while (improve && lit != nrow_factors.rend()) { 
     int testnrow = *lit;
@@ -161,24 +162,21 @@ void ParallelOptimizer::optimize(int niter, int nitscf, int nite) {
       // do nothing, try next nrowmax
     }
     else {
-      bool testreshape = true;
-      double testtime = runtime(testnrow,1,nspin,testreshape,true);
+      bool testreshape = false;
+      double testtime = runtime(testnrow,1,nspin,false,true);
       if ( s_.ctxt_.oncoutpe() ) 
-        cout << "  <!-- ParallelOptimizer: nparallelkpts = " << nparkp << ", nrowmax = " << testnrow << ", reshape = true, runtime = " << testtime << " -->" << endl;
+        cout << "  <!-- ParallelOptimizer: nparallelkpts = " << nparkp << ", nrowmax = " << testnrow << ", reshape = false, runtime = " << testtime << " -->" << endl;
 
-      // try turning off context reshaping, see if time improves
-      if (npcol >= 4) {
-        testreshape = false;
-
-        double reshapetime = runtime(testnrow,1,nspin,testreshape,true);
+      // try turning on context reshaping, see if time improves
+      if (testnrow > 2*npcol) {
+        double reshapetime = runtime(testnrow,1,nspin,true,true);
         if ( s_.ctxt_.oncoutpe() ) 
-          cout << "  <!-- ParallelOptimizer: nparallelkpts = " << nparkp << ", nrowmax = " << testnrow << ", reshape = false, runtime = " << reshapetime << " -->" << endl;
+          cout << "  <!-- ParallelOptimizer: nparallelkpts = " << nparkp << ", nrowmax = " << testnrow << ", reshape = true, runtime = " << reshapetime << " -->" << endl;
       
         if (reshapetime < testtime)
-          testtime = reshapetime;
-        else {
-          testreshape = false;
-          reshape = true;
+        {
+           testtime = reshapetime;
+           testreshape = true;
         }
       }
       
@@ -207,7 +205,10 @@ void ParallelOptimizer::optimize(int niter, int nitscf, int nite) {
   bool highmem = false;
   if (s_.ctrl.extra_memory >= 3)
     highmem = true;
-  s_.wf.randomize(0.02,highmem);
+  if (s_.ctrl.ultrasoft)
+     s_.wf.randomize_us(0.02,s_.atoms,highmem);     // this will force allocate() and resize()
+  else
+     s_.wf.randomize(0.02,highmem);              // this will force allocate() and resize()
   s_.ctrl.reshape_context = reshape;
   s_.wf.set_reshape_context(reshape);
 
@@ -243,54 +244,77 @@ double ParallelOptimizer::runtime(int nrowmax, int npark, int nspin, bool reshap
   const string atoms_dyn = s_.ctrl.atoms_dyn;
   const string cell_dyn = s_.ctrl.cell_dyn;
   
+  const bool atoms_move = ( niter_ > 0 && atoms_dyn != "LOCKED" );
   const bool compute_hpsi = ( wf_dyn != "LOCKED" );
   const bool compute_forces = ( atoms_dyn != "LOCKED" );
   const bool compute_stress = ( s_.ctrl.stress == "ON" );
   const bool use_confinement = ( s_.ctrl.ecuts > 0.0 );
   const bool use_preconditioner = wf_dyn == "PSD" || wf_dyn == "PSDA";  
+  const bool ultrasoft = s_.ctrl.ultrasoft;
+  const bool usdiag = (ultrasoft && atoms_move);
+  const bool nlcc = s_.ctrl.nlcc;
 
   const string charge_mixing = s_.ctrl.charge_mixing;
 
-  Wavefunction wf(s_.ctxt_);
+  //Wavefunction wf(s_.ctxt_);
+  Wavefunction& wf = s_.wf;
   wf.set_nrowmax(nrowmax);
   wf.set_nparallelkpts(npark);
-  wf.set_ecut(s_.wf.ecut());
-  wf.set_cell(s_.wf.cell());
-  wf.set_refcell(s_.wf.refcell());
-  wf.set_nempty(nempty);
-  wf.set_nel(atoms.nel());
   bool highmem = false;
   if (s_.ctrl.extra_memory >= 3)
     highmem = true;
-  wf.randomize(0.02,highmem);     // this will force allocate() and resize()
-  wf.set_reshape_context(reshape);
-  const bool ultrasoft = s_.ctrl.ultrasoft;
   if (ultrasoft)
     wf.set_ultrasoft(ultrasoft);
 
+  if (ultrasoft)
+     wf.randomize_us(0.02,atoms,highmem);  // this will force allocate() and resize()
+  else
+     wf.randomize(0.02,highmem);              // this will force allocate() and resize()
+  wf.set_reshape_context(reshape);
+  
   if ( nempty > 0 )
     wf.update_occ(s_.ctrl.smearing_width,s_.ctrl.smearing_ngauss);
 
   // simulation objects for this parallel distribution
-  Wavefunction& wfref = wf;
   ChargeDensity cd_(s_);
-  EnergyFunctional ef_(s_,wfref,cd_);
-  Wavefunction dwf(wfref);
+  EnergyFunctional ef_(s_,wf,cd_);
+  Wavefunction dwf(wf);
   dwf.set_reshape_context(reshape);
+  cd_.set_nlcc(nlcc);
+
+  // use extra memory for SlaterDets if memory variable = normal, large or huge
+  if (s_.ctrl.extra_memory >= 3) 
+    wf.set_highmem();
 
   Preconditioner *preconditioner = 0;
   if ( use_preconditioner ) {
-    preconditioner = new Preconditioner(s_,wfref,ef_);
+    preconditioner = new Preconditioner(s_,wf,ef_);
   }
   
   WavefunctionStepper* wf_stepper = 0;
   if ( wf_dyn == "SD" )
-    wf_stepper = new SDWavefunctionStepper(wfref,1.0,tmap);
+    wf_stepper = new SDWavefunctionStepper(wf,1.0,tmap);
   else if ( wf_dyn == "PSD" )
-    wf_stepper = new PSDWavefunctionStepper(wfref,*preconditioner,tmap);
+    wf_stepper = new PSDWavefunctionStepper(wf,*preconditioner,tmap);
   else if ( wf_dyn == "PSDA" )
-    wf_stepper = new PSDAWavefunctionStepper(wfref,*preconditioner,tmap);
+    wf_stepper = new PSDAWavefunctionStepper(wf,*preconditioner,tmap);  
+  else if ( wf_dyn == "JD" )
+    wf_stepper = new JDWavefunctionStepper(wf,*preconditioner,ef_,tmap);  
 
+  // if ultrasoft, calculate position-dependent functions
+  double time_cd_usfns = 0.0;
+  if (ultrasoft) {
+    Timer tm_cdus;
+    tm_cdus.start();
+    cd_.update_usfns();
+    tm_cdus.stop();
+    time_cd_usfns = tm_cdus.real();
+    s_.ctxt_.dmax(1,1,&time_cd_usfns,1);
+  }
+
+  // if non-linear core correction defined, calculate position-dependent density
+  if (nlcc)
+     cd_.update_nlcc();
     
   double time_cd_update = 0.0;
   {
@@ -343,6 +367,51 @@ double ParallelOptimizer::runtime(int nrowmax, int npark, int nspin, bool reshap
     s_.ctxt_.dmax(1,1,&time_ef_vhxc,1);
   }
 
+  double time_sd_usfns = 0.0;
+  if (ultrasoft) {
+    D3vector gamma(0.0,0.0,0.0);
+    int nkptloc = wf.nkptloc();
+    int kp = wf.kptloc(0);         // global index of local kpoint
+    if (nkptloc > 1 && wf.kpoint(kp) == gamma) 
+      kp = wf.kptloc(1);  // use more expensive non-gamma calculation for timing
+    Timer tm_sdus;
+    tm_sdus.start();
+    wf.sd(0,kp)->update_usfns();
+    tm_sdus.stop();
+    time_sd_usfns = nkptloc*tm_sdus.real();
+    s_.ctxt_.dmax(1,1,&time_sd_usfns,1);
+  }
+
+  double time_wf_gram = 0.0;
+  {
+    D3vector gamma(0.0,0.0,0.0);
+    int nkptloc = wf.nkptloc();
+    int kp = wf.kptloc(0);         // global index of local kpoint
+    if (nkptloc > 1 && wf.kpoint(kp) == gamma) 
+      kp = wf.kptloc(1);  // use more expensive non-gamma calculation for timing
+    Timer tm_gram;
+    tm_gram.start();
+    wf.sd(0,kp)->gram();
+    tm_gram.stop();
+    time_sd_usfns = nkptloc*tm_gram.real();
+    s_.ctxt_.dmax(1,1,&time_wf_gram,1);
+  }
+
+  double time_sd_betapsi = 0.0;
+  if (ultrasoft) {
+    D3vector gamma(0.0,0.0,0.0);
+    int nkptloc = wf.nkptloc();
+    int kp = wf.kptloc(0);         // global index of local kpoint
+    if (nkptloc > 1 && wf.kpoint(kp) == gamma) 
+      kp = wf.kptloc(1);  // use more expensive non-gamma calculation for timing
+    Timer tm_bpsi;
+    tm_bpsi.start();
+    wf.sd(0,kp)->calc_betapsi();
+    tm_bpsi.stop();
+    time_sd_betapsi = nkptloc*tm_bpsi.real();
+    s_.ctxt_.dmax(1,1,&time_sd_betapsi,1);
+  }
+
   double time_wf_dot = 0.0;
   {
     Timer tm_wf;
@@ -357,7 +426,7 @@ double ParallelOptimizer::runtime(int nrowmax, int npark, int nspin, bool reshap
   if ( compute_forces && compute_eigvec ) {
     Timer tm_wf;
     tm_wf.start();
-    dwf.align(wfref);
+    dwf.align(wf);
     tm_wf.stop();
     time_wf_align = tm_wf.real();
     s_.ctxt_.dmax(1,1,&time_wf_align,1);
@@ -405,23 +474,30 @@ double ParallelOptimizer::runtime(int nrowmax, int npark, int nspin, bool reshap
     cout << "    <!-- ParallelOptimizer:  EnergyFunctional timing: nonscf = " << time_ef_nonscf << " -->" << endl;
     cout << "    <!-- ParallelOptimizer:  EnergyFunctional timing: vhxc = " << time_ef_vhxc << " -->" << endl;
     cout << "    <!-- ParallelOptimizer:  ChargeDensity timing: update = " << time_cd_update << " -->" << endl;
+    if (ultrasoft)
+       cout << "    <!-- ParallelOptimizer:  ChargeDensity timing: usfns = " << time_cd_usfns << " -->" << endl;
     cout << "    <!-- ParallelOptimizer:  ChargeDensity timing: rhor = " << time_cd_rhor << " -->" << endl;
     cout << "    <!-- ParallelOptimizer:  Wavefunction timing: diag = " << time_wf_diag << " -->" << endl;
     cout << "    <!-- ParallelOptimizer:  Wavefunction timing: dot = " << time_wf_dot << " -->" << endl;
     cout << "    <!-- ParallelOptimizer:  Wavefunction timing: align = " << time_wf_align << " -->" << endl;
+    cout << "    <!-- ParallelOptimizer:  Wavefunction timing: gram = " << time_wf_gram << " -->" << endl;
     cout << "    <!-- ParallelOptimizer:  Wavefunction timing: ortho_align = " << time_wf_ortho_align << " -->" << endl;
     cout << "    <!-- ParallelOptimizer:  Wavefunction timing: update = " << time_wf_update << " -->" << endl;
+    if (ultrasoft) {
+       cout << "    <!-- ParallelOptimizer:  SlaterDet timing: update_usfns = " << time_sd_usfns << " -->" << endl;
+       cout << "    <!-- ParallelOptimizer:  SlaterDet timing: calc_betapsi = " << time_sd_betapsi << " -->" << endl;
+    }       
   }
 
 
-  double nonscf_tot = time_ef_nonscf + time_wf_dot + time_wf_update;
+  double nonscf_tot = time_ef_nonscf + time_wf_dot + time_wf_update + time_sd_usfns + time_wf_gram + time_sd_betapsi;
   double scf_tot = time_cd_update + time_ef_vhxc + nite_*nonscf_tot;
   if (nite_ > 1) 
     scf_tot += time_cd_rhor;
   if ( compute_eigvec || s_.ctrl.wf_diag == "EIGVAL" ) 
     scf_tot += time_ef_nonscf + time_wf_diag;
 
-  double ionic_tot = nitscf_*scf_tot + time_cd_update + time_ef_vhxc + time_ef_ionic;
+  double ionic_tot = nitscf_*scf_tot + time_cd_update + time_ef_vhxc + time_ef_ionic + time_cd_usfns;
   if ( compute_forces && compute_eigvec )
     ionic_tot += time_wf_align;
   if ( compute_forces )

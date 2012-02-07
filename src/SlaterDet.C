@@ -250,7 +250,12 @@ void SlaterDet::reshape(const Context& newctxt, const Context& new_col_ctxt, boo
       ctxt_ = newctxt;
     c_.set_context(newctxt);
     c_.resize(m,ctmp.n(),mb,nb);
-
+    if (ultrasoft_)
+    {
+       spsi_.set_context(newctxt);
+       spsi_.resize(m,ctmp.n(),mb,nb);
+    }
+    
     // consider only cases where the dimensions are finite
     if (is_finite_) {
       // transform all states to real space and interpolate
@@ -2320,6 +2325,8 @@ SlaterDet& SlaterDet::operator=(SlaterDet& rhs) {
   if ( this == &rhs ) return *this;
   assert(ctxt_.ictxt() == rhs.context().ictxt());
   c_ = rhs.c_;
+  if (rhs.ultrasoft_)
+     spsi_ = rhs.spsi_;
   return *this;
 }
 
