@@ -162,12 +162,20 @@ void BOSampleStepper::step(int niter)
   // determine whether eigenvectors must be computed
   // eigenvectors are computed if explicitly requested with wf_diag==T
   // or if the SlaterDet has fractionally occupied states
-  const bool fractional_occ = (s_.wf.nspin() * s_.wf.nel() != 2 * s_.wf.nst());
+  //const bool fractional_occ = (s_.wf.nspin() * s_.wf.nel() != 2 * s_.wf.nst());
+  int occtest = (2 * s_.wf.nst()) - s_.wf.nspin() * s_.wf.nel();
+  const bool fractional_occ = (occtest != 0 && occtest != 1);
   const bool compute_eigvec = fractional_occ || s_.ctrl.wf_diag == "T";
   const bool compute_mlwf = s_.ctrl.wf_diag == "MLWF";
   const bool compute_mlwfc = s_.ctrl.wf_diag == "MLWFC";
   enum ortho_type { GRAM, LOWDIN, ORTHO_ALIGN, RICCATI };
 
+  if (fractional_occ && onpe0)
+       cout << "<!-- BOSampleStepper:  fractional occupation detected. -->" << endl;
+  else
+       cout << "<!-- BOSampleStepper:  fractional occupation not detected. -->" << endl;
+   
+  
   if (s_.ctrl.reshape_context)
     s_.wf.set_reshape_context(s_.ctrl.reshape_context);
   
@@ -226,7 +234,11 @@ void BOSampleStepper::step(int niter)
       cout << "<ERROR> BOSampleStepper:  Maximally-localized Wannier Functions not yet implemented with ultrasoft. </ERROR>" << endl;
     return;
   }
-                       
+  if (onpe0 && ultrasoft && compute_stress)
+      cout << "<WARNING> BOSampleStepper:  stress not yet implemented with ultrasoft!  Results WILL be wrong. </WARNING>" << endl;
+  if (onpe0 && nlcc && compute_stress)
+      cout << "<WARNING> BOSampleStepper:  stress not yet implemented with non-linear core corrections!  Results WILL be wrong. </WARNING>" << endl;
+  
   // use extra memory for SlaterDets if memory variable = normal, large or huge
   if (s_.ctrl.extra_memory >= 3) 
     wf.set_highmem();

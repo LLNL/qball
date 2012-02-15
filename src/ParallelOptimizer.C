@@ -76,6 +76,9 @@ void ParallelOptimizer::optimize(int niter, int nitscf, int nite) {
     nrowmax /= 2;   
   if (nrowmax%2 == 0 && nrowmax > 16) 
     nrowmax /= 2;   
+  //ewd: just added
+  if (nrowmax%2 == 0 && nrowmax > 32)
+    nrowmax /= 2;   
 
   // if nkpts > 1, optimize nparallelkpts
   double kpttime = 1.E+20;
@@ -231,8 +234,11 @@ void ParallelOptimizer::optimize(int niter, int nitscf, int nite) {
 ////////////////////////////////////////////////////////////////////////////////
 double ParallelOptimizer::runtime(int nrowmax, int npark, int nspin, bool reshape, bool print_timing) {
 
-  const int nempty = s_.wf.nempty();
-  const bool compute_eigvec = nempty > 0 || s_.ctrl.wf_diag == "T";
+   if (s_.ctxt_.onpe0())
+      cout << "<!--ParallelOptimizer::runtime called w. nparallelkpts = " << npark << ", nrowmax = " << nrowmax << ", nspin = " << nspin << ", reshape = " << reshape << "-->" << endl;
+
+   const int nempty = s_.wf.nempty();
+   const bool compute_eigvec = nempty > 0 || s_.ctrl.wf_diag == "T";
 
   AtomSet& atoms = s_.atoms;
   const UnitCell& cell = s_.wf.cell();

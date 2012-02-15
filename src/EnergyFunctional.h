@@ -70,6 +70,7 @@ class EnergyFunctional
   public:
 
   vector<vector<double> > v_r;
+  vector<vector<complex<double> > > vxc_g;
   vector<vector<complex<double> > > veff_g;
   mutable TimerMap tmap;
   

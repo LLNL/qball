@@ -674,15 +674,15 @@ void ChargeDensity::update_nlcc() {
   sf.update(tau,*vbasis_);
 
   rhornlcc_.resize(wf_.nspin());
-  rhognlcc_.resize(wf_.nspin());
+  rhognlcc.resize(wf_.nspin());
   const int ngwl = vbasis_->localsize();
   const double* gptr = vbasis_->g_ptr();
   for (int ispin=0; ispin<wf_.nspin(); ispin++)
   {
      if ( wf_.spinactive(ispin)) 
      {
-        rhognlcc_[ispin].resize(ngwl);
-        memset( (void*)&rhognlcc_[ispin][0], 0, 2*ngwl*sizeof(double) );
+        rhognlcc[ispin].resize(ngwl);
+        memset( (void*)&rhognlcc[ispin][0], 0, 2*ngwl*sizeof(double) );
         for (int is=0; is<atoms_.nsp(); is++) {
            Species *s = atoms_.species_list[is];
            complex<double> *sfac = &sf.sfac[is][0];
@@ -691,12 +691,12 @@ void ChargeDensity::update_nlcc() {
                  double gval = gptr[ig];
                  double rhogcore = s->rhog_nlcc(gval);
                  // need factor of omega_inv for rhog transform, canceled by sfac
-                 rhognlcc_[ispin][ig] += rhogcore*sfac[ig];
+                 rhognlcc[ispin][ig] += rhogcore*sfac[ig];
               }
            }
         }
       
-        vft_->backward(&rhognlcc_[ispin][0],&rhotmp[0]);
+        vft_->backward(&rhognlcc[ispin][0],&rhotmp[0]);
 
         const int rhor_size = rhor[ispin].size();
         rhornlcc_[ispin].resize(rhor_size);
@@ -704,20 +704,6 @@ void ChargeDensity::update_nlcc() {
            // ewd: should we follow PWSCF's example of forcing positive FFT(rhognlcc)?
            //rhornlcc_[ispin][i] = fabs(rhotmp[i].real())*omega_inv;
            rhornlcc_[ispin][i] = rhotmp[i].real()*omega_inv;
-        
-        /*
-        //ewd DEBUG
-        double rsum = 0.0;
-        double rsumabs = 0.0;
-        double rsum2 = 0.0;
-        for (int i=0; i<rhor_size; i++) {
-           rsum += rhotmp[i].real()*omega_inv;
-           rsumabs += fabs(rhotmp[i].real())*omega_inv;
-           rsum2 += rhor[0][i];
-        }
-        cout << "NLCC.RSUM, mype = " << ctxt_.mype() << ", rsum = " << rsum << ", rsumabs = " << rsumabs << ", rhorsum = " << rsum2 << endl;
-        //ewd DEBUG
-        */
      }
   }
 
@@ -726,11 +712,11 @@ void ChargeDensity::update_nlcc() {
 ////////////////////////////////////////////////////////////////////////////////
 void ChargeDensity::add_nlccden()
 {
-   if (rhognlcc_.size() != rhog.size())
+   if (rhognlcc.size() != rhog.size())
       update_nlcc();
    else if (rhornlcc_.size() != rhor.size())
       update_nlcc();
-   else if (rhognlcc_[0].size() != rhog[0].size())
+   else if (rhognlcc[0].size() != rhog[0].size())
       update_nlcc();
    else if (rhornlcc_[0].size() != rhor[0].size())
       update_nlcc();
@@ -741,7 +727,7 @@ void ChargeDensity::add_nlccden()
       if ( wf_.spinactive(ispin)) 
       {
          for ( int ig = 0; ig < ngwl; ig++ )
-            xcrhog[ispin][ig] = rhog[ispin][ig] + rhognlcc_[ispin][ig];
+            xcrhog[ispin][ig] = rhog[ispin][ig] + rhognlcc[ispin][ig];
          const int rhor_size = rhor[ispin].size();
          for ( int i = 0; i < rhor_size; i++ )
             xcrhor[ispin][i] = rhor[ispin][i] + rhornlcc_[ispin][i];
