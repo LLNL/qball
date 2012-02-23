@@ -994,7 +994,7 @@ double EnergyFunctional::energy(bool compute_hpsi, Wavefunction& dwf,
     }
 
     //ewd DEBUG:  test what directly computed nlcc force terms would be
-    if (cd_.nlcc() && 1 == 0)
+    if (cd_.nlcc())
     {
        for ( int ispin = 0; ispin < wf_.nspin(); ispin++ ) {
           if (wf_.spinactive(ispin)) {

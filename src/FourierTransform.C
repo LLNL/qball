@@ -527,9 +527,8 @@ void FourierTransform::bwd(complex<double>* val)
 #if USE_ESSL
   int inc1 = 1, inc2 = np2_, ntrans = nvec_, isign = -1, initflag = 0;
   double scale = 1.0;
-  
   dcft_(&initflag,&zvec_[0],&inc1,&inc2,&zvec_[0],&inc1,&inc2,&np2_,&ntrans,
-       &isign,&scale,&aux1zb[0],&naux1z,&aux2[0],&naux2);
+        &isign,&scale,&aux1zb[0],&naux1z,&aux2[0],&naux2);
 
 #elif USE_FFTW
    /* 
@@ -543,8 +542,13 @@ void FourierTransform::bwd(complex<double>* val)
   ntrans = nvec_;
   inc1 = 1;
   inc2 = np2_;
-  fftw(bwplan2,ntrans,(FFTW_COMPLEX*)&zvec_[0],inc1,inc2,
-                      (FFTW_COMPLEX*)0,0,0);
+  
+#pragma omp for schedule(guided)
+  for (int it = 0; it < ntrans; it++)
+     fftw(bwplan2,1,(FFTW_COMPLEX*)&zvec_[0]+it*inc2,inc1,inc2,
+          (FFTW_COMPLEX*)0,0,0);
+  //  fftw(bwplan2,ntrans,(FFTW_COMPLEX*)&zvec_[0],inc1,inc2,
+  //                    (FFTW_COMPLEX*)0,0,0);
 #else
   // No library
   /* Transform along z */
@@ -720,14 +724,18 @@ void FourierTransform::bwd(complex<double>* val)
     inc1 = 1;
     inc2 = np0_;
     istart = k * np0_ * np1_; 
-    fftw(bwplan0,ntrans,(FFTW_COMPLEX*)&val[istart],inc1,inc2,
-                        (FFTW_COMPLEX*)0,0,0);
+#pragma omp for schedule(guided)
+    for (int it = 0; it < ntrans; it++)
+       fftw(bwplan0,1,(FFTW_COMPLEX*)&val[istart]+it*inc2,inc1,inc2,
+            (FFTW_COMPLEX*)0,0,0);
     // Transform second block along x: negative y indices
     inc1 = 1;
     inc2 = np0_;
     istart = np0_ * ( (np1_-ntrans) + k * np1_ );
-    fftw(bwplan0,ntrans,(FFTW_COMPLEX*)&val[istart],inc1,inc2,
-                        (FFTW_COMPLEX*)0,0,0);
+#pragma omp for schedule(guided)
+    for (int it = 0; it < ntrans; it++)
+       fftw(bwplan0,1,(FFTW_COMPLEX*)&val[istart]+it*inc2,inc1,inc2,
+            (FFTW_COMPLEX*)0,0,0);
 #else
     // debug: transform along x for all values of y
     int ntrans = np1_;
@@ -744,8 +752,10 @@ void FourierTransform::bwd(complex<double>* val)
     inc1 = np0_;
     inc2 = 1;
     istart = k * np0_ * np1_; 
-    fftw(bwplan1,ntrans,(FFTW_COMPLEX*)&val[istart],inc1,inc2,
-                        (FFTW_COMPLEX*)0,0,0);
+#pragma omp for schedule(guided)
+    for (int it = 0; it < ntrans; it++)
+       fftw(bwplan1,1,(FFTW_COMPLEX*)&val[istart]+it*inc2,inc1,inc2,
+            (FFTW_COMPLEX*)0,0,0);
 #else
     // No library
     // transform along x for non-zero elements
@@ -840,22 +850,28 @@ void FourierTransform::fwd(complex<double>* val)
     inc1 = np0_;
     inc2 = 1;
     istart = k * np0_ * np1_; 
-    fftw(fwplan1,ntrans,(FFTW_COMPLEX*)&val[istart],inc1,inc2,
-                        (FFTW_COMPLEX*)0,0,0);
+#pragma omp for schedule(guided)
+    for (int it = 0; it < ntrans; it++)
+       fftw(fwplan1,1,(FFTW_COMPLEX*)&val[istart]+it*inc2,inc1,inc2,
+            (FFTW_COMPLEX*)0,0,0);
     ntrans = ntrans0_;
     // Transform first block along x: positive y indices
     inc1 = 1;
     inc2 = np0_;
     istart = k * np0_ * np1_; 
-    fftw(fwplan0,ntrans,(FFTW_COMPLEX*)&val[istart],inc1,inc2,
-                        (FFTW_COMPLEX*)0,0,0);
+#pragma omp for schedule(guided)
+    for (int it = 0; it < ntrans; it++)
+       fftw(fwplan0,1,(FFTW_COMPLEX*)&val[istart]+it*inc2,inc1,inc2,
+            (FFTW_COMPLEX*)0,0,0);
     
     // Transform second block along x: negative y indices
     inc1 = 1;
     inc2 = np0_;
     istart = np0_ * ( (np1_-ntrans) + k * np1_ );
-    fftw(fwplan0,ntrans,(FFTW_COMPLEX*)&val[istart],inc1,inc2,
-                        (FFTW_COMPLEX*)0,0,0);
+#pragma omp for schedule(guided)
+    for (int it = 0; it < ntrans; it++)
+       fftw(fwplan0,1,(FFTW_COMPLEX*)&val[istart]+it*inc2,inc1,inc2,
+            (FFTW_COMPLEX*)0,0,0);
                         
 #else
     // No library
@@ -980,8 +996,10 @@ void FourierTransform::fwd(complex<double>* val)
   ntrans = nvec_;
   inc1 = 1;
   inc2 = np2_;
-  fftw(fwplan2,ntrans,(FFTW_COMPLEX*)&zvec_[0],inc1,inc2,
-                      (FFTW_COMPLEX*)0,0,0);
+#pragma omp for schedule(guided)
+    for (int it = 0; it < ntrans; it++)
+       fftw(fwplan2,1,(FFTW_COMPLEX*)&zvec_[0]+it*inc2,inc1,inc2,
+            (FFTW_COMPLEX*)0,0,0);
   int len = zvec_.size();
   double fac = 1.0 / ( np0_ * np1_ * np2_ );
   zdscal(&len,&fac,&zvec_[0],&inc1);
