@@ -1193,6 +1193,22 @@ void Wavefunction::init_usfns(AtomSet* atoms) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+void Wavefunction::update_usfns() {
+  if (ultrasoft_) {
+    for ( int ispin = 0; ispin < nspin_; ispin++ ) {
+      if (spinactive(ispin)) {
+        for ( int ikp=0; ikp<nkp(); ikp++) {
+          if (kptactive(ikp)) {
+            assert(sd_[ispin][ikp] != 0);
+            sd_[ispin][ikp]->update_usfns();
+          }
+        }
+      }
+    }
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
 void Wavefunction::calc_spsi() {
   if (ultrasoft_) {
     for ( int ispin = 0; ispin < nspin_; ispin++ ) {

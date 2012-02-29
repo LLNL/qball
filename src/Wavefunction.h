@@ -132,6 +132,7 @@ class Wavefunction {
   void set_ultrasoft(bool us);
   bool ultrasoft(void) { return ultrasoft_; }
   void init_usfns(AtomSet* atoms);
+  void update_usfns();
   void calc_spsi();
   void set_highmem(void);
   

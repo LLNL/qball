@@ -422,6 +422,7 @@ void BOSampleStepper::step(int niter)
   if (ultrasoft) {
      tmap["usfns"].start();
      cd_.update_usfns();
+     wf.update_usfns();
      tmap["usfns"].stop();
   }
   // if non-linear core correction defined, calculate position-dependent density
@@ -567,6 +568,9 @@ void BOSampleStepper::step(int niter)
         // need eigenvalues to compute forces w. ultrasoft
         //ewd12-21-11 if (ultrasoft) { 
         if (ultrasoft && iter == 0) { 
+          tmap["gram"].start();
+          s_.wf.gram();
+          tmap["gram"].stop();
           ef_.energy(true,dwf,false,fion,false,sigma_eks);
           tmap["diag"].start();
           s_.wf.diag(dwf,true);
@@ -787,6 +791,7 @@ void BOSampleStepper::step(int niter)
           if (ultrasoft) {
              tmap["usfns"].start();
              cd_.update_usfns();
+             wf.update_usfns();
              tmap["usfns"].stop();
           }
           tmap["charge"].start();
@@ -812,6 +817,7 @@ void BOSampleStepper::step(int niter)
             if (ultrasoft) {
               tmap["usfns"].start();
               cd_.update_usfns();
+              wf.update_usfns();
               tmap["usfns"].stop();
             }
             tmap["charge"].start();
@@ -858,11 +864,11 @@ void BOSampleStepper::step(int niter)
                       c[i] = x + dt * v;
                       cv[i] = x;
                     }
-                    if (ultrasoft) {
-                      tmap["usfns"].start();
-                      s_.wf.sd(ispin,ikp)->update_usfns();
-                      tmap["usfns"].stop();
-                    }
+                    //if (ultrasoft) {
+                    //  tmap["usfns"].start();
+                    //  s_.wf.sd(ispin,ikp)->update_usfns();
+                    //  tmap["usfns"].stop();
+                    //}
                     tmap["gram"].start();
                     s_.wf.sd(ispin,ikp)->gram();
                     tmap["gram"].stop();
@@ -878,11 +884,11 @@ void BOSampleStepper::step(int niter)
                       cv[i] = x;
                       cmm[i] = xm;
                     }
-                    if (ultrasoft) {
-                      tmap["usfns"].start();
-                      s_.wf.sd(ispin,ikp)->update_usfns();
-                      tmap["usfns"].stop();
-                    }
+                    //if (ultrasoft) {
+                    //  tmap["usfns"].start();
+                    //  s_.wf.sd(ispin,ikp)->update_usfns();
+                    //  tmap["usfns"].stop();
+                    //}
                     tmap["gram"].start();
                     s_.wf.sd(ispin,ikp)->gram();
                     tmap["gram"].stop();
@@ -905,11 +911,11 @@ void BOSampleStepper::step(int niter)
                     }
 
                     // orthogonalize the extrapolated value
-                    if (ultrasoft) {
-                      tmap["usfns"].start();
-                      s_.wf.sd(ispin,ikp)->update_usfns();
-                      tmap["usfns"].stop();
-                    }
+                    //if (ultrasoft) {
+                    //  tmap["usfns"].start();
+                    //  s_.wf.sd(ispin,ikp)->update_usfns();
+                    //  tmap["usfns"].stop();
+                    //}
                     tmap["gram"].start();
                     s_.wf.sd(ispin,ikp)->gram();
                     tmap["gram"].stop();
@@ -944,11 +950,11 @@ void BOSampleStepper::step(int niter)
                       c[i] = x + dt * v;
                       cv[i] = x;
                     }
-                    if (ultrasoft) {
-                      tmap["usfns"].start();
-                      s_.wf.sd(ispin,ikp)->update_usfns();
-                      tmap["usfns"].stop();
-                    }
+                    //if (ultrasoft) {
+                    //  tmap["usfns"].start();
+                    //  s_.wf.sd(ispin,ikp)->update_usfns();
+                    //  tmap["usfns"].stop();
+                    //}
                     tmap["gram"].start();
                     s_.wf.sd(ispin,ikp)->gram();
                     tmap["gram"].stop();
@@ -964,11 +970,11 @@ void BOSampleStepper::step(int niter)
                       cv[i] = x;
                       cmm[i] = xm;
                     }
-                    if (ultrasoft) {
-                      tmap["usfns"].start();
-                      s_.wf.sd(ispin,ikp)->update_usfns();
-                      tmap["usfns"].stop();
-                    }
+                    //if (ultrasoft) {
+                    //  tmap["usfns"].start();
+                    //  s_.wf.sd(ispin,ikp)->update_usfns();
+                    //  tmap["usfns"].stop();
+                    //}
                     tmap["gram"].start();
                     s_.wf.sd(ispin,ikp)->gram();
                     tmap["gram"].stop();
@@ -994,11 +1000,11 @@ void BOSampleStepper::step(int niter)
                     }
                     
                     // orthogonalize the extrapolated value
-                    if (ultrasoft) {
-                      tmap["usfns"].start();
-                      s_.wf.sd(ispin,ikp)->update_usfns();
-                      tmap["usfns"].stop();
-                    }
+                    //if (ultrasoft) {
+                    //  tmap["usfns"].start();
+                    //  s_.wf.sd(ispin,ikp)->update_usfns();
+                    //  tmap["usfns"].stop();
+                    //}
                     tmap["gram"].start();
                     s_.wf.sd(ispin,ikp)->gram();
                     tmap["gram"].stop();
@@ -1030,11 +1036,11 @@ void BOSampleStepper::step(int niter)
                     //tmap["lowdin"].start();
                     //s_.wf.sd(ispin,ikp)->lowdin();
                     //tmap["lowdin"].stop();
-                    if (ultrasoft) {
-                      tmap["usfns"].start();
-                      s_.wf.sd(ispin,ikp)->update_usfns();
-                      tmap["usfns"].stop();
-                    }
+                    //if (ultrasoft) {
+                    //  tmap["usfns"].start();
+                    //  s_.wf.sd(ispin,ikp)->update_usfns();
+                    //  tmap["usfns"].stop();
+                    //}
                     tmap["gram"].start();
                     s_.wf.sd(ispin,ikp)->gram();
                     tmap["gram"].stop();
@@ -1061,11 +1067,11 @@ void BOSampleStepper::step(int niter)
                     //s_.wf.sd(ispin,ikp)->riccati(*s_.wfv->sd(ispin,ikp));
                     //tmap["riccati"].stop();
                     
-                    if (ultrasoft) {
-                      tmap["usfns"].start();
-                      s_.wf.sd(ispin,ikp)->update_usfns();
-                      tmap["usfns"].stop();
-                    }
+                    //if (ultrasoft) {
+                    //  tmap["usfns"].start();
+                    //  s_.wf.sd(ispin,ikp)->update_usfns();
+                    //  tmap["usfns"].stop();
+                    //}
                     //ewd: lowdin doesn't yet work correctly with ultrasoft
                     //tmap["lowdin"].start();
                     //s_.wf.sd(ispin,ikp)->lowdin();
@@ -1267,6 +1273,8 @@ void BOSampleStepper::step(int niter)
                 }
 
                 wf_stepper->update(dwf);
+                if (ultrasoft)
+                   wf.update_usfns();
                 
                 // update ultrasoft functions if needed, call gram
                 for ( int ispin = 0; ispin < s_.wf.nspin(); ispin++ ) {
@@ -1274,20 +1282,20 @@ void BOSampleStepper::step(int niter)
                     for ( int ikp = 0; ikp < s_.wf.nkp(); ikp++ ) {
                       if (s_.wf.kptactive(ikp)) {
                         assert(s_.wf.sd(ispin,ikp) != 0);
-                        if (ultrasoft) { 
-                          tmap["usfns"].start();
-                          s_.wf.sd(ispin,ikp)->update_usfns(); // calculate betapsi, spsi
-                          tmap["usfns"].stop();
-                        }
+                        //if (ultrasoft) { 
+                        //  tmap["usfns"].start();
+                        //  s_.wf.sd(ispin,ikp)->update_usfns(); // calculate betapsi, spsi
+                        //  tmap["usfns"].stop();
+                        //}
                         tmap["gram"].start();
                         s_.wf.sd(ispin,ikp)->gram();
                         tmap["gram"].stop();
 
-                        if (ultrasoft) { 
-                          tmap["usfns"].start();
-                          s_.wf.sd(ispin,ikp)->calc_betapsi(); // calculate betapsi
-                          tmap["usfns"].stop();
-                        }
+                        //if (ultrasoft) { 
+                        //  tmap["usfns"].start();
+                        //  s_.wf.sd(ispin,ikp)->calc_betapsi(); // calculate betapsi
+                        //  tmap["usfns"].stop();
+                        //}
                       }
                     }
                   }
@@ -1319,22 +1327,9 @@ void BOSampleStepper::step(int niter)
               tmap["diag"].stop();
 
               // update ultrasoft functions w. new eigenvectors
-              if (compute_eigvec) { 
-                for ( int ispin = 0; ispin < s_.wf.nspin(); ispin++ ) {
-                  if (s_.wf.spinactive(ispin)) {
-                    for ( int ikp = 0; ikp < s_.wf.nkp(); ikp++ ) {
-                      if (s_.wf.kptactive(ikp)) {
-                        assert(s_.wf.sd(ispin,ikp) != 0);
-                        if (ultrasoft) { 
-                          tmap["usfns"].start();
-                          s_.wf.sd(ispin,ikp)->update_usfns(); // calculate spsi
-                          tmap["usfns"].stop();
-                        }
-                      }
-                    }
-                  }
-                }
-              }
+              if (compute_eigvec && ultrasoft)
+                 s_.wf.update_usfns();
+
               if (itscf%s_.ctrl.iprint == 0)
                 s_.wf.printeig();
             }

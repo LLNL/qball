@@ -808,7 +808,11 @@ void SlaterDet::rs_mul_add(FourierTransform& ft,
 
 ////////////////////////////////////////////////////////////////////////////////
 void SlaterDet::gram() {
-  if ( basis_->real() ) {
+
+   //if (ultrasoft_)
+   //   update_usfns();   // calculate betapsi, spsi
+
+   if ( basis_->real() ) {
     // k = 0 case
     // create a DoubleMatrix proxy for c_
     DoubleMatrix c_proxy(c_);
@@ -871,6 +875,10 @@ void SlaterDet::gram() {
     //if (ultrasoft_)
     //  calc_betapsi(); // update betapsi w. new wfs
   }
+
+   if (ultrasoft_)
+      update_usfns();   // calculate betapsi, spsi
+
 }
 ////////////////////////////////////////////////////////////////////////////////
 void SlaterDet::set_gram_reshape(bool reshape) {
