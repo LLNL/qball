@@ -939,9 +939,10 @@ double EnergyFunctional::energy(bool compute_hpsi, Wavefunction& dwf,
        if (s->nlcc())
        {
           cd_.nlcc_forceden(is,trhog);
+          const double spinfac = 1./(double)wf_.nspin();
           for ( int ig = 0; ig < ngloc; ig++ )
              for ( int ispin = 0; ispin < wf_.nspin(); ispin++ )
-                vtemp[ig] += omega_inv*trhog[ig]*conj(vxc_g[ispin][ig]);
+                vtemp[ig] += spinfac*omega_inv*trhog[ig]*conj(vxc_g[ispin][ig]);
        }
        
        memset((void*)&ftmp[0],0,3*namax_*sizeof(double));

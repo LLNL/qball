@@ -17,7 +17,6 @@
 #include "PrintMem.h"
 #include "StructureFactor.h"
 #include "blas.h"
-
 #include <iomanip>
 using namespace std;
 
@@ -673,58 +672,51 @@ void ChargeDensity::update_nlcc() {
   sf.init(tau,*vbasis_);
   sf.update(tau,*vbasis_);
 
-  rhornlcc_.resize(wf_.nspin());
-  rhognlcc.resize(wf_.nspin());
   const int ngwl = vbasis_->localsize();
   const double* gptr = vbasis_->g_ptr();
-  for (int ispin=0; ispin<wf_.nspin(); ispin++)
-  {
-     rhognlcc[ispin].resize(ngwl);
-     memset( (void*)&rhognlcc[ispin][0], 0, 2*ngwl*sizeof(double) );
-     for (int is=0; is<atoms_.nsp(); is++) {
-        Species *s = atoms_.species_list[is];
-        complex<double> *sfac = &sf.sfac[is][0];
-        if (s->nlcc()) { 
-           for ( int ig = 0; ig < ngwl; ig++ ) {
-              double gval = gptr[ig];
-              double rhogcore = s->rhog_nlcc(gval);
-              // need factor of omega_inv for rhog transform, canceled by sfac
-              rhognlcc[ispin][ig] += rhogcore*sfac[ig];
-           }
-        }
-     }      
-     vft_->backward(&rhognlcc[ispin][0],&rhotmp[0]);
 
-     const int rhor_size = rhor[ispin].size();
-     rhornlcc_[ispin].resize(rhor_size);
-     for ( int i = 0; i < rhor_size; i++ )
-        // ewd: should we follow PWSCF's example of forcing positive FFT(rhognlcc)?
-        //rhornlcc_[ispin][i] = fabs(rhotmp[i].real())*omega_inv;
-        rhornlcc_[ispin][i] = rhotmp[i].real()*omega_inv;
-  }
+  rhognlcc.resize(ngwl);
+  memset( (void*)&rhognlcc[0], 0, 2*ngwl*sizeof(double) );
+  for (int is=0; is<atoms_.nsp(); is++) {
+     Species *s = atoms_.species_list[is];
+     complex<double> *sfac = &sf.sfac[is][0];
+     if (s->nlcc()) { 
+        for ( int ig = 0; ig < ngwl; ig++ ) {
+           double gval = gptr[ig];
+           double rhogcore = s->rhog_nlcc(gval);
+           // need factor of omega_inv for rhog transform, canceled by sfac
+           rhognlcc[ig] += rhogcore*sfac[ig];
+        }
+     }
+  }      
+  vft_->backward(&rhognlcc[0],&rhotmp[0]);
+
+  const int rhor_size = rhor[0].size();
+  rhornlcc_.resize(rhor_size);
+  for ( int i = 0; i < rhor_size; i++ )
+     // ewd: should we follow PWSCF's example of forcing positive FFT(rhognlcc)?
+     //rhornlcc_[i] = fabs(rhotmp[i].real())*omega_inv;
+     rhornlcc_[i] = rhotmp[i].real()*omega_inv;
 
   add_nlccden();
 }
 ////////////////////////////////////////////////////////////////////////////////
 void ChargeDensity::add_nlccden()
 {
-   if (rhognlcc.size() != rhog.size())
+   if (rhognlcc.size() != rhog[0].size())
       update_nlcc();
-   else if (rhornlcc_.size() != rhor.size())
-      update_nlcc();
-   else if (rhognlcc[0].size() != rhog[0].size())
-      update_nlcc();
-   else if (rhornlcc_[0].size() != rhor[0].size())
+   else if (rhornlcc_.size() != rhor[0].size())
       update_nlcc();
    
    const int ngwl = vbasis_->localsize();
+   const double spinfac = 1./(double)wf_.nspin();
    for (int ispin=0; ispin<wf_.nspin(); ispin++)
    {
       for ( int ig = 0; ig < ngwl; ig++ )
-         xcrhog[ispin][ig] = rhog[ispin][ig] + rhognlcc[ispin][ig];
+         xcrhog[ispin][ig] = rhog[ispin][ig] + spinfac*rhognlcc[ig];
       const int rhor_size = rhor[ispin].size();
       for ( int i = 0; i < rhor_size; i++ )
-         xcrhor[ispin][i] = rhor[ispin][i] + rhornlcc_[ispin][i];
+         xcrhor[ispin][i] = rhor[ispin][i] + spinfac*rhornlcc_[i];
    }
 }
 ////////////////////////////////////////////////////////////////////////////////

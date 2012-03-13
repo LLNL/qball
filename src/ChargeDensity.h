@@ -43,7 +43,7 @@ class ChargeDensity {
   bool highmem_;
   bool nlcc_;
   vector<vector<complex<double> > > qnmg_;
-  vector<vector<double> > rhornlcc_; 
+  vector<double> rhornlcc_; 
   
   public:
   
@@ -52,7 +52,7 @@ class ChargeDensity {
   vector<vector<double> > rhor; // rhor[ispin][i]
   vector<vector<complex<double> > > rhog; // rhog[ispin][ig]
   vector<vector<double> > xcrhor; 
-  vector<vector<complex<double> > > rhognlcc; 
+  vector<complex<double> > rhognlcc; 
   vector<vector<complex<double> > > xcrhog; 
 
   void update_density();
