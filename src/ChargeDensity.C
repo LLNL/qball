@@ -679,33 +679,28 @@ void ChargeDensity::update_nlcc() {
   const double* gptr = vbasis_->g_ptr();
   for (int ispin=0; ispin<wf_.nspin(); ispin++)
   {
-     const int rhor_size = rhor[ispin].size();
      rhognlcc[ispin].resize(ngwl);
-     rhornlcc_[ispin].resize(rhor_size);
      memset( (void*)&rhognlcc[ispin][0], 0, 2*ngwl*sizeof(double) );
-     memset( (void*)&rhornlcc_[ispin][0], 0, rhor_size*sizeof(double) );
-     if ( wf_.spinactive(ispin)) 
-     {
-        for (int is=0; is<atoms_.nsp(); is++) {
-           Species *s = atoms_.species_list[is];
-           complex<double> *sfac = &sf.sfac[is][0];
-           if (s->nlcc()) { 
-              for ( int ig = 0; ig < ngwl; ig++ ) {
-                 double gval = gptr[ig];
-                 double rhogcore = s->rhog_nlcc(gval);
-                 // need factor of omega_inv for rhog transform, canceled by sfac
-                 rhognlcc[ispin][ig] += rhogcore*sfac[ig];
-              }
+     for (int is=0; is<atoms_.nsp(); is++) {
+        Species *s = atoms_.species_list[is];
+        complex<double> *sfac = &sf.sfac[is][0];
+        if (s->nlcc()) { 
+           for ( int ig = 0; ig < ngwl; ig++ ) {
+              double gval = gptr[ig];
+              double rhogcore = s->rhog_nlcc(gval);
+              // need factor of omega_inv for rhog transform, canceled by sfac
+              rhognlcc[ispin][ig] += rhogcore*sfac[ig];
            }
         }
-      
-        vft_->backward(&rhognlcc[ispin][0],&rhotmp[0]);
+     }      
+     vft_->backward(&rhognlcc[ispin][0],&rhotmp[0]);
 
-        for ( int i = 0; i < rhor_size; i++ )
-           // ewd: should we follow PWSCF's example of forcing positive FFT(rhognlcc)?
-           //rhornlcc_[ispin][i] = fabs(rhotmp[i].real())*omega_inv;
-           rhornlcc_[ispin][i] = rhotmp[i].real()*omega_inv;
-     }
+     const int rhor_size = rhor[ispin].size();
+     rhornlcc_[ispin].resize(rhor_size);
+     for ( int i = 0; i < rhor_size; i++ )
+        // ewd: should we follow PWSCF's example of forcing positive FFT(rhognlcc)?
+        //rhornlcc_[ispin][i] = fabs(rhotmp[i].real())*omega_inv;
+        rhornlcc_[ispin][i] = rhotmp[i].real()*omega_inv;
   }
 
   add_nlccden();
@@ -725,14 +720,11 @@ void ChargeDensity::add_nlccden()
    const int ngwl = vbasis_->localsize();
    for (int ispin=0; ispin<wf_.nspin(); ispin++)
    {
-      if ( wf_.spinactive(ispin)) 
-      {
-         for ( int ig = 0; ig < ngwl; ig++ )
-            xcrhog[ispin][ig] = rhog[ispin][ig] + rhognlcc[ispin][ig];
-         const int rhor_size = rhor[ispin].size();
-         for ( int i = 0; i < rhor_size; i++ )
-            xcrhor[ispin][i] = rhor[ispin][i] + rhornlcc_[ispin][i];
-      }
+      for ( int ig = 0; ig < ngwl; ig++ )
+         xcrhog[ispin][ig] = rhog[ispin][ig] + rhognlcc[ispin][ig];
+      const int rhor_size = rhor[ispin].size();
+      for ( int i = 0; i < rhor_size; i++ )
+         xcrhor[ispin][i] = rhor[ispin][i] + rhornlcc_[ispin][i];
    }
 }
 ////////////////////////////////////////////////////////////////////////////////
@@ -749,157 +741,6 @@ void ChargeDensity::nlcc_forceden(int is, vector<complex<double> > &tmprhog) {
         double rhogcore = s->rhog_nlcc(gval);
         tmprhog[ig] += rhogcore;
      }
-  }
-}
-////////////////////////////////////////////////////////////////////////////////
-void ChargeDensity::calc_drhogus(vector<vector<complex<double> > > &drhogus)
-{
-  // compute derivative of rhog with respect to ion coordinates
-  if (ultrasoft_) { 
-    const int nsp = atoms_.nsp();
-    const int ngwl = vbasis_->localsize();
-    const int mloc = vbasis_->maxlocalsize();
-    const double omega = vbasis_->cell().volume();
-    assert(omega != 0.0);
-    const double omega_inv = 1.0 / omega;
-    vector<vector<double> > tau;
-    atoms_.get_positions(tau,true);
-
-    drhogus.resize(3);
-    for (int j=0; j<3; j++)
-      drhogus[j].resize(mloc);
-    
-    for (int j=0; j<3; j++)
-      for (int ig=0; ig<mloc; ig++)
-        drhogus[j][ig] = complex<double>(0.0,0.0);
-
-    // calc summat = SUM occ_i <beta|phi_i> <phi_i|beta>
-    for (int ispin=0; ispin<wf_.nspin(); ispin++) {
-      if ( wf_.spinactive(ispin)) {
-        for ( int ikp=0; ikp<wf_.nkp(); ikp++) {
-          if (wf_.kptactive(ikp)) {
-            assert(wf_.sd(ispin,ikp) != 0);
-            double wt = wf_.weight(ikp)/wf_.weightsum();
-            SlaterDet* sdp = wf_.sd(ispin,ikp);
-            const Basis& basis_ = sdp->basis();
-            const vector<double>& occ = sdp->occ();
-            //ewd OPT
-            //sdp->calc_betapsi();
-            //ewd NO-OPT
-            sdp->calc_betapsi();
-            for (int is=0; is<nsp; is++) {
-              const ComplexMatrix* bpsi = sdp->betapsi(is);
-              const complex<double>* bp = bpsi->cvalptr();  
-              const int nbase = sdp->context().mycol() * sdp->c().nb();
-              Species *s = atoms_.species_list[is];
-              if (s->ultrasoft()) { 
-                int naloc_t = atoms_.usloc_atind_t[is].size();
-                int na = atoms_.na(is);
-                int nqtot = s->nqtot();
-                int nbeta = s->nbeta();
-                int nbetalm = s->nbetalm();
-                int nstloc = bpsi->nloc();
-                int bp_mloc = bpsi->mloc();
-
-                for (int j=0; j<3; j++) {          // force component 
-                  vector<complex<double> > summat(nqtot*na);
-                  vector<complex<double> > dsummat(nqtot*na);
-                  for (int i=0; i<nqtot*na; i++) {
-                    summat[i] = complex<double>(0.0,0.0);
-                    dsummat[i] = complex<double>(0.0,0.0);
-                  }
-              
-                  sdp->calc_dbetapsi(j);
-                  if (bpsi->size() > 0) {
-                    const ComplexMatrix* dbetapsi = sdp->dbetapsi(is);
-                    const complex<double>* dbpj = dbetapsi->cvalptr();
-                    for (int ibl = 0; ibl < naloc_t; ibl++) {
-                      int ia = atoms_.usloc_atind_t[is][ibl]; // ia = absolute atom index of betapsi local ind
-                      for (int qind=0; qind < nqtot; qind++) {
-                        int lm1,lm2;
-                        s->qind_to_betalm(qind,lm1,lm2);
-                        double mult = 2.0;          // off-diag. terms
-                        if (lm1 == lm2) mult = 1.0;
-                        for (int n=0; n<nstloc; n++) {
-                          const double sdocc = occ[n + nbase];
-                          int ind1 = bp_mloc*n + ibl*nbetalm + lm1;
-                          int ind2 = bp_mloc*n + ibl*nbetalm + lm2;
-                          summat[ia*nqtot + qind] += omega_inv*wt*mult*sdocc*(conj(bp[ind1])*bp[ind2]);
-                          dsummat[ia*nqtot + qind] += omega_inv*wt*mult*sdocc*(conj(dbpj[ind1])*bp[ind2] + conj(bp[ind1])*dbpj[ind2]);
-                        }
-                      }
-                    }
-                  }
-                  int dsize = 2*na*nqtot;
-                  double* psummat = (double*)&summat[0];
-                  double* pdsummat = (double*)&dsummat[0];
-                  // sum over process rows = sum over all states
-                  sdp->context().dsum('r',dsize,1,&psummat[0],dsize);
-                  sdp->context().dsum('r',dsize,1,&pdsummat[0],dsize);
-                  // sum over process columns = summat for all atoms now on all pes
-                  sdp->context().dsum('c',dsize,1,&psummat[0],dsize);
-                  sdp->context().dsum('c',dsize,1,&pdsummat[0],dsize);
-                  if (highmem_) {
-                    complex<double> zone = complex<double>(1.0,0.0);
-                    int one = 1;
-                    char cn='n';
-                    // want to multiply chunk of summat that matches local qnmg 
-                    int sumlocsize = nqtot*atoms_.usloc_nat[is]; 
-                    int sumind0 = nqtot*atoms_.usloc_atind[is][0];
-                    if (sumlocsize > 0 && ngwl > 0)
-                      zgemm(&cn,&cn,(int*)&ngwl,&one,&sumlocsize,&zone,&qnmg_[is][0],
-                            (int*)&ngwl,&dsummat[sumind0],&sumlocsize,&zone,&drhogus[j][0],
-                            (int*)&ngwl);
-
-                    // add dqnm(G)/dR
-                    int naloc = atoms_.usloc_nat[is];
-                    int ialoc0 = atoms_.usloc_atind[is][0];
-                    const double *const gxj = vbasis_->gx_ptr(j);
-                    for (int ig=0; ig<ngwl; ig++) {
-                      complex<double> dsf = complex<double>(0.0,-gxj[ig]);
-                      for (int ialoc=0; ialoc<naloc; ialoc++) {
-                        int ia = ialoc0 + ialoc;
-                        complex<double> rhosum = complex<double>(0.0,0.0);
-                        for (int qind=0; qind<nqtot; qind++)
-                          drhogus[j][ig] += dsf*qnmg_[is][qind*ngwl+ig]*summat[nqtot*ia+qind];
-                      }
-                    }
-                  }
-                  else {
-                    // multiply qnm(G), structure factor and dsummat, add dqnm(G)/dR
-                    const double *const gx = vbasis_->gx_ptr(0);
-                    const double *const gy = vbasis_->gx_ptr(1);
-                    const double *const gz = vbasis_->gx_ptr(2);
-                    const double *const gxj = vbasis_->gx_ptr(j);
-                    int naloc = atoms_.usloc_nat[is];
-                    int ialoc0 = atoms_.usloc_atind[is][0];
-                    for (int ig=0; ig<ngwl; ig++) {
-                      complex<double> dsf = complex<double>(0.0,-gxj[ig]);
-                      for (int ialoc=0; ialoc<naloc; ialoc++) {
-                        int ia = ialoc0 + ialoc;
-                        const double arg = tau[is][3*ia]*gx[ig] + tau[is][3*ia+1]*gy[ig] + tau[is][3*ia+2]*gz[ig];
-                        double sgr = sin(arg);
-                        double cgr = cos(arg);
-                        complex<double> rhosum = complex<double>(0.0,0.0);
-                        for (int qind=0; qind<nqtot; qind++)
-                          rhosum += qnmg_[is][qind*ngwl+ig]*dsummat[nqtot*ia+qind] + dsf*qnmg_[is][qind*ngwl+ig]*summat[nqtot*ia+qind];
-                        drhogus[j][ig] += omega_inv*rhosum*complex<double>(cgr,-sgr);
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-    // sum drhogus across rows to average ultrasoft contribution over all atoms, kpts, spin
-    for (int j=0; j<3; j++) {
-      int sumsize = 2*mloc;
-      double* rp = (double*)&drhogus[j][0];
-      wf_.wfcontext()->dsum('r',sumsize,1,&rp[0],sumsize);
-    }
   }
 }
 ////////////////////////////////////////////////////////////////////////////////
