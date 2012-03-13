@@ -778,19 +778,6 @@ void SlaterDet::rs_mul_add(FourierTransform& ft,
     }
   }
   else {
-    /*ewd:  change this to complex (June 8, 2011)
-    // only one transform at a time
-    for ( int n = 0; n < nstloc(); n++ ) {
-      ft.backward(c_.cvalptr(n*mloc),&tmp[0]);
-      for ( int i = 0; i < np012loc; i++ )
-        tmp[i] *= v[i];
-      ft.forward(&tmp[0], &ctmp[0]);
-      int len = 2 * mloc;
-      int inc1 = 1;
-      double alpha = 1.0;
-      daxpy(&len,&alpha,(double*)&ctmp[0],&inc1,&dcp[2*n*mloc],&inc1);
-    }
-    */
     // only one transform at a time
     for ( int n = 0; n < nstloc(); n++ ) {
       ft.backward(c_.cvalptr(n*mloc),&tmp[0]);

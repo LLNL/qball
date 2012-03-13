@@ -34,7 +34,8 @@
 # LIBPATH = -L$(FFTWDIR) -L$(LAPACKDIR) -L$(BLASDIR) 
 # LIBS =  $(SCALAPACKLIB) -lfftw -lblas -llapack -lm
  LIBPATH = -L$(FFTWDIR) -L$(LAPACKDIR) -L$(BLASDIR) -L$(ESSLDIR)/lib -L/opt/ibmcmp/xlsmp/bg/3.1/bglib64 -L/opt/ibmcmp/xlmass/bg/7.3/bglib64 -L/opt/ibmcmp/xlf/bg/14.1/bglib64
- LIBS =  $(SCALAPACKLIB) -lfftw -lblas -llapack -lesslbg -lmassv -lxlf90_r -lxlopt -lxlomp_ser -lxl -lxlfmath
+# LIBS =  $(SCALAPACKLIB) -lfftw -lblas -llapack -lesslbg -lxlf90_r -lxlopt -lxlomp_ser -lxl -lxlfmath
+ LIBS =  $(SCALAPACKLIB) -lfftw -lesslbg -lblas -llapack -lxlf90_r -lxlopt -lxlomp_ser -lxl -lxlfmath
  LDFLAGS = $(LIBPATH) $(LIBS) -qarch=qp -lc -lnss_files -lnss_dns -lresolv
 
 #-------------------------------------------------------------------------------

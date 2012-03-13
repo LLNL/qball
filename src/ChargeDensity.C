@@ -735,6 +735,22 @@ void ChargeDensity::add_nlccden()
    }
 }
 ////////////////////////////////////////////////////////////////////////////////
+void ChargeDensity::nlcc_forceden(int is, vector<complex<double> > &rhog) {
+  // sum up nlcc core density (omit structure factor term for force calc)
+  const int ngwl = vbasis_->localsize();
+  const double* gptr = vbasis_->g_ptr();
+  rhog.resize(ngwl);
+  memset( (void*)&rhog[0], 0, 2*ngwl*sizeof(double) );
+  Species *s = atoms_.species_list[is];
+  if (s->nlcc()) { 
+     for ( int ig = 0; ig < ngwl; ig++ ) {
+        double gval = gptr[ig];
+        double rhogcore = s->rhog_nlcc(gval);
+        rhog[ig] += rhogcore;
+     }
+  }
+}
+////////////////////////////////////////////////////////////////////////////////
 void ChargeDensity::calc_drhogus(vector<vector<complex<double> > > &drhogus)
 {
   // compute derivative of rhog with respect to ion coordinates

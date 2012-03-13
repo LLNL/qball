@@ -5,6 +5,10 @@ HOSTNAME := $(shell hostname -s | sed  's/[0-9]*//g')
 ifeq ($(HOSTNAME),bgqfen)  
   ARCHGUESS = ibm_bgq_xlc
 endif
+ifeq ($(HOSTNAME),seqlac)  
+#  ARCHGUESS = ibm_bgq_xlc
+  ARCHGUESS = ibm_bgq_xlc_smp
+endif
 ifeq ($(HOSTNAME),rzuseqlac)  
   ARCHGUESS = ibm_bgq_xlc
 endif

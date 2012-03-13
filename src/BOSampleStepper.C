@@ -172,7 +172,7 @@ void BOSampleStepper::step(int niter)
 
   if (fractional_occ && onpe0)
        cout << "<!-- BOSampleStepper:  fractional occupation detected. -->" << endl;
-  else
+  else if (onpe0)
        cout << "<!-- BOSampleStepper:  fractional occupation not detected. -->" << endl;
    
   
@@ -575,6 +575,9 @@ void BOSampleStepper::step(int niter)
           tmap["diag"].start();
           s_.wf.diag(dwf,true);
           tmap["diag"].stop();
+          tmap["usfns"].start();
+          s_.wf.update_usfns();
+          tmap["usfns"].stop();
           s_.wf.printeig();
         }
         
@@ -1405,26 +1408,15 @@ void BOSampleStepper::step(int niter)
           if (ultrasoft) { 
             ef_.energy(true,dwf,false,fion,false,sigma_eks);
             tmap["diag"].start();
-            //s_.wf.diag(dwf,compute_eigvec);
-            s_.wf.diag(dwf,true);
+            s_.wf.diag(dwf,compute_eigvec);
+            //s_.wf.diag(dwf,true);  // ewd:  why true?  Why did I do this??
             tmap["diag"].stop();
 
             // update ultrasoft functions w. new eigenvectors
-            if (compute_eigvec) { 
-              for ( int ispin = 0; ispin < s_.wf.nspin(); ispin++ ) {
-                if (s_.wf.spinactive(ispin)) {
-                  for ( int ikp = 0; ikp < s_.wf.nkp(); ikp++ ) {
-                    if (s_.wf.kptactive(ikp)) {
-                      assert(s_.wf.sd(ispin,ikp) != 0);
-                      if (ultrasoft) { 
-                        tmap["usfns"].start();
-                        s_.wf.sd(ispin,ikp)->update_usfns(); // calculate spsi
-                        tmap["usfns"].stop();
-                      }
-                    }
-                  }
-                }
-              }
+            if (compute_eigvec && ultrasoft) { 
+               tmap["usfns"].start();
+               s_.wf.update_usfns();
+               tmap["usfns"].stop();
             }
             s_.wf.printeig();
           }

@@ -929,72 +929,108 @@ double EnergyFunctional::energy(bool compute_hpsi, Wavefunction& dwf,
     const double* gx0 = vbasis_->gx_ptr(0);
     const double* gx1 = vbasis_->gx_ptr(1);
     const double* gx2 = vbasis_->gx_ptr(2);
+    vector<complex<double> > trhog;
     for ( int is = 0; is < nsp_; is++ ) {
-      for ( int ig = 0; ig < ngloc; ig++ ) {
-        double tmp = fpi * rhops[is][ig] * g2i[ig];
-        vtemp[ig] =  tmp * conj(rhogt[ig]) + vps[is][ig] * conj(rhoelg[ig]);
-      }
-      memset((void*)&ftmp[0],0,3*namax_*sizeof(double));
-      // loop over atoms of species is
-      for ( int ia = 0; ia < na_[is]; ia++ ) {
-        double sum0=0.0,sum1=0.0,sum2=0.0;
-        double *c0 = sf.cos0_ptr(is,ia);
-        double *c1 = sf.cos1_ptr(is,ia);
-        double *c2 = sf.cos2_ptr(is,ia);
-        double *s0 = sf.sin0_ptr(is,ia);
-        double *s1 = sf.sin1_ptr(is,ia);
-        double *s2 = sf.sin2_ptr(is,ia);
-        for ( int ig = 0; ig < ngloc; ig++ ) {
-          // compute Exp[igr] in 3D as a product of 1D contributions
-          // complex<double> teigr = ei0[kv[3*ig+0]] *
-          //                         ei1[kv[3*ig+1]] *
-          //                         ei2[kv[3*ig+2]];
-          const int iii = ig+ig+ig;
-          const int kx = idx[iii];
-          const int ky = idx[iii+1];
-          const int kz = idx[iii+2];
+       for ( int ig = 0; ig < ngloc; ig++ ) {
+          double tmp = fpi * rhops[is][ig] * g2i[ig];
+          vtemp[ig] =  tmp * conj(rhogt[ig]) + vps[is][ig] * conj(rhoelg[ig]);
+       }
+       Species *s = s_.atoms.species_list[is];
+       if (s->nlcc())
+       {
+          cd_.nlcc_forceden(is,trhog);
+          for ( int ig = 0; ig < ngloc; ig++ )
+             for ( int ispin = 0; ispin < wf_.nspin(); ispin++ )
+                vtemp[ig] += omega_inv*trhog[ig]*conj(vxc_g[ispin][ig]);
+       }
+       
+       memset((void*)&ftmp[0],0,3*namax_*sizeof(double));
+       // loop over atoms of species is
+       for ( int ia = 0; ia < na_[is]; ia++ ) {
+          double sum0=0.0,sum1=0.0,sum2=0.0;
+          double *c0 = sf.cos0_ptr(is,ia);
+          double *c1 = sf.cos1_ptr(is,ia);
+          double *c2 = sf.cos2_ptr(is,ia);
+          double *s0 = sf.sin0_ptr(is,ia);
+          double *s1 = sf.sin1_ptr(is,ia);
+          double *s2 = sf.sin2_ptr(is,ia);
+          for ( int ig = 0; ig < ngloc; ig++ ) {
+             // compute Exp[igr] in 3D as a product of 1D contributions
+             // complex<double> teigr = ei0[kv[3*ig+0]] *
+             //                         ei1[kv[3*ig+1]] *
+             //                         ei2[kv[3*ig+2]];
+             const int iii = ig+ig+ig;
+             const int kx = idx[iii];
+             const int ky = idx[iii+1];
+             const int kz = idx[iii+2];
           
-          const double cos_a = c0[kx];
-          const double cos_b = c1[ky];
-          const double cos_c = c2[kz];
+             const double cos_a = c0[kx];
+             const double cos_b = c1[ky];
+             const double cos_c = c2[kz];
+             
+             const double sin_a = s0[kx];
+             const double sin_b = s1[ky];
+             const double sin_c = s2[kz];
  
-          const double sin_a = s0[kx];
-          const double sin_b = s1[ky];
-          const double sin_c = s2[kz];
- 
-          // Next line: exp(-i*gr) =
-          // (cos_a - I sin_a)*(cos_b - I sin_b)*(cos_c - I sin_c)
-          double teigr_re = 
-            cos_a*cos_b*cos_c - sin_a*sin_b*cos_c -
-            sin_a*cos_b*sin_c - cos_a*sin_b*sin_c;
-          double teigr_im = 
-            sin_a*sin_b*sin_c - sin_a*cos_b*cos_c -
-            cos_a*sin_b*cos_c - cos_a*cos_b*sin_c;
-                   
-          /* fion is real */
-          double tmp = teigr_re * vtemp[ig].imag() + 
-                       teigr_im * vtemp[ig].real();
+             // Next line: exp(-i*gr) =
+             // (cos_a - I sin_a)*(cos_b - I sin_b)*(cos_c - I sin_c)
+             double teigr_re = 
+                 cos_a*cos_b*cos_c - sin_a*sin_b*cos_c -
+                 sin_a*cos_b*sin_c - cos_a*sin_b*sin_c;
+             double teigr_im = 
+                 sin_a*sin_b*sin_c - sin_a*cos_b*cos_c -
+                 cos_a*sin_b*cos_c - cos_a*cos_b*sin_c;
+             
+             /* fion is real */
+             double tmp = teigr_re * vtemp[ig].imag() + 
+                 teigr_im * vtemp[ig].real();
 
-          sum0 += tmp * gx0[ig];
-          sum1 += tmp * gx1[ig];
-          sum2 += tmp * gx2[ig];
+             sum0 += tmp * gx0[ig];
+             sum1 += tmp * gx1[ig];
+             sum2 += tmp * gx2[ig];
+             
+          }
+          ftmp[3*ia]   = sum0;
+          ftmp[3*ia+1] = sum1;
+          ftmp[3*ia+2] = sum2;
+       }
+       
+       // add NLCC contribution to forces, if any
+       //Species *s = s_.atoms.species_list[is];
+       if (1 == 0 && s->nlcc())
+       {
+          vector<double> fnlctmp(ngloc,0.0);
+          for ( int ig = 0; ig < ngloc; ig++ )
+          {
+             fnlctmp[ig] = 0.0;
+             for ( int ispin = 0; ispin < wf_.nspin(); ispin++ )
+                //vtemp[ig] += omega_inv * vxc_g[ispin][ig] * conj(cd_.rhognlcc[ispin][ig]);
+                //fnlctmp[ig] += omega_inv * (vxc_g[ispin][ig].imag()*cd_.rhognlcc[ispin][ig].real() - vxc_g[ispin][ig].real()*cd_.rhognlcc[ispin][ig].imag());
+                fnlctmp[ig] += (vxc_g[ispin][ig].imag()*cd_.rhognlcc[ispin][ig].real() - vxc_g[ispin][ig].real()*cd_.rhognlcc[ispin][ig].imag());
+          }          
+          // loop over atoms of species is
+          for ( int ia = 0; ia < na_[is]; ia++ ) {
+             double sum0=0.0,sum1=0.0,sum2=0.0;
+             for ( int ig = 0; ig < ngloc; ig++ ) {
+                sum0 += fnlctmp[ig]*gx0[ig];
+                sum1 += fnlctmp[ig]*gx1[ig];
+                sum2 += fnlctmp[ig]*gx2[ig];
+             }
+             ftmp[3*ia]   += sum0;
+             ftmp[3*ia+1] += sum1;
+             ftmp[3*ia+2] += sum2;
+          }
+       }
+       int len = 3*na_[is];
+       vbasis_->context().dsum(len,1,&ftmp[0],len);
 
-        }
-        ftmp[3*ia]   = sum0;
-        ftmp[3*ia+1] = sum1;
-        ftmp[3*ia+2] = sum2;
-      }
-
-      int len = 3*na_[is];
-      vbasis_->context().dsum(len,1,&ftmp[0],len);
-
-      double vfac = vbasis_->real() ? 2.0*omega : omega;
-      for ( int i = 0; i < 3*na_[is]; i++ )
-        fion[is][i] += fion_esr[is][i] - vfac * ftmp[i];
+       double vfac = vbasis_->real() ? 2.0*omega : omega;
+       for ( int i = 0; i < 3*na_[is]; i++ )
+          fion[is][i] += fion_esr[is][i] - vfac * ftmp[i];
     }
 
     //ewd DEBUG:  test what directly computed nlcc force terms would be
-    if (cd_.nlcc())
+    if (cd_.nlcc() && 1==0)
     {
        for ( int ispin = 0; ispin < wf_.nspin(); ispin++ ) {
           if (wf_.spinactive(ispin)) {
@@ -1002,7 +1038,7 @@ double EnergyFunctional::energy(bool compute_hpsi, Wavefunction& dwf,
                 Species *s = s_.atoms.species_list[is];
                 if (s->nlcc()) { 
                    for ( int ig = 0; ig < ngloc; ig++ )
-                      vtemp[ig] =  vxc_g[ispin][ig] * cd_.rhognlcc[ispin][ig];
+                      vtemp[ig] =  vxc_g[ispin][ig] * conj(cd_.rhognlcc[ispin][ig]);
                    memset((void*)&ftmp[0],0,3*namax_*sizeof(double));
                    // loop over atoms of species is
                    for ( int ia = 0; ia < na_[is]; ia++ ) {
@@ -1022,7 +1058,7 @@ double EnergyFunctional::energy(bool compute_hpsi, Wavefunction& dwf,
                          const int kx = idx[iii];
                          const int ky = idx[iii+1];
                          const int kz = idx[iii+2];
-          
+                      
                          const double cos_a = c0[kx];
                          const double cos_b = c1[ky];
                          const double cos_c = c2[kz];
@@ -1039,7 +1075,7 @@ double EnergyFunctional::energy(bool compute_hpsi, Wavefunction& dwf,
                          double teigr_im = 
                              sin_a*sin_b*sin_c - sin_a*cos_b*cos_c -
                              cos_a*sin_b*cos_c - cos_a*cos_b*sin_c;
-                   
+                         
                          /* fion is real */
                          double tmp = teigr_re * vtemp[ig].imag() + 
                              teigr_im * vtemp[ig].real();
@@ -1057,7 +1093,7 @@ double EnergyFunctional::energy(bool compute_hpsi, Wavefunction& dwf,
                    int len = 3*na_[is];
                    vbasis_->context().dsum(len,1,&ftmp[0],len);
 
-                   double vfac = vbasis_->real() ? 2.0*omega : omega;
+                   double vfac = vbasis_->real() ? 2.0 : 1.0;
                    if (wf_.nspin() == 2) vfac *= 0.5;
                    
                    //ewd DEBUG
@@ -1065,7 +1101,7 @@ double EnergyFunctional::energy(bool compute_hpsi, Wavefunction& dwf,
                       for ( int ia = 0; ia < na_[is]; ia++ )
                          cout << "NLCC FORCE: is = " << is << ", ia = " << ia << " fion_nlcc = " << vfac*ftmp[3*ia] << "  "  << vfac*ftmp[3*ia+1] << "  "  << vfac*ftmp[3*ia+2] << endl;
                    
-             
+                
                    //for ( int i = 0; i < 3*na_[is]; i++ )
                    //   fion[is][i] += fion_esr[is][i] - vfac * ftmp[i];
                 }

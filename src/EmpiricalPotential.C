@@ -12,6 +12,7 @@
 #include <iomanip>
 #include <sstream>
 #include <fstream>
+#include <cstdlib>
 using namespace std;
 
 ////////////////////////////////////////////////////////////////////////////////

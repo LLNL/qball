@@ -68,6 +68,7 @@ class ChargeDensity {
   bool nlcc() { return nlcc_; }
   void update_nlcc();
   void add_nlccden();
+  void nlcc_forceden(int is, vector<complex<double> > &rhog);
   void calc_drhogus(vector<vector<complex<double> > > &drhogus);
   void print_memory(ostream&os, double& totsum, double& locsum) const;
   
