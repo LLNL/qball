@@ -679,10 +679,13 @@ void ChargeDensity::update_nlcc() {
   const double* gptr = vbasis_->g_ptr();
   for (int ispin=0; ispin<wf_.nspin(); ispin++)
   {
+     const int rhor_size = rhor[ispin].size();
+     rhognlcc[ispin].resize(ngwl);
+     rhornlcc_[ispin].resize(rhor_size);
+     memset( (void*)&rhognlcc[ispin][0], 0, 2*ngwl*sizeof(double) );
+     memset( (void*)&rhornlcc_[ispin][0], 0, rhor_size*sizeof(double) );
      if ( wf_.spinactive(ispin)) 
      {
-        rhognlcc[ispin].resize(ngwl);
-        memset( (void*)&rhognlcc[ispin][0], 0, 2*ngwl*sizeof(double) );
         for (int is=0; is<atoms_.nsp(); is++) {
            Species *s = atoms_.species_list[is];
            complex<double> *sfac = &sf.sfac[is][0];
@@ -698,8 +701,6 @@ void ChargeDensity::update_nlcc() {
       
         vft_->backward(&rhognlcc[ispin][0],&rhotmp[0]);
 
-        const int rhor_size = rhor[ispin].size();
-        rhornlcc_[ispin].resize(rhor_size);
         for ( int i = 0; i < rhor_size; i++ )
            // ewd: should we follow PWSCF's example of forcing positive FFT(rhognlcc)?
            //rhornlcc_[ispin][i] = fabs(rhotmp[i].real())*omega_inv;
@@ -735,18 +736,18 @@ void ChargeDensity::add_nlccden()
    }
 }
 ////////////////////////////////////////////////////////////////////////////////
-void ChargeDensity::nlcc_forceden(int is, vector<complex<double> > &rhog) {
+void ChargeDensity::nlcc_forceden(int is, vector<complex<double> > &tmprhog) {
   // sum up nlcc core density (omit structure factor term for force calc)
   const int ngwl = vbasis_->localsize();
   const double* gptr = vbasis_->g_ptr();
-  rhog.resize(ngwl);
-  memset( (void*)&rhog[0], 0, 2*ngwl*sizeof(double) );
+  tmprhog.resize(ngwl);
+  memset( (void*)&tmprhog[0], 0, 2*ngwl*sizeof(double) );
   Species *s = atoms_.species_list[is];
   if (s->nlcc()) { 
      for ( int ig = 0; ig < ngwl; ig++ ) {
         double gval = gptr[ig];
         double rhogcore = s->rhog_nlcc(gval);
-        rhog[ig] += rhogcore;
+        tmprhog[ig] += rhogcore;
      }
   }
 }
