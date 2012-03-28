@@ -62,7 +62,6 @@ void SlaterDet::init_usfns(AtomSet* atoms) {
     delete betapsi_[i];
     delete dbetapsi_[i];
   }
-  
   betag_.resize(nsp);
   betapsi_.resize(nsp);
   dbetapsi_.resize(nsp);
@@ -100,6 +99,13 @@ void SlaterDet::init_usfns(AtomSet* atoms) {
       atoms_->usloc_nat[is] = atoms_->usloc_atind[is].size();
       atoms_->usloc_nat_t[is] = atoms_->usloc_atind_t[is].size();
 
+      //ewd DEBUG
+#ifdef PRINTALL
+      if (ctxt_.mype() == 0)
+         cout << "SD.init_usfns, species " << is << ", nbetalm = " << nbetalm << ", naloc = " << atoms_->usloc_nat[is] << ", naloc_t = " << atoms_->usloc_nat_t[is] << endl;
+#endif
+
+
       int ntot, nloc;
       if (highmem_) {
         ntot = na*nbetalm;
@@ -111,11 +117,19 @@ void SlaterDet::init_usfns(AtomSet* atoms) {
         nloc = nbetalm;
       }
       betag_[is]->resize(m,ntot,mloc,nloc);
+
+      //ewd DEBUG
+#ifdef PRINTALL
+      if (ctxt_.mype() == 0)
+         cout << "SD.init_usfns, species " << is << " betag matrix size = " << m << " x " << ntot << ", local size = " << mloc << " x " << nloc << endl;
+#endif
+  
     }
   }
 
   calc_betag();
   calc_betapsi();
+  
   for (int is=0; is<nsp; is++) {
     Species *s = atoms_->species_list[is];
     if (s->ultrasoft()) { 
@@ -126,7 +140,6 @@ void SlaterDet::init_usfns(AtomSet* atoms) {
     }
   }
   calc_spsi();
-
 }
 ////////////////////////////////////////////////////////////////////////////////
 void SlaterDet::update_usfns() {
@@ -1747,6 +1760,7 @@ void SlaterDet::calc_betag() {
       if (s->ultrasoft()) {
         int nbeta = s->nbeta();
         int nbetalm = s->nbetalm();
+        #pragma omp parallel for
         for (int ibl = 0; ibl < atoms_->usloc_atind[is].size(); ibl++) {
           int ia = atoms_->usloc_atind[is][ibl];
 
@@ -1818,6 +1832,7 @@ void SlaterDet::calc_betag() {
         complex<double>* bg = betag_[is]->valptr();
         int lm = 0;
         int nbeta = s->nbeta();
+        #pragma omp parallel for
         for (int b=0; b < nbeta; b++) {
           int nbetam = 2*s->betal(b)+1;
           for (int m=0; m < nbetam ; m++) {
@@ -1853,26 +1868,56 @@ void SlaterDet::calc_betapsi(void) {
     for (int is=0; is<betapsi_.size(); is++) {
       ComplexMatrix* bg = betag_[is];
       betapsi_[is]->resize(bg->n(),c_.n(),bg->nb(),c_.nb());
+
+      //ewd DEBUG
+#ifdef PRINTALL
+      if (ctxt_.mype() == 0)
+         cout << "SD.calc_betapsi, species " << is << " betapsi matrix size = " << betapsi_[is]->m() << " x " << betapsi_[is]->n() << ", local size = " << betapsi_[is]->mloc() << " x " << betapsi_[is]->nloc() << endl;
+#endif
       
       if ( basis_->real() ) {
         // correct for G=0 term
         double* bgp = (double*) betag_[is]->valptr();
         int bg_nloc = betag_[is]->nloc();
         int bg_mloc = betag_[is]->mloc();
+        #pragma omp parallel for
         for (int ib=0; ib < bg_nloc; ib++) {
           bgp[2*ib*bg_mloc] *= 0.5;
           bgp[2*ib*bg_mloc+1] *= 0.5;
         }
+
+      //ewd DEBUG
+#ifdef PRINTALL
+      if (ctxt_.mype() == 0)
+         cout << "SD.calc_betapsi, species " << is << ", calling gemm of betag (" << bg->m() << " x " << bg->n() << ", " << bg->mloc() << " x " << bg->nloc() << ") and c (" << c_.m() << " x " << c_.n() << ", " << c_.mloc() << " x " << c_.nloc() << ")" << endl;
+#endif
+
+
         betapsi_[is]->gemm('c','n',2.0,*bg,c_,0.0);
+#ifdef PRINTALL
+      if (ctxt_.mype() == 0)
+         cout << "SD.calc_betapsi, species " << is << ", betapsi gemm finished." << endl;
+#endif
 
         // restore betag
+        #pragma omp parallel for
         for (int ib=0; ib < bg_nloc; ib++) {
           bgp[2*ib*bg_mloc] *= 2.;
           bgp[2*ib*bg_mloc+1] *= 2.;
         }
       }
       else {
+      //ewd DEBUG
+#ifdef PRINTALL
+      if (ctxt_.mype() == 0)
+         cout << "SD.calc_betapsi, species " << is << ", calling gemm of betag (" << bg->m() << " x " << bg->n() << ", " << bg->mloc() << " x " << bg->nloc() << ") and c (" << c_.m() << " x " << c_.n() << ", " << c_.mloc() << " x " << c_.nloc() << ")" << endl;
+#endif
+      
         betapsi_[is]->gemm('c','n',1.0,*bg,c_,0.0);
+#ifdef PRINTALL
+      if (ctxt_.mype() == 0)
+         cout << "SD.calc_betapsi, species " << is << ", betapsi gemm finished." << endl;
+#endif
       }
     }
   }
@@ -1906,7 +1951,14 @@ void SlaterDet::calc_betapsi(void) {
         complex<double>* bptmpp = bptmp.valptr();
         ComplexMatrix bgsf(ctxt_,betag_[is]->m(),betag_[is]->n(),betag_[is]->mb(),betag_[is]->nb());
         complex<double>* bgsfp = bgsf.valptr();
+        #pragma omp parallel for
         for (int ibl = 0; ibl < naloc_max; ibl++) {
+
+           //ewd DEBUG
+           if (ctxt_.mype() == 0)
+              cout << "SD.CALC_BETAPSI ibl = " << ibl << ", naloc_max = " << naloc_max << endl;
+           //ewd DEBUG
+           
           if (ibl < naloc) { 
             int ia = atoms_->usloc_atind[is][ibl]; 
             // calculate structure factor
@@ -1925,7 +1977,17 @@ void SlaterDet::calc_betapsi(void) {
               for ( int ig = 0; ig < ngwl; ig++ )
                 bgsfp[lm*bg_mloc+ig] = bgp[lm*bg_mloc+ig]*complex<double>(ckpgr[ig],-skpgr[ig]);
           }
+      //ewd DEBUG
+#ifdef PRINTALL
+      if (ctxt_.mype() == 0)
+         cout << "SD.calc_betapsi, species " << is << ", ibl = " << ibl << ", calling gemm of bgsf (" << bgsf.m() << " x " << bgsf.n() << ", " << bgsf.mloc() << " x " << bgsf.nloc() << ") and c (" << c_.m() << " x " << c_.n() << ", " << c_.mloc() << " x " << c_.nloc() << ")" << endl;
+#endif
+      
           bptmp.gemm('c','n',1.0,bgsf,c_,0.0);
+#ifdef PRINTALL
+      if (ctxt_.mype() == 0)
+         cout << "SD.calc_betapsi, species " << is << ", bptmp gemm finished." << endl;
+#endif
 
           if (ibl < naloc_t) { 
             for ( int n = 0; n < nstloc(); n++ ) {
@@ -1984,12 +2046,14 @@ void SlaterDet::calc_dbetapsi(int j) {
       int bg_mloc = betag_[is]->mloc();
       complex<double>* dbgpj = dbgj.valptr();
       const double *const kpgj = basis_->kpgx_ptr(j);
+      #pragma omp parallel for
       for (int ib=0; ib < bg_nloc; ib++)
         for (int ig=0; ig<ngwl; ig++)
           dbgpj[ib*bg_mloc+ig] = bgp[ib*bg_mloc+ig]*complex<double>(0.0,-kpgj[ig]);
 
       if ( basis_->real() ) {
         // correct for G=0 term
+        #pragma omp parallel for
         for (int ib=0; ib < bg_nloc; ib++)
           dbgpj[ib*bg_mloc] *= 0.5;
         dbetapsi_[is]->gemm('c','n',2.0,dbgj,c_,0.0);
@@ -2030,6 +2094,7 @@ void SlaterDet::calc_dbetapsi(int j) {
         ComplexMatrix dbgsf(ctxt_,betag_[is]->m(),betag_[is]->n(),betag_[is]->mb(),betag_[is]->nb());
         complex<double>* dbgsfp = dbgsf.valptr();
         
+        #pragma omp parallel for
         for (int ibl = 0; ibl < naloc_max; ibl++) {
           if (ibl < naloc) { 
             int ia = atoms_->usloc_atind[is][ibl]; 
@@ -2142,6 +2207,7 @@ void SlaterDet::calc_spsi() {
           int bpsize = bpsum.size();
           for (int i=0; i<bpsize; i++)
             bpsum[i] = complex<double>(0.0,0.0);
+          #pragma omp parallel for
           for (int n=0; n<nstloc; n++) {
             for (int ibl = 0; ibl < naloc_t; ibl++) {
               int ia = atoms_->usloc_atind_t[is][ibl];
@@ -2160,7 +2226,15 @@ void SlaterDet::calc_spsi() {
           for (int i=0; i<bpsize; i++)
             bpsp[i] = omega_inv*bpsum[i];
         }
+#ifdef PRINTALL
+      if (ctxt_.mype() == 0)
+         cout << "SD.calc_spsi, species " << is << ", calling gemm of betag (" << betag->m() << " x " << betag->n() << ", " << betag->mloc() << " x " << betag->nloc() << ") and bpsisum (" << bpsisum.m() << " x " << bpsisum.n() << ", " << bpsisum.mloc() << " x " << bpsisum.nloc() << ")" << endl;
+#endif
         spsi_.gemm('n','n',1.0,*betag,bpsisum,1.0);
+#ifdef PRINTALL
+      if (ctxt_.mype() == 0)
+         cout << "SD.calc_spsi, species " << is << ", spsi gemm finished." << endl;
+#endif
       }
       else { // !highmem
         // need to multiply betag by structure factor first
@@ -2177,6 +2251,7 @@ void SlaterDet::calc_spsi() {
         int tbp_m = nbetalm*ctxt_.npcol();
         ComplexMatrix tbpsum(ctxt_,tbp_m,c_.n(),nbetalm,c_.nb());
         complex<double>* tbpp = tbpsum.valptr();
+        #pragma omp parallel for
         for (int ibl = 0; ibl < naloc_max; ibl++) {
           vector<complex<double> > bpsum(nstloc*nbetalm);
           for (int i=0; i<bpsum.size(); i++)
@@ -2225,7 +2300,15 @@ void SlaterDet::calc_spsi() {
             for (int i=0; i<nstloc*nbetalm; i++)
               tbpp[i] = omega_inv*bpsum[i];
           }
+#ifdef PRINTALL
+      if (ctxt_.mype() == 0)
+         cout << "SD.calc_spsi, species " << is << ", calling gemm of bgsf (" << bgsf.m() << " x " << bgsf.n() << ", " << bgsf.mloc() << " x " << bgsf.nloc() << ") and tbpsum (" << tbpsum.m() << " x " << tbpsum.n() << ", " << tbpsum.mloc() << " x " << tbpsum.nloc() << ")" << endl;
+#endif
           spsi_.gemm('n','n',1.0,bgsf,tbpsum,1.0);
+#ifdef PRINTALL
+      if (ctxt_.mype() == 0)
+         cout << "SD.calc_spsi, species " << is << ", spsi gemm finished." << endl;
+#endif
         }
       }
     }
@@ -2273,11 +2356,20 @@ void SlaterDet::randomize_us(double amplitude, AtomSet& as) {
       p[i] = amplitude * complex<double>(re,im);
     }
   }
+  if (ctxt_.mype() == 0)
+     cout << "Calling cleanup()" << endl;
+
   cleanup();
+
+  if (ctxt_.mype() == 0)
+     cout << "Calling init_usfns()" << endl;
 
   // calculate ultrasoft functions
   init_usfns(&as);
-  
+
+  if (ctxt_.mype() == 0)
+     cout << "Calling gram()" << endl;
+
   // orthogonalize
   gram();
 }

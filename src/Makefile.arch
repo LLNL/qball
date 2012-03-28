@@ -10,7 +10,7 @@ ifeq ($(HOSTNAME),seqlac)
   ARCHGUESS = ibm_bgq_xlc_smp
 endif
 ifeq ($(HOSTNAME),rzuseqlac)  
-  ARCHGUESS = ibm_bgq_xlc
+  ARCHGUESS = ibm_bgq_xlc_smp
 endif
 ifeq ($(HOSTNAME),dawn)  
   ARCHGUESS = ibm_bgp_xlc

@@ -70,6 +70,7 @@ class ChargeDensity {
   void add_nlccden();
   void nlcc_forceden(int is, vector<complex<double> > &rhog);
   void print_memory(ostream&os, double& totsum, double& locsum) const;
+  void print_timing();
   
   ChargeDensity(Sample& s);
   ~ChargeDensity();

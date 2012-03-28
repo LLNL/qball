@@ -12,8 +12,6 @@
 #include <cmath>
 #include <cassert>
 #include <vector>
-//ewd DEBUG
-#include <iostream>
 
 void LDAFunctional::setxc(void) 
 {
@@ -27,13 +25,6 @@ void LDAFunctional::setxc(void)
     {
       xc_unpolarized(rho[ir],exc[ir],vxc1[ir]);
     }
-
-    //ewd DEBUG
-    double rsum = 0.0;
-    for ( int ir = 0; ir < _np; ir++ )
-       rsum += rho[ir];
-    cout << "LDAFUNCTIONAL.DEBUG: rsum = " << rsum << endl;
-    //ewd DEBUG
   }
   else
   {

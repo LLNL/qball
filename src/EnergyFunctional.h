@@ -101,6 +101,7 @@ class EnergyFunctional
   
   void print(ostream& os) const;
   void print_memory(ostream&os, double& totsum, double& locsum) const;
+  void print_timing();
   
   EnergyFunctional(const Sample& s, const Wavefunction& wf, ChargeDensity& cd);
   ~EnergyFunctional();

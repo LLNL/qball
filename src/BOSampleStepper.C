@@ -31,6 +31,11 @@
 #endif
 #include <iostream>
 #include <iomanip>
+#ifdef BGQ
+#include <bgpm/include/bgpm.h>
+extern "C" void HPM_Start(char *);
+extern "C" void HPM_Stop(char *);
+#endif
 using namespace std;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -41,22 +46,6 @@ BOSampleStepper::BOSampleStepper(Sample& s, int nitscf, int nite) :
 ////////////////////////////////////////////////////////////////////////////////
 BOSampleStepper::~BOSampleStepper()
 {
-  for ( TimerMap::iterator i = tmap.begin(); i != tmap.end(); i++ )
-  {
-    double time = (*i).second.real();
-    double tmin = time;
-    double tmax = time;
-    s_.ctxt_.dmin(1,1,&tmin,1);
-    s_.ctxt_.dmax(1,1,&tmax,1);
-    if ( s_.ctxt_.myproc()==0 )
-    {
-      cout << "<timing name=\""
-           << setw(15) << (*i).first << "\""
-           << " min=\"" << setprecision(3) << setw(9) << tmin << "\""
-           << " max=\"" << setprecision(3) << setw(9) << tmax << "\"/>"
-           << endl;
-    }
-  }
 }
 ////////////////////////////////////////////////////////////////////////////////
 void BOSampleStepper::initialize_density(void)
@@ -442,7 +431,11 @@ void BOSampleStepper::step(int niter)
     tleft = s_.ctrl.run_timer - (tbase - s_.ctrl.time_init);
   }
   
-  // Next line: special case of niter=0: compute GS only
+#ifdef BGQ
+  HPM_Start("iterloop");
+#endif
+
+  // Next line: special case of niter=0: compute GS only        
   for ( int iter = 0; iter < max(niter,1); iter++ )
   {
 
@@ -1503,7 +1496,8 @@ void BOSampleStepper::step(int niter)
       s_.ctxt_.dmax(1,1,&tmax,1);
       if ( onpe0 )
       {
-        cout << "  <timing name=\"iteration\""
+       cout << left << setw(34) << "<timing where=\"run\""
+           << setw(24) << " name=\" iteration\""
              << " min=\"" << setprecision(3) << setw(9) << tmin << "\""
              << " max=\"" << setprecision(3) << setw(9) << tmax << "\"/>"
              << endl;
@@ -1513,6 +1507,9 @@ void BOSampleStepper::step(int niter)
         s_.constraints.update_constraints(dt);
     } // else (not converged)
   } // for iter
+#ifdef BGQ
+  HPM_Stop("iterloop");
+#endif
 
   // print memory usage of main data objects
   if (s_.ctxt_.oncoutpe()) {
@@ -1533,6 +1530,30 @@ void BOSampleStepper::step(int niter)
   }
   
 
+#ifdef PRINTALL
+  //ewd print timing
+  cd_.print_timing();
+  ef_.print_timing();
+  // print timer map
+  for ( TimerMap::iterator i = tmap.begin(); i != tmap.end(); i++ )
+  {
+     double time = (*i).second.real();
+     double tmin = time;
+     double tmax = time;
+     s_.ctxt_.dmin(1,1,&tmin,1);
+     s_.ctxt_.dmax(1,1,&tmax,1);
+     if ( s_.ctxt_.mype()==0 )
+     {
+       cout << left << setw(34) << "<timing where=\"run\""
+           << setw(8) << " name=\""
+           << setw(15) << (*i).first << "\""
+           << " min=\"" << setprecision(3) << setw(9) << tmin << "\""
+           << " max=\"" << setprecision(3) << setw(9) << tmax << "\"/>"
+           << endl;
+     }
+  }
+#endif  
+  
   
   //ewd save last charge density 
   if (cell_dyn == "LOCKED") {

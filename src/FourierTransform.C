@@ -17,6 +17,7 @@
 using namespace std;
 #include <cassert>
 
+#include <omp.h>
 #if USE_MPI
 #include <mpi.h>
 #else
@@ -543,7 +544,7 @@ void FourierTransform::bwd(complex<double>* val)
   inc1 = 1;
   inc2 = np2_;
   
-#pragma omp for schedule(guided)
+#pragma omp parallel for
   for (int it = 0; it < ntrans; it++)
      fftw(bwplan2,1,(FFTW_COMPLEX*)&zvec_[0]+it*inc2,inc1,inc2,
           (FFTW_COMPLEX*)0,0,0);
@@ -724,7 +725,7 @@ void FourierTransform::bwd(complex<double>* val)
     inc1 = 1;
     inc2 = np0_;
     istart = k * np0_ * np1_; 
-#pragma omp for schedule(guided)
+#pragma omp parallel for
     for (int it = 0; it < ntrans; it++)
        fftw(bwplan0,1,(FFTW_COMPLEX*)&val[istart]+it*inc2,inc1,inc2,
             (FFTW_COMPLEX*)0,0,0);
@@ -732,7 +733,7 @@ void FourierTransform::bwd(complex<double>* val)
     inc1 = 1;
     inc2 = np0_;
     istart = np0_ * ( (np1_-ntrans) + k * np1_ );
-#pragma omp for schedule(guided)
+#pragma omp parallel for
     for (int it = 0; it < ntrans; it++)
        fftw(bwplan0,1,(FFTW_COMPLEX*)&val[istart]+it*inc2,inc1,inc2,
             (FFTW_COMPLEX*)0,0,0);
@@ -752,7 +753,7 @@ void FourierTransform::bwd(complex<double>* val)
     inc1 = np0_;
     inc2 = 1;
     istart = k * np0_ * np1_; 
-#pragma omp for schedule(guided)
+#pragma omp parallel for
     for (int it = 0; it < ntrans; it++)
        fftw(bwplan1,1,(FFTW_COMPLEX*)&val[istart]+it*inc2,inc1,inc2,
             (FFTW_COMPLEX*)0,0,0);
@@ -850,7 +851,7 @@ void FourierTransform::fwd(complex<double>* val)
     inc1 = np0_;
     inc2 = 1;
     istart = k * np0_ * np1_; 
-#pragma omp for schedule(guided)
+#pragma omp parallel for
     for (int it = 0; it < ntrans; it++)
        fftw(fwplan1,1,(FFTW_COMPLEX*)&val[istart]+it*inc2,inc1,inc2,
             (FFTW_COMPLEX*)0,0,0);
@@ -859,7 +860,7 @@ void FourierTransform::fwd(complex<double>* val)
     inc1 = 1;
     inc2 = np0_;
     istart = k * np0_ * np1_; 
-#pragma omp for schedule(guided)
+#pragma omp parallel for
     for (int it = 0; it < ntrans; it++)
        fftw(fwplan0,1,(FFTW_COMPLEX*)&val[istart]+it*inc2,inc1,inc2,
             (FFTW_COMPLEX*)0,0,0);
@@ -868,7 +869,7 @@ void FourierTransform::fwd(complex<double>* val)
     inc1 = 1;
     inc2 = np0_;
     istart = np0_ * ( (np1_-ntrans) + k * np1_ );
-#pragma omp for schedule(guided)
+#pragma omp parallel for
     for (int it = 0; it < ntrans; it++)
        fftw(fwplan0,1,(FFTW_COMPLEX*)&val[istart]+it*inc2,inc1,inc2,
             (FFTW_COMPLEX*)0,0,0);
@@ -996,7 +997,7 @@ void FourierTransform::fwd(complex<double>* val)
   ntrans = nvec_;
   inc1 = 1;
   inc2 = np2_;
-#pragma omp for schedule(guided)
+#pragma omp parallel for
     for (int it = 0; it < ntrans; it++)
        fftw(fwplan2,1,(FFTW_COMPLEX*)&zvec_[0]+it*inc2,inc1,inc2,
             (FFTW_COMPLEX*)0,0,0);

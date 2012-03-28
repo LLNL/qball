@@ -69,5 +69,6 @@ class NonLocalPotential
     vector<complex<double> >& veff);
 
   void print_memory(ostream&os, int kmult, int kmultloc, double& totsum, double& locsum) const;
+  void print_timing();
 };
 #endif

@@ -163,8 +163,10 @@ ChargeDensity::~ChargeDensity(void) {
   for ( int ispin = 0; ispin < wf_.nspin(); ispin++ ) 
     for ( int ikp = 0; ikp < ft_[ispin].size(); ikp++ )
       delete ft_[ispin][ikp];
-  //ewd clean up output -- add back in with verbose or timing option?
-  /*
+}
+////////////////////////////////////////////////////////////////////////////////
+void ChargeDensity::print_timing() {
+
   for ( TimerMap::iterator i = tmap.begin(); i != tmap.end(); i++ ) {
     double time = (*i).second.real();
     double tmin = time;
@@ -173,15 +175,15 @@ ChargeDensity::~ChargeDensity(void) {
     ctxt_.dmax(1,1,&tmax,1);
     //if ( ctxt_.myproc()==0 ) {
     if ( ctxt_.mype()==0 ) {
-      cout << "<!-- timing "
-           << setw(15) << (*i).first
-           << " : " << setprecision(3) << setw(9) << tmin
-           << " "   << setprecision(3) << setw(9) << tmax << " -->" << endl;
+       cout << left << setw(34) << "<timing where=\"charge\""
+           << setw(8) << " name=\""
+           << setw(15) << (*i).first << "\""
+           << " min=\"" << setprecision(3) << setw(9) << tmin << "\""
+           << " max=\"" << setprecision(3) << setw(9) << tmax << "\"/>"
+           << endl;
     }
   }
-  */
 }
-
 ////////////////////////////////////////////////////////////////////////////////
 void ChargeDensity::update_density() {
   assert(rhor.size() == wf_.nspin());
@@ -244,7 +246,10 @@ void ChargeDensity::update_density() {
             //ewd OPT
             //sdp->calc_betapsi();
             //ewd NO-OPT: remove all OPT comments for now
+            tmap["charge_usfns"].start();
             sdp->calc_betapsi();
+            tmap["charge_usfns"].stop();
+            tmap["charge_usloop"].start();
             for (int is=0; is<nsp; is++) {
               const ComplexMatrix* bpsi = sdp->betapsi(is);
               const complex<double>* bp = bpsi->cvalptr();  
@@ -263,7 +268,8 @@ void ChargeDensity::update_density() {
                   summat[i] = complex<double>(0.0,0.0);
                
                 if (bpsi->size() > 0) {
-                  for (int ibl = 0; ibl < naloc_t; ibl++) {
+                   #pragma omp parallel for
+                   for (int ibl = 0; ibl < naloc_t; ibl++) {
                     int ia = atoms_.usloc_atind_t[is][ibl]; // ia = absolute atom index of betapsi local ind
                     for (int qind=0; qind < nqtot; qind++) {
                       int lm1,lm2;
@@ -306,6 +312,7 @@ void ChargeDensity::update_density() {
                   const double *const gz = vbasis_->gx_ptr(2);
                   int naloc = atoms_.usloc_nat[is];
                   int ialoc0 = atoms_.usloc_atind[is][0];
+                   #pragma omp parallel for
                   for (int ig=0; ig<ngwl; ig++) {
                     for (int ialoc=0; ialoc<naloc; ialoc++) {
                       int ia = ialoc0 + ialoc;
@@ -321,6 +328,8 @@ void ChargeDensity::update_density() {
                 }
               }
             }
+            tmap["charge_usloop"].stop();
+
           }
         }
       }
@@ -328,10 +337,14 @@ void ChargeDensity::update_density() {
       // sum rhogus across rows to average ultrasoft contribution over all atoms, kpts, spin
       int sumsize = 2*ngwl;
       double* rp = (double*)&rhogus[0];
+      tmap["charge_rowsum"].start();
       wf_.wfcontext()->dsum('r',sumsize,1,&rp[0],sumsize);
+      tmap["charge_rowsum"].stop();
 
       // transform ultrasoft density contribution to real space
+      tmap["charge_usfft"].start();
       vft_->backward(&rhogus[0],&rhotmp[0]);
+      tmap["charge_usfft"].stop();
 
       double uscharge_ = 0.0;
       for ( int i = 0; i < rhor[ispin].size(); i++ )
@@ -342,10 +355,12 @@ void ChargeDensity::update_density() {
         cout << "<!-- ultrasoft contribution to total charge = " << uscharge_ << " -->" << endl;
 
       // add ultrasoft contribution to rhor
+      tmap["charge_usloop"].start();
       const int rhor_size = rhor[ispin].size();
       double *const prhor = &rhor[ispin][0];
       for ( int i = 0; i < rhor_size; i++ ) 
         prhor[i] += rhotmp[i].real();
+      tmap["charge_usloop"].stop();
     }
 
     tmap["charge_sym"].start();
@@ -400,7 +415,7 @@ void ChargeDensity::update_density() {
     const int rhor_size = rhor[ispin].size();
     const double *const prhor = &rhor[ispin][0];
     tmap["charge_integral"].start();
-
+    #pragma omp parallel for
     for ( int i = 0; i < rhor_size; i++ ) {
       const double prh = prhor[i];
       sum += prh;
@@ -423,6 +438,7 @@ void ChargeDensity::update_density() {
           cout << "<WARNING> Total electronic charge has non-integer value!! </WARNING>" << endl;
       }
     }
+    tmap["charge_integral"].stop();
     tmap["charge_vft"].start();
     vft_->forward(&rhotmp[0],&rhog[ispin][0]);
     tmap["charge_vft"].stop();
@@ -447,6 +463,7 @@ void ChargeDensity::update_rhor(void) {
 
     const int rhor_size = rhor[ispin].size();
     double *const prhor = &rhor[ispin][0];
+    #pragma omp parallel for
     for ( int i = 0; i < rhor_size; i++ ) {
       prhor[i] = rhotmp[i].real() * omega_inv;
     }
@@ -605,6 +622,8 @@ void ChargeDensity::update_usfns() {
   assert(omega != 0.0);
   const double omega_inv = 1.0 / omega;
 
+  tmap["charge_usupdate"].start();
+
   if (highmem_) { 
     vector<vector<double> > tau;
     atoms_.get_positions(tau,true);
@@ -616,6 +635,7 @@ void ChargeDensity::update_usfns() {
         int naloc = atoms_.usloc_nat[is];
         int nqtot = s->nqtot();
         qnmg_[is].resize(nqtot*naloc*ngwl);
+        #pragma omp parallel for
         for (int ibl = 0; ibl < naloc; ibl++) {
           int ia = atoms_.usloc_atind[is][ibl];
 
@@ -657,6 +677,7 @@ void ChargeDensity::update_usfns() {
       }
     }
   }
+  tmap["charge_usupdate"].stop();
 }
 ////////////////////////////////////////////////////////////////////////////////
 void ChargeDensity::update_nlcc() {
@@ -665,6 +686,8 @@ void ChargeDensity::update_nlcc() {
   const double omega = vbasis_->cell().volume();
   assert(omega != 0.0);
   const double omega_inv = 1.0 / omega;
+
+  tmap["charge_update_nlcc"].start();
 
   vector<vector<double> > tau;
   atoms_.get_positions(tau,true);
@@ -681,6 +704,7 @@ void ChargeDensity::update_nlcc() {
      Species *s = atoms_.species_list[is];
      complex<double> *sfac = &sf.sfac[is][0];
      if (s->nlcc()) { 
+        #pragma omp parallel for
         for ( int ig = 0; ig < ngwl; ig++ ) {
            double gval = gptr[ig];
            double rhogcore = s->rhog_nlcc(gval);
@@ -693,12 +717,14 @@ void ChargeDensity::update_nlcc() {
 
   const int rhor_size = rhor[0].size();
   rhornlcc_.resize(rhor_size);
+  #pragma omp parallel for
   for ( int i = 0; i < rhor_size; i++ )
      // ewd: should we follow PWSCF's example of forcing positive FFT(rhognlcc)?
      //rhornlcc_[i] = fabs(rhotmp[i].real())*omega_inv;
      rhornlcc_[i] = rhotmp[i].real()*omega_inv;
 
   add_nlccden();
+  tmap["charge_update_nlcc"].stop();
 }
 ////////////////////////////////////////////////////////////////////////////////
 void ChargeDensity::add_nlccden()
@@ -707,17 +733,22 @@ void ChargeDensity::add_nlccden()
       update_nlcc();
    else if (rhornlcc_.size() != rhor[0].size())
       update_nlcc();
+
+   tmap["charge_add_nlccden"].start();
    
    const int ngwl = vbasis_->localsize();
    const double spinfac = 1./(double)wf_.nspin();
    for (int ispin=0; ispin<wf_.nspin(); ispin++)
    {
+      #pragma omp parallel for
       for ( int ig = 0; ig < ngwl; ig++ )
          xcrhog[ispin][ig] = rhog[ispin][ig] + spinfac*rhognlcc[ig];
       const int rhor_size = rhor[ispin].size();
+      #pragma omp parallel for
       for ( int i = 0; i < rhor_size; i++ )
          xcrhor[ispin][i] = rhor[ispin][i] + spinfac*rhornlcc_[i];
    }
+   tmap["charge_add_nlccden"].stop();
 }
 ////////////////////////////////////////////////////////////////////////////////
 void ChargeDensity::nlcc_forceden(int is, vector<complex<double> > &tmprhog) {

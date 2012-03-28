@@ -24,9 +24,10 @@ NonLocalPotential::~NonLocalPotential(void) {
   //{
   //  delete anl[is];
   //}
+}
 
-  //ewd clean up output -- add back in with verbose or timing option?
-  /*
+////////////////////////////////////////////////////////////////////////////////
+void NonLocalPotential::print_timing(void) {
   for ( TimerMap::iterator i = tmap.begin(); i != tmap.end(); i++ ) {
     double time = (*i).second.real();
     double tmin = time;
@@ -35,13 +36,14 @@ NonLocalPotential::~NonLocalPotential(void) {
     ctxt_.dmax(1,1,&tmax,1);
     //if ( ctxt_.myproc()==0 ) {
     if ( ctxt_.mype()==0 ) {
-      cout << "<!-- timing "
-           << setw(15) << (*i).first
-           << " : " << setprecision(3) << setw(9) << tmin
-           << " "   << setprecision(3) << setw(9) << tmax << " -->" << endl;
+       cout << left << setw(34) << "<timing where=\"nonlocal\""
+           << setw(8) << " name=\""
+           << setw(15) << (*i).first << "\""
+           << " min=\"" << setprecision(3) << setw(9) << tmin << "\""
+           << " max=\"" << setprecision(3) << setw(9) << tmax << "\"/>"
+           << endl;
     }
   }
-  */
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -266,6 +268,7 @@ void NonLocalPotential::update_twnl(void) {
               double *dt0_xy = &dtwnl[is][3*ngwl];
               double *dt0_yz = &dtwnl[is][4*ngwl];
               double *dt0_xz = &dtwnl[is][5*ngwl];
+
               for ( int ig = 0; ig < ngwl; ig++ ) {
                 double v,dv;
                 s->dvnlg(0,kpg[ig],v,dv);
@@ -305,6 +308,7 @@ void NonLocalPotential::update_twnl(void) {
                 double *dt0_yz = &dtwnl[is][ngwl*(4+6*iquad)];
                 double *dt0_xz = &dtwnl[is][ngwl*(5+6*iquad)];
                 const double r = rquad[is][iquad];
+
                 for ( int ig = 0; ig < ngwl; ig++ ) {
                   // I(l=0) = 4 pi j_l(G r) r
                   // twnl[is][ipr][l][ig] = 4 pi j_0(Gr_i) r_i Ylm
@@ -1420,7 +1424,8 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
         // calculate D_nm^I = D_nm^0 + cell_vol * SUM V_eff(G) * Q_nm^I(G)
         tmap["usnl_dmat"].start();
         if (highmem_) {
-          for (int ibl = 0; ibl < naloc; ibl++) {
+#pragma omp parallel for schedule(guided)
+           for (int ibl = 0; ibl < naloc; ibl++) {
             int ia = atoms_.usloc_atind[is][ibl];     // ia = absolute atom index of qnmg
             for (int qind=0; qind < nqtot; qind++) {
               const int qi0 = ibl*nqtot*ngloc + qind*ngloc;
@@ -1434,6 +1439,7 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
           }
         }
         else {
+#pragma omp parallel for schedule(guided)
           for (int ibl = 0; ibl < naloc; ibl++) {
             int ia = atoms_.usloc_atind[is][ibl];     // ia = absolute atom index of qnmg
             for (int qind=0; qind < nqtot; qind++) {
@@ -1452,6 +1458,7 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
         ctxt_.dsum('c',qsize,1,&dmat[0],qsize);    
 
         // add dzero term
+#pragma omp parallel for schedule(guided)
         for (int ia = 0; ia < na; ia++) {
           for (int qind=0; qind < nqtot; qind++) {
             const int dind = ia*nqtot + qind;
@@ -1493,6 +1500,7 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
           const int bp_nloc = betapsi->nloc();
           const int bg_mloc = betag->mloc();
           if (betapsi->size() > 0) { 
+#pragma omp parallel for schedule(guided)
             for (int ibl = 0; ibl < naloc_t; ibl++) {
               int ia = atoms_.usloc_atind_t[is][ibl];
               for (int qind=0; qind < nqtot; qind++) {
@@ -1512,6 +1520,10 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
           if (sd_.highmem()) {
             // add contribution to hpsi from amat*betapsi    
             ComplexMatrix& cp = dsd.c();
+#ifdef PRINTALL
+      if (ctxt_.mype() == 0)
+         cout << "NLP.hpsi, species " << is << ", calling gemm of betag (" << betag->m() << " x " << betag->n() << ", " << betag->mloc() << " x " << betag->nloc() << ") and amat (" << amat.m() << " x " << amat.n() << ", " << amat.mloc() << " x " << amat.nloc() << ")" << endl;
+#endif
             cp.gemm('n','n',1.0,*betag,amat,1.0);
           }
           else {
@@ -1561,6 +1573,10 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
                   tbpp[i] = omega_inv*bpsum[i];
               }
               ComplexMatrix& cp = dsd.c();
+#ifdef PRINTALL
+      if (ctxt_.mype() == 0)
+         cout << "NLP.hpsi, species " << is << ", calling gemm of bgsf (" << bgsf.m() << " x " << bgsf.n() << ", " << bgsf.mloc() << " x " << bgsf.nloc() << ") and tbpsum (" << tbpsum.m() << " x " << tbpsum.n() << ", " << tbpsum.mloc() << " x " << tbpsum.nloc() << ")" << endl;
+#endif
               cp.gemm('n','n',1.0,bgsf,tbpsum,1.0);
             }
           }
@@ -1684,6 +1700,7 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
           }
           ctxt_.dsum(3*na,1,&tmpfion[0],3*na);
 
+#pragma omp parallel for schedule(guided)
           for ( int ia = 0; ia < na; ia++ ) {
             fion[is][3*ia+0] = tmpfion[3*ia];
             fion[is][3*ia+1] = tmpfion[3*ia+1];
@@ -1767,7 +1784,7 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
         tmap["comp_eigr"].stop();                                            
 
         // compute anl_loc                                                   
-        tmap["comp_anl"].start();                                            
+        tmap["comp_anl"].start();
         for ( int ipr = 0; ipr < npr[is]; ipr++ ) {
           // twnl[is][ig+ngwl*ipr]
           const double * t = &twnl[is][ngwl*ipr];                            
@@ -2344,6 +2361,7 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
      
       if ( compute_forces ) {
         ctxt_.dsum(3*na[is],1,&tmpfion[0],3*na[is]);
+#pragma omp parallel for schedule(guided)
         for ( int ia = 0; ia < na[is]; ia++ ) {
           fion[is][3*ia+0] = tmpfion[3*ia];
           fion[is][3*ia+1] = tmpfion[3*ia+1];
@@ -2402,7 +2420,7 @@ void NonLocalPotential::update_usfns(Basis* cdbasis) {
         vector<double> qaug;
         s->calc_qnmg(cdbasis_,qnm,qaug);
         sd_.set_qaug(is,qaug);          // store qaug in SlaterDet
-    
+      
         for (int ibl = 0; ibl < naloc; ibl++) {
           int ia = atoms_.usloc_atind[is][ibl];
 
@@ -2445,6 +2463,7 @@ void NonLocalPotential::update_usfns(Basis* cdbasis) {
             sfactcd_[is][ibl*ngloc+ig] = complex<double>(cos(arg),-sin(arg));
           }
         }
+
         for (int ibl = 0; ibl < naloc; ibl++) {
           int ia = atoms_.usloc_atind[is][ibl];
 
