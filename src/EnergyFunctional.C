@@ -233,8 +233,8 @@ void EnergyFunctional::print_timing() {
   for ( int ispin = 0; ispin < wf_.nspin(); ispin++ )
      if (wf_.spinactive(ispin)) {
         int nlpsize = nlp[ispin].size();
-        //for (int i=0; i<nlpsize; i++) 
-        //   nlp[ispin][i]->print_timing();
+        for (int i=0; i<nlpsize; i++) 
+           nlp[ispin][i]->print_timing();
      }
 
 }

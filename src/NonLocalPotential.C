@@ -1396,7 +1396,9 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
     //ewd OPT
     //sd_.calc_betapsi();  // update betapsi w. latest wf
     //ewd NO-OPT
+    tmap["usnl_calcbpsi"].start();
     sd_.calc_betapsi();  // update betapsi w. latest wf
+    tmap["usnl_calcbpsi"].stop();
     const int ngloc = cdbasis_->localsize();
     assert(veff.size() >= ngloc);
     int nsp = atoms_.nsp();
@@ -1424,7 +1426,7 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
         // calculate D_nm^I = D_nm^0 + cell_vol * SUM V_eff(G) * Q_nm^I(G)
         tmap["usnl_dmat"].start();
         if (highmem_) {
-#pragma omp parallel for schedule(guided)
+           //#pragma omp parallel for schedule(guided)
            for (int ibl = 0; ibl < naloc; ibl++) {
             int ia = atoms_.usloc_atind[is][ibl];     // ia = absolute atom index of qnmg
             for (int qind=0; qind < nqtot; qind++) {
@@ -1439,7 +1441,7 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
           }
         }
         else {
-#pragma omp parallel for schedule(guided)
+           //#pragma omp parallel for schedule(guided)
           for (int ibl = 0; ibl < naloc; ibl++) {
             int ia = atoms_.usloc_atind[is][ibl];     // ia = absolute atom index of qnmg
             for (int qind=0; qind < nqtot; qind++) {
@@ -1451,6 +1453,7 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
             }
           }
         }
+        tmap["usnl_dmat"].stop();
         
         // sum over local atoms
         ctxt_.dsum('r',qsize,1,&dmat[0],qsize);    
@@ -1458,18 +1461,17 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
         ctxt_.dsum('c',qsize,1,&dmat[0],qsize);    
 
         // add dzero term
-#pragma omp parallel for schedule(guided)
+        //#pragma omp parallel for schedule(guided)
         for (int ia = 0; ia < na; ia++) {
           for (int qind=0; qind < nqtot; qind++) {
             const int dind = ia*nqtot + qind;
             dmat[dind] += s->dzero(qind);
           }
         }
-        tmap["usnl_dmat"].stop();
         
         // accumulate Enl contribution
+        tmap["usnl_enl"].start();
         if (betapsi->size() > 0) { 
-          tmap["usnl_enl"].start();
           const int bp_mloc = betapsi->mloc(); // nbetalm*naloc_t
           const int nbase = ctxt_.mycol() * sd_.c().nb();                      
           for ( int n = 0; n < nstloc; n++ ) {
@@ -1487,8 +1489,8 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
               }
             }
           }
-          tmap["usnl_enl"].stop();
         }
+        tmap["usnl_enl"].stop();
         
         if ( compute_hpsi ) {
           tmap["usnl_hpsi"].start();
@@ -1500,7 +1502,7 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
           const int bp_nloc = betapsi->nloc();
           const int bg_mloc = betag->mloc();
           if (betapsi->size() > 0) { 
-#pragma omp parallel for schedule(guided)
+             //#pragma omp parallel for schedule(guided)
             for (int ibl = 0; ibl < naloc_t; ibl++) {
               int ia = atoms_.usloc_atind_t[is][ibl];
               for (int qind=0; qind < nqtot; qind++) {
@@ -1700,7 +1702,7 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
           }
           ctxt_.dsum(3*na,1,&tmpfion[0],3*na);
 
-#pragma omp parallel for schedule(guided)
+          //#pragma omp parallel for schedule(guided)
           for ( int ia = 0; ia < na; ia++ ) {
             fion[is][3*ia+0] = tmpfion[3*ia];
             fion[is][3*ia+1] = tmpfion[3*ia+1];
@@ -2361,7 +2363,7 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
      
       if ( compute_forces ) {
         ctxt_.dsum(3*na[is],1,&tmpfion[0],3*na[is]);
-#pragma omp parallel for schedule(guided)
+        //#pragma omp parallel for schedule(guided)
         for ( int ia = 0; ia < na[is]; ia++ ) {
           fion[is][3*ia+0] = tmpfion[3*ia];
           fion[is][3*ia+1] = tmpfion[3*ia+1];

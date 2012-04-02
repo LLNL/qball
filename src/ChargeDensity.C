@@ -268,7 +268,7 @@ void ChargeDensity::update_density() {
                   summat[i] = complex<double>(0.0,0.0);
                
                 if (bpsi->size() > 0) {
-                   #pragma omp parallel for
+                   //#pragma omp parallel for
                    for (int ibl = 0; ibl < naloc_t; ibl++) {
                     int ia = atoms_.usloc_atind_t[is][ibl]; // ia = absolute atom index of betapsi local ind
                     for (int qind=0; qind < nqtot; qind++) {
@@ -312,7 +312,7 @@ void ChargeDensity::update_density() {
                   const double *const gz = vbasis_->gx_ptr(2);
                   int naloc = atoms_.usloc_nat[is];
                   int ialoc0 = atoms_.usloc_atind[is][0];
-                   #pragma omp parallel for
+                  //#pragma omp parallel for
                   for (int ig=0; ig<ngwl; ig++) {
                     for (int ialoc=0; ialoc<naloc; ialoc++) {
                       int ia = ialoc0 + ialoc;
@@ -415,7 +415,7 @@ void ChargeDensity::update_density() {
     const int rhor_size = rhor[ispin].size();
     const double *const prhor = &rhor[ispin][0];
     tmap["charge_integral"].start();
-    #pragma omp parallel for
+    //#pragma omp parallel for
     for ( int i = 0; i < rhor_size; i++ ) {
       const double prh = prhor[i];
       sum += prh;
@@ -635,7 +635,7 @@ void ChargeDensity::update_usfns() {
         int naloc = atoms_.usloc_nat[is];
         int nqtot = s->nqtot();
         qnmg_[is].resize(nqtot*naloc*ngwl);
-        #pragma omp parallel for
+        //#pragma omp parallel for
         for (int ibl = 0; ibl < naloc; ibl++) {
           int ia = atoms_.usloc_atind[is][ibl];
 
@@ -704,7 +704,7 @@ void ChargeDensity::update_nlcc() {
      Species *s = atoms_.species_list[is];
      complex<double> *sfac = &sf.sfac[is][0];
      if (s->nlcc()) { 
-        #pragma omp parallel for
+        //#pragma omp parallel for
         for ( int ig = 0; ig < ngwl; ig++ ) {
            double gval = gptr[ig];
            double rhogcore = s->rhog_nlcc(gval);

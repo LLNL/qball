@@ -1760,7 +1760,6 @@ void SlaterDet::calc_betag() {
       if (s->ultrasoft()) {
         int nbeta = s->nbeta();
         int nbetalm = s->nbetalm();
-        #pragma omp parallel for
         for (int ibl = 0; ibl < atoms_->usloc_atind[is].size(); ibl++) {
           int ia = atoms_->usloc_atind[is][ibl];
 
@@ -1832,7 +1831,6 @@ void SlaterDet::calc_betag() {
         complex<double>* bg = betag_[is]->valptr();
         int lm = 0;
         int nbeta = s->nbeta();
-        #pragma omp parallel for
         for (int b=0; b < nbeta; b++) {
           int nbetam = 2*s->betal(b)+1;
           for (int m=0; m < nbetam ; m++) {
@@ -1880,6 +1878,7 @@ void SlaterDet::calc_betapsi(void) {
         double* bgp = (double*) betag_[is]->valptr();
         int bg_nloc = betag_[is]->nloc();
         int bg_mloc = betag_[is]->mloc();
+        // correct for G=0:  replace w. blas function (dscal/zscal)?
         #pragma omp parallel for
         for (int ib=0; ib < bg_nloc; ib++) {
           bgp[2*ib*bg_mloc] *= 0.5;
@@ -1899,7 +1898,7 @@ void SlaterDet::calc_betapsi(void) {
          cout << "SD.calc_betapsi, species " << is << ", betapsi gemm finished." << endl;
 #endif
 
-        // restore betag
+        // restore betag:  replace w. blas function?
         #pragma omp parallel for
         for (int ib=0; ib < bg_nloc; ib++) {
           bgp[2*ib*bg_mloc] *= 2.;
@@ -1951,7 +1950,6 @@ void SlaterDet::calc_betapsi(void) {
         complex<double>* bptmpp = bptmp.valptr();
         ComplexMatrix bgsf(ctxt_,betag_[is]->m(),betag_[is]->n(),betag_[is]->mb(),betag_[is]->nb());
         complex<double>* bgsfp = bgsf.valptr();
-        #pragma omp parallel for
         for (int ibl = 0; ibl < naloc_max; ibl++) {
 
            //ewd DEBUG
@@ -2046,13 +2044,12 @@ void SlaterDet::calc_dbetapsi(int j) {
       int bg_mloc = betag_[is]->mloc();
       complex<double>* dbgpj = dbgj.valptr();
       const double *const kpgj = basis_->kpgx_ptr(j);
-      #pragma omp parallel for
       for (int ib=0; ib < bg_nloc; ib++)
         for (int ig=0; ig<ngwl; ig++)
           dbgpj[ib*bg_mloc+ig] = bgp[ib*bg_mloc+ig]*complex<double>(0.0,-kpgj[ig]);
 
       if ( basis_->real() ) {
-        // correct for G=0 term
+        // correct for G=0 term:  replace w. blas function?
         #pragma omp parallel for
         for (int ib=0; ib < bg_nloc; ib++)
           dbgpj[ib*bg_mloc] *= 0.5;
@@ -2094,7 +2091,6 @@ void SlaterDet::calc_dbetapsi(int j) {
         ComplexMatrix dbgsf(ctxt_,betag_[is]->m(),betag_[is]->n(),betag_[is]->mb(),betag_[is]->nb());
         complex<double>* dbgsfp = dbgsf.valptr();
         
-        #pragma omp parallel for
         for (int ibl = 0; ibl < naloc_max; ibl++) {
           if (ibl < naloc) { 
             int ia = atoms_->usloc_atind[is][ibl]; 
@@ -2207,7 +2203,6 @@ void SlaterDet::calc_spsi() {
           int bpsize = bpsum.size();
           for (int i=0; i<bpsize; i++)
             bpsum[i] = complex<double>(0.0,0.0);
-          #pragma omp parallel for
           for (int n=0; n<nstloc; n++) {
             for (int ibl = 0; ibl < naloc_t; ibl++) {
               int ia = atoms_->usloc_atind_t[is][ibl];
@@ -2251,7 +2246,6 @@ void SlaterDet::calc_spsi() {
         int tbp_m = nbetalm*ctxt_.npcol();
         ComplexMatrix tbpsum(ctxt_,tbp_m,c_.n(),nbetalm,c_.nb());
         complex<double>* tbpp = tbpsum.valptr();
-        #pragma omp parallel for
         for (int ibl = 0; ibl < naloc_max; ibl++) {
           vector<complex<double> > bpsum(nstloc*nbetalm);
           for (int i=0; i<bpsum.size(); i++)
