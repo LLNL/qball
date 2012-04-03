@@ -20,6 +20,7 @@ using namespace std;
 #include "apc.h"
 #endif
 
+#include "omp.h"
 #include "isodate.h"
 #include "release.h"
 #include "qbox_xmlns.h"
@@ -114,7 +115,6 @@ using namespace std;
 #include "RunTimer.h"
 #include "HubbardU.h"
 #include "Memory.h"
-
 #if BGLDEBUG
 #include <rts.h>
 #endif
@@ -179,6 +179,8 @@ int main(int argc, char **argv, char **envp)
     cout << "<qbox:simulation xmlns:qbox=\"" << qbox_xmlns() << "\">" << endl;
     cout << "<release> " << release() << " " << ARCH << " </release>" << endl;
     cout << "<npes> " << ctxt.size() << " </npes>" << endl;
+    int nthreads = omp_get_max_threads();
+    cout << "<nthreads> " << nthreads << " </nthreads>" << endl;
 
     // Identify executable name, checksum, size and link date
     if ( getlogin() != 0 ) 

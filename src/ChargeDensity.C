@@ -20,6 +20,7 @@
 #include <iomanip>
 #ifdef BGQ
 extern "C" void cdLoop(const int size, complex<double>* v1, complex<double>* v2, complex<double>* vout);
+extern "C" void cdLoop2(const int size, double* v1, double* v2, double* vout);
 #endif
 using namespace std;
 
@@ -313,23 +314,29 @@ void ChargeDensity::update_density() {
                       for (int qind=0; qind<nqtot; qind++)
                          summatloc[naloc*qind + ibl] = summat[nqtot*ia+qind];
                    }
+                   if (naloc > 0)
+                   {
+                      complex<double> zone = complex<double>(1.0,0.0);
+                      complex<double> zzero = complex<double>(0.0,0.0);
+                      char cn='n';
+                      char ct='t';
+                      zgemm(&cn,&ct,(int*)&naloc,(int*)&ngwl,&nqtot,&zone,&summatloc[0],&naloc,
+                            &qnmg_[is][0],(int*)&ngwl,&zzero,&tmpmult[0],&naloc);
 
-                   complex<double> zone = complex<double>(1.0,0.0);
-                   complex<double> zzero = complex<double>(0.0,0.0);
-                   char cn='n';
-                   char ct='t';
-                   zgemm(&cn,&ct,(int*)&naloc,(int*)&ngwl,&nqtot,&zone,&summatloc[0],&naloc,
-                         &qnmg_[is][0],(int*)&ngwl,&zzero,&tmpmult[0],&naloc);
-
-#ifdef BGQ
-                   #pragma omp parallel for schedule(guided)
-                   for (int ig=0; ig<ngwl; ig++)
-                      cdLoop(naloc,(complex<double>*)&tmpmult[ig*naloc],(complex<double>*)&sfactloc_[is][ig*naloc],&rhogus[ig]);
+#ifdef BGQDISABLE
+                      double* ptmp = (double*) &tmpmult[0];
+                      double* psfloc = (double*) &sfactloc_[is][0];
+                      double* prhogus = (double*) &rhogus[0];
+                      #pragma omp parallel for
+                      for (int ig=0; ig<ngwl; ig++)
+                         cdLoop2(naloc,&ptmp[2*ig*naloc],&psfloc[2*ig*naloc],&prhogus[2*ig]);
 #else
-                   for (int ig=0; ig<ngwl; ig++)
-                      for (int ibl=0; ibl<naloc; ibl++)
-                         rhogus[ig] += tmpmult[ig*naloc+ibl]*sfactloc_[is][ig*naloc+ibl];
+                      #pragma omp parallel for
+                      for (int ig=0; ig<ngwl; ig++)
+                         for (int ibl=0; ibl<naloc; ibl++)
+                            rhogus[ig] += tmpmult[ig*naloc+ibl]*sfactloc_[is][ig*naloc+ibl];
 #endif                   
+                   }
                 }
               }
             }
@@ -468,7 +475,7 @@ void ChargeDensity::update_rhor(void) {
 
     const int rhor_size = rhor[ispin].size();
     double *const prhor = &rhor[ispin][0];
-    #pragma omp parallel for
+    //#pragma omp parallel for
     for ( int i = 0; i < rhor_size; i++ ) {
       prhor[i] = rhotmp[i].real() * omega_inv;
     }
@@ -749,7 +756,7 @@ void ChargeDensity::update_nlcc() {
 
   const int rhor_size = rhor[0].size();
   rhornlcc_.resize(rhor_size);
-  #pragma omp parallel for
+  //#pragma omp parallel for
   for ( int i = 0; i < rhor_size; i++ )
      // ewd: should we follow PWSCF's example of forcing positive FFT(rhognlcc)?
      //rhornlcc_[i] = fabs(rhotmp[i].real())*omega_inv;
@@ -772,11 +779,11 @@ void ChargeDensity::add_nlccden()
    const double spinfac = 1./(double)wf_.nspin();
    for (int ispin=0; ispin<wf_.nspin(); ispin++)
    {
-      #pragma omp parallel for
+      //#pragma omp parallel for
       for ( int ig = 0; ig < ngwl; ig++ )
          xcrhog[ispin][ig] = rhog[ispin][ig] + spinfac*rhognlcc[ig];
       const int rhor_size = rhor[ispin].size();
-      #pragma omp parallel for
+      //#pragma omp parallel for
       for ( int i = 0; i < rhor_size; i++ )
          xcrhor[ispin][i] = rhor[ispin][i] + spinfac*rhornlcc_[i];
    }

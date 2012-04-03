@@ -1879,7 +1879,7 @@ void SlaterDet::calc_betapsi(void) {
         int bg_nloc = betag_[is]->nloc();
         int bg_mloc = betag_[is]->mloc();
         // correct for G=0:  replace w. blas function (dscal/zscal)?
-        #pragma omp parallel for
+        //#pragma omp parallel for
         for (int ib=0; ib < bg_nloc; ib++) {
           bgp[2*ib*bg_mloc] *= 0.5;
           bgp[2*ib*bg_mloc+1] *= 0.5;
@@ -1899,7 +1899,7 @@ void SlaterDet::calc_betapsi(void) {
 #endif
 
         // restore betag:  replace w. blas function?
-        #pragma omp parallel for
+      //#pragma omp parallel for
         for (int ib=0; ib < bg_nloc; ib++) {
           bgp[2*ib*bg_mloc] *= 2.;
           bgp[2*ib*bg_mloc+1] *= 2.;
@@ -2050,7 +2050,7 @@ void SlaterDet::calc_dbetapsi(int j) {
 
       if ( basis_->real() ) {
         // correct for G=0 term:  replace w. blas function?
-        #pragma omp parallel for
+         //#pragma omp parallel for
         for (int ib=0; ib < bg_nloc; ib++)
           dbgpj[ib*bg_mloc] *= 0.5;
         dbetapsi_[is]->gemm('c','n',2.0,dbgj,c_,0.0);

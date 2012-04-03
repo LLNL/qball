@@ -28,7 +28,8 @@
 
  LIBPATH = -L$(FFTWDIR) -L$(BLASDIR) -L$(XERCESCLIBDIR)
 # LIBS =  $(SCALAPACKLIB) -lfftw -openmp -lmkl_core -lmkl_intel_thread -lmkl_intel_lp64 -lifcore -lxerces-c
- LIBS =  $(SCALAPACKLIB) -lfftw -openmp -lmkl_core -lmkl_intel_thread -lmkl_intel_lp64 -lpthread -lguide -lifcore -lxerces-c
+# LIBS =  $(SCALAPACKLIB) -lfftw -openmp -lmkl_core -lmkl_intel_thread -lmkl_intel_lp64 -lpthread -lguide -lifcore -lxerces-c
+ LIBS =  $(SCALAPACKLIB) -lfftw -openmp -lmkl_core -lmkl_intel_thread -lmkl_intel_lp64 -lifcore -lxerces-c
 
  LDFLAGS = $(LIBPATH) $(LIBS) -Wl,-rpath,/usr/local/tools/mkl-10.3.1/lib
 
