@@ -43,6 +43,7 @@ class ChargeDensity {
   bool highmem_;
   bool nlcc_;
   vector<vector<complex<double> > > qnmg_;
+  vector<vector<complex<double> > > sfactloc_;
   vector<double> rhornlcc_; 
   
   public:

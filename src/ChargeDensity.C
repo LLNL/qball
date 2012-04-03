@@ -18,6 +18,9 @@
 #include "StructureFactor.h"
 #include "blas.h"
 #include <iomanip>
+#ifdef BGQ
+extern "C" void cdLoop(const int size, complex<double>* v1, complex<double>* v2, complex<double>* vout);
+#endif
 using namespace std;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -227,9 +230,6 @@ void ChargeDensity::update_density() {
       const int nsp = atoms_.nsp();
       const int ngwl = vbasis_->localsize();
       const int mloc = vbasis_->maxlocalsize();
-      vector<vector<double> > tau;
-      atoms_.get_positions(tau,true);
-      
       rhogus.resize(ngwl);
       for (int ig=0; ig<ngwl; ig++)
         rhogus[ig] = complex<double>(0.0,0.0);
@@ -243,9 +243,6 @@ void ChargeDensity::update_density() {
             SlaterDet* sdp = wf_.sd(ispin,ikp);
             const Basis& basis_ = sdp->basis();
             const vector<double>& occ = sdp->occ();
-            //ewd OPT
-            //sdp->calc_betapsi();
-            //ewd NO-OPT: remove all OPT comments for now
             tmap["charge_usfns"].start();
             sdp->calc_betapsi();
             tmap["charge_usfns"].stop();
@@ -268,7 +265,6 @@ void ChargeDensity::update_density() {
                   summat[i] = complex<double>(0.0,0.0);
                
                 if (bpsi->size() > 0) {
-                   //#pragma omp parallel for
                    for (int ibl = 0; ibl < naloc_t; ibl++) {
                     int ia = atoms_.usloc_atind_t[is][ibl]; // ia = absolute atom index of betapsi local ind
                     for (int qind=0; qind < nqtot; qind++) {
@@ -306,25 +302,34 @@ void ChargeDensity::update_density() {
                           (int*)&ngwl);
                 }
                 else {
-                  // multiply qnm(G), structure factor and summat
-                  const double *const gx = vbasis_->gx_ptr(0);
-                  const double *const gy = vbasis_->gx_ptr(1);
-                  const double *const gz = vbasis_->gx_ptr(2);
-                  int naloc = atoms_.usloc_nat[is];
-                  int ialoc0 = atoms_.usloc_atind[is][0];
-                  //#pragma omp parallel for
-                  for (int ig=0; ig<ngwl; ig++) {
-                    for (int ialoc=0; ialoc<naloc; ialoc++) {
-                      int ia = ialoc0 + ialoc;
-                      const double arg = tau[is][3*ia]*gx[ig] + tau[is][3*ia+1]*gy[ig] + tau[is][3*ia+2]*gz[ig];
-                      double sgr = sin(arg);
-                      double cgr = cos(arg);
-                      complex<double> rhosum = complex<double>(0.0,0.0);
+                   // multiply qnm(G), structure factor and summat
+                   int naloc = atoms_.usloc_nat[is];
+                   vector<complex<double> > tmpmult(naloc*ngwl);
+                   vector<complex<double> > summatloc(nqtot*naloc);
+                   int ialoc0 = atoms_.usloc_atind[is][0];
+                   for (int ibl=0; ibl<naloc; ibl++)
+                   {
+                      int ia = ialoc0 + ibl;
                       for (int qind=0; qind<nqtot; qind++)
-                        rhosum += qnmg_[is][qind*ngwl+ig]*summat[nqtot*ia+qind];
-                      rhogus[ig] += omega_inv*rhosum*complex<double>(cgr,-sgr);
-                    }
-                  }
+                         summatloc[naloc*qind + ibl] = summat[nqtot*ia+qind];
+                   }
+
+                   complex<double> zone = complex<double>(1.0,0.0);
+                   complex<double> zzero = complex<double>(0.0,0.0);
+                   char cn='n';
+                   char ct='t';
+                   zgemm(&cn,&ct,(int*)&naloc,(int*)&ngwl,&nqtot,&zone,&summatloc[0],&naloc,
+                         &qnmg_[is][0],(int*)&ngwl,&zzero,&tmpmult[0],&naloc);
+
+#ifdef BGQ
+                   #pragma omp parallel for schedule(guided)
+                   for (int ig=0; ig<ngwl; ig++)
+                      cdLoop(naloc,(complex<double>*)&tmpmult[ig*naloc],(complex<double>*)&sfactloc_[is][ig*naloc],&rhogus[ig]);
+#else
+                   for (int ig=0; ig<ngwl; ig++)
+                      for (int ibl=0; ibl<naloc; ibl++)
+                         rhogus[ig] += tmpmult[ig*naloc+ibl]*sfactloc_[is][ig*naloc+ibl];
+#endif                   
                 }
               }
             }
@@ -666,16 +671,43 @@ void ChargeDensity::update_usfns() {
     }
   }
   else {
-    qnmg_.resize(nsp);
-    for (int is=0; is<nsp; is++) {
-      Species *s = atoms_.species_list[is];
-      if (s->ultrasoft()) { 
-        int nqtot = s->nqtot();
-        qnmg_[is].resize(nqtot*ngwl);
-        vector<double> qaug;
-        s->calc_qnmg(vbasis_,qnmg_[is],qaug);
-      }
-    }
+     if (qnmg_.size() != nsp)
+     {
+        qnmg_.resize(nsp);
+        for (int is=0; is<nsp; is++) {
+           Species *s = atoms_.species_list[is];
+           if (s->ultrasoft()) { 
+              int nqtot = s->nqtot();
+              qnmg_[is].resize(nqtot*ngwl);
+              vector<double> qaug;
+              s->calc_qnmg(vbasis_,qnmg_[is],qaug);
+           }
+        }
+     }
+     vector<vector<double> > tau;
+     atoms_.get_positions(tau,true);
+      
+     sfactloc_.resize(nsp);
+     for (int is=0; is<nsp; is++) {
+        Species *s = atoms_.species_list[is];
+        if (s->ultrasoft()) { 
+           int naloc = atoms_.usloc_nat[is];
+           sfactloc_[is].resize(naloc*ngwl);
+           const double *const gx = vbasis_->gx_ptr(0);
+           const double *const gy = vbasis_->gx_ptr(1);
+           const double *const gz = vbasis_->gx_ptr(2);
+           int ialoc0 = atoms_.usloc_atind[is][0];
+           for (int ig=0; ig<ngwl; ig++) {
+              for (int ialoc=0; ialoc<naloc; ialoc++) {
+                 int ia = ialoc0 + ialoc;
+                 const double arg = tau[is][3*ia]*gx[ig] + tau[is][3*ia+1]*gy[ig] + tau[is][3*ia+2]*gz[ig];
+                 double sgr = sin(arg);
+                 double cgr = cos(arg);
+                 sfactloc_[is][naloc*ig+ialoc] = omega_inv*complex<double>(cos(arg),-sin(arg));
+              }
+           }
+        }
+     }
   }
   tmap["charge_usupdate"].stop();
 }

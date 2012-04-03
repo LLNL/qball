@@ -34,8 +34,14 @@ QBSRC=AtomSet.C Atom.C SymmetrySet.C Symmetry.C Species.C Wavefunction.C SlaterD
       SphericalIntegration.C PrintMem.C
 KPTSRC=SymOpSet.C SymOp.C
 
+SIMDSRC = clooper.c
+
 QBOBJS = $(QBSRC:%.C=$(OBJDIR)/%.o)
 KPTOBJS = $(KPTSRC:%.C=$(OBJDIR)/%.o)
+SIMDOBJS = $(SIMDSRC:%.c=$(OBJDIR)/%.o)
+ifdef CFLAGS
+	QBOBJS += $(SIMDOBJS)
+endif
 
 OBJDIR = objs-$(ARCH)
 EXENAME = qb-$(ARCH)
@@ -49,6 +55,9 @@ DEFAULT: $(EXENAME)
 
 $(OBJDIR)/%.o: %.C
 	$(CXX) $(CXXFLAGS) -o $@ -c $^
+
+$(OBJDIR)/%.o: %.c
+	$(CC) $(CFLAGS) -o $@ -c $^
 
 $(OBJDIR)/qb.o: qb.C
 	$(CXX) $(CXXFLAGS) -o $@ -c $^
@@ -233,7 +242,7 @@ SampleStepper.o EnergyFunctional.o
 	enscript -Ecpp --toc -2rGj -pqb.ps *.h *.C Makefile *.mk
 #------------------------------------------------------------------------------
  tar :
-	tar czf qbsrc.tgz *.[Ch] Makefile Makefile.arch ChangeLog *.mk
+	tar czf qbsrc.tgz *.[Chc] Makefile Makefile.arch ChangeLog *.mk
 #------------------------------------------------------------------------------
 
 -include .depend_$(ARCH)
