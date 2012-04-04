@@ -16,6 +16,7 @@ using namespace std;
 #if AIX || BGL
 extern "C" void vsincos(double *x, double *y, double *z, int *n);
 #endif
+extern "C" void myzdotc(const int size, complex<double>* v1, complex<double>* v2, complex<double>* vout);
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1426,22 +1427,29 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
         // calculate D_nm^I = D_nm^0 + cell_vol * SUM V_eff(G) * Q_nm^I(G)
         tmap["usnl_dmat"].start();
         if (highmem_) {
-           //#pragma omp parallel for schedule(guided)
            for (int ibl = 0; ibl < naloc; ibl++) {
-            int ia = atoms_.usloc_atind[is][ibl];     // ia = absolute atom index of qnmg
-            for (int qind=0; qind < nqtot; qind++) {
-              const int qi0 = ibl*nqtot*ngloc + qind*ngloc;
-              const int dind = ia*nqtot + qind;
-              double qv = 0.0;
-              for (int ig=0; ig<ngloc; ig++)
-                qv += real(conj(qnmg_[is][qi0+ig])*veff[ig]);
-              
-              dmat[dind] = qv;  // missing omega_inv from qnmg FFT cancels out omega
-            }
-          }
+              int ia = atoms_.usloc_atind[is][ibl];     // ia = absolute atom index of qnmg
+              for (int qind=0; qind < nqtot; qind++) {
+                 const int qi0 = ibl*nqtot*ngloc + qind*ngloc;
+                 const int dind = ia*nqtot + qind;
+                 const int one = 1;
+
+                 //double qv = 0.0;
+                 //for (int ig=0; ig<ngloc; ig++)
+                 //  qv += real(conj(qnmg_[is][qi0+ig])*veff[ig]);
+
+                 //zdotc gives seg fault from C++
+                 //complex<double> qv = zdotc((int*)&ngloc,&qnmg_[is][qi0],&one,&veff[0],&one);
+
+                 complex<double> qv = complex<double>(0.0,0.0);
+                 myzdotc(ngloc,&qnmg_[is][qi0],&veff[0],&qv);
+                 
+                 dmat[dind] = real(qv);  // missing omega_inv from qnmg FFT cancels out omega
+              }
+           }
         }
         else {
-           //#pragma omp parallel for schedule(guided)
+           #pragma omp parallel for
           for (int ibl = 0; ibl < naloc; ibl++) {
             int ia = atoms_.usloc_atind[is][ibl];     // ia = absolute atom index of qnmg
             for (int qind=0; qind < nqtot; qind++) {
@@ -2413,10 +2421,15 @@ void NonLocalPotential::update_usfns(Basis* cdbasis) {
     Species *s = atoms_.species_list[is];
     if (s->ultrasoft()) { 
       int naloc = atoms_.usloc_nat[is];
-      int naloc_t = atoms_.usloc_nat_t[is];
       int nqtot = s->nqtot();
       int nbeta = s->nbeta();
+
       if (highmem_) {
+
+         //ewd DEBUG
+         if (ctxt_.mype() == 0)
+            cout << "NonLocalPotential::update_usfns, qnmg_.size = " << nqtot*naloc*ngloc << ", naloc = " << naloc << ", nqtot = " << nqtot << ", ngloc = " << ngloc << endl;
+      
         qnmg_[is].resize(nqtot*naloc*ngloc);
         vector<complex<double> > qnm;
         vector<double> qaug;
@@ -2447,6 +2460,10 @@ void NonLocalPotential::update_usfns(Basis* cdbasis) {
         }        
       }
       else {
+         //ewd DEBUG
+         if (ctxt_.mype() == 0)
+            cout << "NonLocalPotential::update_usfns, qnmg_.size = " << nqtot*ngloc << ", nqtot = " << nqtot << ", ngloc = " << ngloc << endl;
+         
         qnmg_[is].resize(nqtot*ngloc);
         sfactcd_[is].resize(naloc*ngloc);
         sfactwf_[is].resize(naloc*ngwl);

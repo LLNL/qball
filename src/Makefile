@@ -160,6 +160,8 @@ makedirs:
 	$(LD) $(DFLAGS) -o $@ $^ $(LDFLAGS)
  testMatrix: testMatrix.o Matrix.o Context.o
 	$(LD) $(DFLAGS) -o $@ $^ $(LDFLAGS)
+ testBlas: testBlas.o
+	$(LD) $(DFLAGS) -o $@ $^ $(LDFLAGS)
  testEigenSolvers: testEigenSolvers.o Matrix.o Context.o
 	$(LD) $(DFLAGS) -o $@ $^ $(LDFLAGS)
  testFourierTransform: testFourierTransform.o FourierTransform.o \

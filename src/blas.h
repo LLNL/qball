@@ -21,6 +21,7 @@ using namespace std;
 #define zaxpy  zaxpy_  
 #define ddot   ddot_   
 #define zdotu  zdotu_   
+#define zdotc  zdotc_   
 #define drot   drot_   
 #define dasum  dasum_  
 #define dsbmv  dsbmv_  
@@ -59,6 +60,8 @@ double ddot(const int *n, const double *a, const int *inca,
 const double *b, const int *incb);
 complex<double> zdotu(const int *n, const complex<double> *a, const int *inca, 
   const complex<double> *b, const int *incb);
+complex<double> zdotc(int* n, complex<double> *zx, int* incx, 
+  complex<double> *zy, int* incy);
 void drot(int*, double*, int*, double*, int*, double*, double*);
 void dgemm(char *ta, char *tb, int *m, int *n, int *k,
   double *alpha, double *a, int *lda, double *b, int *ldb,

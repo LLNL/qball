@@ -17,6 +17,7 @@
  SCALAPACKLIB  = $(SCALAPACK_DIR)/libscalapack.a
 
  CXX=/usr/local/bin/mpiicpc
+ CC=/usr/local/bin/mpiicc
  LD=$(CXX)
 
 # DFLAGS += -DUSE_FFTW -DUSE_CSTDIO_LFS -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DXML -DUSE_XERCES
@@ -25,6 +26,7 @@
  INCLUDE = -I$(FFTWDIR) -I$(XERCESCDIR)/include
  
  CXXFLAGS= -g -O3 -xW -DUSE_MPI -DSCALAPACK -DADD_ -D$(PLT) $(INCLUDE) $(DFLAGS)
+ CFLAGS= -g -O3 -xW -DUSE_MPI -DSCALAPACK -DADD_ -D$(PLT) $(INCLUDE) $(DFLAGS)
 
  LIBPATH = -L$(FFTWDIR) -L$(BLASDIR) -L$(XERCESCLIBDIR)
  LIBS =  $(SCALAPACKLIB) -lfftw -openmp -lmkl_core -lmkl_intel_thread -lmkl_intel_lp64 -lifcore -lxerces-c
