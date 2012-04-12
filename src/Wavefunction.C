@@ -1116,7 +1116,7 @@ void Wavefunction::update_occ(double temp, int ngauss) {
           }
 
           // ewd DEBUG
-          if (ctxt_.mype() == 0 && niter > 99900)
+          if (ctxt_.mype() == 0 && niter > 99997)
              cout << "WF.OCC, iter " << niter << ": mu = " << mu[0] << ", dmu = " << dmu[0] << ", rhosum = " << rhosum[0] << endl;
 
           

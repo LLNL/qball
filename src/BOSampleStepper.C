@@ -431,10 +431,6 @@ void BOSampleStepper::step(int niter)
     tleft = s_.ctrl.run_timer - (tbase - s_.ctrl.time_init);
   }
   
-#ifdef BGQ
-  HPM_Start("iterloop");
-#endif
-
   // Next line: special case of niter=0: compute GS only        
   for ( int iter = 0; iter < max(niter,1); iter++ )
   {
@@ -1095,6 +1091,10 @@ void BOSampleStepper::step(int niter)
         SimpleConvergenceDetector conv_scf(s_.ctrl.threshold_scf_nsteps, s_.ctrl.threshold_scf);
         bool convflag = false;
 
+#ifdef BGQ
+  HPM_Start("scfloop");
+#endif
+
         // SCF LOOP
         for ( int itscf = 0; itscf < nitscf_; itscf++ )
         {
@@ -1350,6 +1350,10 @@ void BOSampleStepper::step(int niter)
               cout << "  <!-- BOSampleStepper: end scf iteration -->" << endl;
           }
         } // for itscf
+#ifdef BGQ
+  HPM_Stop("scfloop");
+#endif
+
         if (!convflag && s_.ctrl.threshold_scf > 0.0) 
           if ( s_.ctxt_.oncoutpe() ) 
             cout << "<WARNING> Ionic iteration finished without triggering scf convergence threshold, consider increasing nscf = " << nitscf_ << " </WARNING>" << endl;
@@ -1394,7 +1398,14 @@ void BOSampleStepper::step(int niter)
 
 
         // If GS calculation only, print energy and atomset at end of iterations
-        if ( gs_only )
+
+
+        bool fastend = false;
+#ifdef BGQ        
+        fastend = true;
+#endif        
+
+        if ( gs_only && !fastend)
         {
 
           // need eigenvalues to compute forces w. ultrasoft
@@ -1418,9 +1429,8 @@ void BOSampleStepper::step(int niter)
           if ( !initial_atomic_density )
             cd_.update_density();
           tmap["charge"].stop();
-          
-          ef_.update_vhxc();
 
+          ef_.update_vhxc();
           const bool compute_forces = true;
           ef_.energy(false,dwf,compute_forces,fion,compute_stress,sigma_eks);
 
@@ -1507,9 +1517,6 @@ void BOSampleStepper::step(int niter)
         s_.constraints.update_constraints(dt);
     } // else (not converged)
   } // for iter
-#ifdef BGQ
-  HPM_Stop("iterloop");
-#endif
 
   // print memory usage of main data objects
   if (s_.ctxt_.oncoutpe()) {

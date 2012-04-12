@@ -1427,6 +1427,7 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
         // calculate D_nm^I = D_nm^0 + cell_vol * SUM V_eff(G) * Q_nm^I(G)
         tmap["usnl_dmat"].start();
         if (highmem_) {
+           #pragma omp parallel for
            for (int ibl = 0; ibl < naloc; ibl++) {
               int ia = atoms_.usloc_atind[is][ibl];     // ia = absolute atom index of qnmg
               for (int qind=0; qind < nqtot; qind++) {

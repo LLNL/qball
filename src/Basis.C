@@ -675,6 +675,14 @@ bool BasisImpl::resize(const UnitCell& cell, const UnitCell& refcell,
   
   maxlocalsize_ = (*max_element(nodes.begin(), nodes.end(), 
     ptr_less<Node>()))->size();
+#if BGQ
+  if (real_)
+     while (maxlocalsize_%4 != 0)
+        maxlocalsize_++;
+  else
+     while (maxlocalsize_%2 != 0)
+        maxlocalsize_++;
+#endif     
   minlocalsize_ = (*min_element(nodes.begin(), nodes.end(), 
     ptr_less<Node>()))->size();
  

@@ -415,6 +415,15 @@ void DoubleMatrix::init_size(int m, int n, int mb, int nb)
 #endif
   if ( mb_ == 0 ) mb_ = 1;
   if ( nb_ == 0 ) nb_ = 1;
+
+  //ewd:  force local data sizes to be 32-byte aligned
+#ifdef BGQ 
+  while (mb_%4 != 0)
+     mb_++;
+  while (nb_%4 != 0)
+     nb_++;
+#endif
+  
   ictxt_ = ctxt_.ictxt();
   nprow_ = ctxt_.nprow();
   npcol_ = ctxt_.npcol();
@@ -484,6 +493,13 @@ void ComplexMatrix::init_size(int m, int n, int mb, int nb)
 #endif
   if ( mb_ == 0 ) mb_ = 1;
   if ( nb_ == 0 ) nb_ = 1;
+  // force local data sizes to be 32-byte aligned
+#ifdef BGQ 
+  while (mb_%2 != 0)
+     mb_++;
+  while (nb_%2 != 0)
+     nb_++;
+#endif
   ictxt_ = ctxt_.ictxt();
   nprow_ = ctxt_.nprow();
   npcol_ = ctxt_.npcol();

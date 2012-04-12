@@ -14,6 +14,11 @@ using namespace std;
 // default value for most compilers
 #define FTN_LINK extern "C"
 
+#ifdef USE_JAGGEMM
+#define zgemm jag_zgemm
+#define dgemm jag_dgemm
+#endif
+
 #ifdef ADD_
 #define dcopy  dcopy_  
 #define zcopy  zcopy_  
@@ -43,6 +48,12 @@ using namespace std;
 #define dgetrf     dgetrf_
 #define dgetri     dgetri_
 #endif
+
+#ifdef USE_JAGGEMM
+#define zgemm jag_zgemm
+#define dgemm jag_dgemm
+#endif
+
 
 #ifdef __cplusplus
 FTN_LINK {

@@ -13,6 +13,7 @@
  ESSLDIR = /bgsys/ibm_essl/sles10/prod/opt/ibmmath
 
  CXX=mpixlcxx
+ CC=mpixlcxx
  LD=$(CXX)
 
 # DFLAGS += -DUSE_ESSL -DUSE_MPI -DSCALAPACK -DADD_ -DUSE_CSTDIO_LFS -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -D$(PLT)
@@ -21,6 +22,7 @@
  INCLUDE =  -I$(ESSLDIR)/include
  
  CXXFLAGS= -g -O3 -qarch=450 -qtune=450 $(INCLUDE) $(DFLAGS)
+ CFLAGS= -g -O3 -qarch=450 -qtune=450 $(INCLUDE) $(DFLAGS)
 
  LIBPATH = -L$(ESSLDIR)/lib -L/opt/ibmcmp/xlsmp/bg/1.7/bglib
 
