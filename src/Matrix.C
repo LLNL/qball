@@ -20,6 +20,7 @@ using namespace std;
 
 
 #include "Matrix.h"
+#include "profile.h"
 
 #ifdef ADD_
 #define numroc     numroc_
@@ -423,7 +424,7 @@ void DoubleMatrix::init_size(int m, int n, int mb, int nb)
   while (nb_%4 != 0)
      nb_++;
 #endif
-  
+
   ictxt_ = ctxt_.ictxt();
   nprow_ = ctxt_.nprow();
   npcol_ = ctxt_.npcol();
@@ -1520,11 +1521,13 @@ void DoubleMatrix::gemm(char transa, char transb,
     }
  
 #ifdef SCALAPACK
+    QB_Pstart(3, pdgemm);
     int ione=1;
     pdgemm(&transa, &transb, &m, &n, &k, &alpha,
          a.val, &ione, &ione, a.desc_,
          b.val, &ione, &ione, b.desc_,
          &beta, val, &ione, &ione, desc_);
+    QB_Pstop(pdgemm);
 #else
     dgemm(&transa, &transb, &m, &n, &k, &alpha, a.val, &a.lld_, 
           b.val, &b.lld_, &beta, val, &lld_);
@@ -1564,10 +1567,12 @@ void ComplexMatrix::gemm(char transa, char transb,
  
 #ifdef SCALAPACK
     int ione=1;
+    QB_Pstart(4, pzgemm);
     pzgemm(&transa, &transb, &m, &n, &k, &alpha,
          a.val, &ione, &ione, a.desc_,
          b.val, &ione, &ione, b.desc_,
          &beta, val, &ione, &ione, desc_);
+    QB_Pstop(pzgemm);
 #else
     zgemm(&transa, &transb, &m, &n, &k, &alpha, a.val, &a.lld_, 
           b.val, &b.lld_, &beta, val, &lld_);
@@ -2576,6 +2581,7 @@ void DoubleMatrix::syevd(char uplo, valarray<double>& w, DoubleMatrix& z)
       int tmpiwork;
       
       // calculate minimum workspace required
+      QB_Pstart(5,pdsyevd);
       pdsyevd(&jobz, &uplo, &m_, val, &ione, &ione, desc_, &w[0], 
               z.val, &ione, &ione, z.desc_, &tmplwork, &lwork, &tmpiwork, &liwork, &info);
       
@@ -2598,6 +2604,7 @@ void DoubleMatrix::syevd(char uplo, valarray<double>& w, DoubleMatrix& z)
       int* iwork = new int[liwork];
       pdsyevd(&jobz, &uplo, &m_, val, &ione, &ione, desc_, &w[0], 
               z.val, &ione, &ione, z.desc_, work, &lwork, iwork, &liwork, &info);
+      QB_Pstop(pdsyevd);
            
       MPI_Bcast(&w[0], m_, MPI_DOUBLE, 0, ctxt_.comm());
       delete[] work;
@@ -2674,7 +2681,8 @@ void DoubleMatrix::syev(char uplo, valarray<double>& w)
       double tmplwork;
       double *zval = 0; // zval is not referenced since jobz == 'N'
       int * descz = 0;
-      
+     
+      QB_Pstart(6,pdsyev); 
       pdsyev(&jobz, &uplo, &m_, val, &ione, &ione, desc_, &w[0], 
              zval, &ione, &ione, descz, &tmplwork, &lwork, &info);
       
@@ -2683,6 +2691,7 @@ void DoubleMatrix::syev(char uplo, valarray<double>& w)
       
       pdsyev(&jobz, &uplo, &m_, val, &ione, &ione, desc_, &w[0], 
              zval, &ione, &ione, descz, work, &lwork, &info);
+      QB_Pstop(pdsyev); 
            
       MPI_Bcast(&w[0], m_, MPI_DOUBLE, 0, ctxt_.comm());
       delete[] work;
@@ -2762,7 +2771,8 @@ void DoubleMatrix::syevd(char uplo, valarray<double>& w)
       int tmpiwork;
       double *zval = 0; // zval is not referenced since jobz == 'N'
       int * descz = 0;
-    
+   
+      QB_Pstart(7,pdsyevd); 
       pdsyevd(&jobz, &uplo, &m_, val, &ione, &ione, desc_, &w[0], 
               zval, &ione, &ione, descz, &tmpwork, &lwork, 
               &tmpiwork, &liwork, &info);
@@ -2773,6 +2783,7 @@ void DoubleMatrix::syevd(char uplo, valarray<double>& w)
       int* iwork = new int[liwork];
       pdsyevd(&jobz, &uplo, &m_, val, &ione, &ione, desc_, &w[0], 
             zval, &ione, &ione, descz, work, &lwork, iwork, &liwork, &info);
+      QB_Pstop(pdsyevd); 
 
       MPI_Bcast(&w[0], m_, MPI_DOUBLE, 0, ctxt_.comm());
 
@@ -2927,7 +2938,8 @@ void ComplexMatrix::heevd(char uplo, valarray<double>& w, ComplexMatrix& z) {
       complex<double> tmplwork;
       double tmplrwork;
       int tmpliwork;
-    
+   
+      QB_Pstart(8,pzheevd); 
       // first call to get optimal lwork and lrwork sizes
       pzheevd(&jobz, &uplo, &n_, val, &ione, &ione, desc_, &w[0], 
            z.val, &ione, &ione, z.desc_, &tmplwork, &lwork,
@@ -2966,6 +2978,7 @@ void ComplexMatrix::heevd(char uplo, valarray<double>& w, ComplexMatrix& z) {
       pzheevd(&jobz, &uplo, &n_, val, &ione, &ione, desc_, &w[0], 
               z.val, &ione, &ione, z.desc_, work, &lwork,
               rwork, &lrwork, iwork, &liwork, &info);
+      QB_Pstop(pzheevd); 
       MPI_Bcast(&w[0], m_, MPI_DOUBLE, 0, ctxt_.comm());
       delete[] work;
       delete[] rwork;
@@ -3051,6 +3064,8 @@ void ComplexMatrix::heevx(char uplo, valarray<double>& w, ComplexMatrix& z) {
     //ewd DEBUG
     cout << "Calling pzheevx to get work sizes" << endl;
 
+    QB_Pstart(9,pzheevx); 
+
     // first call to get optimal lwork and lrwork sizes
     pzheevx(&jobz, &range, &uplo, &n_, val, &ione, &ione, desc_, 
             &vl,&vu,&il,&iu,&abstol,&neig,&nz,
@@ -3073,6 +3088,7 @@ void ComplexMatrix::heevx(char uplo, valarray<double>& w, ComplexMatrix& z) {
             &w[0], &orfac, z.val, &ione, &ione, z.desc_, work, &lwork,
            rwork, &lrwork, iwork, &liwork, ifail, &iclustr, &gap, &info);
 
+    QB_Pstop(pzheevx); 
     for (int i=0; i<m_; i++) 
       if (ifail[i] != 0)
         cout << "<WARNING> Matrix::heevx eigenvector " << i << " failed to converge! </WARNING>" << endl;
@@ -3275,6 +3291,7 @@ void ComplexMatrix::heevd(char uplo, valarray<double>& w) {
     complex<double> *zval = 0;
     int *descz = 0;
 
+    QB_Pstart(10,pzheevd);
     // first call to get optimal lwork and lrwork sizes
     pzheevd(&jobz, &uplo, &n_, val, &ione, &ione, desc_, &w[0], 
            zval, &ione, &ione, descz, &tmplwork, &lwork,
@@ -3289,6 +3306,7 @@ void ComplexMatrix::heevd(char uplo, valarray<double>& w) {
     pzheevd(&jobz, &uplo, &n_, val, &ione, &ione, desc_, &w[0], 
            zval, &ione, &ione, descz, work, &lwork,
            rwork, &lrwork, iwork, &liwork, &info);
+    QB_Pstop(pzheevd);
            
     MPI_Bcast(&w[0], m_, MPI_DOUBLE, 0, ctxt_.comm());
 #else
@@ -3354,9 +3372,11 @@ void ComplexMatrix::heev(char uplo, valarray<double>& w)
     lrwork = (int) tmplrwork + 1;
     double* rwork = new double[lrwork];
 
+    QB_Pstart(11,pzheev);
     pzheev(&jobz, &uplo, &n_, val, &ione, &ione, desc_, &w[0], 
            zval, &ione, &ione, descz, work, &lwork,
            rwork, &lrwork, &info);
+    QB_Pstop(pzheev);
 
     MPI_Bcast(&w[0], m_, MPI_DOUBLE, 0, ctxt_.comm());
 #else

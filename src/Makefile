@@ -66,13 +66,7 @@ $(EXENAME): makedirs depend $(QBOBJS) BGQOMPhack $(OBJDIR)/qb.o
 	$(LD) $(DFLAGS) -o $(EXENAME) $(OBJDIR)/qb.o $(QBOBJS) $(LDFLAGS)
 
 BGQOMPhack:
-ifeq ($(ARCH),ibm_bgq_xlc_smp)
-	$(CXX) -qsmp=omp $(CXXFLAGS) -o $(OBJDIR)/FourierTransform.o -c FourierTransform.C
-	$(CXX) -qsmp=omp $(CXXFLAGS) -o $(OBJDIR)/ChargeDensity.o -c ChargeDensity.C
-	$(CXX) -qsmp=omp $(CXXFLAGS) -o $(OBJDIR)/SlaterDet.o -c SlaterDet.C
-	$(CXX) -qsmp=omp $(CXXFLAGS) -o $(OBJDIR)/NonLocalPotential.o -c NonLocalPotential.C
-endif
-ifeq ($(ARCH),ibm_bgq_xlc_smp_betaessl)
+ifdef OMPHACK
 	$(CXX) -qsmp=omp $(CXXFLAGS) -o $(OBJDIR)/FourierTransform.o -c FourierTransform.C
 	$(CXX) -qsmp=omp $(CXXFLAGS) -o $(OBJDIR)/ChargeDensity.o -c ChargeDensity.C
 	$(CXX) -qsmp=omp $(CXXFLAGS) -o $(OBJDIR)/SlaterDet.o -c SlaterDet.C

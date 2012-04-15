@@ -10,6 +10,7 @@
 #include "FourierTransform.h"
 #include "Basis.h"
 #include "Context.h"
+#include "profile.h"
 
 #include <complex>
 #include <algorithm>
@@ -521,6 +522,7 @@ void FourierTransform::bwd(complex<double>* val)
   // If the basis is real: Column (h,k) is followed by column (-h,-k), 
   // except for (0,0)
 
+  QB_Pstart(2, bwd_fft);
 #if TIMING
   tm_b_fft.start();
 #endif
@@ -788,11 +790,13 @@ void FourierTransform::bwd(complex<double>* val)
 #if TIMING
   tm_b_fft.stop();
 #endif
+  QB_Pstop(bwd_fft);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 void FourierTransform::fwd(complex<double>* val)
 {
+  QB_Pstart(1, fwd_fft);
 #if TIMING
   tm_f_fft.start();
 #endif
@@ -1018,6 +1022,7 @@ void FourierTransform::fwd(complex<double>* val)
 #if TIMING
   tm_f_fft.stop();
 #endif
+  QB_Pstop(fwd_fft);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

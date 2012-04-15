@@ -119,6 +119,10 @@ using namespace std;
 #include <rts.h>
 #endif
 
+#ifdef USE_JAGGEMM
+extern "C" int setup_grid();
+#endif
+
 int main(int argc, char **argv, char **envp)
 {
   Timer tm;
@@ -335,6 +339,10 @@ int main(int argc, char **argv, char **envp)
   ui->addVar(new HubbardU(s));
   ui->addVar(new Memory(s));
 
+#ifdef USE_JAGGEMM
+  setup_grid();
+#endif  
+  
   if ( argc == 2 )
   {
     // input file was given as a command line argument

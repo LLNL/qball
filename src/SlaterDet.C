@@ -170,10 +170,18 @@ void SlaterDet::resize(const UnitCell& cell, const UnitCell& refcell,
     occ_.resize(nst);
     eig_.resize(nst);
 
-    const int mb = basis_->maxlocalsize();
+    int mb = basis_->maxlocalsize();
     const int m = ctxt_.nprow() * mb;
-    const int nb = nst/ctxt_.npcol() + (nst%ctxt_.npcol() > 0 ? 1 : 0);
+    int nb = nst/ctxt_.npcol() + (nst%ctxt_.npcol() > 0 ? 1 : 0);
 
+#ifdef BGQ
+    while (mb%4 != 0)
+       mb++;
+    while (nb%8 != 0)
+       nb++;
+#endif  
+
+    
     // Determine if plane wave coefficients must be reset after the resize
     // This is needed if the dimensions of the matrix c_ must be changed
     const bool needs_reset =

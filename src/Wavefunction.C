@@ -11,6 +11,7 @@
 #include "Basis.h"
 #include "Context.h"
 #include "jacobi.h"
+#include "profile.h"
 #include <vector>
 #include <iomanip>
 #include <sstream>
@@ -1226,6 +1227,7 @@ void Wavefunction::calc_spsi() {
 
 ////////////////////////////////////////////////////////////////////////////////
 void Wavefunction::gram(void) {
+  QB_Pstart(12,gram);
   for ( int ispin = 0; ispin < nspin_; ispin++ ) {
     if (spinactive(ispin)) {
       for ( int ikp=0; ikp<nkp(); ikp++) {
@@ -1236,6 +1238,7 @@ void Wavefunction::gram(void) {
       }
     }
   }
+  QB_Pstop(gram);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1322,6 +1325,7 @@ double Wavefunction::sdot(const Wavefunction& wf) const {
 
 ////////////////////////////////////////////////////////////////////////////////
 void Wavefunction::diag(Wavefunction& dwf, bool eigvec) {
+  QB_Pstart(13,diag);
   // subspace diagonalization of <*this | dwf>
   // if eigvec==true, eigenvectors are computed and stored in *this, dwf is 
   // overwritten
@@ -1473,6 +1477,7 @@ void Wavefunction::diag(Wavefunction& dwf, bool eigvec) {
       }
     }
   }
+  QB_Pstop(diag);
 }
 ////////////////////////////////////////////////////////////////////////////////
 void Wavefunction::extrap_real(const double dt, const AtomSet& as) {

@@ -26,6 +26,7 @@
 #include "SimpleConvergenceDetector.h"
 #include "Hugoniostat.h"
 #include "PrintMem.h"
+#include "profile.h"
 #ifdef USE_APC
 #include "apc.h"
 #endif
@@ -1092,6 +1093,7 @@ void BOSampleStepper::step(int niter)
         bool convflag = false;
 
 #ifdef BGQ
+  QB_Pstart(14,scfloop);
   HPM_Start("scfloop");
 #endif
 
@@ -1350,8 +1352,10 @@ void BOSampleStepper::step(int niter)
               cout << "  <!-- BOSampleStepper: end scf iteration -->" << endl;
           }
         } // for itscf
+
 #ifdef BGQ
   HPM_Stop("scfloop");
+  QB_Pstop(scfloop);
 #endif
 
         if (!convflag && s_.ctrl.threshold_scf > 0.0) 
@@ -1517,7 +1521,6 @@ void BOSampleStepper::step(int niter)
         s_.constraints.update_constraints(dt);
     } // else (not converged)
   } // for iter
-
   // print memory usage of main data objects
   if (s_.ctxt_.oncoutpe()) {
     double memtot = 0.0;
