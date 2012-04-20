@@ -1060,7 +1060,7 @@ void Wavefunction::update_occ(double temp, int ngauss) {
     // finite temperature
     const double eVolt = 0.036749023; // 1 eV in Hartree
     //const int maxiter = 1000;
-    const int maxiter = 100000;
+    const int maxiter = 10000;
  
     // loop to find value of mu
     double mu[2] = {0.0,0.0};
@@ -1103,7 +1103,7 @@ void Wavefunction::update_occ(double temp, int ngauss) {
         
         int niter = 0;
         double wtcharge = totalcharge[ispin]*kptweight[ispin];
-        while ( niter < maxiter && fabs(rhosum[ispin] - wtcharge) > 1.e-10*kptweight[ispin] ) {
+        while ( niter < maxiter && fabs(rhosum[ispin] - wtcharge) > 1.e-8*kptweight[ispin] ) {
           niter++;
           if ( rhosum[ispin] < wtcharge ) {
             if ( dir[ispin] == down ) dmu[ispin] /= 2.0;

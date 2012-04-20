@@ -583,6 +583,7 @@ void FourierTransform::bwd(complex<double>* val)
   const int zvec_size = zvec_.size();
   double* const ps = (double*) &sbuf[0];
   const double* const pz = (double*) &zvec_[0];
+#pragma omp parallel for
   for ( int i = 0; i < zvec_size; i++ )
   {
     // sbuf[ipack_[i]] = zvec_[i];
@@ -611,7 +612,7 @@ void FourierTransform::bwd(complex<double>* val)
     cout << " FourierTransform: status = " << status << endl;
     ctxt_.abort(2);
   }
-  ctxt_.barrier();  // needed to prevent buffer overflow on Peloton, 2/2007
+  //ctxt_.barrier();  // needed to prevent buffer overflow on Peloton, 2/2007
 #else
   assert(sbuf.size()==rbuf.size());
   rbuf = sbuf;
@@ -627,6 +628,7 @@ void FourierTransform::bwd(complex<double>* val)
   {
     const int len = np012loc();
     double* const pv = (double*) &val[0];
+#pragma omp parallel for
     for ( int i = 0; i < len; i++ )
     {
       pv[2*i]   = 0.0;
@@ -652,6 +654,7 @@ void FourierTransform::bwd(complex<double>* val)
     const int rbuf_size = rbuf.size();
     const double* const pr = (double*) &rbuf[0];
     double* const pv = (double*) &val[0];
+#pragma omp parallel for
     for ( int i = 0; i < rbuf_size; i++ )
     {
       // val[iunpack_[i]] = rbuf[i];
@@ -921,6 +924,7 @@ void FourierTransform::fwd(complex<double>* val)
   const int rbuf_size = rbuf.size();
   double* const pr = (double*) &rbuf[0];
   const double* const pv = (double*) &val[0];
+#pragma omp parallel for
   for ( int i = 0; i < rbuf_size; i++ )
   {
     // rbuf[i] = val[iunpack_[i]];
@@ -941,7 +945,7 @@ void FourierTransform::fwd(complex<double>* val)
       MPI_DOUBLE,(double*)&sbuf[0],&scounts[0],&sdispl[0],MPI_DOUBLE,
       ctxt_.comm());
   assert ( status == 0 );
-  ctxt_.barrier();  // needed to prevent buffer overflow on Peloton, 2/2007
+  //ctxt_.barrier();  // needed to prevent buffer overflow on Peloton, 2/2007
 #else
   assert(sbuf.size()==rbuf.size());
   //rbuf = sbuf; //ewd I think this is wrong
@@ -967,6 +971,7 @@ void FourierTransform::fwd(complex<double>* val)
   const int zvec_size = zvec_.size();
   const double* const ps = (double*) &sbuf[0];
   double* const pz = (double*) &zvec_[0];
+#pragma omp parallel for
   for ( int i = 0; i < zvec_size; i++ )
   {
     // zvec_[i] = sbuf[ipack_[i]];
@@ -1156,6 +1161,7 @@ void FourierTransform::vector_to_zvec(const complex<double> *c)
   const int ng = basis_.localsize();
   const int zvec_size = zvec_.size();
   double* const pz = (double*) &zvec_[0];
+#pragma omp parallel for
   for ( int i = 0; i < zvec_size; i++ )
   {
     pz[2*i]   = 0.0;
@@ -1163,6 +1169,7 @@ void FourierTransform::vector_to_zvec(const complex<double> *c)
   }
   const double* const pc = (double*) &c[0];
   if ( basis_.real() ) {  
+#pragma omp parallel for
     for ( int ig = 0; ig < ng; ig++ ) {
       // zvec_[ifftp_[ig]] = c[ig];
       // zvec_[ifftm_[ig]] = conj(c[ig]);
@@ -1177,6 +1184,7 @@ void FourierTransform::vector_to_zvec(const complex<double> *c)
     }
   }
   else
+#pragma omp parallel for
     for ( int ig = 0; ig < ng; ig++ ) {
       // zvec_[ifftp_[ig]] = c[ig];
       const double a = pc[2*ig];
@@ -1193,6 +1201,7 @@ void FourierTransform::zvec_to_vector(complex<double> *c)
   const int ng = basis_.localsize();
   const double* const pz = (double*) &zvec_[0];
   double* const pc = (double*) &c[0];
+#pragma omp parallel for
   for ( int ig = 0; ig < ng; ig++ )
   {
     // c[ig] = zvec_[ifftp_[ig]];
@@ -1212,6 +1221,7 @@ void FourierTransform::doublevector_to_zvec(const complex<double> *c1,
   assert(basis_.real());
   const int zvec_size = zvec_.size();
   double* const pz = (double*) &zvec_[0];
+#pragma omp parallel for
   for ( int i = 0; i < zvec_size; i++ )
   {
     pz[2*i] = 0.0;
@@ -1220,6 +1230,7 @@ void FourierTransform::doublevector_to_zvec(const complex<double> *c1,
   const int ng = basis_.localsize();
   const double* const pc1 = (double*) &c1[0];
   const double* const pc2 = (double*) &c2[0];
+#pragma omp parallel for
   for ( int ig = 0; ig < ng; ig++ )
   {
     // const double a = c1[ig].real();
@@ -1251,6 +1262,7 @@ void FourierTransform::zvec_to_doublevector(complex<double> *c1,
   const double* const pz = (double*) &zvec_[0];
   double* const pc1 = (double*) &c1[0];
   double* const pc2 = (double*) &c2[0];
+#pragma omp parallel for
   for ( int ig = 0; ig < ng; ig++ )
   {
     // const double a = 0.5*zvec_[ip].real();

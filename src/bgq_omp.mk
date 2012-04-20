@@ -8,7 +8,8 @@
  PLT=BGQ
 #-------------------------------------------------------------------------------
 
- LIBHOME = $(HOME)/software
+# LIBHOME = $(HOME)/software
+ LIBHOME = /nfs/tmp2/asde/qball_bgq/lib
 
 # XERCESCDIR=$(LIBHOME)/xml/xml-bgq/xerces-c-src_2_5_0
 # XERCESCLIBDIR=$(XERCESCDIR)/lib

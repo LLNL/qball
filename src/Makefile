@@ -117,92 +117,25 @@ makedirs:
 	@if [ ! -d $(OBJDIR) ]; then mkdir -p $(OBJDIR) ; fi
 	@if [ ! -e .depend_$(ARCH) ]; then touch .depend_$(ARCH) ; fi
 
- SamplePrint: SamplePrint.o SamplePrintHandlers.o
+testMatrix: $(OBJDIR)/testMatrix.o $(OBJDIR)/Matrix.o $(OBJDIR)/Context.o
 	$(LD) $(DFLAGS) -o $@ $^ $(LDFLAGS)
- testAndersonMixer: testAndersonMixer.o AndersonMixer.o Context.o
+testBasis: $(OBJDIR)/testBasis.o $(OBJDIR)/Basis.o $(OBJDIR)/UnitCell.o $(OBJDIR)/Context.o
 	$(LD) $(DFLAGS) -o $@ $^ $(LDFLAGS)
- testSample: testSample.o AtomSet.o Atom.o Species.o \
-        Wavefunction.o SlaterDet.o \
-        Basis.o FourierTransform.o Matrix.o Context.o \
-        sinft.o spline.o UnitCell.o 
+testFourierTransform: $(OBJDIR)/testFourierTransform.o $(OBJDIR)/FourierTransform.o $(OBJDIR)/Basis.o \
+	$(OBJDIR)/UnitCell.o $(OBJDIR)/Context.o
 	$(LD) $(DFLAGS) -o $@ $^ $(LDFLAGS)
- testChargeDensity: testChargeDensity.o ChargeDensity.o \
-        Wavefunction.o SlaterDet.o \
-        Basis.o FourierTransform.o Matrix.o UnitCell.o Context.o
+testBlas: $(OBJDIR)/testBlas.o
 	$(LD) $(DFLAGS) -o $@ $^ $(LDFLAGS)
- testWavefunction: testWavefunction.o Wavefunction.o SlaterDet.o \
-        Basis.o FourierTransform.o Matrix.o UnitCell.o Context.o
+testEigenSolvers: $(OBJDIR)/testEigenSolvers.o $(OBJDIR)/Matrix.o $(OBJDIR)/Context.o
 	$(LD) $(DFLAGS) -o $@ $^ $(LDFLAGS)
- testEnergyFunctional: testEnergyFunctional.o EnergyFunctional.o Basis.o \
-	SlaterDet.o Matrix.o UnitCell.o Context.o FourierTransform.o \
-        Wavefunction.o Species.o Atom.o AtomSet.o StructureFactor.o \
-        ChargeDensity.o \
-        sinft.o spline.o 
+xmlSpecies: xmlSpecies.o qbox_xmlns.o
 	$(LD) $(DFLAGS) -o $@ $^ $(LDFLAGS)
- testSlaterDet: testSlaterDet.o SlaterDet.o FourierTransform.o \
-        Basis.o UnitCell.o Matrix.o Context.o
-	$(LD) $(DFLAGS) -o $@ $^ $(LDFLAGS)
- testBasisMapping: testBasisMapping.o BasisMapping.o Basis.o \
-	Context.o UnitCell.o
-	$(LD) $(DFLAGS) -o $@ $^ $(LDFLAGS)
- testSpecies: testSpecies.o Species.o sinft.o spline.o Context.o \
-	SpeciesReader.o StructuredDocumentHandler.o SpeciesHandler.o
-	$(LD) $(DFLAGS) -o $@ $^ $(LDFLAGS)
- testXCFunctional: testXCFunctional.o LDAFunctional.o PBEFunctional.o
-	$(LD) $(DFLAGS) -o $@ $^ $(LDFLAGS)
- testEmpiricalPotential: testEmpiricalPotential.o EmpiricalPotential.o Context.o spline.o
-	$(LD) $(DFLAGS) -o $@ $^ $(LDFLAGS)
- testMatrix: testMatrix.o Matrix.o Context.o
-	$(LD) $(DFLAGS) -o $@ $^ $(LDFLAGS)
- testBlas: testBlas.o
-	$(LD) $(DFLAGS) -o $@ $^ $(LDFLAGS)
- testEigenSolvers: testEigenSolvers.o Matrix.o Context.o
-	$(LD) $(DFLAGS) -o $@ $^ $(LDFLAGS)
- testFourierTransform: testFourierTransform.o FourierTransform.o \
-        Context.o Basis.o UnitCell.o 
-	$(LD) $(DFLAGS) -o $@ $^ $(LDFLAGS)
- testFTGrid: testFTGrid.o FTGrid.o BlacsContext.o Basis.o
-	$(LD) $(DFLAGS) -o $@ $^ $(LDFLAGS)
- testGridFunction: testGridFunction.o GridFunction.o BlacsContext.o
-	$(LD) $(DFLAGS) -o $@ $^ $(LDFLAGS)
- testUnitCell: testUnitCell.o UnitCell.o
-	$(LD) $(DFLAGS) -o $@ $^ $(LDFLAGS)
- testBasis: testBasis.o Basis.o UnitCell.o Context.o
-	$(LD) $(DFLAGS) -o $@ $^ $(LDFLAGS)
- testBlacsContext: testBlacsContext.o BlacsContext.o
-	$(LD) $(DFLAGS) -o $@ $^ $(LDFLAGS)
- testContext: testContext.o Context.o
-	$(LD) $(DFLAGS) -o $@ $^ $(LDFLAGS)
- testMPIsubcomm:  testMPIsubcomm.o
-	$(LD) $(DFLAGS) -o $@ $^ $(LDFLAGS)
- testHandler: testHandler.o
-	$(LD) $(DFLAGS) -o $@ $^ $(LDFLAGS)
- testPParse: testPParse.o
-	$(LD) $(DFLAGS) -o $@ $^ $(LDFLAGS)
- testMemParse: testMemParse.o
-	$(LD) $(DFLAGS) -o $@ $^ $(LDFLAGS)
- xmlSpecies: xmlSpecies.o qbox_xmlns.o
-	$(LD) $(DFLAGS) -o $@ $^ $(LDFLAGS)
- xmlget: xmlget.o
+xmlget: xmlget.o
 	$(LD) -o xmlget xmlget.C -I$(XERCESCDIR)/include \
         -L$(XERCESCDIR)/lib -lxerces-c 
- xmlextract: xmlextract.o
+xmlextract: xmlextract.o
 	$(LD) -o xmlextract xmlextract.C -I$(XERCESCDIR)/include \
         -L$(XERCESCDIR)/lib -lxerces-c 
- testXMLGFPreprocessor: testXMLGFPreprocessor.o XMLGFPreprocessor.o Context.o \
-        Base64Transcoder.o Matrix.o
-	$(LD) $(DFLAGS) -o $@ $^ $(LDFLAGS)
- testwrite: testwrite.o Context.o
-	$(LD) $(DFLAGS) -o $@ $^ $(LDFLAGS)
- testStepper: testStepper.o AtomSet.o Context.o MDIonicStepper.o \
-Wavefunction.o Species.o SlaterDet.o spline.o sinft.o Basis.o Matrix.o \
-FourierTransform.o UnitCell.o Atom.o BOSampleStepper.o \
-SampleStepper.o EnergyFunctional.o 
-	$(LD) $(DFLAGS) -o $@ $^ $(LDFLAGS)
- test_fftw: test_fftw.o
-	$(LD) $(DFLAGS) -o $@ $^ $(LDFLAGS)
- test_fftw3: test_fftw3.o
-	$(LD) $(DFLAGS) -o $@ $^ $(LDFLAGS)
 #------------------------------------------------------------------------------
 # generate dependencies in makefile: use -Y to avoid library header files
 # that are likely to be different on other platforms.

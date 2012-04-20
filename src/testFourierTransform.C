@@ -32,7 +32,7 @@ int main(int argc, char **argv)
 
   Context ctxt_global;
   int mype = ctxt_global.mype();
-  cout << " Process " << mype << " on " << processor_name << endl;
+  //cout << " Process " << mype << " on " << processor_name << endl;
 
   D3vector a,b,c,kpoint;
   double ecut;
@@ -85,17 +85,17 @@ int main(int argc, char **argv)
   double flops = 2*basis.nrod_loc() *      fft_flops(ft2.np2()) +
                  ft2.np1()/2 * ft2.np2() * fft_flops(ft2.np0()) +
                  ft2.np0()   * ft2.np2() * fft_flops(ft2.np1());
-  if ( ctxt.oncoutpe() )
+  if ( ctxt.onpe0() )
   {
     cout << " wfbasis.size() = " << basis.size() << endl;
     cout << " wfbasis.np() = " << basis.np(0) << " " << basis.np(1)
          << " " << basis.np(2) << endl;
-    cout << " flop count: " << flops << endl;
+    //cout << " flop count: " << flops << endl;
+    cout << " wfbasis.nrod_loc(): " << basis.nrod_loc() << endl;
+    cout << " zvec.size: " 
+         << 2*basis.nrod_loc()*ft2.np2() * sizeof(complex<double>)
+         << endl;
   }
-  cout << " wfbasis.nrod_loc(): " << basis.nrod_loc() << endl;
-  cout << " zvec.size: " 
-       << 2*basis.nrod_loc()*ft2.np2() * sizeof(complex<double>)
-       << endl;
 
   cout.setf(ios::fixed,ios::floatfield);
   cout.setf(ios::right,ios::adjustfield);
@@ -115,6 +115,7 @@ int main(int argc, char **argv)
   }
 #endif
 
+  /*EWD DEBUG
   tm.reset();
   ft2.reset_timers();
   tm.start();
@@ -207,41 +208,43 @@ int main(int argc, char **argv)
   tm.start();
   ft2.forward(&f2[0],&x1[0],&x2[0]);
   tm.stop();
-  cout << " fwd3: tm_f_fft:    " << ft2.tm_f_fft.real() << endl;
-  cout << " fwd3: tm_f_mpi:    " << ft2.tm_f_mpi.real() << endl;
-  cout << " fwd3: tm_f_pack:   " << ft2.tm_f_pack.real() << endl;
-  cout << " fwd3: tm_f_unpack: " << ft2.tm_f_unpack.real() << endl;
-  cout << " fwd3: tm_f_zero:   " << ft2.tm_f_zero.real() << endl;
-  cout << " fwd3: tm_f_map:    " << ft2.tm_f_map.real() << endl;
-  cout << " fwd3: tm_f_total:  " << ft2.tm_f_fft.real() +
-                                    ft2.tm_f_mpi.real() +
-                                    ft2.tm_f_pack.real() +
-                                    ft2.tm_f_unpack.real() +
-                                    ft2.tm_f_zero.real() +
-                                    ft2.tm_f_map.real() << endl;
-  cout << " fwd3 time: " << tm.cpu() << " / " << tm.real()
-  << "    " << 1.e-6*flops/tm.real() << " MFlops" << endl;
-
+  if ( ctxt.onpe0() ) {
+     cout << " fwd3: tm_f_fft:    " << ft2.tm_f_fft.real() << endl;
+     cout << " fwd3: tm_f_mpi:    " << ft2.tm_f_mpi.real() << endl;
+     cout << " fwd3: tm_f_pack:   " << ft2.tm_f_pack.real() << endl;
+     cout << " fwd3: tm_f_unpack: " << ft2.tm_f_unpack.real() << endl;
+     cout << " fwd3: tm_f_zero:   " << ft2.tm_f_zero.real() << endl;
+     cout << " fwd3: tm_f_map:    " << ft2.tm_f_map.real() << endl;
+     cout << " fwd3: tm_f_total:  " << ft2.tm_f_fft.real() +
+         ft2.tm_f_mpi.real() +
+         ft2.tm_f_pack.real() +
+         ft2.tm_f_unpack.real() +
+         ft2.tm_f_zero.real() +
+         ft2.tm_f_map.real() << endl;
+     cout << " fwd3 time: " << tm.cpu() << " / " << tm.real()
+          << "    " << 1.e-6*flops/tm.real() << " MFlops" << endl;
+  }
   tm.reset();
   ft2.reset_timers();
   tm.start();
   ft2.backward(&x1[0],&x2[0],&f2[0]);
   tm.stop();
-  cout << " bwd3: tm_b_fft:    " << ft2.tm_b_fft.real() << endl;
-  cout << " bwd3: tm_b_mpi:    " << ft2.tm_b_mpi.real() << endl;
-  cout << " bwd3: tm_b_pack:   " << ft2.tm_b_pack.real() << endl;
-  cout << " bwd3: tm_b_unpack: " << ft2.tm_b_unpack.real() << endl;
-  cout << " bwd3: tm_b_zero:   " << ft2.tm_b_zero.real() << endl;
-  cout << " bwd3: tm_b_map:    " << ft2.tm_b_map.real() << endl;
-  cout << " bwd3: tm_b_total:  " << ft2.tm_b_fft.real() +
-                                    ft2.tm_b_mpi.real() +
-                                    ft2.tm_b_pack.real() +
-                                    ft2.tm_b_unpack.real() +
-                                    ft2.tm_b_zero.real() +
-                                    ft2.tm_b_map.real() << endl;
-  cout << " bwd3 time: " << tm.cpu() << " / " << tm.real()
-  << "    " << 1.e-6*flops/tm.real() << " MFlops" << endl;
-  
+  if ( ctxt.onpe0() ) {
+     cout << " bwd3: tm_b_fft:    " << ft2.tm_b_fft.real() << endl;
+     cout << " bwd3: tm_b_mpi:    " << ft2.tm_b_mpi.real() << endl;
+     cout << " bwd3: tm_b_pack:   " << ft2.tm_b_pack.real() << endl;
+     cout << " bwd3: tm_b_unpack: " << ft2.tm_b_unpack.real() << endl;
+     cout << " bwd3: tm_b_zero:   " << ft2.tm_b_zero.real() << endl;
+     cout << " bwd3: tm_b_map:    " << ft2.tm_b_map.real() << endl;
+     cout << " bwd3: tm_b_total:  " << ft2.tm_b_fft.real() +
+         ft2.tm_b_mpi.real() +
+         ft2.tm_b_pack.real() +
+         ft2.tm_b_unpack.real() +
+         ft2.tm_b_zero.real() +
+         ft2.tm_b_map.real() << endl;
+     cout << " bwd3 time: " << tm.cpu() << " / " << tm.real()
+          << "    " << 1.e-6*flops/tm.real() << " MFlops" << endl;
+  }  
 #if 1
   //////////////////////////////////////////////////////////////////////////////
   // Integration of a 2-norm normalized plane wave
@@ -273,7 +276,8 @@ int main(int argc, char **argv)
     tsum += norm(f2[i]);
   MPI_Allreduce(&tsum,&sum,1,MPI_DOUBLE,MPI_SUM,ctxt.comm());
   
-  cout << " sum pw^2: " << sum / ft2.np012() << endl;
+  if ( ctxt.onpe0() )
+     cout << " sum pw^2: " << sum / ft2.np012() << endl;
   
   //////////////////////////////////////////////////////////////////////////////
   // Integration of a 2-norm normalized gaussian
@@ -289,10 +293,11 @@ int main(int argc, char **argv)
   double gnorm = 0.0;
   for ( int i = 0; i < basis.localsize(); i++ )
     gnorm += 2.0 * norm(x[i]);
-  if ( ctxt.oncoutpe() )
+  if ( ctxt.onpe0() )
     gnorm -= norm(x[0]);
   ctxt.dsum(1,1,&gnorm,1);
-  cout << " gaussian gnorm: " << gnorm << endl;
+  if ( ctxt.onpe0() )
+     cout << " gaussian gnorm: " << gnorm << endl;
   
   ft2.backward(&x[0],&f2[0]);
   
@@ -312,14 +317,19 @@ int main(int argc, char **argv)
     tsum += norm(f2[i]);
   MPI_Allreduce(&tsum,&sum,1,MPI_DOUBLE,MPI_SUM,ctxt.comm());
   
-  cout << " gaussian rnorm: " << sum / ft2.np012() << endl;
+  if ( ctxt.onpe0() )
+     cout << " gaussian rnorm: " << sum / ft2.np012() << endl;
 #endif
-
+  EWD DEBUG  */
+  
   // Define ft from vbasis
   Basis vbasis(ctxt,kpoint);
   vbasis.resize(cell,cell,4.0*ecut);
-  cout << " vbasis.np() = " << vbasis.np(0) << " " << vbasis.np(1)
-       << " " << vbasis.np(2) << endl;
+  if ( ctxt.onpe0() )
+     cout << " vbasis.np() = " << vbasis.np(0) << " " << vbasis.np(1)
+          << " " << vbasis.np(2) << endl;
+
+  /* EWD DEBUG
   FourierTransform vft(basis,vbasis.np(0),vbasis.np(1),vbasis.np(2));
   vector<complex<double> > vf(vft.np012loc());
   vft.backward(&x[0],&vf[0]);
@@ -329,7 +339,9 @@ int main(int argc, char **argv)
     tsum += norm(vf[i]);
   MPI_Allreduce(&tsum,&sum,1,MPI_DOUBLE,MPI_SUM,ctxt.comm());
   
-  cout << " gaussian rnorm: " << sum / vft.np012() << endl;
+  if ( ctxt.onpe0() )
+     cout << " gaussian rnorm: " << sum / vft.np012() << endl;
+  EWD DEBUG  */
 
   } // Context scope
 #if USE_MPI

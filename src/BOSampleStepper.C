@@ -32,7 +32,7 @@
 #endif
 #include <iostream>
 #include <iomanip>
-#ifdef BGQ
+#ifdef HPM
 #include <bgpm/include/bgpm.h>
 extern "C" void HPM_Start(char *);
 extern "C" void HPM_Stop(char *);
@@ -1092,9 +1092,11 @@ void BOSampleStepper::step(int niter)
         SimpleConvergenceDetector conv_scf(s_.ctrl.threshold_scf_nsteps, s_.ctrl.threshold_scf);
         bool convflag = false;
 
-#ifdef BGQ
-  QB_Pstart(14,scfloop);
+#ifdef HPM  
   HPM_Start("scfloop");
+#endif
+#ifdef TAU
+  QB_Pstart(14,scfloop);
 #endif
 
         // SCF LOOP
@@ -1353,9 +1355,11 @@ void BOSampleStepper::step(int niter)
           }
         } // for itscf
 
-#ifdef BGQ
-  HPM_Stop("scfloop");
+#ifdef TAU  
   QB_Pstop(scfloop);
+#endif
+#ifdef HPM
+  HPM_Stop("scfloop");
 #endif
 
         if (!convflag && s_.ctrl.threshold_scf > 0.0) 
@@ -1481,6 +1485,10 @@ void BOSampleStepper::step(int niter)
               print_stress();
             }
           }
+        }
+        else if (gs_only && fastend) {
+           if ( onpe0 )
+              cout << ef_;
         }
         wf_stepper->postprocess();
       }

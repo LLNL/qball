@@ -1380,6 +1380,7 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
   const vector<double>& occ = sd_.occ();
   const vector<double>& eig = sd_.eig();
   const int ngwl = basis_.localsize();
+  const int mloc = basis_.maxlocalsize();
   // define atom block size
   const int na_block_size = 32;
   vector<vector<double> > tau;
@@ -1742,10 +1743,16 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
 
       valarray<double> anl_loc_gamma;
       valarray<complex<double> > anl_loc;
+      //if (basis_.real())
+      //  anl_loc_gamma.resize(npr[is]*na_block_size*2*ngwl);
+      //else 
+      //  anl_loc.resize(npr[is]*na_block_size*ngwl);
+      //vector<double> anl_loc_gamma;
+      //vector<complex<double> > anl_loc;
       if (basis_.real())
-        anl_loc_gamma.resize(npr[is]*na_block_size*2*ngwl);
+         anl_loc_gamma.resize(npr[is]*na_block_size*2*mloc,0.0);
       else 
-        anl_loc.resize(npr[is]*na_block_size*ngwl);
+         anl_loc.resize(npr[is]*na_block_size*mloc,complex<double>(0.0,0.0));
         
       const int nstloc = sd_.nstloc();
       // fnl_loc[ipra][n]
@@ -1786,6 +1793,7 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
 #if AIX || BGL  
         vsincos(&skpgr[0],&ckpgr[0],&kpgr[0],&len);                                
 #else
+        #pragma omp parallel for
         for ( int i = 0; i < len; i++ ) {
           const double arg = kpgr[i];
           skpgr[i] = sin(arg);                                                 
@@ -1811,6 +1819,7 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
             const double* c = &ckpgr[ia*ngwl];
             const double* s = &skpgr[ia*ngwl];
             if ( l == 0 ) {
+#pragma omp parallel for
               for ( int ig = 0; ig < ngwl; ig++ ) {
                 a[2*ig]   = t[ig] * c[ig];                                   
                 a[2*ig+1] = t[ig] * s[ig];                                   
@@ -1819,6 +1828,7 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
             else if ( l == 1 ) {
               /* Next line: -i * eigr */                                   
               /* -i * (a+i*b) = b - i*a */                                 
+#pragma omp parallel for
               for ( int ig = 0; ig < ngwl; ig++ ) {
                 a[2*ig]   =  t[ig] * s[ig];
                 a[2*ig+1] = -t[ig] * c[ig];
@@ -1827,6 +1837,7 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
             else if ( l == 2 ) {
               // Next line: (-) sign for -eigr                             
               /* -1 * (a+i*b) = -a - i*b */                                 
+#pragma omp parallel for
               for ( int ig = 0; ig < ngwl; ig++ ) {
                 a[2*ig]   = -t[ig] * c[ig];
                 a[2*ig+1] = -t[ig] * s[ig];
@@ -1834,6 +1845,7 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
             }
             else if ( l == 3 ) {
               /* i * (a+i*b) = -b + i*a */ 
+#pragma omp parallel for
               for ( int ig = 0; ig < ngwl; ig++ ) {
                 a[2*ig]   = -t[ig] * s[ig];
                 a[2*ig+1] = t[ig] * c[ig];
@@ -1849,6 +1861,7 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
         double one=1.0;                                                      
         char ct='t';                                                         
         int twongwl = 2 * ngwl;                                              
+        int twomloc = 2 * mloc;                                              
         int nprnaloc = ia_block_size * npr[is];                              
         int c_lda;
         const complex<double>* c = sd_.c().cvalptr();                        
@@ -1856,8 +1869,11 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
         if (basis_.real()) {
           c_lda = 2*sd_.c().mloc();                                        
           tmap["fnl_gemm"].start();                                            
-          dgemm(&ct,&cn,&nprnaloc,(int*)&nstloc,&twongwl,&one,
-                &anl_loc_gamma[0],&twongwl, (double*)c, &c_lda,
+          //dgemm(&ct,&cn,&nprnaloc,(int*)&nstloc,&twongwl,&one,
+          //      &anl_loc_gamma[0],&twongwl, (double*)c, &c_lda,
+          //      &zero,&fnl_loc_gamma[0],&nprnaloc);
+          dgemm(&ct,&cn,&nprnaloc,(int*)&nstloc,&twomloc,&one,
+                &anl_loc_gamma[0],&twomloc, (double*)c, &c_lda,
                 &zero,&fnl_loc_gamma[0],&nprnaloc);
           tmap["fnl_gemm"].stop();
         }
@@ -1867,8 +1883,12 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
           complex<double> zone = complex<double>(1.0,0.0);
           char cc='c';
           tmap["fnl_gemm"].start();
-          zgemm(&cc,&cn,&nprnaloc,(int*)&nstloc,(int*)&ngwl,&zone,
-                &anl_loc[0],(int *)&ngwl, (complex<double> *)c, &c_lda,
+          //zgemm(&cc,&cn,&nprnaloc,(int*)&nstloc,(int*)&ngwl,&zone,
+          //      &anl_loc[0],(int *)&ngwl, (complex<double> *)c, &c_lda,
+          //      &zzero,&fnl_loc[0],&nprnaloc);
+
+          zgemm(&cc,&cn,&nprnaloc,(int*)&nstloc,(int*)&mloc,&zone,
+                &anl_loc[0],(int *)&mloc, (complex<double> *)c, &c_lda,
                 &zzero,&fnl_loc[0],&nprnaloc);
           tmap["fnl_gemm"].stop();
         }
@@ -1948,15 +1968,21 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
           int cp_lda;
           if (basis_.real()) {
             cp_lda = 2*dsd.c().mloc();
-            dgemm(&cn,&cn,&twongwl,(int*)&nstloc,&nprnaloc,&one,
-                  &anl_loc_gamma[0],&twongwl, &fnl_loc_gamma[0],&nprnaloc,
+            //dgemm(&cn,&cn,&twongwl,(int*)&nstloc,&nprnaloc,&one,
+            //      &anl_loc_gamma[0],&twongwl, &fnl_loc_gamma[0],&nprnaloc,
+            //      &one,(double*)cp, &cp_lda);
+            dgemm(&cn,&cn,&twomloc,(int*)&nstloc,&nprnaloc,&one,
+                  &anl_loc_gamma[0],&twomloc, &fnl_loc_gamma[0],&nprnaloc,
                   &one,(double*)cp, &cp_lda);
           }
           else {
             int cp_lda = dsd.c().mloc();
             complex<double> zone = complex<double>(1.0,0.0);
-            zgemm(&cn,&cn,(int*)&ngwl,(int*)&nstloc,&nprnaloc,&zone,
-                  &anl_loc[0],(int*)&ngwl, &fnl_loc[0],&nprnaloc,
+            //zgemm(&cn,&cn,(int*)&ngwl,(int*)&nstloc,&nprnaloc,&zone,
+            //        &anl_loc[0],(int*)&ngwl, &fnl_loc[0],&nprnaloc,
+            //        &zone,(complex<double>*)cp, &cp_lda);
+            zgemm(&cn,&cn,(int*)&mloc,(int*)&nstloc,&nprnaloc,&zone,
+                  &anl_loc[0],(int*)&mloc, &fnl_loc[0],&nprnaloc,
                   &zone,(complex<double>*)cp, &cp_lda);
           }
 
@@ -2038,16 +2064,22 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
               double one=1.0;
               char ct='t';        
               const int twongwl = 2 * ngwl;                                    
-              dgemm(&ct,&cn,(int*)&nprnaloc,(int*)&nstloc,(int*)&twongwl,&one, 
-                    &anl_loc_gamma[0],(int*)&twongwl, (double*)c,(int*)&c_lda,       
+              //dgemm(&ct,&cn,(int*)&nprnaloc,(int*)&nstloc,(int*)&twongwl,&one, 
+              //      &anl_loc_gamma[0],(int*)&twongwl, (double*)c,(int*)&c_lda,       
+              //      &zero,&dfnl_loc_gamma[0],(int*)&nprnaloc);
+              dgemm(&ct,&cn,(int*)&nprnaloc,(int*)&nstloc,(int*)&twomloc,&one, 
+                    &anl_loc_gamma[0],(int*)&twomloc, (double*)c,(int*)&c_lda,       
                     &zero,&dfnl_loc_gamma[0],(int*)&nprnaloc);
             }
             else {
               complex<double> zzero = complex<double>(0.0,0.0);
               complex<double> zone = complex<double>(1.0,0.0);
               char cc='c';
-              zgemm(&cc,&cn,(int*)&nprnaloc,(int*)&nstloc,(int*)&ngwl,&zone, 
-                    &anl_loc[0],(int*)&ngwl, (complex<double> *)c,(int*)&c_lda,       
+              //zgemm(&cc,&cn,(int*)&nprnaloc,(int*)&nstloc,(int*)&ngwl,&zone, 
+              //      &anl_loc[0],(int*)&ngwl, (complex<double> *)c,(int*)&c_lda,       
+              //      &zzero,&dfnl_loc[0],(int*)&nprnaloc);                       
+              zgemm(&cc,&cn,(int*)&nprnaloc,(int*)&nstloc,(int*)&mloc,&zone, 
+                    &anl_loc[0],(int*)&mloc, (complex<double> *)c,(int*)&c_lda,       
                     &zzero,&dfnl_loc[0],(int*)&nprnaloc);                       
             }
 
@@ -2324,16 +2356,22 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
               double one=1.0;      
               char ct='t';         
               const int twongwl = 2 * ngwl;                                     
-              dgemm(&ct,&cn,(int*)&nprnaloc,(int*)&nstloc,(int*)&twongwl,&one,  
-                    &anl_loc_gamma[0],(int*)&twongwl, (double*)c,(int*)&c_lda,        
+              //dgemm(&ct,&cn,(int*)&nprnaloc,(int*)&nstloc,(int*)&twongwl,&one,  
+              //      &anl_loc_gamma[0],(int*)&twongwl, (double*)c,(int*)&c_lda,        
+              //      &zero,&dfnl_loc_gamma[0],(int*)&nprnaloc);                        
+              dgemm(&ct,&cn,(int*)&nprnaloc,(int*)&nstloc,(int*)&twomloc,&one,  
+                    &anl_loc_gamma[0],(int*)&twomloc, (double*)c,(int*)&c_lda,        
                     &zero,&dfnl_loc_gamma[0],(int*)&nprnaloc);                        
             }
             else {
               complex<double> zzero = complex<double>(0.0,0.0);
               complex<double> zone = complex<double>(1.0,0.0);
               char cc='c';
-              zgemm(&cc,&cn,(int*)&nprnaloc,(int*)&nstloc,(int*)&ngwl,&zone, 
-                    &anl_loc[0],(int*)&ngwl, (complex<double> *)c,(int*)&c_lda,       
+              //zgemm(&cc,&cn,(int*)&nprnaloc,(int*)&nstloc,(int*)&ngwl,&zone, 
+              //      &anl_loc[0],(int*)&ngwl, (complex<double> *)c,(int*)&c_lda,       
+              //      &zzero,&dfnl_loc[0],(int*)&nprnaloc);                       
+              zgemm(&cc,&cn,(int*)&nprnaloc,(int*)&nstloc,(int*)&mloc,&zone, 
+                    &anl_loc[0],(int*)&mloc, (complex<double> *)c,(int*)&c_lda,       
                     &zzero,&dfnl_loc[0],(int*)&nprnaloc);                       
             }
 

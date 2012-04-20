@@ -54,7 +54,7 @@ int main(int argc, char **argv)
       throw;
     }
     
-    cout << basis;
+    //cout << basis;
     
     //Basis b2(basis);
     //cout << b2;

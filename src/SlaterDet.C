@@ -174,14 +174,23 @@ void SlaterDet::resize(const UnitCell& cell, const UnitCell& refcell,
     const int m = ctxt_.nprow() * mb;
     int nb = nst/ctxt_.npcol() + (nst%ctxt_.npcol() > 0 ? 1 : 0);
 
-#ifdef BGQ
-    while (mb%4 != 0)
-       mb++;
-    while (nb%8 != 0)
-       nb++;
-#endif  
+#ifdef BGQ 
+    if (basis_->real())
+    {
+       while (mb%4 != 0)
+          mb++;
+       while (nb%8 != 0)
+          nb++;
+    }
+    else
+    {
+       while (mb%2 != 0)
+          mb++;
+       while (nb%8 != 0)
+          nb++;
+    }
+#endif
 
-    
     // Determine if plane wave coefficients must be reset after the resize
     // This is needed if the dimensions of the matrix c_ must be changed
     const bool needs_reset =
@@ -191,7 +200,7 @@ void SlaterDet::resize(const UnitCell& cell, const UnitCell& refcell,
 
     if ( needs_reset )
       reset();
-
+    
     // check if data can be copied from temporary copy
     // It is assumed that nst and ecut are not changing at the same time
     // Only the cases where one change at a time occurs is covered
@@ -857,8 +866,15 @@ void SlaterDet::gram() {
     if (ultrasoft_)  // orthogonalize psi and S*psi
       s.gemm('c','n',1.0,c_,spsi_,0.0);
     else
-      s.herk('l','c',1.0,c_,0.0);
-
+    {
+       // gemm may actually be faster on BG/Q, try it 
+#ifdef BGQ
+       s.herk('l','c',1.0,c_,0.0);
+       //s.gemm('c','n',1.0,c_,c_,0.0);
+#else       
+       s.herk('l','c',1.0,c_,0.0);
+#endif
+    }
     if (gram_reshape_) {
       int mbsq = c_.n()/ctxtsq_.nprow() + (c_.n()%ctxtsq_.nprow() == 0 ? 0 : 1);
       int nbsq = c_.n()/ctxtsq_.npcol() + (c_.n()%ctxtsq_.npcol() == 0 ? 0 : 1);

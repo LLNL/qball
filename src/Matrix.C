@@ -421,7 +421,7 @@ void DoubleMatrix::init_size(int m, int n, int mb, int nb)
 #ifdef BGQ 
   while (mb_%4 != 0)
      mb_++;
-  while (nb_%4 != 0)
+  while (nb_%8 != 0)
      nb_++;
 #endif
 
@@ -439,6 +439,10 @@ void DoubleMatrix::init_size(int m, int n, int mb, int nb)
   if ( n_ != 0 )
     nloc_ = numroc(&n_,&nb_,&mycol_,&isrcproc,&npcol_);
   size_ = mloc_ * nloc_;
+
+  //ewd DEBUG
+  //cout << "DOUBLE_MATRIX_INIT:  mype = " << ctxt_.mype() << ", m = " << m_ << ", n = " << n_ << ", mb = " << mb_ << ", nb = " << nb_ << ", mloc = " << mloc_ << ", nloc = " << nloc_ << endl;
+
   
   // set leading dimension of val array to mloc_;
   lld_ = mloc_;
@@ -498,7 +502,7 @@ void ComplexMatrix::init_size(int m, int n, int mb, int nb)
 #ifdef BGQ 
   while (mb_%2 != 0)
      mb_++;
-  while (nb_%2 != 0)
+  while (nb_%8 != 0)
      nb_++;
 #endif
   ictxt_ = ctxt_.ictxt();
@@ -520,6 +524,9 @@ void ComplexMatrix::init_size(int m, int n, int mb, int nb)
   // set leading dimension of val array to mloc_;
   lld_ = mloc_;
   if ( lld_ == 0 ) lld_ = 1;
+
+  //ewd DEBUG
+  //cout << "COMPLEX_MATRIX_INIT:  mype = " << ctxt_.mype() << ", m = " << m_ << ", n = " << n_ << ", mb = " << mb_ << ", nb = " << nb_ << ", mloc = " << mloc_ << ", nloc = " << nloc_ << endl;
 
   // total and local number of blocks
   mblocks_ = 0;

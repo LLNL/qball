@@ -918,7 +918,8 @@ double EnergyFunctional::energy(bool compute_hpsi, Wavefunction& dwf,
               }
             }
             else {
-              for ( int n = 0; n < sd.nstloc(); n++ ) {
+               //ewd:  OMP HERE?
+               for ( int n = 0; n < sd.nstloc(); n++ ) {
                 for ( int ig = 0; ig < ngwloc; ig++ ) {
                   cp[ig+mloc*n] += 0.5 * kpg2[ig] * c[ig+mloc*n];
                 }

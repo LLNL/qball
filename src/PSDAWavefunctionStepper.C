@@ -109,6 +109,8 @@ void PSDAWavefunctionStepper::update(Wavefunction& dwf) {
             if ( extrapolate_[ispin][ikp] ) {
               double theta = 0.0;
               double a = 0.0, b = 0.0;
+
+              //ewd OMP HERE?
               for ( int n = 0; n < nloc; n++ ) {
                 const int nglobal = wf_.sd(ispin,ikp)->c().j(0,n);
                 const vector<double>& occ = wf_.sd(ispin,ikp)->occ();
