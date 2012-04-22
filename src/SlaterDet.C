@@ -174,17 +174,18 @@ void SlaterDet::resize(const UnitCell& cell, const UnitCell& refcell,
     const int m = ctxt_.nprow() * mb;
     int nb = nst/ctxt_.npcol() + (nst%ctxt_.npcol() > 0 ? 1 : 0);
 
+    //ewd:  hacky, but works for now
 #ifdef BGQ 
     if (basis_->real())
     {
-       while (mb%4 != 0)
+       while (mb%8 != 0)
           mb++;
        while (nb%8 != 0)
           nb++;
     }
     else
     {
-       while (mb%2 != 0)
+       while (mb%4 != 0)
           mb++;
        while (nb%8 != 0)
           nb++;
@@ -272,9 +273,27 @@ void SlaterDet::reshape(const Context& newctxt, const Context& new_col_ctxt, boo
       basis_ = new Basis(new_col_ctxt,tmpkpt,ultrasoft_);
       basis_->resize(tmpcell,tmprefcell,tmpecut);
     }
-    const int mb = basis_->maxlocalsize();
+    int mb = basis_->maxlocalsize();
     const int m = newctxt.nprow() * mb;
-    const int nb = ctmp.n()/newctxt.npcol() + (ctmp.n()%newctxt.npcol() > 0 ? 1 : 0);
+    int nb = ctmp.n()/newctxt.npcol() + (ctmp.n()%newctxt.npcol() > 0 ? 1 : 0);
+
+    //ewd:  hacky, but works for now
+#ifdef BGQ 
+    if (basis_->real())
+    {
+       while (mb%8 != 0)
+          mb++;
+       while (nb%8 != 0)
+          nb++;
+    }
+    else
+    {
+       while (mb%4 != 0)
+          mb++;
+       while (nb%8 != 0)
+          nb++;
+    }
+#endif
 
     if (setnewctxt)
       ctxt_ = newctxt;

@@ -419,7 +419,7 @@ void DoubleMatrix::init_size(int m, int n, int mb, int nb)
 
   //ewd:  force local data sizes to be 32-byte aligned
 #ifdef BGQ 
-  while (mb_%4 != 0)
+  while (mb_%8 != 0)
      mb_++;
   while (nb_%8 != 0)
      nb_++;
@@ -500,7 +500,7 @@ void ComplexMatrix::init_size(int m, int n, int mb, int nb)
   if ( nb_ == 0 ) nb_ = 1;
   // force local data sizes to be 32-byte aligned
 #ifdef BGQ 
-  while (mb_%2 != 0)
+  while (mb_%4 != 0)
      mb_++;
   while (nb_%8 != 0)
      nb_++;

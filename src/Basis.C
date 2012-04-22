@@ -677,10 +677,10 @@ bool BasisImpl::resize(const UnitCell& cell, const UnitCell& refcell,
     ptr_less<Node>()))->size();
 #ifdef BGQ
   if (real_)
-     while (maxlocalsize_%4 != 0)
+     while (maxlocalsize_%8 != 0)
         maxlocalsize_++;
   else
-     while (maxlocalsize_%2 != 0)
+     while (maxlocalsize_%4 != 0)
         maxlocalsize_++;
 #endif     
   minlocalsize_ = (*min_element(nodes.begin(), nodes.end(), 

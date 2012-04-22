@@ -1380,7 +1380,8 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
   const vector<double>& occ = sd_.occ();
   const vector<double>& eig = sd_.eig();
   const int ngwl = basis_.localsize();
-  const int mloc = basis_.maxlocalsize();
+  //const int mloc = basis_.maxlocalsize();
+  const int mloc = sd_.c().mloc();
   // define atom block size
   const int na_block_size = 32;
   vector<vector<double> > tau;
@@ -1878,7 +1879,7 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
           tmap["fnl_gemm"].stop();
         }
         else {
-          c_lda = sd_.c().mloc();                                        
+           c_lda = mloc;
           complex<double> zzero = complex<double>(0.0,0.0);
           complex<double> zone = complex<double>(1.0,0.0);
           char cc='c';
