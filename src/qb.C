@@ -115,6 +115,11 @@ using namespace std;
 #include "RunTimer.h"
 #include "HubbardU.h"
 #include "Memory.h"
+#include "profile.h"
+
+#ifdef USE_CTF
+#include "cyclopstf.h"
+#endif
 #if BGLDEBUG
 #include <rts.h>
 #endif
@@ -135,7 +140,25 @@ int main(int argc, char **argv, char **envp)
   ApcInit();
 #endif
 #ifdef USE_MPIP
-    MPI_Pcontrol(0);
+  MPI_Pcontrol(0);
+#endif
+#ifdef USE_CTF
+  {
+    int myRank,numPes;
+    MPI_Comm_rank(MPI_COMM_WORLD, &myRank);
+    MPI_Comm_size(MPI_COMM_WORLD, &numPes);
+    CTF_init(MPI_COMM_WORLD, myRank, numPes); 
+    CTF_init_complex(MPI_COMM_WORLD, myRank, numPes); 
+  }    
+#endif
+#ifdef TAU
+  int myRank;
+  MPI_Comm_rank(MPI_COMM_WORLD, &myRank);
+  TAU_PROFILE_TIMER(timer, "main", "int (int, char**)", TAU_USER);
+  TAU_PROFILE_START(timer);
+  TAU_PROFILE_INIT(argc, argv);
+  TAU_PROFILE_SET_NODE(myRank);
+  TAU_PROFILE_SET_CONTEXT(0);
 #endif
 
 #if BGLDEBUG
@@ -342,7 +365,7 @@ int main(int argc, char **argv, char **envp)
 #ifdef USE_JAGGEMM
   setup_grid();
 #endif  
-  
+
   if ( argc == 2 )
   {
     // input file was given as a command line argument
@@ -373,8 +396,12 @@ int main(int argc, char **argv, char **envp)
   }
 
   } // end of Context scope
+  TAU_PROFILE_STOP(timer);
 #if USE_APC
   ApcFinalize();
+#endif
+#ifdef USE_CTF
+  CTF_exit();
 #endif
 #if USE_MPI
   MPI_Finalize();

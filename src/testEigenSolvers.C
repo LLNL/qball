@@ -107,7 +107,7 @@ int main(int argc, char **argv)
             complex<double> cij = (sij,zij);
             s[ival] = cij;
           }
-
+    /*
     if (mype == 0) {
       cout << "Starting matrix:" << endl;
       for ( int m = 0; m < s.nblocks(); m++ )
@@ -122,15 +122,15 @@ int main(int argc, char **argv)
               int ival = iii + jjj * s.mloc();
               cout << "  " << iii << " " << jjj << "   " << s[ival] << endl;
             }
-      cout << endl;
+      cout << endl;      
     }
-
+    */
 
     valarray<double> w1(s.m());
     valarray<double> w2(s.m());
 
     if (mype == 0) 
-      cout << "Calculating eigenvalues and eigenvectors with heevx..." << endl;
+      cout << "Calculating eigenvalues and eigenvectors with heevr..." << endl;
     
     ComplexMatrix z1(s.context(),s.n(),s.n(),s.nb(),s.nb());
     ComplexMatrix z2(s.context(),s.n(),s.n(),s.nb(),s.nb());
@@ -140,7 +140,7 @@ int main(int argc, char **argv)
     if (mype == 0)
       cout << "matrix dimensions = " << c1.m() << " x " << c1.n() << " (" << c1.mb() << " x " << c1.nb() << " )" << endl;
     
-    c1.heevx('l',w1,z1);
+    c1.heevr('l',w1,z1);
     
     if (mype == 0) {
       cout << "Eigenvalues:  " << endl;
@@ -149,8 +149,9 @@ int main(int argc, char **argv)
         if (i%8 == 0) cout << endl;
       }
       cout << endl;
-      cout << "Eigenvectors:  " << endl;
 
+      /*
+      cout << "Eigenvectors:  " << endl;
       for ( int m = 0; m < z1.nblocks(); m++ )
         for ( int l = 0; l < z1.mblocks(); l++ )
           for ( int y = 0; y < z1.nbs(m); y++ )  
@@ -164,6 +165,8 @@ int main(int argc, char **argv)
               cout << "  " << iii << " " << jjj << "   " << z1[ival] << endl;
             }
       cout << endl;
+      */
+      
     }
     
     if (mype == 0) 
@@ -179,9 +182,9 @@ int main(int argc, char **argv)
         if (i%8 == 0) cout << endl;
       }
       cout << endl;
+
+      /*
       cout << "Eigenvectors:  " << endl;
-
-
       for ( int m = 0; m < z2.nblocks(); m++ )
         for ( int l = 0; l < z2.mblocks(); l++ )
           for ( int y = 0; y < z2.nbs(m); y++ )  
@@ -195,6 +198,9 @@ int main(int argc, char **argv)
               cout << "  " << iii << " " << jjj << "   " << z2[ival] << endl;
             }
       cout << endl;
+      */
+
+      
     }
 
     /*

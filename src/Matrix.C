@@ -21,6 +21,9 @@ using namespace std;
 
 #include "Matrix.h"
 #include "profile.h"
+#ifdef USE_CTF
+#include "cyclopstf.h"
+#endif
 
 #ifdef ADD_
 #define numroc     numroc_
@@ -439,10 +442,6 @@ void DoubleMatrix::init_size(int m, int n, int mb, int nb)
   if ( n_ != 0 )
     nloc_ = numroc(&n_,&nb_,&mycol_,&isrcproc,&npcol_);
   size_ = mloc_ * nloc_;
-
-  //ewd DEBUG
-  //cout << "DOUBLE_MATRIX_INIT:  mype = " << ctxt_.mype() << ", m = " << m_ << ", n = " << n_ << ", mb = " << mb_ << ", nb = " << nb_ << ", mloc = " << mloc_ << ", nloc = " << nloc_ << endl;
-
   
   // set leading dimension of val array to mloc_;
   lld_ = mloc_;
@@ -524,9 +523,6 @@ void ComplexMatrix::init_size(int m, int n, int mb, int nb)
   // set leading dimension of val array to mloc_;
   lld_ = mloc_;
   if ( lld_ == 0 ) lld_ = 1;
-
-  //ewd DEBUG
-  //cout << "COMPLEX_MATRIX_INIT:  mype = " << ctxt_.mype() << ", m = " << m_ << ", n = " << n_ << ", mb = " << mb_ << ", nb = " << nb_ << ", mloc = " << mloc_ << ", nloc = " << nloc_ << endl;
 
   // total and local number of blocks
   mblocks_ = 0;
@@ -1530,10 +1526,17 @@ void DoubleMatrix::gemm(char transa, char transb,
 #ifdef SCALAPACK
     QB_Pstart(3, pdgemm);
     int ione=1;
+#ifdef USE_CTF
+    CTF_pdgemm(transa, transb, m, n, k, alpha,
+	       a.val, ione, ione, a.desc_,
+	       b.val, ione, ione, b.desc_,
+	       beta, val, ione, ione, desc_);
+#else
     pdgemm(&transa, &transb, &m, &n, &k, &alpha,
          a.val, &ione, &ione, a.desc_,
          b.val, &ione, &ione, b.desc_,
          &beta, val, &ione, &ione, desc_);
+#endif
     QB_Pstop(pdgemm);
 #else
     dgemm(&transa, &transb, &m, &n, &k, &alpha, a.val, &a.lld_, 
@@ -1575,10 +1578,17 @@ void ComplexMatrix::gemm(char transa, char transb,
 #ifdef SCALAPACK
     int ione=1;
     QB_Pstart(4, pzgemm);
+#ifdef USE_CTF
+    CTF_pzgemm(transa, transb, m, n, k, alpha,
+	       a.val, ione, ione, a.desc_,
+	       b.val, ione, ione, b.desc_,
+	       beta, val, ione, ione, desc_);
+#else
     pzgemm(&transa, &transb, &m, &n, &k, &alpha,
          a.val, &ione, &ione, a.desc_,
          b.val, &ione, &ione, b.desc_,
          &beta, val, &ione, &ione, desc_);
+#endif
     QB_Pstop(pzgemm);
 #else
     zgemm(&transa, &transb, &m, &n, &k, &alpha, a.val, &a.lld_, 
@@ -3192,52 +3202,43 @@ void ComplexMatrix::heevr(char uplo, valarray<double>& w, ComplexMatrix& z) {
       MPI_Bcast(&w[0], m_, MPI_DOUBLE, 0, ctxt_.comm());
     }
     else {
-      int ione=1;
-      int lwork=-1;
-      int lrwork=-1;
-      int liwork=-1;
-      complex<double> tmplwork;
-      double tmplrwork;
-      int tmpliwork;
-    
-      // first call to get optimal lwork and lrwork sizes
-      //pzheevr(&jobz, &uplo, &n_, val, &ione, &ione, desc_, &w[0], 
-      //     z.val, &ione, &ione, z.desc_, &tmplwork, &lwork,
-      //     &tmplrwork, &lrwork, &tmpliwork, &liwork, &info);
+       double dzero = 0.0;
+       int ione=1;
+       int lwork=-1;
+       int lrwork=-1;
+       int liwork=-1;
+       complex<double> tmplwork;
+       double tmplrwork;
+       int tmpliwork;
+       char range = 'A';
+       int m,nz;
+       
+       // first call to get optimal lwork and lrwork sizes
+       pzheevr(&jobz, &range, &uplo, &n_, val, &ione, &ione, desc_,
+               &dzero, &dzero, &ione, &ione,&m,&nz,
+               &w[0], z.val, &ione, &ione, z.desc_, &tmplwork, &lwork,
+               &tmplrwork, &lrwork, &tmpliwork, &liwork, &info);
 
-      // pzheevd does not always calculate sizes correctly:  need to call pdstedc separately
-      // and choose the larger value
 
-      double tmplrwork2, tmpe, tmpq;
-      int tmpliwork2;
-      char tmpcompz = 'I';
-      pdstedc(&tmpcompz, &n_, &w[0], &tmpe, &tmpq, &ione, &ione, desc_, &tmplrwork2, &lwork,
-              &tmpliwork2, &liwork, &info);
+       lrwork = (int) tmplrwork + 1;
+       double* rwork = new double[lrwork];
+       liwork = (int) tmpliwork + 1;
+       int* iwork = new int[liwork];      
 
-      // correct for offset between pdstedc and pzheevd
-      //tmplrwork2 += 2*n_ + n_*n_; // this is too big!
-      //   in pzheevd:  llrwork = lrwork - N - NP0*NQ0
-      // we know tmplrwork = 1 + 8*N + 2*NP0*NQ0 --> NP0*NQ0 = (tmplrwork-1-8*n_)/2
-      tmplrwork2 += n_ + 0.5*(tmplrwork-1-8*n_);
-      
-      if (tmplrwork2 > tmplrwork)
-        lrwork = (int) tmplrwork2 + 1;
-      else 
-        lrwork = (int) tmplrwork + 1;
-      double* rwork = new double[lrwork];
-      
-      if (tmpliwork2 > tmpliwork)
-        liwork = (int) tmpliwork2 + 1;
-      else 
-        liwork = (int) tmpliwork + 1;
-      int* iwork = new int[liwork];
-      
-      lwork = (int) real(tmplwork) + 1;
-      complex<double>* work=new complex<double>[lwork];
+       //cout << "PZHEEVR.DEBUG:  mype = " << ctxt_.mype() << ", lrwork = " << lrwork << ", liwork = " << liwork << ", tmplwork = " << real(tmplwork) << endl;
 
-      //pzheevr(&jobz, &uplo, &n_, val, &ione, &ione, desc_, &w[0], 
-      //        z.val, &ione, &ione, z.desc_, work, &lwork,
-      //        rwork, &lrwork, iwork, &liwork, &info);
+
+       lwork = (int) real(tmplwork) + 1;
+       complex<double>* work=new complex<double>[lwork];
+
+      pzheevr(&jobz, &range, &uplo, &n_, val, &ione, &ione, desc_,
+               &dzero, &dzero, &ione, &ione,&m,&nz,
+               &w[0], z.val, &ione, &ione, z.desc_, work, &lwork,
+               rwork, &lrwork, iwork, &liwork, &info);
+
+      cout << "PZHEEVR.DEBUG:  mype = " << ctxt_.mype() << ", m = " << m << ", nz = " << nz << ", w[0] = " << w[0] << endl;
+
+
       MPI_Bcast(&w[0], m_, MPI_DOUBLE, 0, ctxt_.comm());
       delete[] work;
       delete[] rwork;
