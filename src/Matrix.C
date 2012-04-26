@@ -3040,6 +3040,12 @@ void ComplexMatrix::heevd(char uplo, valarray<double>& w, ComplexMatrix& z) {
 ////////////////////////////////////////////////////////////////////////////////
 // compute eigenvalues and eigenvectors, using pzheevx
 void ComplexMatrix::heevx(char uplo, valarray<double>& w, ComplexMatrix& z) {
+   double default_tol = 1.E-8;
+   heevx(uplo,w,z,default_tol);
+}
+////////////////////////////////////////////////////////////////////////////////
+// compute eigenvalues and eigenvectors, using pzheevx
+void ComplexMatrix::heevx(char uplo, valarray<double>& w, ComplexMatrix& z, double tolerance) {
 
   // this currently doesn't work -- pzheevx returning wrong eigenvectors for some reason
 
@@ -3056,30 +3062,16 @@ void ComplexMatrix::heevx(char uplo, valarray<double>& w, ComplexMatrix& z) {
     int lwork=-1;
     int lrwork=-1;
     int liwork=-1;
-    double vl,vu,gap;
-    int il,iu,neig,nz,tmpifail,iclustr;
+    double vl,vu;
+    int il,iu,neig,nz,tmpifail;
     complex<double> tmplwork;
     double tmplrwork;
     int tmpliwork;
-
-    //SUBROUTINE PZHEEVX( JOBZ, RANGE, UPLO, N, A, IA, JA, DESCA, VL, 
-   //                    $                    VU, IL, IU, ABSTOL, M, NZ, W, ORFAC, Z, IZ,
-    //                    $                    JZ, DESCZ, WORK, LWORK, RWORK, LRWORK, IWORK,
-    //                    $                    LIWORK, IFAIL, ICLUSTR, GAP, INFO )
-    
-    //  void pzheevx(const char*, const char*, const char*, const int*, 
-    //           complex<double>*, const int*, const int*, const int*, // up to desca here
-    //           const double*, const double*, const int*, const int*, // iu
-    //           const double*, int*, int*, double*, const double*, // orfac
-    //           complex<double>*, const int*, const int*, const int*, //descz
-    //           complex<double>*, const int*, double*, const int*, int*, int*, //liwork
-    //           int*, int*, double*, int*);
+    int* iclustr = new int[2*ctxt_.size()];
+    double* gap = new double[ctxt_.size()];
 
     const double orfac = 0.0;  // eigenvalue threshold to reorthogonalize eigenvectors
-    const double abstol = 1.E-3;
-
-    //ewd DEBUG
-    cout << "Calling pzheevx to get work sizes" << endl;
+    const double abstol = tolerance;
 
     QB_Pstart(9,pzheevx); 
 
@@ -3087,10 +3079,7 @@ void ComplexMatrix::heevx(char uplo, valarray<double>& w, ComplexMatrix& z) {
     pzheevx(&jobz, &range, &uplo, &n_, val, &ione, &ione, desc_, 
             &vl,&vu,&il,&iu,&abstol,&neig,&nz,
             &w[0], &orfac, z.val, &ione, &ione, z.desc_, &tmplwork, &lwork,
-           &tmplrwork, &lrwork, &tmpliwork, &liwork, &tmpifail, &iclustr, &gap, &info);
-
-    //ewd DEBUG
-    cout << "pzheevx:  lrwork = " << tmplrwork << ", liwork = " << tmpliwork << ", lwork = " << tmplwork << endl;
+           &tmplrwork, &lrwork, &tmpliwork, &liwork, &tmpifail, iclustr, gap, &info);
 
     lrwork = (int) tmplrwork + 1;
     double* rwork = new double[lrwork];
@@ -3103,7 +3092,7 @@ void ComplexMatrix::heevx(char uplo, valarray<double>& w, ComplexMatrix& z) {
     pzheevx(&jobz, &range, &uplo, &n_, val, &ione, &ione, desc_, 
             &vl,&vu,&il,&iu,&abstol,&neig,&nz,
             &w[0], &orfac, z.val, &ione, &ione, z.desc_, work, &lwork,
-           rwork, &lrwork, iwork, &liwork, ifail, &iclustr, &gap, &info);
+           rwork, &lrwork, iwork, &liwork, ifail, iclustr, gap, &info);
 
     QB_Pstop(pzheevx); 
     for (int i=0; i<m_; i++) 
@@ -3111,10 +3100,11 @@ void ComplexMatrix::heevx(char uplo, valarray<double>& w, ComplexMatrix& z) {
         cout << "<WARNING> Matrix::heevx eigenvector " << i << " failed to converge! </WARNING>" << endl;
 
     //ewd DEBUG
-    cout << "pzheevx eigs, pe " << ctxt_.mype() << ": ";
-    for (int i=0; i<m_; i++) 
-      cout << w[i]*27.2116 << " ";
-    cout << endl;
+    //cout << "pzheevx eigs, pe " << ctxt_.mype() << ": ";
+    //for (int i=0; i<m_; i++) 
+    //  cout << w[i]*27.2116 << " ";
+    //cout << endl;
+    //cout << "pzheevx eigs, pe " << ctxt_.mype() << ", w[0] = " << w[0] << ", neig = " << neig << endl;
 
     MPI_Bcast(&w[0], m_, MPI_DOUBLE, 0, ctxt_.comm());
 

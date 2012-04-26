@@ -503,6 +503,7 @@ class ComplexMatrix
     void heevr(char uplo, valarray<double>& w, ComplexMatrix& z);
     // compute eigenvalues and eigenvectors of hermitian matrix *this, using pzheevx
     void heevx(char uplo, valarray<double>& w, ComplexMatrix& z);
+    void heevx(char uplo, valarray<double>& w, ComplexMatrix& z, double tolerance);
     // compute eigenvalues (only) of hermitian matrix *this
     void heev(char uplo, valarray<double>& w);
     // compute eigenvalues (only) of generalized (non-symmetric) matrix *this

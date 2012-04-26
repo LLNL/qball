@@ -25,6 +25,12 @@ using namespace std;
 #include "Context.h"
 #include "Matrix.h"
 
+
+bool runheevr = false;
+bool runheevx = true;
+bool runheevd = false;
+bool runheev = false;
+
 const double nrandinv = 1./(1.0*RAND_MAX + 1.0);
 const double maxrand = 0.0001;  // maximum random perturbation to identity matrix
 
@@ -52,13 +58,16 @@ int main(int argc, char **argv)
   {
 
     int nprow, npcol, n;
-    if (argc == 4) {
+    double xtol;
+    if (argc == 4 || argc == 5) {
       nprow = atoi(argv[1]);
       npcol = atoi(argv[2]);
       n = atoi(argv[3]);
+      if (argc == 5)
+         xtol = atof(argv[4]);
     }
     else {
-      cerr << "Usage:  testEigenSolvers nprow npcol matrix_size" << endl;
+      cerr << "Usage:  testEigenSolvers nprow npcol matrix_size [tolerance]" << endl;
 #if USE_MPI
       MPI_Abort(MPI_COMM_WORLD,2);
 #else
@@ -126,108 +135,130 @@ int main(int argc, char **argv)
     }
     */
 
-    valarray<double> w1(s.m());
-    valarray<double> w2(s.m());
+    if (runheevr)
+    {
+       if (mype == 0) 
+          cout << "Calculating eigenvalues and eigenvectors with heevr..." << endl;
+    
+       valarray<double> w1(s.m());
+       ComplexMatrix z1(s.context(),s.n(),s.n(),s.nb(),s.nb());
+       ComplexMatrix c1(s);
 
-    if (mype == 0) 
-      cout << "Calculating eigenvalues and eigenvectors with heevr..." << endl;
-    
-    ComplexMatrix z1(s.context(),s.n(),s.n(),s.nb(),s.nb());
-    ComplexMatrix z2(s.context(),s.n(),s.n(),s.nb(),s.nb());
-    
-    ComplexMatrix c1(s);
+       if (mype == 0)
+          cout << "matrix dimensions = " << c1.m() << " x " << c1.n() << " (" << c1.mb() << " x " << c1.nb() << " )" << endl;
 
-    if (mype == 0)
-      cout << "matrix dimensions = " << c1.m() << " x " << c1.n() << " (" << c1.mb() << " x " << c1.nb() << " )" << endl;
+       tmap["heevr"].start();
+       c1.heevr('l',w1,z1);
+       tmap["heevr"].stop();
     
-    c1.heevr('l',w1,z1);
-    
-    if (mype == 0) {
-      cout << "Eigenvalues:  " << endl;
-      for (int i=0; i<s.m(); i++) {
-        cout << "  " << w1[i];
-        if (i%8 == 0) cout << endl;
-      }
-      cout << endl;
+       if (mype == 0) {
+          cout << "Eigenvalues:  " << endl;
+          for (int i=0; i<s.m(); i++) {
+             cout << "  " << w1[i];
+             if (i%8 == 0) cout << endl;
+          }
+          cout << endl;
 
-      /*
-      cout << "Eigenvectors:  " << endl;
-      for ( int m = 0; m < z1.nblocks(); m++ )
-        for ( int l = 0; l < z1.mblocks(); l++ )
-          for ( int y = 0; y < z1.nbs(m); y++ )  
-            for ( int x = 0; x < z1.mbs(l); x++ ) {
-              int i = z1.i(l,x);
-              int j = z1.j(m,y);
-            
-              int iii = x + l*z1.mb();
-              int jjj = y + m*z1.nb();
-              int ival = iii + jjj * z1.mloc();
-              cout << "  " << iii << " " << jjj << "   " << z1[ival] << endl;
-            }
-      cout << endl;
-      */
-      
+       }      
     }
     
-    if (mype == 0) 
-      cout << "Calculating eigenvalues and eigenvectors with heevd..." << endl;
+    if (runheevx)
+    {
+       if (mype == 0 && argc == 5) 
+          cout << "Calculating eigenvalues and eigenvectors with heevx (tolerance = " << xtol << "..." << endl;
+       else if (mype == 0 && argc == 4) 
+          cout << "Calculating eigenvalues and eigenvectors with heevx..." << endl;
     
-    ComplexMatrix c2(s);
-    c2.heevd('l',w2,z2);
+       valarray<double> w2(s.m());
+       ComplexMatrix z2(s.context(),s.n(),s.n(),s.nb(),s.nb());    
+       ComplexMatrix c2(s);
+
+       tmap["heevx"].start();
+       if (argc == 5)
+          c2.heevx('l',w2,z2,xtol);
+       else
+          c2.heevx('l',w2,z2);
+       tmap["heevx"].stop();
     
-    if (mype == 0) {
-      cout << "Eigenvalues:  " << endl;
-      for (int i=0; i<s.m(); i++) {
-        cout << "  " << w2[i];
-        if (i%8 == 0) cout << endl;
-      }
-      cout << endl;
-
-      /*
-      cout << "Eigenvectors:  " << endl;
-      for ( int m = 0; m < z2.nblocks(); m++ )
-        for ( int l = 0; l < z2.mblocks(); l++ )
-          for ( int y = 0; y < z2.nbs(m); y++ )  
-            for ( int x = 0; x < z2.mbs(l); x++ ) {
-              int i = z2.i(l,x);
-              int j = z2.j(m,y);
-            
-              int iii = x + l*z2.mb();
-              int jjj = y + m*z2.nb();
-              int ival = iii + jjj * z2.mloc();
-              cout << "  " << iii << " " << jjj << "   " << z2[ival] << endl;
-            }
-      cout << endl;
-      */
-
-      
+       if (mype == 0) {
+          cout << "Eigenvalues:  " << endl;
+          for (int i=0; i<s.m(); i++) {
+             cout << "  " << w2[i];
+             if (i%8 == 0) cout << endl;
+          }
+          cout << endl;
+       }      
     }
 
-    /*
-    if (mype == 0) 
-      cout << "Calculating eigenvalues and eigenvectors with heev..." << endl;
+    if (runheevd)
+    {
+       if (mype == 0) 
+          cout << "Calculating eigenvalues and eigenvectors with heevd..." << endl;
     
-    ComplexMatrix c3(s);
-    c3.heev('l',w,z);
+       valarray<double> w4(s.m());
+       ComplexMatrix z4(s.context(),s.n(),s.n(),s.nb(),s.nb());    
+       ComplexMatrix c4(s);
+
+       tmap["heevd"].start();
+       c4.heevd('l',w4,z4);
+       tmap["heevd"].stop();
     
-    if (mype == 0) {
-      cout << "Eigenvalues:  " << endl;
-      for (int i=0; i<s.m(); i++) {
-        cout << "  " << w[i];
-        if (i%8 == 0) cout << endl;
-      }
-      cout << endl;
-      cout << "Eigenvectors:  " << endl;
-      //z.print(cout);
-      cout << endl;
+       if (mype == 0) {
+          cout << "Eigenvalues:  " << endl;
+          for (int i=0; i<s.m(); i++) {
+             cout << "  " << w4[i];
+             if (i%8 == 0) cout << endl;
+          }
+          cout << endl;
+       }
     }
-    */
+
+    if (runheev)
+    {
+       if (mype == 0) 
+          cout << "Calculating eigenvalues and eigenvectors with heev..." << endl;
+    
+       valarray<double> w3(s.m());
+       ComplexMatrix z3(s.context(),s.n(),s.n(),s.nb(),s.nb());    
+       ComplexMatrix c3(s);
+
+       tmap["heev"].start();
+       c3.heev('l',w3,z3);
+       tmap["heev"].stop();
+    
+       if (mype == 0) {
+          cout << "Eigenvalues:  " << endl;
+          for (int i=0; i<s.m(); i++) {
+             cout << "  " << w3[i];
+             if (i%8 == 0) cout << endl;
+          }
+          cout << endl;
+       }
+    }
+
     
     if (mype == 0) 
       cout << "Done." << endl;
     tmap["total"].stop();
+
+
+    for ( map<string,Timer>::iterator i = tmap.begin(); i != tmap.end(); i++ ) {
+       double time = (*i).second.cpu();
+       double tmin = time;
+       double tmax = time;
+    
+       ctxt.dmin(1,1,&tmin,1);
+       ctxt.dmax(1,1,&tmax,1);
+       if (mype == 0) { 
+          cout << "  timing "
+               << setw(10) << (*i).first
+               << " : " << setprecision(4) << setw(9) << tmin
+               << " "   << setprecision(4) << setw(9) << tmax << endl;
+       }
+    }
   }
 
+  
 #ifdef USE_MPI
   MPI_Finalize();
 #endif
