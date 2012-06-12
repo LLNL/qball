@@ -27,8 +27,8 @@ using namespace std;
 
 
 bool runheevr = false;
-bool runheevx = true;
-bool runheevd = false;
+bool runheevx = false;
+bool runheevd = true;
 bool runheev = false;
 
 const double nrandinv = 1./(1.0*RAND_MAX + 1.0);
@@ -39,7 +39,6 @@ int main(int argc, char **argv)
 
   // set up map of timers
   map<string,Timer> tmap;
-  tmap["total"].start();
 
   // choose random number seed based on system clock
   srand((unsigned)time(NULL));
@@ -75,7 +74,8 @@ int main(int argc, char **argv)
 #endif
     }
     
-    Timer tm;
+    tmap["total"].start();
+    tmap["init"].start();
     Context ctxt(nprow,npcol);
 
     if ( mype == 0 ) {
@@ -116,6 +116,8 @@ int main(int argc, char **argv)
             complex<double> cij = (sij,zij);
             s[ival] = cij;
           }
+    tmap["init"].stop();
+
     /*
     if (mype == 0) {
       cout << "Starting matrix:" << endl;

@@ -126,6 +126,10 @@ testFourierTransform: $(OBJDIR)/testFourierTransform.o $(OBJDIR)/FourierTransfor
 	$(LD) $(DFLAGS) -o $@ $^ $(LDFLAGS)
 testBlas: $(OBJDIR)/testBlas.o
 	$(LD) $(DFLAGS) -o $@ $^ $(LDFLAGS)
+testGram: $(OBJDIR)/testGram.o $(OBJDIR)/Matrix.o $(OBJDIR)/Context.o
+	$(LD) $(DFLAGS) -o $@ $^ $(LDFLAGS)
+testPgemm: $(OBJDIR)/testPgemm.o $(OBJDIR)/Matrix.o $(OBJDIR)/Context.o
+	$(LD) $(DFLAGS) -o $@ $^ $(LDFLAGS)
 testEigenSolvers: $(OBJDIR)/testEigenSolvers.o $(OBJDIR)/Matrix.o $(OBJDIR)/Context.o
 	$(LD) $(DFLAGS) -o $@ $^ $(LDFLAGS)
 xmlSpecies: xmlSpecies.o qbox_xmlns.o
