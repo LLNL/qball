@@ -46,10 +46,10 @@ EnergyFunctional::EnergyFunctional(const Sample& s, const Wavefunction& wf, Char
   
   // define FT's on vbasis contexts
   
-  int np0v = vbasis_->np(0);
-  int np1v = vbasis_->np(1);
-  int np2v = vbasis_->np(2);
   vft = cd_.vft();
+  int np0v = vft->np0();
+  int np1v = vft->np1();
+  int np2v = vft->np2();
   
   v_r.resize(wf_.nspin());
   for ( int ispin = 0; ispin < wf_.nspin(); ispin++ ) {
@@ -276,6 +276,7 @@ void EnergyFunctional::update_vhxc(void) {
   xcp->update(v_r);
   exc_ = xcp->exc();
   tmap["exc"].stop();
+
 
   /*
   //ewd DEBUG: calculate integral of (vxc(r)+vhart(r))*rhor(r) to compare w. PWSCF
@@ -932,7 +933,7 @@ double EnergyFunctional::energy(bool compute_hpsi, Wavefunction& dwf,
     }
     tmap["hpsi"].stop();
   } // if compute_hpsi
-  
+
   if ( compute_forces ) {
     const int* idx = vbasis_->idx_ptr();
     const double* gx0 = vbasis_->gx_ptr(0);

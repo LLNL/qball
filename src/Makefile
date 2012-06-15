@@ -118,7 +118,7 @@ makedirs:
 	@if [ ! -e .depend_$(ARCH) ]; then touch .depend_$(ARCH) ; fi
 
 testMatrix: $(OBJDIR)/testMatrix.o $(OBJDIR)/Matrix.o $(OBJDIR)/Context.o
-	$(LD) $(DFLAGS) -o $@ $^ $(LDFLAGS)
+	$(LD) $(DFLAGS) -o $@-$(ARCH) $^ $(LDFLAGS)
 testBasis: $(OBJDIR)/testBasis.o $(OBJDIR)/Basis.o $(OBJDIR)/UnitCell.o $(OBJDIR)/Context.o
 	$(LD) $(DFLAGS) -o $@ $^ $(LDFLAGS)
 testFourierTransform: $(OBJDIR)/testFourierTransform.o $(OBJDIR)/FourierTransform.o $(OBJDIR)/Basis.o \
@@ -127,11 +127,11 @@ testFourierTransform: $(OBJDIR)/testFourierTransform.o $(OBJDIR)/FourierTransfor
 testBlas: $(OBJDIR)/testBlas.o
 	$(LD) $(DFLAGS) -o $@ $^ $(LDFLAGS)
 testGram: $(OBJDIR)/testGram.o $(OBJDIR)/Matrix.o $(OBJDIR)/Context.o
-	$(LD) $(DFLAGS) -o $@ $^ $(LDFLAGS)
+	$(LD) $(DFLAGS) -o $@-$(ARCH) $^ $(LDFLAGS)
 testPgemm: $(OBJDIR)/testPgemm.o $(OBJDIR)/Matrix.o $(OBJDIR)/Context.o
-	$(LD) $(DFLAGS) -o $@ $^ $(LDFLAGS)
+	$(LD) $(DFLAGS) -o $@-$(ARCH) $^ $(LDFLAGS)
 testEigenSolvers: $(OBJDIR)/testEigenSolvers.o $(OBJDIR)/Matrix.o $(OBJDIR)/Context.o
-	$(LD) $(DFLAGS) -o $@ $^ $(LDFLAGS)
+	$(LD) $(DFLAGS) -o $@-$(ARCH) $^ $(LDFLAGS)
 xmlSpecies: xmlSpecies.o qbox_xmlns.o
 	$(LD) $(DFLAGS) -o $@ $^ $(LDFLAGS)
 xmlget: xmlget.o

@@ -55,6 +55,19 @@ class Ecut : public Var
       s->wf.set_ecut(0.5*v);
       if ( s->wfv != 0 )
         s->wfv->set_ecut(0.5*v);
+
+      /*
+      //ewd:  add this to avoid users running without initializing wf
+      //ewd:  note:  this can cause problems if users set ecut before calling .sys file
+      double amp = 0.02;
+      bool highmem = false;
+      if (s->ctrl.extra_memory >= 3)
+         highmem = true;
+      if (s->ctrl.ultrasoft)
+         s->wf.randomize_us(amp,s->atoms,highmem);
+      else
+         s->wf.randomize(amp,highmem);
+      */
     }
     
     return 0;

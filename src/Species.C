@@ -52,7 +52,7 @@ bool Species::initialize(double rcpsval)
 {
   // initialize the Species
   rcps_ = rcpsval;
-  
+
   assert(description_ != "undefined");
   
   const double fpi = 4.0 * M_PI;
@@ -116,11 +116,15 @@ bool Species::initialize(double rcpsval)
   //const double rmax = 40.0;
   //while (deltar_*ndft_ < rmax) 
   //  ndft_ *= 2;
-
   //if (ctxt_.oncoutpe()) 
-  //  cout << "<!-- Species " << name_ << ":  extending grid to rmax = " << rmax 
+  //   cout << "<!-- Species " << name_ << ":  extending grid to rmax = " << rmax 
   //       << " to increase vnlg resolution (" << ndft_ << " pts) -->" << endl;
 
+  //ewd DEBUG  
+  ndft_ *= 2;
+  if (ctxt_.oncoutpe()) 
+     cout << "SPECIES.ndft = " << ndft_ << endl;
+  
 
   rps_.resize(ndft_);
   for ( int i = 0; i < ndft_; i++ )

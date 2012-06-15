@@ -116,8 +116,6 @@ void BOSampleStepper::initialize_density(void)
   atoms.get_positions(tau0);
   StructureFactor sf;
   sf.init(tau0,*vbasis);
-  // ewd DEBUG
-  cout << "SF.UPDATE CALLED FROM BOSS" << endl;
   sf.update(tau0,*vbasis);
   
   memset( (void*)&rhopst[0], 0, 2*ngloc*sizeof(double) );
@@ -1098,7 +1096,6 @@ void BOSampleStepper::step(int niter)
 #ifdef TAU
   QB_Pstart(14,scfloop);
 #endif
-
         // SCF LOOP
         for ( int itscf = 0; itscf < nitscf_; itscf++ )
         {
@@ -1225,7 +1222,6 @@ void BOSampleStepper::step(int niter)
           
             // reset stepper only if multiple non-selfconsistent steps
             if ( nite_ > 1 ) wf_stepper->preprocess();
-
             double lastnonscfetot;
             const double nonscfthresh = s_.ctrl.threshold_nonscf;
             for ( int ite = 0; ite < nite_; ite++ )

@@ -2523,8 +2523,7 @@ void Wavefunction::print_casino(ostream& os) const {
   
   // for now, assume basis of all SlaterDets are the same size
   if (spincontext_[0]->mycol() == 0) {
-    Basis sdbasis = sd_[0][0]->basis();
-    sdbasis.print_casino(os);
+    sd_[0][0]->basis().print_casino(os);
   }
 // pes not involved in basis print need to wait before sending data to pe0
   wfcontext_->barrier();  

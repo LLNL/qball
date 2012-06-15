@@ -62,6 +62,7 @@ class SlaterDet {
   ~SlaterDet();
   Context& context(void) const { return ctxt_; }
   const Basis& basis(void) const { return *basis_; }
+  Basis& basis(void) { return *basis_; }
   const D3vector kpoint(void) const { return basis_->kpoint(); }
   const ComplexMatrix& c(void) const { return c_; }
   ComplexMatrix& c(void) { return c_; }

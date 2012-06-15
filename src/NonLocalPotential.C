@@ -1870,12 +1870,13 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
         if (basis_.real()) {
           c_lda = 2*sd_.c().mloc();                                        
           tmap["fnl_gemm"].start();                                            
-          //dgemm(&ct,&cn,&nprnaloc,(int*)&nstloc,&twongwl,&one,
-          //      &anl_loc_gamma[0],&twongwl, (double*)c, &c_lda,
-          //      &zero,&fnl_loc_gamma[0],&nprnaloc);
-          dgemm(&ct,&cn,&nprnaloc,(int*)&nstloc,&twomloc,&one,
-                &anl_loc_gamma[0],&twomloc, (double*)c, &c_lda,
+          dgemm(&ct,&cn,&nprnaloc,(int*)&nstloc,&twongwl,&one,
+                &anl_loc_gamma[0],&twongwl, (double*)c, &c_lda,
                 &zero,&fnl_loc_gamma[0],&nprnaloc);
+          //ewd:  this was uncommented prior to 6/15/12, 2:49pm
+          //dgemm(&ct,&cn,&nprnaloc,(int*)&nstloc,&twomloc,&one,
+          //      &anl_loc_gamma[0],&twomloc, (double*)c, &c_lda,
+          //      &zero,&fnl_loc_gamma[0],&nprnaloc);
           tmap["fnl_gemm"].stop();
         }
         else {
@@ -1884,13 +1885,13 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
           complex<double> zone = complex<double>(1.0,0.0);
           char cc='c';
           tmap["fnl_gemm"].start();
-          //zgemm(&cc,&cn,&nprnaloc,(int*)&nstloc,(int*)&ngwl,&zone,
-          //      &anl_loc[0],(int *)&ngwl, (complex<double> *)c, &c_lda,
-          //      &zzero,&fnl_loc[0],&nprnaloc);
-
-          zgemm(&cc,&cn,&nprnaloc,(int*)&nstloc,(int*)&mloc,&zone,
-                &anl_loc[0],(int *)&mloc, (complex<double> *)c, &c_lda,
+          zgemm(&cc,&cn,&nprnaloc,(int*)&nstloc,(int*)&ngwl,&zone,
+                &anl_loc[0],(int *)&ngwl, (complex<double> *)c, &c_lda,
                 &zzero,&fnl_loc[0],&nprnaloc);
+          //ewd:  this was uncommented prior to 6/15/12, 2:49pm
+          //zgemm(&cc,&cn,&nprnaloc,(int*)&nstloc,(int*)&mloc,&zone,
+          //      &anl_loc[0],(int *)&mloc, (complex<double> *)c, &c_lda,
+          //      &zzero,&fnl_loc[0],&nprnaloc);
           tmap["fnl_gemm"].stop();
         }
           
@@ -1969,22 +1970,24 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
           int cp_lda;
           if (basis_.real()) {
             cp_lda = 2*dsd.c().mloc();
-            //dgemm(&cn,&cn,&twongwl,(int*)&nstloc,&nprnaloc,&one,
-            //      &anl_loc_gamma[0],&twongwl, &fnl_loc_gamma[0],&nprnaloc,
-            //      &one,(double*)cp, &cp_lda);
-            dgemm(&cn,&cn,&twomloc,(int*)&nstloc,&nprnaloc,&one,
-                  &anl_loc_gamma[0],&twomloc, &fnl_loc_gamma[0],&nprnaloc,
+            dgemm(&cn,&cn,&twongwl,(int*)&nstloc,&nprnaloc,&one,
+                  &anl_loc_gamma[0],&twongwl, &fnl_loc_gamma[0],&nprnaloc,
                   &one,(double*)cp, &cp_lda);
+            //ewd:  this was uncommented prior to 6/15/12, 2:49pm
+            //dgemm(&cn,&cn,&twomloc,(int*)&nstloc,&nprnaloc,&one,
+            //      &anl_loc_gamma[0],&twomloc, &fnl_loc_gamma[0],&nprnaloc,
+            //      &one,(double*)cp, &cp_lda);
           }
           else {
             int cp_lda = dsd.c().mloc();
             complex<double> zone = complex<double>(1.0,0.0);
-            //zgemm(&cn,&cn,(int*)&ngwl,(int*)&nstloc,&nprnaloc,&zone,
-            //        &anl_loc[0],(int*)&ngwl, &fnl_loc[0],&nprnaloc,
-            //        &zone,(complex<double>*)cp, &cp_lda);
-            zgemm(&cn,&cn,(int*)&mloc,(int*)&nstloc,&nprnaloc,&zone,
-                  &anl_loc[0],(int*)&mloc, &fnl_loc[0],&nprnaloc,
-                  &zone,(complex<double>*)cp, &cp_lda);
+            zgemm(&cn,&cn,(int*)&ngwl,(int*)&nstloc,&nprnaloc,&zone,
+                    &anl_loc[0],(int*)&ngwl, &fnl_loc[0],&nprnaloc,
+                    &zone,(complex<double>*)cp, &cp_lda);
+            //ewd:  this was uncommented prior to 6/15/12, 2:49pm
+            //zgemm(&cn,&cn,(int*)&mloc,(int*)&nstloc,&nprnaloc,&zone,
+            //      &anl_loc[0],(int*)&mloc, &fnl_loc[0],&nprnaloc,
+            //      &zone,(complex<double>*)cp, &cp_lda);
           }
 
           tmap["enl_hpsi"].stop();

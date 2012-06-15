@@ -32,6 +32,8 @@ SlaterDet::SlaterDet(Context& ctxt, const Context& my_col_ctxt, D3vector kpoint,
   basis_ = new Basis(my_col_ctxt,kpoint,ultrasoft_);
   gram_reshape_ = false;
   highmem_ = false;
+  // set seed for randomization
+  srand48(ctxt_.myproc());
 }
 ////////////////////////////////////////////////////////////////////////////////
 SlaterDet::SlaterDet(const SlaterDet& rhs) : ctxt_(rhs.context()),
@@ -2361,8 +2363,8 @@ void SlaterDet::randomize(double amplitude) {
     for ( int i = 0; i < basis_->localsize(); i++ ) {
       double re = drand48();
       double im = drand48();
-      //p[i] += amplitude * complex<double>(re,im);
-      p[i] = amplitude * complex<double>(re,im);
+      p[i] += amplitude * complex<double>(re,im);
+      //p[i] = amplitude * complex<double>(re,im);
     }
   }
   cleanup();

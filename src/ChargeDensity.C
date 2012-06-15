@@ -40,9 +40,15 @@ ChargeDensity::ChargeDensity(Sample& s) : wf_(s.wf),atoms_(s.atoms),ctxt_(s.wf.c
      vbasis_->resize(wf_.cell(),wf_.refcell(),4.0*wf_.ecut());
   
   // define vft_, FT on vbasis context for transforming the density  
-  int np0v = vbasis_->np(0);
-  int np1v = vbasis_->np(1);
-  int np2v = vbasis_->np(2);
+  // add 2 to grid size to avoid aliasing when using non-zero k-points
+  // adding 1 would suffice, but add 2 to keep even numbers
+  int np0v = vbasis_->np(0) + 2;
+  int np1v = vbasis_->np(1) + 2;
+  int np2v = vbasis_->np(2) + 2;
+  while (!vbasis_->factorizable(np0v)) np0v += 2;
+  while (!vbasis_->factorizable(np1v)) np1v += 2;
+  while (!vbasis_->factorizable(np2v)) np2v += 2;
+  
   vft_ = new FourierTransform(*vbasis_,np0v,np1v,np2v);
   rhor.resize(wf_.nspin());
   rhog.resize(wf_.nspin());
@@ -503,18 +509,26 @@ void ChargeDensity::reshape_rhor(const Context& oldvctxt, const Context& newvctx
   Basis* oldvbasis_ = new Basis(oldvctxt, tmpkpoint);
   double ecut = vbasis_->ecut();
   oldvbasis_->resize(wf_.cell(),wf_.refcell(),ecut);
-  int oldnp0v = oldvbasis_->np(0);
-  int oldnp1v = oldvbasis_->np(1);
-  int oldnp2v = oldvbasis_->np(2);
+  int oldnp0v = oldvbasis_->np(0) + 2;
+  int oldnp1v = oldvbasis_->np(1) + 2;
+  int oldnp2v = oldvbasis_->np(2) + 2;
+  while (!oldvbasis_->factorizable(oldnp0v)) oldnp0v += 2;
+  while (!oldvbasis_->factorizable(oldnp1v)) oldnp1v += 2;
+  while (!oldvbasis_->factorizable(oldnp2v)) oldnp2v += 2;
+  
   FourierTransform* oldvft_ = new FourierTransform(*oldvbasis_,oldnp0v,oldnp1v,oldnp2v);
 
   if (vbasis_ != 0) 
     delete vbasis_;
   vbasis_ = new Basis(vcontext_, tmpkpoint);
   vbasis_->resize(wf_.cell(),wf_.refcell(),ecut);
-  int np0v = vbasis_->np(0);
-  int np1v = vbasis_->np(1);
-  int np2v = vbasis_->np(2);
+  int np0v = vbasis_->np(0) + 2;
+  int np1v = vbasis_->np(1) + 2;
+  int np2v = vbasis_->np(2) + 2;
+  while (!vbasis_->factorizable(np0v)) np0v += 2;
+  while (!vbasis_->factorizable(np1v)) np1v += 2;
+  while (!vbasis_->factorizable(np2v)) np2v += 2;
+  
   if (vft_ != 0) 
     delete vft_;
   vft_ = new FourierTransform(*vbasis_,np0v,np1v,np2v);

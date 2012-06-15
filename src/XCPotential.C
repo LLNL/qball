@@ -156,7 +156,7 @@ void XCPotential::update(vector<vector<double> >& vr)
         int inc2=2, inc1=1;
         double *grj = xcf_->grad_rho[j];
         dcopy(&np012loc_,(double*)&tmpr[0],&inc2,grj,&inc1);
-      }
+       }
     }
     else {
       for ( int j = 0; j < 3; j++ ) {
