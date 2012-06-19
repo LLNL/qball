@@ -74,10 +74,20 @@ int RunCmd::action(int argc, char **argv)
   }
 
   if (!s->wf.hasdata()) {
-    s->wf.set_hasdata(true);
-    if ( !atomic_density && ui->oncoutpe()) {
-      cout << "<WARNING> Wavefunction has been neither loaded nor initialized! </WARNING>" << endl;
-      cout << "<WARNING> Use randomize_wf or run -atomic_density to initialize.  </WARNING>" << endl;
+    if ( !atomic_density )
+    {
+       if (ui->oncoutpe())
+          cout << "<INFO> Wavefunction has been neither loaded nor initialized! Calling randomize_wf... </INFO>" << endl;
+       //ewd:  add this to avoid users running without initializing wf
+       //ewd:  note:  this can cause problems if users set ecut before calling .sys file
+       double amp = 0.02;
+       bool highmem = false;
+       if (s->ctrl.extra_memory >= 3)
+          highmem = true;
+       if (s->ctrl.ultrasoft)
+          s->wf.randomize_us(amp,s->atoms,highmem);
+       else
+          s->wf.randomize(amp,highmem);
     }
   }
   

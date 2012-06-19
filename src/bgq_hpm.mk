@@ -11,8 +11,8 @@
 # do this to force manual compilation of key threaded objects
  OMPHACK = 1
 
-# LIBHOME = $(HOME)/software
- LIBHOME = /nfs/tmp2/asde/qball_bgq/lib
+ LIBHOME = $(HOME)/software
+# LIBHOME = /nfs/tmp2/asde/qball_bgq/lib
 
 # XERCESCDIR=$(LIBHOME)/xml/xml-bgq/xerces-c-src_2_5_0
 # XERCESCLIBDIR=$(XERCESCDIR)/lib
