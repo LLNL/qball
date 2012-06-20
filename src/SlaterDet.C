@@ -55,8 +55,8 @@ void SlaterDet::init_usfns(AtomSet* atoms) {
   const int npcol = ctxt_.npcol();
   const int mycol = ctxt_.mycol();
   const int myrow = ctxt_.myrow();
-  const int mloc = basis_->maxlocalsize();
-  const int m = ctxt_.nprow() * mloc;
+  const int mb = basis_->maxlocalsize();
+  const int m = ctxt_.nprow() * mb;
 
   // if this gets called twice, need to delete previous matrices
   for (int i=0; i<betag_.size(); i++) {
@@ -118,12 +118,12 @@ void SlaterDet::init_usfns(AtomSet* atoms) {
         ntot = nbetalm*ctxt_.npcol();
         nloc = nbetalm;
       }
-      betag_[is]->resize(m,ntot,mloc,nloc);
+      betag_[is]->resize(m,ntot,mb,nloc);
 
       //ewd DEBUG
 #ifdef PRINTALL
       if (ctxt_.mype() == 0)
-         cout << "SD.init_usfns, species " << is << " betag matrix size = " << m << " x " << ntot << ", local size = " << mloc << " x " << nloc << endl;
+         cout << "SD.init_usfns, species " << is << " betag matrix size = " << m << " x " << ntot << ", local size = " << mb << " x " << nloc << endl;
 #endif
   
     }

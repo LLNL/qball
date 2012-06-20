@@ -11,8 +11,8 @@
 # do this to force manual compilation of key threaded objects
  OMPHACK = 1
 
- LIBHOME = $(HOME)/software
-# LIBHOME = /nfs/tmp2/asde/qball_bgq/lib
+# LIBHOME = $(HOME)/software
+ LIBHOME = /nfs/tmp2/asde/qball_bgq/lib
 
 # XERCESCDIR=$(LIBHOME)/xml/xml-bgq/xerces-c-src_2_5_0
 # XERCESCLIBDIR=$(XERCESCDIR)/lib
@@ -36,18 +36,15 @@ CC=$(BGQ_SDK_PATH)/comm/xl/bin/mpixlc_r
  LD=$(CXX)
 
  DFLAGS += -DPRINTALL -DUSE_JAGGEMM -DUSE_FFTW -DUSE_CSTDIO_LFS -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DHPM
-# DFLAGS += -DPRINTALL -DUSE_JAGGEMM -DUSE_FFTW -DUSE_CSTDIO_LFS -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DTAU
  
  INCLUDE = -I$(FFTWDIR) -I$(ESSLDIR)/include
  
-# CXXFLAGS= -g -O3 -qarch=qp -DUSE_MPI -DSCALAPACK -DADD_ -D$(PLT) $(INCLUDE) $(DFLAGS)
-# CXXFLAGS= -g -O3 -qsmp=omp -qarch=qp -DUSE_MPI -DSCALAPACK -D$(PLT) $(INCLUDE) $(DFLAGS)
  CXXFLAGS= -g -O3 -qarch=qp -DUSE_MPI -DSCALAPACK -D$(PLT) $(INCLUDE) $(DFLAGS)
  CFLAGS= -qhot=novector -qsimd=auto -g -O3 -DUSE_MPI -DSCALAPACK -D$(PLT) $(INCLUDE) $(DFLAGS)
 
  LIBPATH = -L$(FFTWDIR) -L$(LAPACKDIR) -L$(BLASDIR) -L$(ESSLDIR)/lib -L/opt/ibmcmp/xlsmp/bg/3.1/bglib64 -L/opt/ibmcmp/xlf/bg/14.1/bglib64
+# LIBS =  $(SCALAPACKLIB) -lfftw -lesslsmpbg -lblas -llapack -lxlf90_r -lxlsmp -lxlfmath $(HPMLIBS)
  LIBS =  $(SCALAPACKLIB) $(JAGGEMMLIB) -lfftw -lesslsmpbg -lblas -llapack -lxlf90_r -lxlsmp -lxlfmath $(HPMLIBS)
-# LIBS =  $(SCALAPACKLIB) $(JAGGEMMLIB) -lfftw -lesslsmpbg -lblas -llapack -lxlf90_r -lxlsmp -lxlfmath
  LDFLAGS = $(LIBPATH) $(LIBS) -qarch=qp -lc -lnss_files -lnss_dns -lresolv
 
 #TAUROOTDIR = $(LIBHOME)/tau/tau-2.21.2
