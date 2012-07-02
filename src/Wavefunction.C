@@ -2004,8 +2004,10 @@ void Wavefunction::write_dump(string filebase) {
 
   os.open(mypefile.c_str(),ofstream::binary);
 
-  // hack to make checkpointing work w. new 8.0 BG/L compiler
-  //os.write(mypefile.c_str(),sizeof(char)*mypefile.length());
+  // hack to make checkpointing work with BlueGene compilers
+#ifdef BGQ
+  os.write(mypefile.c_str(),sizeof(char)*mypefile.length());
+#endif
   int wkploc = nkptloc_;
   int kp0 = kptloc_[0];         // global index of local kpoint
   int wnst = sd(0,kp0)->nst();
@@ -2070,15 +2072,18 @@ void Wavefunction::read_dump(string filebase) {
 
   if (is.is_open()) {
 
-    // hack to make checkpointing work w. new 8.0 BG/L compiler
-    //int len = mypefile.length();
-    //char* tmpfilename = new char[256];
-    //is.read(tmpfilename,sizeof(char)*mypefile.length());
-    int wkploc = nkptloc_;
-    int kp0 = kptloc_[0];         // global index of local kpoint
-    int wnst = sd(0,kp0)->nst();
-    //is.read((char*)&wkploc,sizeof(int));
-    //is.read((char*)&wnst,sizeof(int));
+     // hack to make checkpointing work with BlueGene compilers
+#ifdef BGQ
+     int len = mypefile.length();
+     char* tmpfilename = new char[256];
+     is.read(tmpfilename,sizeof(char)*mypefile.length());
+#endif
+     
+     int wkploc = nkptloc_;
+     int kp0 = kptloc_[0];         // global index of local kpoint
+     int wnst = sd(0,kp0)->nst();
+     //is.read((char*)&wkploc,sizeof(int));
+     //is.read((char*)&wnst,sizeof(int));
 
     // read in wave function
     for ( int ispin = 0; ispin < nspin_; ispin++ ) {
@@ -2162,10 +2167,12 @@ void Wavefunction::write_states(string filebase, string format) {
                       os << setprecision(8);
                     }
 
-                    // hack to make checkpointing work w. new 8.0 BG/L compiler
-                    //if (format == "binary") 
-                    //  os.write(statefile.c_str(),sizeof(char)*statefile.length());
-
+                    // hack to make checkpointing work w. BlueGene compilers
+#ifdef BGQ
+                    if (format == "binary") 
+                      os.write(statefile.c_str(),sizeof(char)*statefile.length());
+#endif
+                    
                     // headers for visualization formats
                     if (format == "molmol" || format == "text") {
                       D3vector a0 = cell_.a(0);
@@ -2270,8 +2277,10 @@ void Wavefunction::write_states(string filebase, string format) {
                     int nst = sd_[ispin][kp]->nst();
                     const double* peig = sd_[ispin][kp]->eig_ptr();
                     const double* pocc = sd_[ispin][kp]->occ_ptr();
-                    // hack to make checkpointing work w. new 8.0 BG/L compiler
-                    //os.write(statefile.c_str(),sizeof(char)*statefile.length());
+                    // hack to make checkpointing work w. BlueGene compilers
+#ifdef BGQ
+                    os.write(statefile.c_str(),sizeof(char)*statefile.length());
+#endif                    
                     os.write((char*)&peig[0],sizeof(double)*nst);
                     os.write((char*)&pocc[0],sizeof(double)*nst);
                     os.close();
@@ -2335,11 +2344,13 @@ void Wavefunction::read_states(string filebase) {
                     is.open(statefile.c_str(),ofstream::binary);
                     if (is.is_open()) {
 
-                      // hack to make checkpointing work w. new 8.0 BG/L compiler
-                      //int len = statefile.length();
-                      //char* tmpfilename = new char[256];
-                      //is.read(tmpfilename,sizeof(char)*statefile.length());
-                    
+                       // hack to make checkpointing work w. BlueGene compilers
+#ifdef BGQ
+                       int len = statefile.length();
+                       char* tmpfilename = new char[256];
+                       is.read(tmpfilename,sizeof(char)*statefile.length());
+#endif
+                       
                       // open files and reads data
                       for ( int i = 0; i < tctxt->nprow(); i++ ) {
                         int size = 2*ft.np2_loc(i)*ft.np0()*ft.np1();
@@ -2414,11 +2425,13 @@ void Wavefunction::read_states(string filebase) {
                     is.open(statefile.c_str(),ofstream::binary);
 
                     if (is.is_open()) {
-                      // hack to make checkpointing work w. new 8.0 BG/L compiler
-                      //int len = statefile.length();
-                      //char* tmpfilename = new char[256];
-                      //is.read(tmpfilename,sizeof(char)*statefile.length());
-
+                       // hack to make checkpointing work w. BlueGene compilers
+#ifdef BGQ
+                      int len = statefile.length();
+                      char* tmpfilename = new char[256];
+                      is.read(tmpfilename,sizeof(char)*statefile.length());
+#endif
+                      
                       is.read((char*)&eigtmp[0],sizeof(double)*nst);
                       is.read((char*)&occtmp[0],sizeof(double)*nst);
                       is.close();

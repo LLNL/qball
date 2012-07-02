@@ -24,11 +24,14 @@ using namespace std;
 
 #include "Context.h"
 #include "Matrix.h"
+#include "jacobi.h"
 
+bool runsyevd = true;
+bool runjacobi = true;
 
 bool runheevr = false;
 bool runheevx = false;
-bool runheevd = true;
+bool runheevd = false;
 bool runheev = false;
 
 const double nrandinv = 1./(1.0*RAND_MAX + 1.0);
@@ -87,6 +90,7 @@ int main(int argc, char **argv)
     int nb = n/npcol;
     
     ComplexMatrix s(ctxt,n,n,nb,nb);
+    DoubleMatrix r(ctxt,n,n,nb,nb);
     
     for ( int m = 0; m < s.nblocks(); m++ )
       for ( int l = 0; l < s.mblocks(); l++ )
@@ -115,6 +119,7 @@ int main(int argc, char **argv)
             int ival = iii + jjj * s.mloc();
             complex<double> cij = (sij,zij);
             s[ival] = cij;
+            r[ival] = sij;
           }
     tmap["init"].stop();
 
@@ -136,6 +141,48 @@ int main(int argc, char **argv)
       cout << endl;      
     }
     */
+
+    if (runsyevd)
+    {
+       if (mype == 0) 
+          cout << "Calculating eigenvalues and eigenvectors with syevd..." << endl;
+    
+       valarray<double> w4(r.m());
+       DoubleMatrix z4(r.context(),r.n(),r.n(),r.nb(),r.nb());    
+       DoubleMatrix c4(r);
+
+       tmap["syevd"].start();
+       c4.syevd('l',w4,z4);
+       tmap["syevd"].stop();
+    
+       if (mype == 0) {
+          cout << "Eigenvalues:  " << endl;
+          for (int i=0; i<r.m(); i++) {
+             cout << "  " << w4[i];
+             if (i%8 == 0) cout << endl;
+          }
+          cout << endl;
+       }
+    }
+
+    if (runjacobi)
+    {
+       if (mype == 0) 
+          cout << "Calculating eigenvalues and eigenvectors with jacobi..." << endl;
+       vector<double> w(r.m());
+       DoubleMatrix z(r.context(),r.n(),r.n(),r.nb(),r.nb());    
+       DoubleMatrix h(r);
+       const int maxsweep = 30;
+       int nsweep = jacobi(maxsweep,1.e-6,h,z,w);
+       if (mype == 0) {
+          cout << "Eigenvalues:  " << endl;
+          for (int i=0; i<r.m(); i++) {
+             cout << "  " << w[i];
+             if (i%8 == 0) cout << endl;
+          }
+          cout << endl;
+       }
+    }
 
     if (runheevr)
     {

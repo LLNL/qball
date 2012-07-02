@@ -134,8 +134,11 @@ int LoadCmd::action(int argc, char **argv) {
 
         if (wfctxt->oncoutpe()) {
           cout << "<!-- LoadCmd:  loading mixed charge density from file. -->" << endl;
-          //char* tmpfilename = new char[256];
-          //is.read(tmpfilename,sizeof(char)*rhorfile.length());
+          // hack to make checkpointing work w. BlueGene compilers
+#ifdef BGQ
+          char* tmpfilename = new char[256];
+          is.read(tmpfilename,sizeof(char)*rhorfile.length());
+#endif          
           for ( int i = 0; i < wfctxt->nprow(); i++ ) {
             int tmpsize;
             wfctxt->irecv(1,1,&tmpsize,1,i,0);
@@ -253,8 +256,12 @@ int LoadCmd::action(int argc, char **argv) {
 
         if (wfctxt->oncoutpe()) {
           cout << "<!-- LoadCmd:  loading mixed charge density from file. -->" << endl;
-          //char* tmpfilename = new char[256];
-          //is.read(tmpfilename,sizeof(char)*rhorfile.length());
+          // hack to make checkpointing work w. BlueGene compilers
+#ifdef BGQ
+          char* tmpfilename = new char[256];
+          is.read(tmpfilename,sizeof(char)*rhorfile.length());
+#endif
+          
           for ( int i = 0; i < wfctxt->nprow(); i++ ) {
             int tmpsize;
             wfctxt->irecv(1,1,&tmpsize,1,i,0);

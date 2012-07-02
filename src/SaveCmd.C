@@ -176,9 +176,12 @@ int SaveCmd::action(int argc, char **argv) {
         }
           
         if (wfctxt->onpe0()) {
-          os.open(rhorfile.c_str(),ofstream::binary);
-          // hack to make checkpointing work w. new 8.0 BG/L compiler
-          //os.write(rhorfile.c_str(),sizeof(char)*rhorfile.length());
+           os.open(rhorfile.c_str(),ofstream::binary);
+           // hack to make checkpointing work w. BlueGene compilers
+#ifdef BGQ
+           os.write(rhorfile.c_str(),sizeof(char)*rhorfile.length());
+#endif
+           
         }
         for ( int i = 0; i < wfctxt->nprow(); i++ ) {
           if ( i == wfctxt->myrow() ) {
@@ -254,9 +257,11 @@ int SaveCmd::action(int argc, char **argv) {
         }
           
         if (wfctxt->onpe0()) {
-          os.open(rhorfile.c_str(),ofstream::binary);
-          // hack to make checkpointing work w. new 8.0 BG/L compiler
-          //os.write(rhorfile.c_str(),sizeof(char)*rhorfile.length());
+           os.open(rhorfile.c_str(),ofstream::binary);
+           // hack to make checkpointing work w. BlueGene compilers
+#ifdef BGQ
+           os.write(rhorfile.c_str(),sizeof(char)*rhorfile.length());
+#endif          
         }
         for ( int i = 0; i < wfctxt->nprow(); i++ ) {
           if ( i == wfctxt->myrow() ) {
