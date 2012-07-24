@@ -86,6 +86,7 @@ using namespace std;
 #include "FermiTemp.h"
 #include "Dt.h"
 #include "Nempty.h"
+#include "NetCharge.h"
 #include "Nrowmax.h"
 #include "RefCell.h"
 #include "Spin.h"
@@ -361,6 +362,7 @@ int main(int argc, char **argv, char **envp)
   ui->addVar(new RunTimer(s));
   ui->addVar(new HubbardU(s));
   ui->addVar(new Memory(s));
+  ui->addVar(new NetCharge(s));
 
 #ifdef USE_JAGGEMM
   setup_grid();
