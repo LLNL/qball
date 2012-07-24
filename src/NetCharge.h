@@ -27,7 +27,7 @@ class NetCharge : public Var
   {
     if ( argc != 2 )
     {
-      if ( ui->onpe0() )
+      if ( ui->oncoutpe() )
       cout << " net_charge takes only one value" << endl;
       return 1;
     }
@@ -44,14 +44,14 @@ class NetCharge : public Var
     // set new netcharge to v
     if ( s->atoms.nel() - v < 0 )
     {
-      if ( ui->onpe0() )
+      if ( ui->oncoutpe() )
         cout << " net_charge: cannot remove more than "
              << s->atoms.nel() << " electrons" << endl;
       return 1;
     }
 
     s->wf.set_nel(s->atoms.nel() - v);
-    s->wf.update_occ(0.0);
+    s->wf.update_occ(0.0,0);
     if ( s->wfv != 0 )
     {
       s->wfv->set_nel(s->atoms.nel() - v);
