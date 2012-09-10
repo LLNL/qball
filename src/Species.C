@@ -120,10 +120,8 @@ bool Species::initialize(double rcpsval)
   //   cout << "<!-- Species " << name_ << ":  extending grid to rmax = " << rmax 
   //       << " to increase vnlg resolution (" << ndft_ << " pts) -->" << endl;
 
-  //ewd DEBUG  
+  //ewd DEBUG
   ndft_ *= 2;
-  if (ctxt_.oncoutpe()) 
-     cout << "SPECIES.ndft = " << ndft_ << endl;
   
 
   rps_.resize(ndft_);
@@ -268,6 +266,10 @@ bool Species::initialize(double rcpsval)
     gspl_[i] = i * fac;
     vlocg_[i] /= gspl_[i];
   }
+
+  //ewd DEBUG  
+  if (ctxt_.oncoutpe()) 
+     cout << "SPECIES.ndft = " << ndft_ << ", rmax = " << ndft_*deltar_ << ", gmax = " << gspl_[ndft_-1] << ", hubbard_l = " << hubbard_l_ << endl;
 
   //  Initialize cubic spline interpolation for local potential Vloc(G)
   //  Use zero first derivative at G=0 and natural (y"=0) at Gmax

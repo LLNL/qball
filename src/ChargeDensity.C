@@ -42,6 +42,7 @@ ChargeDensity::ChargeDensity(Sample& s) : wf_(s.wf),atoms_(s.atoms),ctxt_(s.wf.c
   // define vft_, FT on vbasis context for transforming the density  
   // add 2 to grid size to avoid aliasing when using non-zero k-points
   // adding 1 would suffice, but add 2 to keep even numbers
+
   int np0v = vbasis_->np(0) + 2;
   int np1v = vbasis_->np(1) + 2;
   int np2v = vbasis_->np(2) + 2;
