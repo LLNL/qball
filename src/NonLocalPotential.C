@@ -2068,23 +2068,27 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
               double one=1.0;
               char ct='t';        
               const int twongwl = 2 * ngwl;                                    
-              //dgemm(&ct,&cn,(int*)&nprnaloc,(int*)&nstloc,(int*)&twongwl,&one, 
-              //      &anl_loc_gamma[0],(int*)&twongwl, (double*)c,(int*)&c_lda,       
-              //      &zero,&dfnl_loc_gamma[0],(int*)&nprnaloc);
-              dgemm(&ct,&cn,(int*)&nprnaloc,(int*)&nstloc,(int*)&twomloc,&one, 
-                    &anl_loc_gamma[0],(int*)&twomloc, (double*)c,(int*)&c_lda,       
+              //ewd:  original code
+              dgemm(&ct,&cn,(int*)&nprnaloc,(int*)&nstloc,(int*)&twongwl,&one, 
+                    &anl_loc_gamma[0],(int*)&twongwl, (double*)c,(int*)&c_lda,       
                     &zero,&dfnl_loc_gamma[0],(int*)&nprnaloc);
+              //ewd:  this "fix" may actually be a bug, comment it out (10/1/2012)
+              //dgemm(&ct,&cn,(int*)&nprnaloc,(int*)&nstloc,(int*)&twomloc,&one, 
+              //      &anl_loc_gamma[0],(int*)&twomloc, (double*)c,(int*)&c_lda,       
+              //      &zero,&dfnl_loc_gamma[0],(int*)&nprnaloc);
             }
             else {
               complex<double> zzero = complex<double>(0.0,0.0);
               complex<double> zone = complex<double>(1.0,0.0);
               char cc='c';
-              //zgemm(&cc,&cn,(int*)&nprnaloc,(int*)&nstloc,(int*)&ngwl,&zone, 
-              //      &anl_loc[0],(int*)&ngwl, (complex<double> *)c,(int*)&c_lda,       
-              //      &zzero,&dfnl_loc[0],(int*)&nprnaloc);                       
-              zgemm(&cc,&cn,(int*)&nprnaloc,(int*)&nstloc,(int*)&mloc,&zone, 
-                    &anl_loc[0],(int*)&mloc, (complex<double> *)c,(int*)&c_lda,       
+              //ewd:  original code
+              zgemm(&cc,&cn,(int*)&nprnaloc,(int*)&nstloc,(int*)&ngwl,&zone, 
+                    &anl_loc[0],(int*)&ngwl, (complex<double> *)c,(int*)&c_lda,       
                     &zzero,&dfnl_loc[0],(int*)&nprnaloc);                       
+              //ewd:  this "fix" may actually be a bug, comment it out (10/1/2012)
+              //zgemm(&cc,&cn,(int*)&nprnaloc,(int*)&nstloc,(int*)&mloc,&zone, 
+              //      &anl_loc[0],(int*)&mloc, (complex<double> *)c,(int*)&c_lda,       
+              //      &zzero,&dfnl_loc[0],(int*)&nprnaloc);                       
             }
 
             // Note: no need to correct for double counting of the           
@@ -2360,23 +2364,25 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
               double one=1.0;      
               char ct='t';         
               const int twongwl = 2 * ngwl;                                     
-              //dgemm(&ct,&cn,(int*)&nprnaloc,(int*)&nstloc,(int*)&twongwl,&one,  
-              //      &anl_loc_gamma[0],(int*)&twongwl, (double*)c,(int*)&c_lda,        
-              //      &zero,&dfnl_loc_gamma[0],(int*)&nprnaloc);                        
-              dgemm(&ct,&cn,(int*)&nprnaloc,(int*)&nstloc,(int*)&twomloc,&one,  
-                    &anl_loc_gamma[0],(int*)&twomloc, (double*)c,(int*)&c_lda,        
+              dgemm(&ct,&cn,(int*)&nprnaloc,(int*)&nstloc,(int*)&twongwl,&one,  
+                    &anl_loc_gamma[0],(int*)&twongwl, (double*)c,(int*)&c_lda,        
                     &zero,&dfnl_loc_gamma[0],(int*)&nprnaloc);                        
+              //ewd:  this "fix" may actually be a bug, comment it out (10/1/2012)
+              //dgemm(&ct,&cn,(int*)&nprnaloc,(int*)&nstloc,(int*)&twomloc,&one,  
+              //      &anl_loc_gamma[0],(int*)&twomloc, (double*)c,(int*)&c_lda,        
+              //      &zero,&dfnl_loc_gamma[0],(int*)&nprnaloc);                        
             }
             else {
               complex<double> zzero = complex<double>(0.0,0.0);
               complex<double> zone = complex<double>(1.0,0.0);
               char cc='c';
-              //zgemm(&cc,&cn,(int*)&nprnaloc,(int*)&nstloc,(int*)&ngwl,&zone, 
-              //      &anl_loc[0],(int*)&ngwl, (complex<double> *)c,(int*)&c_lda,       
-              //      &zzero,&dfnl_loc[0],(int*)&nprnaloc);                       
-              zgemm(&cc,&cn,(int*)&nprnaloc,(int*)&nstloc,(int*)&mloc,&zone, 
-                    &anl_loc[0],(int*)&mloc, (complex<double> *)c,(int*)&c_lda,       
+              zgemm(&cc,&cn,(int*)&nprnaloc,(int*)&nstloc,(int*)&ngwl,&zone, 
+                    &anl_loc[0],(int*)&ngwl, (complex<double> *)c,(int*)&c_lda,       
                     &zzero,&dfnl_loc[0],(int*)&nprnaloc);                       
+              //ewd:  this "fix" may actually be a bug, comment it out (10/1/2012)
+              //zgemm(&cc,&cn,(int*)&nprnaloc,(int*)&nstloc,(int*)&mloc,&zone, 
+              //      &anl_loc[0],(int*)&mloc, (complex<double> *)c,(int*)&c_lda,       
+              //      &zzero,&dfnl_loc[0],(int*)&nprnaloc);                       
             }
 
             // Note: no need to correct for double counting of the            
