@@ -148,8 +148,10 @@ int main(int argc, char **argv, char **envp)
     int myRank,numPes;
     MPI_Comm_rank(MPI_COMM_WORLD, &myRank);
     MPI_Comm_size(MPI_COMM_WORLD, &numPes);
-    CTF_init(MPI_COMM_WORLD, myRank, numPes); 
-    CTF_init_complex(MPI_COMM_WORLD, myRank, numPes); 
+    CTF_init(MPI_COMM_WORLD, MACHINE_BGQ, myRank, numPes); 
+    CTF_init_complex(MPI_COMM_WORLD, MACHINE_BGQ, myRank, numPes); 
+    //CTF_init(MPI_COMM_WORLD, myRank, numPes); 
+    //CTF_init_complex(MPI_COMM_WORLD, myRank, numPes); 
   }    
 #endif
 #ifdef TAU
