@@ -33,6 +33,7 @@ class ChargeDensity {
   AtomSet& atoms_;
   Basis* vbasis_;
   FourierTransform* vft_;
+  int np0v_, np1v_, np2v_;
   vector<vector<FourierTransform*> > ft_; // ft_[ispin][ikp];
   valarray<complex<double> > rhotmp;
   vector<int> symindexloc;
@@ -42,9 +43,13 @@ class ChargeDensity {
   bool ultrasoft_;
   bool highmem_;
   bool nlcc_;
+  bool tddft_involved_;
   vector<vector<complex<double> > > qnmg_;
   vector<vector<complex<double> > > sfactloc_;
   vector<double> rhornlcc_; 
+
+  void initialize(const Sample& s);
+  void initializeSymmetries(const Sample& s);
   
   public:
   
@@ -73,7 +78,8 @@ class ChargeDensity {
   void print_memory(ostream&os, double& totsum, double& locsum) const;
   void print_timing();
   
-  ChargeDensity(Sample& s);
+  ChargeDensity(const Sample& s);
+  ChargeDensity(const Sample& s, Wavefunction& cdwf);
   ~ChargeDensity();
 };
 #endif

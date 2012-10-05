@@ -27,9 +27,12 @@ using namespace std;
 
 ////////////////////////////////////////////////////////////////////////////////
 SlaterDet::SlaterDet(Context& ctxt, const Context& my_col_ctxt, D3vector kpoint,
-            bool ultrasoft) : ctxt_(ctxt), c_(ctxt), ctxtsq_(ctxt), spsi_(ctxt) {
+                     bool ultrasoft, bool force_complex) : ctxt_(ctxt), c_(ctxt),
+                                                           ctxtsq_(ctxt), spsi_(ctxt)
+{
   ultrasoft_ = ultrasoft;
-  basis_ = new Basis(my_col_ctxt,kpoint,ultrasoft_);
+  force_complex_ = (ultrasoft_ || force_complex);
+  basis_ = new Basis(my_col_ctxt,kpoint,force_complex_);
   gram_reshape_ = false;
   highmem_ = false;
   // set seed for randomization
@@ -38,7 +41,7 @@ SlaterDet::SlaterDet(Context& ctxt, const Context& my_col_ctxt, D3vector kpoint,
 ////////////////////////////////////////////////////////////////////////////////
 SlaterDet::SlaterDet(const SlaterDet& rhs) : ctxt_(rhs.context()),
   basis_(new Basis(*(rhs.basis_))), c_(rhs.c_), gram_reshape_(rhs.gram_reshape_),
-  spsi_(rhs.spsi_), highmem_(rhs.highmem_) {}
+  spsi_(rhs.spsi_), highmem_(rhs.highmem_), ultrasoft_(rhs.ultrasoft_) {}
 ////////////////////////////////////////////////////////////////////////////////
 SlaterDet::~SlaterDet()  {
   delete basis_;
@@ -162,7 +165,7 @@ void SlaterDet::resize(const UnitCell& cell, const UnitCell& refcell,
 
   try {
     // create a temporary copy of the basis and of the coefficient matrix
-    Basis btmp(basis_->context(),basis_->kpoint(),ultrasoft_);
+    Basis btmp(basis_->context(),basis_->kpoint(),force_complex_);
     btmp.resize(basis_->cell(),basis_->refcell(),basis_->ecut());
     
     ComplexMatrix ctmp(c_);
@@ -272,7 +275,7 @@ void SlaterDet::reshape(const Context& newctxt, const Context& new_col_ctxt, boo
       double tmpecut = basis_->ecut();
       D3vector tmpkpt = basis_->kpoint();
       delete basis_;
-      basis_ = new Basis(new_col_ctxt,tmpkpt,ultrasoft_);
+      basis_ = new Basis(new_col_ctxt,tmpkpt,force_complex_);
       basis_->resize(tmpcell,tmprefcell,tmpecut);
     }
     int mb = basis_->maxlocalsize();
@@ -561,7 +564,7 @@ void SlaterDet::copyTo(SlaterDet* newsd) {
         // pe 0 will tell source and destination pes about each other
         int srcpe = -1;
         int destpe = -1;
-        if (ctxt_.onpe0()) {
+        if (ctxt_.oncoutpe()) {
           for (int i=0; i<ctxt_.size(); i++) {
             int tmpnew, tmpold;
             MPI_Recv(&tmpnew,1,MPI_INT,i,i,ctxt_.comm(),&status);
@@ -2414,9 +2417,129 @@ void SlaterDet::randomize_us(double amplitude, AtomSet& as) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+void SlaterDet::randomize_real(double amplitude)
+{
+  if ( basis_->size() == 0 )
+    return;
+  // Note: randomization results depend on the process grid size and shape
+  srand48(ctxt_.myproc());
+  for ( int n = 0; n < c_.nloc(); n++ )
+  {
+    complex<double>* p = c_.valptr(c_.mloc()*n);
+    for ( int i = 0; i < basis_->localsize(); i++ )
+    {
+      double re = drand48();
+      double im = drand48();
+      p[i] = amplitude * complex<double>(re,im);
+      p[basis_->index_of_minus_g(i)] = amplitude * complex<double>(re,-1.0*im);
+    }
+
+    p[basis_->zero_index()] = complex<double>(real(p[basis_->zero_index()]),0.0);
+  }
+  // gram does an initial cleanup
+  gram();
+}
+
+////////////////////////////////////////////////////////////////////////////////
 void SlaterDet::rescale(double factor) {
   c_ *= factor;
 }
+
+////////////////////////////////////////////////////////////////////////////////
+// AS: shift state n_state by the vector (shift_x, shift_y, shift_z)
+void SlaterDet::shift_wf(double shift_x,double shift_y,double shift_z,int n_state)
+{
+  if ( basis_->size() == 0 )
+    return;
+
+  // AS: remark: nstloc() is the same as c_.nloc()
+
+  // AS: first version: shifts all the states
+  // for ( int n = 0; n < nstloc(); n++ )
+  //   {
+  //     for ( int i = 0; i < basis_->localsize(); i++ )
+  //       {
+  //         double kpg_x = basis_->kpgx(i);
+  //         double kpg_y = basis_->kpgx(i+basis_->localsize()  );
+  //         double kpg_z = basis_->kpgx(i+basis_->localsize()*2);
+  //         c_[i+n*c_.mloc()] *= exp( complex<double>(0,1) * (kpg_x*shift_x+kpg_y*shift_y+kpg_z*shift_z) );
+  //       }
+  //   }
+
+  // AS: second version: shifts only n_state, worked
+  // for ( int i = 0; i < basis_->localsize(); i++ )
+  //   {
+  //     double kpg_x = basis_->kpgx(i);
+  //     double kpg_y = basis_->kpgx(i+basis_->localsize()  );
+  //     double kpg_z = basis_->kpgx(i+basis_->localsize()*2);
+  //     c_[i+(n_state-1)*c_.mloc()] *= exp( complex<double>(0,1) * (kpg_x*shift_x+kpg_y*shift_y+kpg_z*shift_z) );
+  //   }
+
+  // AS: final version: shifts only n_state, works as well
+
+  if ( ctxt_.mycol() != c_.pc(n_state-1) )
+    return;
+
+  assert( c_.y(n_state-1) <= c_.nloc() );
+  complex<double>* p = c_.valptr(c_.mloc()*c_.y(n_state-1));
+
+  for ( int i = 0; i < basis_->localsize(); i++ )
+  {
+    double kpg_x = basis_->kpgx(i);
+    double kpg_y = basis_->kpgx(i+basis_->localsize());
+    double kpg_z = basis_->kpgx(i+basis_->localsize()*2);
+    p[i] *= exp( complex<double>(0,1) * (kpg_x*shift_x+kpg_y*shift_y+kpg_z*shift_z) );
+  }
+
+  // AS: no orthogonalization should be necessary here
+  // gram();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// AS: change phase of the wave function to make it real for Gamma only
+void SlaterDet::phase_wf_real(void)
+{
+  if ( basis_->size() == 0 )
+    return;
+
+  for ( int n = 0; n < nstloc(); n++ )
+  {
+    // AS: pick the plane-wave coefficient
+    complex<double>* p = c_.valptr( c_.mloc() * n );
+    double as_renorm = arg( p[basis_->zero_index()] );
+
+    // AS: This would be an alternative way if doing the phase change, but it does give the same result
+    // complex<double> as_renorm2 = abs( p[basis_->zero_index()] ) / p[basis_->zero_index()];
+
+    // AS: DEBUG output
+    // cout << "AS: ZERO_INDEX: " << basis_->zero_index() << endl;
+    // cout.precision(20);
+    // cout << "AS: STATE: " << n << " p[basis_->zero_index()]        : " << p[basis_->zero_index()] << endl;
+    // cout << "AS: STATE: " << n << " arg( p[basis_->zero_index()] ) : " << arg(p[basis_->zero_index()]) << endl;
+    // cout << "AS: STATE: " << n << " as_renorm                      : " << as_renorm << endl;
+    // cout << "AS: STATE: " << n << " as_renorm2                     : " << as_renorm2 << endl;
+    // cout << "AS: STATE: " << n << " abs( p[basis_->zero_index()])  : " << abs(p[basis_->zero_index()]) << endl;
+    // cout << "AS: STATE: " << n << " exp( -1.0 * i * as_renorm )    : " << exp( -1.0 * complex<double>(0.0,1.0) * as_renorm ) << endl;
+
+    // AS: that did not work for very small G=0
+    // for ( int i = 0; i < basis_->localsize(); i++ )
+    // {
+    //   p[i] *= exp( -1.0 * complex<double>(0.0,1.0) * as_renorm );
+    // }
+
+    for ( int i = 0; i < basis_->localsize(); i++ )
+    {
+      complex<double> c_g = p[i];
+      complex<double> c_minusg = p[basis_->index_of_minus_g(i)];
+
+      p[i] = 0.5*(c_g + conj(c_minusg));
+      p[basis_->index_of_minus_g(i)] = 0.5*(c_minusg + conj(c_g));
+    }
+
+    p[basis_->zero_index()] = complex<double>(real(p[basis_->zero_index()]),0.0);
+  }
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 void SlaterDet::cleanup(void) {
   // set Im( c(G=0) ) to zero and 
@@ -2523,7 +2646,7 @@ void SlaterDet::print(ostream& os, string encoding) {
         }
       }
     }
-    if ( ctxt_.onpe0() ) {
+    if ( ctxt_.oncoutpe() ) {
       for ( int i = 0; i < ctxt_.nprow(); i++ ) {
         int size = 0;
         ctxt_.irecv(1,1,&size,1,i,c_.pc(n));

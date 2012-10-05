@@ -85,7 +85,7 @@ int main(int argc, char **argv)
   double flops = 2*basis.nrod_loc() *      fft_flops(ft2.np2()) +
                  ft2.np1()/2 * ft2.np2() * fft_flops(ft2.np0()) +
                  ft2.np0()   * ft2.np2() * fft_flops(ft2.np1());
-  if ( ctxt.onpe0() )
+  if ( ctxt.oncoutpe() )
   {
     cout << " wfbasis.size() = " << basis.size() << endl;
     cout << " wfbasis.np() = " << basis.np(0) << " " << basis.np(1)
@@ -208,7 +208,7 @@ int main(int argc, char **argv)
   tm.start();
   ft2.forward(&f2[0],&x1[0],&x2[0]);
   tm.stop();
-  if ( ctxt.onpe0() ) {
+  if ( ctxt.oncoutpe() ) {
      cout << " fwd3: tm_f_fft:    " << ft2.tm_f_fft.real() << endl;
      cout << " fwd3: tm_f_mpi:    " << ft2.tm_f_mpi.real() << endl;
      cout << " fwd3: tm_f_pack:   " << ft2.tm_f_pack.real() << endl;
@@ -229,7 +229,7 @@ int main(int argc, char **argv)
   tm.start();
   ft2.backward(&x1[0],&x2[0],&f2[0]);
   tm.stop();
-  if ( ctxt.onpe0() ) {
+  if ( ctxt.oncoutpe() ) {
      cout << " bwd3: tm_b_fft:    " << ft2.tm_b_fft.real() << endl;
      cout << " bwd3: tm_b_mpi:    " << ft2.tm_b_mpi.real() << endl;
      cout << " bwd3: tm_b_pack:   " << ft2.tm_b_pack.real() << endl;
@@ -276,7 +276,7 @@ int main(int argc, char **argv)
     tsum += norm(f2[i]);
   MPI_Allreduce(&tsum,&sum,1,MPI_DOUBLE,MPI_SUM,ctxt.comm());
   
-  if ( ctxt.onpe0() )
+  if ( ctxt.oncoutpe() )
      cout << " sum pw^2: " << sum / ft2.np012() << endl;
   
   //////////////////////////////////////////////////////////////////////////////
@@ -293,10 +293,10 @@ int main(int argc, char **argv)
   double gnorm = 0.0;
   for ( int i = 0; i < basis.localsize(); i++ )
     gnorm += 2.0 * norm(x[i]);
-  if ( ctxt.onpe0() )
+  if ( ctxt.oncoutpe() )
     gnorm -= norm(x[0]);
   ctxt.dsum(1,1,&gnorm,1);
-  if ( ctxt.onpe0() )
+  if ( ctxt.oncoutpe() )
      cout << " gaussian gnorm: " << gnorm << endl;
   
   ft2.backward(&x[0],&f2[0]);
@@ -317,7 +317,7 @@ int main(int argc, char **argv)
     tsum += norm(f2[i]);
   MPI_Allreduce(&tsum,&sum,1,MPI_DOUBLE,MPI_SUM,ctxt.comm());
   
-  if ( ctxt.onpe0() )
+  if ( ctxt.oncoutpe() )
      cout << " gaussian rnorm: " << sum / ft2.np012() << endl;
 #endif
   EWD DEBUG  */
@@ -325,7 +325,7 @@ int main(int argc, char **argv)
   // Define ft from vbasis
   Basis vbasis(ctxt,kpoint);
   vbasis.resize(cell,cell,4.0*ecut);
-  if ( ctxt.onpe0() )
+  if ( ctxt.oncoutpe() )
      cout << " vbasis.np() = " << vbasis.np(0) << " " << vbasis.np(1)
           << " " << vbasis.np(2) << endl;
 
@@ -339,7 +339,7 @@ int main(int argc, char **argv)
     tsum += norm(vf[i]);
   MPI_Allreduce(&tsum,&sum,1,MPI_DOUBLE,MPI_SUM,ctxt.comm());
   
-  if ( ctxt.onpe0() )
+  if ( ctxt.oncoutpe() )
      cout << " gaussian rnorm: " << sum / vft.np012() << endl;
   EWD DEBUG  */
 

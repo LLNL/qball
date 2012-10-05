@@ -90,6 +90,12 @@ double Basis::gx(int i) const    { return gx_[i]; }
 double Basis::kpgx(int i) const  { return kpgx_[i]; }
 int    Basis::isort(int i) const { return isort_loc[i]; }
 
+// AS: return index of the g_x = g_y = g_z = 0 element
+int Basis::zero_index() { return zero_index_; }
+
+// AS:
+int Basis::index_of_minus_g(int i) { return index_of_minus_g_[i]; }
+
 const int*    Basis::idx_ptr(void) const   { return &(idx_[0]); }
 const double* Basis::g_ptr(void)  const    { return &(g_[0]); }
 const double* Basis::kpg_ptr(void)  const  { return &(kpg_[0]); }
@@ -330,6 +336,10 @@ bool Basis::resize(const UnitCell& cell, const UnitCell& refcell,
     gx_.resize(3*localsize_[myrow_]);
     kpgx_.resize(3*localsize_[myrow_]);
     isort_loc.resize(localsize_[myrow_]);
+
+    // AS: prepare the array 
+    index_of_minus_g_.resize(localsize_[myrow_]);
+    
     return true;
   }
 
@@ -364,7 +374,7 @@ bool Basis::resize(const UnitCell& cell, const UnitCell& refcell,
 
   if ( !cell.in_bz(kp) )
   {
-    if ( ctxt_.onpe0() )
+    if ( ctxt_.oncoutpe() )
       cout << " Basis::resize: warning: " << kpoint_
            << " out of the BZ: " << kp << endl;
   }
@@ -675,6 +685,9 @@ bool Basis::resize(const UnitCell& cell, const UnitCell& refcell,
   kpgx_.resize(3*localsize_[myrow_]);
   isort_loc.resize(localsize_[myrow_]);
 
+  // AS: prepare the array
+  index_of_minus_g_.resize(localsize_[myrow_]);
+
   update_g();
 
   // basis set construction is complete
@@ -702,6 +715,10 @@ void Basis::update_g(void)
     gx_[i] = gt.x;
     gx_[locsize+i] = gt.y;
     gx_[locsize+locsize+i] = gt.z;
+
+    // AS: store the index of the g_x = g_y = g_z = 0 element
+    if ( (idx_[3*i+0]==0) && (idx_[3*i+1]==0) && (idx_[3*i+2]==0) ) zero_index_ = i;
+
     kpgx_[i] = kpgt.x;
     kpgx_[locsize+i] = kpgt.y;
     kpgx_[locsize+locsize+i] = kpgt.z;
@@ -727,6 +744,41 @@ void Basis::update_g(void)
     cout << ctxt_.mype() << " sorted " << i << " " << g2_[isort_loc[i]] << endl;
   }
 #endif
+}
+
+////////////////////////////////////////////////////////////////////////////////
+void Basis::update_index_of_minus_g(void)
+{
+  const int locsize = localsize_[myrow_];
+
+  cout << "CALLED!!!" << endl;
+
+  // AS: debug output of the array index_of_minus_g
+  for ( int i = 0; i < locsize; i++ )
+  {
+    index_of_minus_g_[i]=-10;
+  }
+
+  // AS: find the array index_of_minus_g
+  for ( int i = 0; i < locsize; i++ )
+  {
+    for ( int j = i; j < locsize; j++ )
+    {
+      if ( (gx_[i]==-1.0*gx_[j]) && (gx_[locsize+i]==-1.0*gx_[locsize+j]) && (gx_[locsize+locsize+i]==-1.0*gx_[locsize+locsize+j]) )
+      {
+        index_of_minus_g_[i]=j;
+        index_of_minus_g_[j]=i;
+      }
+    }
+  }
+
+  // AS: debug output of the array index_of_minus_g
+  // for ( int i = 0; i < locsize; i++ )
+  // {
+  //   if (index_of_minus_g_[i]<0) {
+  //     cout << " AS: WARNING!!! " << gx_[i] << " " << gx_[locsize+i] << " " << gx_[locsize+locsize+i] << " " << i << " " << index_of_minus_g_[i] << "  " << gx_[index_of_minus_g_[i]] << " " << gx_[locsize+index_of_minus_g_[i]] << " " << gx_[locsize+locsize+index_of_minus_g_[i]] << endl;
+  //   }
+  // }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -830,7 +882,7 @@ void Basis::print_casino(ostream& os) {
         context().dsend(size,1,&gxtmp[0],1,0,0);
       }
     }
-    if ( context().onpe0() ) {
+    if ( context().oncoutpe() ) {
       for ( int i = ip; i < ipp; i++ ) {
         int locsize = 0;
         context().irecv(1,1,&locsize,1,i,0);

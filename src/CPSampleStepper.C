@@ -69,13 +69,13 @@ CPSampleStepper::~CPSampleStepper(void)
 ////////////////////////////////////////////////////////////////////////////////
 void CPSampleStepper::step(int niter)
 {
-  const bool onpe0 = s_.ctxt_.onpe0();
+  const bool oncoutpe = s_.ctxt_.oncoutpe();
   // CP dynamics is allowed only for all doubly occupied states
   // check if states are all doubly occupied
   const bool wf_double_occ = (s_.wf.nel() == 2 * s_.wf.nst());
   if ( !wf_double_occ )
   {
-    if ( s_.ctxt_.onpe0() )
+    if ( s_.ctxt_.oncoutpe() )
     {
       cout << " CPSampleStepper::step:"
               " not all states doubly occupied: cannot run" << endl;
@@ -141,7 +141,7 @@ void CPSampleStepper::step(int niter)
 
     ekin_e = mdwf_stepper->ekin();
 
-    if ( onpe0 )
+    if ( oncoutpe )
     {
       cout.setf(ios::fixed,ios::floatfield);
       cout.setf(ios::right,ios::adjustfield);
@@ -180,7 +180,7 @@ void CPSampleStepper::step(int niter)
       mdionic_stepper->compute_r(energy,fion);
       ekin_ion = mdionic_stepper->ekin();
 
-      if ( onpe0 )
+      if ( oncoutpe )
       {
         cout << "<atomset>" << endl;
         cout << atoms.cell();
@@ -216,7 +216,7 @@ void CPSampleStepper::step(int niter)
       if ( s_.constraints.size() > 0 )
       {
         s_.constraints.compute_forces(mdionic_stepper->r0(), fion);
-        if ( onpe0 )
+        if ( oncoutpe )
         {
           s_.constraints.list_constraints(cout);
         }
@@ -224,7 +224,7 @@ void CPSampleStepper::step(int niter)
 #endif
     }
 
-    if ( onpe0 )
+    if ( oncoutpe )
     {
       cout << "  <ekin_e> " << ekin_e << " </ekin_e>\n";
 

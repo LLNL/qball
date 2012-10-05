@@ -14,6 +14,10 @@
 #include "JDWavefunctionStepper.h"
 #include "PSDWavefunctionStepper.h"
 #include "PSDAWavefunctionStepper.h"
+#include "SOTDWavefunctionStepper.h"
+#include "SORKTDWavefunctionStepper.h"
+#include "FORKTDWavefunctionStepper.h"
+#include "TDEULERWavefunctionStepper.h"
 #include "SDIonicStepper.h"
 #include "SDAIonicStepper.h"
 #include "CGIonicStepper.h"
@@ -32,6 +36,7 @@
 #endif
 #include <iostream>
 #include <iomanip>
+#include <deque>
 #ifdef HPM
 #include <bgpm/include/bgpm.h>
 extern "C" void HPM_Start(char *);
@@ -42,11 +47,32 @@ using namespace std;
 ////////////////////////////////////////////////////////////////////////////////
 BOSampleStepper::BOSampleStepper(Sample& s, int nitscf, int nite) :
   SampleStepper(s), cd_(s), ef_(s,s.wf,cd_),dwf(s.wf), wfv(s.wfv), nitscf_(nitscf),
-  nite_(nite), initial_atomic_density(false) {}
+  nite_(nite), initial_atomic_density(false)
+{
+   const string wf_dyn = s_.ctrl.wf_dyn;
+   tddft_involved_ = s_.ctrl.tddft_involved;
+   if (tddft_involved_)
+   {
+      Wavefunction* wf0 = new Wavefunction(dwf);
+      Wavefunction* wf1 = new Wavefunction(s.wf);
+      Wavefunction* wf2 = new Wavefunction(s.wf);
+      Wavefunction* wf3 = new Wavefunction(s.wf);
+      Wavefunction* wf4 = new Wavefunction(s.wf);
 
+      wfdeque.push_back ( wf0 );
+      wfdeque.push_back ( wf1 );
+      wfdeque.push_back ( wf2 );
+      wfdeque.push_back ( wf3 );
+      wfdeque.push_back ( wf4 );
+   }
+}
 ////////////////////////////////////////////////////////////////////////////////
 BOSampleStepper::~BOSampleStepper()
 {
+   // delete any created Wavefunctions
+   if (tddft_involved_)
+      for (deque<Wavefunction*>::const_iterator it = wfdeque.begin(); it != wfdeque.end(); ++it)
+         delete *it;
 }
 ////////////////////////////////////////////////////////////////////////////////
 void BOSampleStepper::initialize_density(void)
@@ -143,7 +169,7 @@ void BOSampleStepper::initialize_density(void)
 ////////////////////////////////////////////////////////////////////////////////
 void BOSampleStepper::step(int niter)
 {
-  const bool onpe0 = s_.ctxt_.onpe0();
+  const bool oncoutpe = s_.ctxt_.oncoutpe();
 
   const bool anderson_charge_mixing = ( s_.ctrl.charge_mix_ndim > 0 );
   
@@ -158,9 +184,9 @@ void BOSampleStepper::step(int niter)
   const bool compute_mlwfc = s_.ctrl.wf_diag == "MLWFC";
   enum ortho_type { GRAM, LOWDIN, ORTHO_ALIGN, RICCATI };
 
-  if (fractional_occ && onpe0)
+  if (fractional_occ && oncoutpe)
        cout << "<!-- BOSampleStepper:  fractional occupation detected. -->" << endl;
-  else if (onpe0)
+  else if (oncoutpe)
        cout << "<!-- BOSampleStepper:  fractional occupation not detected. -->" << endl;
    
   
@@ -179,8 +205,17 @@ void BOSampleStepper::step(int niter)
   const string atoms_dyn = s_.ctrl.atoms_dyn;
   const string cell_dyn = s_.ctrl.cell_dyn;
 
-  const bool extrapolate_wf = atoms_dyn == "MD";
+  // AS: flag used below to control initial step for SOTD
+  bool wfv_is_new = false;
+  const bool extrapolate_wf = ( atoms_dyn == "MD" ) && ( nite_ == 1 ) && (!tddft_involved_);
 
+
+  //ewd DEBUG
+  //if (tddft_involved_ && oncoutpe)
+  //   cout << "DEBUG:  TDDFT_INVOLVED SET TO TRUE!" << endl;
+  //ewd DEBUG
+
+  
   const bool ntc_extrapolation =
     s_.ctrl.debug.find("NTC_EXTRAPOLATION") != string::npos;
   const bool asp_extrapolation =
@@ -188,7 +223,7 @@ void BOSampleStepper::step(int niter)
 
   //ewd check for case where PSDA used (incorrectly) with nite = 1 and empty states
   if (wf_dyn == "PSDA" && nite_ == 1 && compute_eigvec) {
-    if ( onpe0 ) {
+    if ( oncoutpe ) {
       cout << "<ERROR> BOSampleStepper:  PSDA unstable with empty states and nite = 1. </ERROR>" << endl;
       cout << "<ERROR> BOSampleStepper:  Increase nite or use wf_dyn = PSD. </ERROR>" << endl;
     }
@@ -218,20 +253,20 @@ void BOSampleStepper::step(int niter)
   
   //ewd check that MLWF not being used with ultrasoft (not yet implemented)
   if (ultrasoft && (compute_mlwf || compute_mlwfc)) {
-    if ( onpe0 ) 
+    if ( oncoutpe ) 
       cout << "<ERROR> BOSampleStepper:  Maximally-localized Wannier Functions not yet implemented with ultrasoft. </ERROR>" << endl;
     return;
   }
-  if (onpe0 && ultrasoft && compute_stress)
+  if (oncoutpe && ultrasoft && compute_stress)
       cout << "<WARNING> BOSampleStepper:  stress not yet implemented with ultrasoft!  Results WILL be wrong. </WARNING>" << endl;
-  if (onpe0 && nlcc && compute_stress)
+  if (oncoutpe && nlcc && compute_stress)
       cout << "<WARNING> BOSampleStepper:  stress not yet implemented with non-linear core corrections!  Results WILL be wrong. </WARNING>" << endl;
   
   // use extra memory for SlaterDets if memory variable = normal, large or huge
   if (s_.ctrl.extra_memory >= 3) 
     wf.set_highmem();
   
-  if (!gs_only && s_.ctrl.dft_plus_u && onpe0)
+  if (!gs_only && s_.ctrl.dft_plus_u && oncoutpe)
     cout << "<WARNING> Forces and stress not currently implemented with DFT+U! </WARNING>" << endl;
   
   Timer tm_iter;
@@ -262,6 +297,31 @@ void BOSampleStepper::step(int niter)
     }
     wf_stepper = new SDWavefunctionStepper(wf,dt2bye,tmap);
   }
+  else if ( wf_dyn == "TDEULER" )
+     wf_stepper = new TDEULERWavefunctionStepper(wf,s_.ctrl.tddt,tmap);
+  else if ( wf_dyn == "SOTD" )
+  {
+     // AS: prepare the array to store the |psi(t-tddt)> for the second-order propagation
+     if ( s_.wfv == 0 )
+     {
+        s_.wfv = new Wavefunction(wf);
+        s_.wfv->clear();
+        wfv_is_new = true;
+     }
+
+     // AS: initially prepare the deque with the respective wave functions
+     wfdeque.push_back ( s_.wfv );
+     *wfdeque[0]=*(s_.wfv);
+
+     wfdeque.push_back ( s_.wfv );
+     *wfdeque[1]=wf;
+
+     wf_stepper = new SOTDWavefunctionStepper(wf,s_.ctrl.tddt,tmap,&wfdeque);
+  }
+  else if ( wf_dyn == "SORKTD" )
+     wf_stepper = new SORKTDWavefunctionStepper(wf,s_.ctrl.tddt,tmap,&wfdeque);
+  else if ( wf_dyn == "FORKTD" )
+     wf_stepper = new FORKTDWavefunctionStepper(wf,s_.ctrl.tddt,tmap,&wfdeque);
   else if ( wf_dyn == "PSD" )
     wf_stepper = new PSDWavefunctionStepper(wf,*preconditioner,tmap);
   else if ( wf_dyn == "PSDA" )
@@ -277,7 +337,8 @@ void BOSampleStepper::step(int niter)
     ionic_stepper = new SDAIonicStepper(s_);
   else if ( atoms_dyn == "CG" )
     ionic_stepper = new CGIonicStepper(s_);
-  else if ( atoms_dyn == "MD" )
+  // AS: IMPULSIVE does MD with constant velocities
+  else if ( atoms_dyn == "MD" || atoms_dyn == "IMPULSIVE" )
     ionic_stepper = new MDIonicStepper(s_);
   else if ( atoms_dyn == "BMD" )
     ionic_stepper = new BMDIonicStepper(s_);
@@ -307,7 +368,7 @@ void BOSampleStepper::step(int niter)
     // There must be a single k-point, and it must be gamma
     if ( wf.nkp() > 1 || ( wf.nkp()==1 && wf.kpoint(0) != D3vector(0,0,0) ) )
     {
-      if ( onpe0 )
+      if ( oncoutpe )
       {
         cout << "<ERROR> BOSampleStepper::step: MLWF can be computed at k=0 only </ERROR>"
              << endl;
@@ -523,7 +584,7 @@ void BOSampleStepper::step(int niter)
       ApcStart(1);
 #endif
       
-      if ( onpe0 )
+      if ( oncoutpe )
         cout << "<iteration count=\"" << iter+1 << "\">\n";
 
       if ( ionic_stepper )
@@ -540,10 +601,14 @@ void BOSampleStepper::step(int niter)
             //ewd DEBUG:  need to renormalize ultrasoft density so tot_charge is correct?
             assert(false);
         }
-        else
+        else 
           cd_.update_density();
+        if (tddft_involved_)
+           ( ef_.hamil_cd() )->update_density();
         tmap["charge"].stop();
 
+        if (tddft_involved_)
+           ef_.update_hamiltonian();
         ef_.update_vhxc();
         const bool compute_forces = true;
 
@@ -554,8 +619,6 @@ void BOSampleStepper::step(int niter)
         }
 
         // need eigenvalues to compute forces w. ultrasoft
-        //ewd12-21-11 if (ultrasoft) { 
-        //ewd10-5-12if (ultrasoft && iter == 0) { 
         if (ultrasoft) { 
           tmap["gram"].start();
           s_.wf.gram();
@@ -608,7 +671,7 @@ void BOSampleStepper::step(int niter)
           }
         }
 
-        if ( onpe0 )
+        if ( oncoutpe )
         {
           cout.setf(ios::fixed,ios::floatfield);
           cout.setf(ios::right,ios::adjustfield);
@@ -709,7 +772,7 @@ void BOSampleStepper::step(int niter)
         }
 
         // print positions, velocities and forces at time t0
-        if ( onpe0 )
+        if ( oncoutpe )
         {
           cout << "<atomset>" << endl;
           cout << atoms.cell();
@@ -772,7 +835,7 @@ void BOSampleStepper::step(int niter)
            if ( s_.constraints.size() > 0 )
           {
             s_.constraints.compute_forces(ionic_stepper->r0(), fion);
-            if ( onpe0 )
+            if ( oncoutpe )
             {
               s_.constraints.list_constraints(cout);
             }
@@ -856,7 +919,6 @@ void BOSampleStepper::step(int niter)
                       c[i] = x + dt * v;
                       cv[i] = x;
                     }
-                    //ewd: 10-5-12b, uncomment this
                     if (ultrasoft) {
                       tmap["usfns"].start();
                       s_.wf.sd(ispin,ikp)->update_usfns();
@@ -877,7 +939,6 @@ void BOSampleStepper::step(int niter)
                       cv[i] = x;
                       cmm[i] = xm;
                     }
-                    //ewd: 10-5-12b, uncomment this
                     if (ultrasoft) {
                       tmap["usfns"].start();
                       s_.wf.sd(ispin,ikp)->update_usfns();
@@ -905,7 +966,6 @@ void BOSampleStepper::step(int niter)
                     }
 
                     // orthogonalize the extrapolated value
-                    //ewd: 10-5-12b, uncomment this
                     if (ultrasoft) {
                       tmap["usfns"].start();
                       s_.wf.sd(ispin,ikp)->update_usfns();
@@ -945,7 +1005,6 @@ void BOSampleStepper::step(int niter)
                       c[i] = x + dt * v;
                       cv[i] = x;
                     }
-                    //ewd: 10-5-12b, uncomment this
                     if (ultrasoft) {
                       tmap["usfns"].start();
                       s_.wf.sd(ispin,ikp)->update_usfns();
@@ -1096,10 +1155,10 @@ void BOSampleStepper::step(int niter)
         bool convflag = false;
 
 #ifdef HPM  
-  HPM_Start("scfloop");
+        HPM_Start("scfloop");
 #endif
 #ifdef TAU
-  QB_Pstart(14,scfloop);
+        QB_Pstart(14,scfloop);
 #endif
         // SCF LOOP
         for ( int itscf = 0; itscf < nitscf_; itscf++ )
@@ -1147,13 +1206,16 @@ void BOSampleStepper::step(int niter)
             if (itscf > 0)
               conv_scf.addValue(ef_.etotal());
             
-            if ( nite_ > 1 && onpe0 )
+            if ( nite_ > 1 && oncoutpe )
               cout << "  <!-- BOSampleStepper: start scf iteration -->" << endl;
 
             // compute new density in cd_.rhog
             tmap["charge"].start();
             if ( itscf==0 && initial_atomic_density ) {
               cd_.update_rhor();
+              // AS: TODO: double check what to use here
+              if (tddft_involved_)
+                 ( ef_.hamil_cd() )->update_rhor();
               if (ultrasoft)
                 assert(false);  // ewd DEBUG: need to implement this for ultrasoft
             }
@@ -1162,67 +1224,129 @@ void BOSampleStepper::step(int niter)
             tmap["charge"].stop();
 
             if ( charge_mixing != "off" && nite_ > 1) {
-              if ( itscf == 0) {
-                //ewd:  read rhog_in from checkpoint if possible
-                for ( int ispin = 0; ispin < nspin; ispin++ ) {
-                  int rhogflag = 1;
+               if ( itscf == 0) {
+                  //ewd:  read rhog_in from checkpoint if possible
+                  for ( int ispin = 0; ispin < nspin; ispin++ ) {
+                     int rhogflag = 1;
 
-                  if (cell_dyn == "LOCKED" && (atoms_dyn == "LOCKED" || dt == 0.0) && s_.rhog_last.size() == rhog_in[ispin].size()) {
-                     if (s_.rhog_last[ispin].size() == rhog_in[ispin].size()) {
-                        rhogflag = 0;
-                        for ( int i=0; i < rhog_in[ispin].size(); i++ ) 
-                           rhog_in[ispin][i] = s_.rhog_last[ispin][i];
+                     if (cell_dyn == "LOCKED" && (atoms_dyn == "LOCKED" || dt == 0.0) && s_.rhog_last.size() == rhog_in[ispin].size()) {
+                        if (s_.rhog_last[ispin].size() == rhog_in[ispin].size()) {
+                           rhogflag = 0;
+                           for ( int i=0; i < rhog_in[ispin].size(); i++ ) 
+                              rhog_in[ispin][i] = s_.rhog_last[ispin][i];
+                        }
+                     }
+                  
+                     if (rhogflag) {
+                        for ( int i=0; i < rhog_in[ispin].size(); i++ )
+                        {
+                           if (tddft_involved_)
+                              rhog_in[ispin][i] = ( ef_.hamil_cd() )->rhog[ispin][i];
+                           else
+                              rhog_in[ispin][i] = cd_.rhog[ispin][i];
+                        }
                      }
                   }
-                  
-                  if (rhogflag) {
-                    for ( int i=0; i < rhog_in[ispin].size(); i++ ) 
-                      rhog_in[ispin][i] = cd_.rhog[ispin][i];
-                  }
-                }
-              }
-              // itscf > 0
-              else {
+               }
+               // itscf > 0
+               else {
 
-                for ( int ispin = 0; ispin < nspin; ispin++ ) {
-                  // compute correction drhog
-                  for ( int i=0; i < rhog_in[ispin].size(); i++ )
-                  {
-                    drhog[ispin][i] = (cd_.rhog[ispin][i] - rhog_in[ispin][i]);
-                  }
-
-                  const double alpha = s_.ctrl.charge_mix_coeff;
-                  // Anderson acceleration
-                  if ( anderson_charge_mixing )
-                  {
-                    // row weighting of LS calculation
-                    for ( int i=0; i < drhog[ispin].size(); i++ )
-                      drhog[ispin][i] /= wls[i];
+                  for ( int ispin = 0; ispin < nspin; ispin++ ) {
+                     // compute correction drhog
+                     for ( int i=0; i < rhog_in[ispin].size(); i++ )
+                     {
+                        drhog[ispin][i] = (cd_.rhog[ispin][i] - rhog_in[ispin][i]);
+                     }
+                     
+                     const double alpha = s_.ctrl.charge_mix_coeff;
+                     // Anderson acceleration
+                     if ( anderson_charge_mixing )
+                     {
+                        // row weighting of LS calculation
+                        for ( int i=0; i < drhog[ispin].size(); i++ )
+                           drhog[ispin][i] /= wls[i];
                     
-                    //ewd:  try running this on every task
-                    mixer[ispin]->update((double*)&rhog_in[ispin][0],(double*)&drhog[ispin][0],
-                                         (double*)&rhobar[ispin][0],(double*)&drhobar[ispin][0]);
+                        //ewd:  try running this on every task
+                        mixer[ispin]->update((double*)&rhog_in[ispin][0],(double*)&drhog[ispin][0],
+                                             (double*)&rhobar[ispin][0],(double*)&drhobar[ispin][0]);
 
-                    for ( int i=0; i < drhobar[ispin].size(); i++ )
-                      drhobar[ispin][i] *= wls[i];
+                        for ( int i=0; i < drhobar[ispin].size(); i++ )
+                           drhobar[ispin][i] *= wls[i];
                     
-                    for ( int i=0; i < rhog_in[ispin].size(); i++ )
-                      rhog_in[ispin][i] = rhobar[ispin][i] + alpha * drhobar[ispin][i] * wkerker[i];
+                        for ( int i=0; i < rhog_in[ispin].size(); i++ )
+                           rhog_in[ispin][i] = rhobar[ispin][i] + alpha * drhobar[ispin][i] * wkerker[i];
+                     }
+                     else {
+                        for ( int i=0; i < rhog_in[ispin].size(); i++ )
+                           rhog_in[ispin][i] += alpha * drhog[ispin][i] * wkerker[i];
+                     }
+
+                     if (tddft_involved_)
+                     {
+                        for ( int i=0; i < rhog_in[ispin].size(); i++ )
+                           ( ef_.hamil_cd() )->rhog[ispin][i] = rhog_in[ispin][i];
+                        ( ef_.hamil_cd() )->update_rhor();                     
+                     }
+                     
+                     // Apply correction
+                     for ( int i=0; i < rhog_in[ispin].size(); i++ )
+                        cd_.rhog[ispin][i] = rhog_in[ispin][i];
                   }
-                  else {
-                    for ( int i=0; i < rhog_in[ispin].size(); i++ )
-                      rhog_in[ispin][i] += alpha * drhog[ispin][i] * wkerker[i];
-                  }
-                  
-                  // Apply correction
-                  for ( int i=0; i < rhog_in[ispin].size(); i++ )
-                    cd_.rhog[ispin][i] = rhog_in[ispin][i];
-                }
-                cd_.update_rhor();
-              }              
+                  cd_.update_rhor();
+               }              
             }
+
+            // AS: update the Hamiltonian, the potential, and the energy before propagation
+            // starts and/or after the mixing
+            if (tddft_involved_)
+               ef_.update_hamiltonian();
+              
             ef_.update_vhxc();
+            //ef_.update_exc_ehart_eps();
+
+            // AS: the first step is an EULER one in the case of the second-order propagation
+            if ( ( wf_dyn == "SOTD" ) && wfv_is_new ) {
+               // AS: |psi(t-tddt)> is the wave function in the very beginning
+               *wfdeque[0]=wf;
+
+               // AS: |psi(t)> is calculated by doing one TDEULER step using the EULER stepper
+               WavefunctionStepper* wf_init_stepper = new TDEULERWavefunctionStepper(wf,s_.ctrl.tddt,tmap);
+               
+               cout << wf_dyn << " initialization energy: " << ef_.energy(true,dwf,false,fion,false,sigma_eks) << endl;
+               cout << wf_dyn << " initialization expectation value: " << s_.wf.dot(dwf) << endl;
+
+               wf_init_stepper->update(dwf);
+               // AS: now we have |psi(t)>
+               *wfdeque[1]=wf;
+               (*s_.hamil_wf)=s_.wf;
+
+               // AS: the wave functions used in the Hamiltonian are NOT updated here
+               cd_.update_density();
+               ( ef_.hamil_cd() )->update_density();
+
+               // AS: update the Hamiltonian after the first EULER step
+               ef_.update_hamiltonian();
+               ef_.update_vhxc();
+               // AS: modified version of EnergyFunctional::update_vhxc(void) which leaves the potential
+               // untouched and only recalculates the energy terms
+               //ef_.update_exc_ehart_eps();   
+               // AS: we are ready to go with the SOTD
+               if ( wf_dyn == "SOTD" ) wfv_is_new=false;
+            }
           
+            if (wf_dyn=="FORKTD") {
+               // AS: initialize wfdeque[0] with 0, it will be k_1
+               *wfdeque[0]=dwf;
+               // AS: initialize wfdeque[1] with 0, it will be k_2
+               *wfdeque[1]=s_.wf;
+               // AS: initialize wfdeque[2] with 0, it will be k_3
+               *wfdeque[2]=s_.wf;
+               // AS: initialize wfdeque[3] with 0, it will be k_4
+               *wfdeque[3]=s_.wf;
+               // AS: initialize wfdeque[4] with wf, to keep a copy
+               *wfdeque[4]=s_.wf;
+            }
+            
             // reset stepper only if multiple non-selfconsistent steps
             if ( nite_ > 1 ) wf_stepper->preprocess();
             double lastnonscfetot;
@@ -1260,17 +1384,385 @@ void BOSampleStepper::step(int niter)
 
                 if (ultrasoft) { 
                   const double us_eigenvalue_sum = s_.wf.sdot(dwf);
-                  if ( onpe0 )
+                  if ( oncoutpe )
                     cout  << "  <eigenvalue_sum> "
                           << us_eigenvalue_sum << " </eigenvalue_sum>" << endl;
                 }
                 else {
                   const double eigenvalue_sum = s_.wf.dot(dwf);
-                  if ( onpe0 )
+                  if ( oncoutpe )
                     cout << "  <eigenvalue_sum> "
                          << eigenvalue_sum << " </eigenvalue_sum>" << endl;
                 }
 
+
+
+                // AS: calculation and output of < psi(t) | H(t_0) | psi(t) > , i.e., the expectation values
+                // AS: in the case the wave functions are propagated in time
+                // AS: code taken from Wavefunction::diag(Wavefunction& dwf, bool eigvec)
+                if ( tddft_involved_ && s_.ctrl.wf_diag == "EIGVAL" )
+                {
+                   if ( oncoutpe ) cout << "<" << wf_dyn << " expectation set>" << endl;
+
+                   // AS: this is the new version, not copying code, but copying the wave function instead
+                   Wavefunction* to_diag_wf1 = new Wavefunction(s_.wf);
+                   (*to_diag_wf1) = (s_.wf);
+                   (*to_diag_wf1).diag(dwf,false);
+
+                   if ( oncoutpe )
+                   {
+                      for ( int ispin = 0; ispin < (*to_diag_wf1).nspin(); ispin++ )
+                      {
+                         for ( int ikp = 0; ikp < (*to_diag_wf1).nkp(); ikp++ )
+                         {
+                            const int nst = (*to_diag_wf1).sd(ispin,ikp)->nst();
+                            const double eVolt = 2.0 * 13.6058;
+                            cout <<    "  <" << wf_dyn << " expectation values spin=\"" << ispin
+                                 << "\" kpoint=\"" << s_.wf.sd(ispin,ikp)->kpoint()
+                                 << "\" n=\"" << nst << "\">" << endl;
+                            cout << "  ";
+                            for ( int i = 0; i < nst; i++ )
+                            {
+                               cout << setw(15) << setprecision(8)
+                                    << (*to_diag_wf1).sd(ispin,ikp)->eig(i)*eVolt;
+                               if ( i%5 == 4 ) cout << endl;
+                            }
+                            if ( nst%5 != 0 ) cout << endl;
+                            cout << "  </" << wf_dyn << " expectation values>" << endl;
+                         }
+                      }
+                   }
+
+                   if ( oncoutpe ) cout << "</" << wf_dyn << " expectation set>" << endl;
+                   delete(to_diag_wf1);
+                }
+
+                // AS: calculation and output of < psi(t) | psi(t) > , i.e., the orthonormalization
+                // AS: code adopted from SlaterDet::gram(void)
+                if ( tddft_involved_ && s_.ctrl.wf_diag == "EIGVAL" )
+                {
+                   for ( int ispin = 0; ispin < (wf).nspin(); ispin++ )
+                   {
+                      for ( int ikp = 0; ikp < (wf).nkp(); ikp++ )
+                      {
+                         ComplexMatrix ortho(wf.sd(ispin,ikp)->context(),(wf.sd(ispin,ikp)->c()).n(),(wf.sd(ispin,ikp)->c()).n(),(wf.sd(ispin,ikp)->c()).nb(),(wf.sd(ispin,ikp)->c()).nb());
+                                                                                                      
+                         ortho.gemm('c','n',1.0,(wf).sd(ispin,ikp)->c(),(wf).sd(ispin,ikp)->c(),0.0);
+                         if ( oncoutpe )
+                         {
+                            cout << "ortho: " << endl;
+                         }
+                         //ewd:  this is not going to print correctly, as tasks will not print data in order
+                         cout << ortho;   
+                      }
+                   }
+                }
+
+                if (wf_dyn=="SORKTD") {
+                   wfdeque.push_back( s_.wfv );
+                   // AS: initialize wfdeque[0] with 0, it will be k_1
+                   (*wfdeque[0]).clear();
+
+                   wfdeque.push_back( s_.wfv );
+                   // AS: initialize wfdeque[1] with 0, it will be k_2
+                   (*wfdeque[1]).clear();
+
+                   wfdeque.push_back( s_.wfv );
+                   // AS: initialize wfdeque[2] with wf, to keep a copy
+                   (*wfdeque[2])=s_.wf;
+
+                   for ( int ispin = 0; ispin < wf.nspin(); ispin++ )
+                   {
+                      for ( int ikp = 0; ikp < wf.nkp(); ikp++ )
+                      {
+                         // AS: here we turn wfdeque[0] into k_1
+                         ((*wfdeque[0]).sd(ispin,ikp)->c()).axpy(-1.0*s_.ctrl.tddt*(complex<double>(0,1)), dwf.sd(ispin,ikp)->c() );
+                         // AS: here we turn wf into |psi(t)+0.5*k_1>
+                         ((s_.wf).sd(ispin,ikp)->c()).axpy(0.5, (*wfdeque[0]).sd(ispin,ikp)->c() );
+                      }
+                   }
+
+                   // AS: for the correct output of the nonscf energy
+                   if (s_.ctrl.non_selfc_energy)
+                   {
+                      // AS: the wave functions used in the Hamiltonian are NOT updated here
+                      cd_.update_density();
+                      // AS: modified version of EnergyFunctional::update_vhxc(void) which leaves the
+                      // potential untouched and only recalculates the energy terms
+                      //ef_.update_exc_ehart_eps();
+                   }
+                   
+                   // AS: update the Hamiltonian with psi(t)+0.5*k_1
+                   (*s_.hamil_wf)=s_.wf;
+                   ( ef_.hamil_cd() )->update_density();
+                   ef_.update_hamiltonian();
+                   ef_.update_vhxc();
+
+                   // AS: apply the Hamiltonian to |psi(t)+0.5*k_1>
+                   ef_.energy(true,dwf,false,fion,false,sigma_eks);
+
+                   for ( int ispin = 0; ispin < wf.nspin(); ispin++ )
+                   {
+                      for ( int ikp = 0; ikp < wf.nkp(); ikp++ )
+                      {
+                         // AS: here we turn wfdeque[1] into k_2
+                         ((*wfdeque[1]).sd(ispin,ikp)->c()).axpy(-1.0*s_.ctrl.tddt*(complex<double>(0,1)), dwf.sd(ispin,ikp)->c() );
+                      }
+                   }
+                }
+
+                if (wf_dyn=="FORKTD") {
+                   //ewd DEBUG
+                   tmap["forktd_tot"].start();
+                   tmap["forktd_push"].start();
+
+                   // AS: initialize wfdeque[0] with 0, it will be k_1
+                   (*wfdeque[0]).clear();
+                   
+                   // AS: initialize wfdeque[1] with 0, it will be k_2
+                   (*wfdeque[1]).clear();
+
+                   // AS: initialize wfdeque[2] with 0, it will be k_3
+                   (*wfdeque[2]).clear();
+
+                   // AS: initialize wfdeque[3] with 0, it will be k_4
+                   (*wfdeque[3]).clear();
+
+                   // AS: initialize wfdeque[4] with wf, to keep a copy
+                   (*wfdeque[4])=s_.wf;
+
+                   //ewd DEBUG
+                   tmap["forktd_push"].stop();
+                   tmap["forktd_axpy"].start();
+                   //ewd DEBUG
+
+                   for ( int ispin = 0; ispin < wf.nspin(); ispin++ )
+                   {
+                      for ( int ikp = 0; ikp < wf.nkp(); ikp++ )
+                      {
+                         // AS: here we turn wfdeque[0] into k_1
+                         ((*wfdeque[0]).sd(ispin,ikp)->c()).axpy(-1.0*s_.ctrl.tddt*(complex<double>(0,1)), dwf.sd(ispin,ikp)->c() );
+                         // AS: here we turn wf into |psi(t)+0.5*k_1>
+                         ((s_.wf).sd(ispin,ikp)->c()).axpy(0.5, (*wfdeque[0]).sd(ispin,ikp)->c() );
+                      }
+                   }
+
+                   //ewd DEBUG
+                   tmap["forktd_axpy"].stop();
+                   //ewd DEBUG
+
+                   // AS: for the correct output of the nonscf energy
+                   if (s_.ctrl.non_selfc_energy)
+                   {
+                      // AS: the wave functions used in the Hamiltonian are NOT updated here
+                      cd_.update_density();
+
+                      // AS: modified version of EnergyFunctional::update_vhxc(void) which leaves the
+                      // potential untouched and only recalculates the energy terms
+                      //ef_.update_exc_ehart_eps();
+                   }
+
+                   //ewd DEBUG
+                   tmap["forktd_wfcp"].start();
+                   //ewd DEBUG
+
+                   // AS: set the Hamiltonian accordingly
+                   (*s_.hamil_wf)=s_.wf;
+
+                   //ewd DEBUG
+                   tmap["forktd_wfcp"].stop();
+                   tmap["forktd_cd"].start();
+                   //ewd DEBUG
+
+                   ( ef_.hamil_cd() )->update_density();
+
+                   //ewd DEBUG
+                   tmap["forktd_cd"].stop();
+                   tmap["forktd_efup"].start();
+                   //ewd DEBUG
+
+                   ef_.update_hamiltonian();
+                   ef_.update_vhxc();
+
+                   //ewd DEBUG
+                   tmap["forktd_efup"].stop();
+                   tmap["forktd_efen"].start();
+                   //ewd DEBUG
+
+                   // AS: apply the Hamiltonian to |psi(t)+0.5*k_1>
+                   ef_.energy(true,dwf,false,fion,false,sigma_eks);
+
+                   //ewd DEBUG
+                   tmap["forktd_efen"].stop();
+                   tmap["forktd_wfcp"].start();
+                   //ewd DEBUG
+
+                   // AS: setting wf back to |psi(t)>
+                   s_.wf=(*wfdeque[4]);
+
+                   //ewd DEBUG
+                   tmap["forktd_wfcp"].stop();
+                   tmap["forktd_axpy"].start();
+                   //ewd DEBUG                                            
+                   for ( int ispin = 0; ispin < wf.nspin(); ispin++ )
+                   {
+                      for ( int ikp = 0; ikp < wf.nkp(); ikp++ )
+                      {
+                         // AS: here we turn wfdeque[1] into k_2
+                         ((*wfdeque[1]).sd(ispin,ikp)->c()).axpy(-1.0*s_.ctrl.tddt*(complex<double>(0,1)), dwf.sd(ispin,ikp)->c() );
+                         // AS: here we turn wf into |psi(t)+0.5*k_2>
+                         ((s_.wf).sd(ispin,ikp)->c()).axpy(0.5, (*wfdeque[1]).sd(ispin,ikp)->c() );
+                      }
+                   }
+
+
+                   //ewd DEBUG
+                   tmap["forktd_axpy"].stop();
+                   //ewd DEBUG
+
+                   // AS: for the correct output of the energy
+                   if (s_.ctrl.non_selfc_energy)
+                   {
+                      // AS: the wave functions used in the Hamiltonian are NOT updated here
+                      cd_.update_density();
+
+                      // AS: modified version of EnergyFunctional::update_vhxc(void) which leaves the
+                      // potential untouched and only recalculates the energy terms
+                      //ef_.update_exc_ehart_eps();
+                   }
+                   
+                   // AS: set the Hamiltonian accordingly
+
+                   //ewd DEBUG
+                   tmap["forktd_wfcp"].start();
+                   //ewd DEBUG
+
+                   (*s_.hamil_wf)=s_.wf;
+
+                   //ewd DEBUG
+                   tmap["forktd_wfcp"].stop();
+                   tmap["forktd_cd"].start();
+                   //ewd DEBUG
+
+                   ( ef_.hamil_cd() )->update_density();
+
+                   //ewd DEBUG
+                   tmap["forktd_cd"].stop();
+                   tmap["forktd_efup"].start();
+                   //ewd DEBUG
+
+                   ef_.update_hamiltonian();
+                   ef_.update_vhxc();
+
+                   //ewd DEBUG
+                   tmap["forktd_efup"].stop();
+                   tmap["forktd_efen"].start();
+                   //ewd DEBUG
+
+                   // AS: apply the Hamiltonian to |psi(t)+0.5*k_2>
+                   ef_.energy(true,dwf,false,fion,false,sigma_eks);
+
+                   //ewd DEBUG
+                   tmap["forktd_efen"].stop();
+                   tmap["forktd_wfcp"].start();
+                   //ewd DEBUG
+
+                   // AS: setting wf back to |psi(t)>
+                   s_.wf=(*wfdeque[4]);
+
+                   tmap["forktd_wfcp"].stop();
+                   tmap["forktd_axpy"].start();
+                   //ewd DEBUG
+
+                   for ( int ispin = 0; ispin < wf.nspin(); ispin++ )
+                   {
+                      for ( int ikp = 0; ikp < wf.nkp(); ikp++ )
+                      {
+                         // AS: here we turn wfdeque[2] into k_3
+                         ((*wfdeque[2]).sd(ispin,ikp)->c()).axpy(-1.0*s_.ctrl.tddt*(complex<double>(0,1)), dwf.sd(ispin,ikp)->c() );
+                         // AS: here we turn wf into |psi(t)+k_3>
+                         ((s_.wf).sd(ispin,ikp)->c()).axpy(1.0, (*wfdeque[2]).sd(ispin,ikp)->c() );
+                      }
+                   }
+                   //ewd DEBUG
+                   tmap["forktd_axpy"].stop();
+                   //ewd DEBUG
+
+                   // AS: for the correct output of the energy
+                   if (s_.ctrl.non_selfc_energy)
+                   {
+                      // AS: the wave functions used in the Hamiltonian are NOT updated here
+                      cd_.update_density();
+
+                      // AS: modified version of EnergyFunctional::update_vhxc(void) which leaves the
+                      // potential untouched and only recalculates the energy terms
+                      //ef_.update_exc_ehart_eps();
+                   }
+
+                   // AS: set the Hamiltonian accordingly
+
+                   //ewd DEBUG
+                   tmap["forktd_wfcp"].start();
+                   //ewd DEBUG
+
+                   (*s_.hamil_wf)=s_.wf;
+
+                   //ewd DEBUG
+                   tmap["forktd_wfcp"].stop();
+                   tmap["forktd_cd"].start();
+                   //ewd DEBUG
+
+                   ( ef_.hamil_cd() )->update_density();
+
+                   //ewd DEBUG
+                   tmap["forktd_cd"].stop();
+                   tmap["forktd_efup"].start();
+                   //ewd DEBUG
+
+                   ef_.update_hamiltonian();
+                   ef_.update_vhxc();
+
+                   //ewd DEBUG
+                   tmap["forktd_efup"].stop();
+                   tmap["forktd_efen"].start();
+                   //ewd DEBUG
+
+                   // AS: apply the Hamiltonian to |psi(t)+k_3>
+                   ef_.energy(true,dwf,false,fion,false,sigma_eks);
+
+                   //ewd DEBUG
+                   tmap["forktd_efen"].stop();
+                   tmap["forktd_axpy"].start();
+                   //ewd DEBUG
+
+                   for ( int ispin = 0; ispin < wf.nspin(); ispin++ )
+                   {
+                      for ( int ikp = 0; ikp < wf.nkp(); ikp++ )
+                      {
+                         // AS: here we turn wfdeque[3] into k_4
+                         ((*wfdeque[3]).sd(ispin,ikp)->c()).axpy(-1.0*s_.ctrl.tddt*(complex<double>(0,1)), dwf.sd(ispin,ikp)->c() );
+                      }
+                   }
+
+                   //ewd DEBUG
+                   tmap["forktd_axpy"].stop();
+                   tmap["forktd_tot"].stop();
+                   //ewd DEBUG
+                }
+                // AS: energy renormalization is currently disabled
+                // output of the renormalized energy
+                // double wf_dyn_energy;
+                // double wf_dyn_eigenvalue_sum;
+                // if ( tddft_involved ) {
+                // wf_dyn_energy = ef_.energy(true,dwf,false,fion,false,sigma_eks,true);
+                // wf_dyn_eigenvalue_sum = real(s_.wf.dot(dwf));
+                // if ( oncoutpe )
+                // {
+                //   cout << wf_dyn << " energy: " << wf_dyn_energy << endl;
+                //   cout << wf_dyn << " expectation value: " << wf_dyn_eigenvalue_sum << endl;
+                // }
+                // }    
+                
                 wf_stepper->update(dwf);
                 if (ultrasoft)
                    wf.update_usfns();
@@ -1299,8 +1791,20 @@ void BOSampleStepper::step(int niter)
                     }
                   }
                 }
+
+                // AS: change the phase of the wave function if the respective variable is set
+                if ( s_.wf.phase_real_set() ) {
+                   s_.wf.phase_wf_real();
+
+                   //ewd DEBUG
+                   //if (oncoutpe)
+                   //cout << "DEBUG:  PHASE_WF_REAL SET TO TRUE!" << endl;
+                   //ewd DEBUG
+  
+                }
                 
-                if ( onpe0 )
+                
+                if ( oncoutpe )
                 {
                   cout.setf(ios::fixed,ios::floatfield);
                   cout.setf(ios::right,ios::adjustfield);
@@ -1313,12 +1817,41 @@ void BOSampleStepper::step(int niter)
                     cout << "  <enthalpy_int> " << setw(15)
                          << enthalpy << " </enthalpy_int>\n"
                          << flush;
-                  }
+                  }                  
+                }
+                
+                if ( ( nite_ > 1 ) && ( (wf_dyn=="SORKTD") || (wf_dyn=="FORKTD") ) ) {
+                   (*s_.hamil_wf)=s_.wf;
+                   ( ef_.hamil_cd() )->update_density();
+                   cd_.update_density();
+                   ef_.update_hamiltonian();
+                   ef_.update_vhxc();
+                   // AS: this should be only needed if cd_ has changed and no update_vhxc call is
+                   //     done and the energy is written somewhere after
+                   // ef_.update_exc_ehart_eps();
+                }
+
+                // AS: for the correct output of the energy
+                if ( s_.ctrl.non_selfc_energy && (wf_dyn!="SORKTD") && (wf_dyn!="FORKTD") )
+                {
+
+                   //ewd DEBUG
+                   //if (oncoutpe)
+                   //   cout << "DEBUG:  NON_SELFC_ENERGY SET TO TRUE!" << endl;
+                   //ewd DEBUG
+
+                   // AS: the wave functions used in the Hamiltonian are NOT updated here
+                   cd_.update_density();
+
+                   // AS: modified version of EnergyFunctional::update_vhxc(void) which leaves the
+                   // potential untouched and only
+                   // AS: recalculates the energy terms
+                   ef_.update_exc_ehart_eps();
                 }
               }
             } // for ite
             // subspace diagonalization
-            if ( compute_eigvec || s_.ctrl.wf_diag == "EIGVAL" || usdiag)
+            if ( compute_eigvec || s_.ctrl.wf_diag == "EIGVAL" || usdiag && (!tddft_involved_))
             {
               ef_.energy(true,dwf,false,fion,false,sigma_eks);
               tmap["diag"].start();
@@ -1340,7 +1873,7 @@ void BOSampleStepper::step(int niter)
               if (itscf%s_.ctrl.iprint == 0)
                 s_.wf.printocc();
               const double wf_entropy = wf.entropy();
-              if ( onpe0 )
+              if ( oncoutpe )
               {
                 cout << "  <!-- Wavefunction entropy: " << wf_entropy << " -->" << endl;
                 //const double boltz = 1.0 / ( 11605.0 * 2.0 * 13.6058 );
@@ -1348,19 +1881,116 @@ void BOSampleStepper::step(int niter)
                      << - wf_entropy * s_.ctrl.smearing_width * 2.0 << " -->" << endl;
               }
             }
-          
-            if ( nite_ > 1 && onpe0 )
+
+            // AS: after the first set of non-selfconsistent steps the Hamiltonian is no longer fixed
+            // AS: this makes the Hamiltonian time dependent
+            if (tddft_involved_)
+            {
+               (*s_.hamil_wf)=s_.wf;
+               ( ef_.hamil_cd() )->update_density();
+            }
+            
+            if ( nite_ > 1 && oncoutpe )
               cout << "  <!-- BOSampleStepper: end scf iteration -->" << endl;
           }
         } // for itscf
 
 #ifdef TAU  
-  QB_Pstop(scfloop);
+        QB_Pstop(scfloop);
 #endif
 #ifdef HPM
-  HPM_Stop("scfloop");
+        HPM_Stop("scfloop");
 #endif
 
+        // AS: keep the previous wave function
+        if ( wf_dyn == "SOTD" ) *(s_.wfv)=*wfdeque[0];
+
+        // AS: non-adiabatic overlap for succeeding steps of the Born-Oppenheimer trajectory is calculated
+        if ( ( atoms_move ) && ( s_.ctrl.na_overlap_min >= 0 ) )
+        {
+           // AS: after the first step previous_wf is simply set to the current wf
+           if ( s_.previous_wf == 0 )
+           {
+              s_.previous_wf = new Wavefunction(wf);
+              (*s_.previous_wf) = s_.wf;
+           }
+           
+           // AS: ATTENTION: currently the min/max indices are not used yet! Overlap is calculated for all the states!
+           for ( int ispin = 0; ispin < wf.nspin(); ispin++ )
+           {
+              for ( int ikp = 0; ikp < wf.nkp(); ikp++ )
+              {
+                 if ( wf.force_complex_set() ) {
+                    ComplexMatrix overlap1(wf.sd(ispin,ikp)->context(),(wf.sd(ispin,ikp)->c()).n(),(wf.sd(ispin,ikp)->c()).n(),(wf.sd(ispin,ikp)->c()).nb(),(wf.sd(ispin,ikp)->c()).nb());
+                    ComplexMatrix overlap2(wf.sd(ispin,ikp)->context(),(wf.sd(ispin,ikp)->c()).n(),(wf.sd(ispin,ikp)->c()).n(),(wf.sd(ispin,ikp)->c()).nb(),(wf.sd(ispin,ikp)->c()).nb());
+
+                    // AS: The following two lines should give something like the d_jk
+                    // overlap1.gemm('c','n',-1.0*(complex<double>(0,1))/2.0/s_.ctrl.dt,(*s_.previous_wf).sd(ispin,ikp)->c(),wf.sd(ispin,ikp)->c(),0.0);
+                    // overlap1.gemm('c','n',1.0*(complex<double>(0,1))/2.0/s_.ctrl.dt,wf.sd(ispin,ikp)->c(),(*s_.previous_wf).sd(ispin,ikp)->c(),1.0);
+
+                    // AS: The following two lines are the same stuff without the complex i
+                    overlap1.gemm('c','n',-1.0/2.0/s_.ctrl.dt,(*s_.previous_wf).sd(ispin,ikp)->c(),wf.sd(ispin,ikp)->c(),0.0);
+                    overlap2.gemm('c','n',1.0/2.0/s_.ctrl.dt,wf.sd(ispin,ikp)->c(),(*s_.previous_wf).sd(ispin,ikp)->c(),0.0);
+
+                    // AS: this is the normalization
+                    // overlap1.gemm('c','n',1.0,wf.sd(ispin,ikp)->c(),wf.sd(ispin,ikp)->c(),0.0);
+                    
+                    cout << "OVERLAP complex: " << endl;
+                    cout << "overlap1" << overlap1 << endl;
+                    cout << "overlap2" << overlap2 << endl;
+                    overlap1 += overlap2;
+                    cout << "overlap1+overlap2" << overlap1 << endl;
+                 }
+                 else
+                 {
+                    DoubleMatrix overlap1(wf.sd(ispin,ikp)->context(),(wf.sd(ispin,ikp)->c()).n(),(wf.sd(ispin,ikp)->c()).n(),(wf.sd(ispin,ikp)->c()).nb(),(wf.sd(ispin,ikp)->c()).nb());
+                    DoubleMatrix overlap2(wf.sd(ispin,ikp)->context(),(wf.sd(ispin,ikp)->c()).n(),(wf.sd(ispin,ikp)->c()).n(),(wf.sd(ispin,ikp)->c()).nb(),(wf.sd(ispin,ikp)->c()).nb());
+
+                    // DoubleMatrix proxies
+                    DoubleMatrix previous_wf_proxy( (*s_.previous_wf).sd(ispin,ikp)->c() );
+                    DoubleMatrix wf_proxy( wf.sd(ispin,ikp)->c() );
+
+                    // AS: The following two lines are something like the d_jk without the complex i
+                    // AS: 2*(-1.0/2.0/s_.ctrl.dt) is the factor
+                    overlap1.gemm('c','n',-1.0/s_.ctrl.dt,previous_wf_proxy,wf_proxy,0.0);
+                    // AS: -1.0*(-1.0/2.0/s_.ctrl.dt) is the factor
+                    overlap1.ger(1.0/2.0/s_.ctrl.dt,previous_wf_proxy,0,wf_proxy,0);
+                    overlap2.gemm('c','n',1.0/s_.ctrl.dt,wf_proxy,previous_wf_proxy,0.0);
+                    overlap2.ger(-1.0/2.0/s_.ctrl.dt,wf_proxy,0,previous_wf_proxy,0);
+
+                    // AS: the following three lines reproduce the correct normalization
+                    // overlap1.gemm('c','n',2.0,wf_proxy,wf_proxy,0.0);
+                    // rank-1 update using first row of sdc_proxy() and c_proxy
+                    // overlap1.ger(-1.0,wf_proxy,0,wf_proxy,0);
+
+                    cout << "OVERLAP real: " << endl;
+                    cout << "overlap1" << overlap1 << endl;
+                    cout << "overlap2" << overlap2 << endl;
+                    overlap1 += overlap2;
+                    cout << "overlap1+overlap2" << overlap1 << endl;
+                 }
+              }
+           }
+
+           // AS: keep a copy of the wave function to calculate the overlap during the following iteration
+           delete s_.previous_wf;
+           s_.previous_wf = new Wavefunction(s_.wf);
+           (*s_.previous_wf) = s_.wf;
+        }
+
+        // AS: this implements a function to print the density every N number of MD steps
+        if ( (s_.ctrl.print_density_every > 0) && ((iter % s_.ctrl.print_density_every) == 0) ) {
+           PlotCmd plot_density_from_stepper(&s_);
+           std::ostringstream oss; oss << std::setfill('0') << std::setw(6) << iter;
+           string arg1 = "plot", arg2 = "-density", arg3 = "plots/density-" + oss.str() + ".cub";
+           char* argv[] = {const_cast<char*>(arg1.c_str()), const_cast<char*>(arg2.c_str()), const_cast<char*>(arg3.c_str())};
+           plot_density_from_stepper.action(3,argv);
+        }
+
+            
+     
+
+  
         if (!convflag && s_.ctrl.threshold_scf > 0.0) 
           if ( s_.ctxt_.oncoutpe() ) 
             cout << "<WARNING> Ionic iteration finished without triggering scf convergence threshold, consider increasing nscf = " << nitscf_ << " </WARNING>" << endl;
@@ -1373,7 +2003,7 @@ void BOSampleStepper::step(int niter)
           if ( compute_mlwf )
             mlwft->apply_transform(sd);
           
-          if ( onpe0 )
+          if ( oncoutpe )
           {
             cout << " <mlwf_set size=\"" << sd.nst() << "\">" << endl;
             for ( int i = 0; i < sd.nst(); i++ )
@@ -1405,8 +2035,6 @@ void BOSampleStepper::step(int niter)
 
 
         // If GS calculation only, print energy and atomset at end of iterations
-
-
         bool fastend = false;
 #ifdef BGQ        
         fastend = true;
@@ -1414,8 +2042,7 @@ void BOSampleStepper::step(int niter)
 
         if ( gs_only && !fastend)
         {
-
-          // need eigenvalues to compute forces w. ultrasoft
+           // need eigenvalues to compute forces w. ultrasoft
           if (ultrasoft) { 
             ef_.energy(true,dwf,false,fion,false,sigma_eks);
             tmap["diag"].start();
@@ -1432,11 +2059,16 @@ void BOSampleStepper::step(int niter)
             s_.wf.printeig();
           }
 
-          tmap["charge"].start();
-          if ( !initial_atomic_density )
-            cd_.update_density();
-          tmap["charge"].stop();
+           tmap["charge"].start();
+           cd_.update_density();
+           tmap["charge"].stop();
 
+           if (tddft_involved_)
+           {
+              ( ef_.hamil_cd() )->update_density();
+              ef_.update_hamiltonian();
+           }
+           
           ef_.update_vhxc();
           const bool compute_forces = true;
           ef_.energy(false,dwf,compute_forces,fion,compute_stress,sigma_eks);
@@ -1452,7 +2084,7 @@ void BOSampleStepper::step(int niter)
             }
           }
 
-          if ( onpe0 )
+          if ( oncoutpe )
           {
             cout << ef_;
             cout << "<atomset>" << endl;
@@ -1486,7 +2118,7 @@ void BOSampleStepper::step(int niter)
           }
         }
         else if (gs_only && fastend) {
-           if ( onpe0 )
+           if ( oncoutpe )
               cout << ef_;
         }
         wf_stepper->postprocess();
@@ -1500,7 +2132,7 @@ void BOSampleStepper::step(int niter)
         tmap["charge"].stop();
         ef_.update_vhxc();
         ef_.energy(true,dwf,false,fion,false,sigma_eks);
-        if ( onpe0 )
+        if ( oncoutpe )
         {
           cout << ef_;
         }
@@ -1515,7 +2147,7 @@ void BOSampleStepper::step(int niter)
       double tmax = time;
       s_.ctxt_.dmin(1,1,&tmin,1);
       s_.ctxt_.dmax(1,1,&tmax,1);
-      if ( onpe0 )
+      if ( oncoutpe )
       {
        cout << left << setw(34) << "<timing where=\"run\""
            << setw(24) << " name=\" iteration\""
@@ -1757,10 +2389,11 @@ void BOSampleStepper::step(int niter)
     ionic_stepper->compute_v(energy,fion);
     // positions r0 and velocities v0 are consistent
   }
-  else
+  else if (wf_dyn != "SOTD")
   {
     // delete wavefunction velocities
-    if ( s_.wfv != 0 )
+     // AS: only if we don't need them anymore; for SOTD we do need them later on
+     if ( s_.wfv != 0 )
       delete s_.wfv;
     s_.wfv = 0;
   }

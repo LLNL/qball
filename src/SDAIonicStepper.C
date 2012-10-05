@@ -27,7 +27,7 @@ void SDAIonicStepper::compute_r(double e0, const vector<vector< double> >& f0)
 
   if ( largest_force > max_force )
   {
-    if ( s_.ctxt_.onpe0() )
+    if ( s_.ctxt_.oncoutpe() )
       cout << "  SDAIonicStepper: force exceeds limit, taking SD step " << endl;
     // take a steepest descent step with limited displacement and exit
     const double alpha_sd = max_force/largest_force;
@@ -63,7 +63,7 @@ void SDAIonicStepper::compute_r(double e0, const vector<vector< double> >& f0)
       }
     }
     wolfe2 = fabs(fp0) < sigma2_ * fabs(fpc_);
-    if ( s_.ctxt_.onpe0() )
+    if ( s_.ctxt_.oncoutpe() )
     {
       cout << "  SDAIonicStepper: fpc = " << fpc_ << endl;
       cout << "  SDAIonicStepper: fp0 = " << fp0 << endl;
@@ -99,7 +99,7 @@ void SDAIonicStepper::compute_r(double e0, const vector<vector< double> >& f0)
 
   alpha_ = linmin_.newalpha(alpha_,e0,fp0);
 
-  if ( s_.ctxt_.onpe0() )
+  if ( s_.ctxt_.oncoutpe() )
     cout << "  SDAIonicStepper: alpha = " << alpha_ << endl;
 
   // rp = rc + alpha * pc

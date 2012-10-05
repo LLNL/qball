@@ -394,7 +394,7 @@ ContextRep::ContextRep() : ictxt_(-1), myrow_(-1), mycol_(-1)
   myproc_ = myrow_ < 0 ? -1 : mycol_ + npcol_ * myrow_;
   onpe0_ = ( mype_ == 0 );
   coutpe_ = 0;
-  oncoutpe_ = onpe0_;
+  oncoutpe_ = oncoutpe_;
   active_ = ( ictxt_ >= 0 );
 
   pmap_.resize(size_);
@@ -437,7 +437,7 @@ ContextRep::ContextRep(int nprow, int npcol) :
   myproc_ = Cblacs_pnum(ictxt_,myrow_,mycol_);
   onpe0_ = ( mype_ == 0 );
   coutpe_ = 0;
-  oncoutpe_ = onpe0_;
+  oncoutpe_ = oncoutpe_;
   active_ = ( ictxt_ >= 0 );
   
   pmap_.resize(size_);
@@ -602,7 +602,7 @@ ictxt_(-1), myrow_(-1), mycol_(-1), nprow_(nprow), npcol_(npcol) {
   myproc_ = Cblacs_pnum(ictxt_,myrow_,mycol_);
   onpe0_ = ( mype_ == 0 );
   coutpe_ = 0;
-  oncoutpe_ = onpe0_;
+  oncoutpe_ = oncoutpe_;
   active_ = ( ictxt_ >= 0 );
 
   pmap_.resize(size_);
@@ -770,7 +770,7 @@ int Context::pmap(int irow, int icol) const
 { return (*pimpl_)->pmap(irow,icol); }
 
 ////////////////////////////////////////////////////////////////////////////////
-bool Context::oncoutpe(void) const { return (*pimpl_)->oncoutpe(); }
+bool Context::onpe0(void) const { return (*pimpl_)->onpe0(); }
 
 ////////////////////////////////////////////////////////////////////////////////
 int Context::coutpe(void) const { return (*pimpl_)->coutpe(); }
@@ -779,7 +779,7 @@ int Context::coutpe(void) const { return (*pimpl_)->coutpe(); }
 void Context::set_coutpe(int num) { (*pimpl_)->set_coutpe(num); }
 
 ////////////////////////////////////////////////////////////////////////////////
-bool Context::onpe0(void) const { return (*pimpl_)->onpe0(); }
+bool Context::oncoutpe(void) const { return (*pimpl_)->oncoutpe(); }
 
 ////////////////////////////////////////////////////////////////////////////////
 bool Context::active(void) const { return (*pimpl_)->active(); }

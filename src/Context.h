@@ -44,9 +44,9 @@ class Context
   int pmap(int irow, int icol) const;
  
   void set_coutpe(int num);
-  bool oncoutpe(void) const;
-  int coutpe(void) const;
   bool onpe0(void) const;
+  int coutpe(void) const;
+  bool oncoutpe(void) const;
   bool active(void) const;
   void abort(int ierr) const;
   void barrier(void) const;

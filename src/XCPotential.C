@@ -14,7 +14,24 @@ using namespace std;
 
 ////////////////////////////////////////////////////////////////////////////////
 XCPotential::XCPotential(ChargeDensity& cd, const string functional_name):
-cd_(cd), ctxt_(cd.vcontext()), vft_(*cd_.vft()), vbasis_(*cd_.vbasis()) {
+    cd_(cd), ctxt_(cd.vcontext()), vft_(*cd_.vft()), vbasis_(*cd_.vbasis()),
+    cd_ecalc_(cd)
+{
+   tddft_involved_ = false;
+   initialize(functional_name);
+}
+////////////////////////////////////////////////////////////////////////////////
+// separate constructor for TDDFT runs
+XCPotential::XCPotential(ChargeDensity& cd, const string functional_name, ChargeDensity& cd_ecalc):
+  cd_(cd), ctxt_(cd.vcontext()), vft_(*cd_.vft()), vbasis_(*cd_.vbasis()), cd_ecalc_(cd_ecalc)
+{
+   tddft_involved_ = true;
+   initialize(functional_name);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+void XCPotential::initialize(string functional_name)
+{
   if ( functional_name == "LDA" ) {
      if (cd_.nlcc())
         xcf_ = new LDAFunctional(cd_.xcrhor);
@@ -62,7 +79,6 @@ cd_(cd), ctxt_(cd.vcontext()), vft_(*cd_.vft()), vbasis_(*cd_.vbasis()) {
     tmpr.resize(np012loc_);
   }
 }
-
 ////////////////////////////////////////////////////////////////////////////////
 XCPotential::~XCPotential(void)
 {
@@ -108,8 +124,12 @@ void XCPotential::update(vector<vector<double> >& vr)
     const int size = xcf_->np();
  
     if ( nspin_ == 1 ) {
-      // unpolarized
-      const double *const rh = xcf_->rho;
+       // unpolarized
+       double* rh;
+       if (tddft_involved_)
+          rh = (double*)&(cd_ecalc_.rhor[0][0]);
+       else
+          rh = (double*)xcf_->rho;
       const double *const v = xcf_->vxc1;
       for ( int i = 0; i < size; i++ ) {
         exc_ += rh[i] * e[i];
@@ -117,16 +137,28 @@ void XCPotential::update(vector<vector<double> >& vr)
       }
     }
     else {
-      // spin polarized
-      const double *const rh_up = xcf_->rho_up;
-      const double *const rh_dn = xcf_->rho_dn;
-      const double *const v_up = xcf_->vxc1_up;
-      const double *const v_dn = xcf_->vxc1_dn;
-      for ( int i = 0; i < size; i++ ) {                                                         
-        exc_ += (rh_up[i] + rh_dn[i]) * e[i];
-        vr[0][i] += v_up[i];
-        vr[1][i] += v_dn[i];
-      }                                                         
+       // spin polarized
+       //const double *const rh_up = xcf_->rho_up;
+       //const double *const rh_dn = xcf_->rho_dn;
+       double* rh_up;
+       double* rh_dn;
+       if (tddft_involved_)
+       {
+          rh_up = &(cd_ecalc_.rhor[0][0]);
+          rh_dn = &(cd_ecalc_.rhor[1][0]);
+       }
+       else
+       {
+          rh_up = (double*)xcf_->rho_up;
+          rh_dn = (double*)xcf_->rho_dn;
+       }
+       const double *const v_up = xcf_->vxc1_up;
+       const double *const v_dn = xcf_->vxc1_dn;
+       for ( int i = 0; i < size; i++ ) {                                                         
+          exc_ += (rh_up[i] + rh_dn[i]) * e[i];
+          vr[0][i] += v_up[i];
+          vr[1][i] += v_dn[i];
+       }                                                         
     }
     double tsum = exc_ * vbasis_.cell().volume() / vft_.np012();
 
@@ -317,7 +349,12 @@ void XCPotential::update(vector<vector<double> >& vr)
       const double *const e = xcf_->exc;
       const double *const v1 = xcf_->vxc1;
       const double *const v2 = xcf_->vxc2;
-      const double *const rh = xcf_->rho;
+      //const double *const rh = xcf_->rho;
+      double* rh;
+      if (tddft_involved_)
+         rh = &(cd_ecalc_.rhor[0][0]);
+      else
+         rh = (double*)xcf_->rho;
       {
         for ( int ir = 0; ir < np012loc_; ir++ )
         {
@@ -336,12 +373,24 @@ void XCPotential::update(vector<vector<double> >& vr)
       const double *const v2_dndn = xcf_->vxc2_dndn;
       const double *const eup = xcf_->exc_up;
       const double *const edn = xcf_->exc_dn;
-      const double *const rh_up = xcf_->rho_up;
-      const double *const rh_dn = xcf_->rho_dn;
+      //const double *const rh_up = xcf_->rho_up;
+      //const double *const rh_dn = xcf_->rho_dn;
+      double* rh_up;
+      double* rh_dn;
+      if (tddft_involved_)
+      {
+         rh_up = &(cd_ecalc_.rhor[0][0]);
+         rh_dn = &(cd_ecalc_.rhor[1][0]);
+      }
+      else
+      {
+         rh_up = (double*)xcf_->rho_up;
+         rh_dn = (double*)xcf_->rho_dn;
+      }
       for ( int ir = 0; ir < np012loc_; ir++ )
       {
-        const double r_up = rh_up[ir];
-        const double r_dn = rh_dn[ir];
+        double r_up = rh_up[ir];
+        double r_dn = rh_dn[ir];
         esum += r_up * eup[ir] + r_dn * edn[ir];
         vr[0][ir] += v1_up[ir] + vxctmp[0][ir];
         vr[1][ir] += v1_dn[ir] + vxctmp[1][ir];
@@ -354,6 +403,88 @@ void XCPotential::update(vector<vector<double> >& vr)
 
   }
 }
+////////////////////////////////////////////////////////////////////////////////
+// AS: modified version of XCPotential::update(vector<vector<double> >& vr) which
+// AS: leaves the potential untouched and only recalculates the energy term
+void XCPotential::update_exc(vector<vector<double> >& vr)
+{
+   assert(tddft_involved_);
+
+   if ( !xcf_->isGGA() )
+   {
+      // LDA functional
+      
+      exc_ = 0.0;
+      const double *const e = xcf_->exc;
+      const int size = xcf_->np();
+
+      if ( nspin_ == 1 )
+      {
+         // unpolarized
+         // AS: was previously const double *const rh = xcf_->rho;
+         // AS: however, the energy has to be determined with the new wave function
+         const double *const rh = &(cd_ecalc_.rhor[0][0]);
+         for ( int i = 0; i < size; i++ )
+         {
+            exc_ += rh[i] * e[i];
+         }
+      }
+      else
+      {
+         // spin polarized
+         const double *const rh_up = xcf_->rho_up;
+         const double *const rh_dn = xcf_->rho_dn;
+         for ( int i = 0; i < size; i++ )
+         {
+            exc_ += (rh_up[i] + rh_dn[i]) * e[i];
+         }
+      }
+      double tsum = exc_ * vbasis_.cell().volume() / vft_.np012();
+      ctxt_.dsum(1,1,&tsum,1);
+      exc_ = tsum;
+   }
+   else
+   {
+      // GGA functional
+      exc_ = 0.0;
+      int size = xcf_->np();
+
+      // div(vxc2*grad_rho) is stored in vxctmp[ispin][ir]
+      
+      double esum=0.0;
+      if ( nspin_ == 1 )
+      {
+         const double *const e = xcf_->exc;
+         // AS: was previously const double *const rh = xcf_->rho;
+         // AS: however, the energy has to be determined with the new wave function
+         // AS: untested so far!
+         const double *const rh = &(cd_ecalc_.rhor[0][0]);
+         {
+            for ( int ir = 0; ir < np012loc_; ir++ )
+            {
+               esum += rh[ir] * e[ir];
+            }
+         }
+      }
+      else
+      {
+         const double *const eup = xcf_->exc_up;
+         const double *const edn = xcf_->exc_dn;
+         const double *const rh_up = xcf_->rho_up;
+         const double *const rh_dn = xcf_->rho_dn;
+         for ( int ir = 0; ir < np012loc_; ir++ )
+         {
+            const double r_up = rh_up[ir];
+            const double r_dn = rh_dn[ir];
+            esum += r_up * eup[ir] + r_dn * edn[ir];
+         }
+      }
+      double tsum = esum * vbasis_.cell().volume() / vft_.np012();
+      ctxt_.dsum(1,1,&tsum,1);
+      exc_ = tsum;
+   }
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 void XCPotential::compute_stress(valarray<double>& sigma_exc)
 {

@@ -43,6 +43,8 @@ Wavefunction::Wavefunction(const Context& ctxt) : ctxt_(ctxt),nel_(0),nempty_(0)
   hasdata_ = false;
   //ewdallocate();
   ultrasoft_ = false;
+  force_complex_wf_ = false;
+  wf_phase_real_ = false;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -53,7 +55,8 @@ nparallelkpts_(wf.nparallelkpts_), kpt_added_(wf.kpt_added_),
 nkptloc_(wf.nkptloc_), spinloc_(wf.spinloc_),
 cell_(wf.cell_), refcell_(wf.refcell_), 
 ecut_(wf.ecut_), weightsum_(wf.weightsum_), reshape_context_(wf.reshape_context_),
-ultrasoft_(wf.ultrasoft_)
+ultrasoft_(wf.ultrasoft_), force_complex_wf_(wf.force_complex_wf_),
+wf_phase_real_(wf.wf_phase_real_)
 {
   // Create a Wavefunction using the dimensions of the argument
   compute_nst();
@@ -122,7 +125,7 @@ ultrasoft_(wf.ultrasoft_)
             for ( int kloc=0; kloc<wf.nkptloc(); kloc++) {
               int kp = wf.kptloc(kloc);         // global index of local kpoint
               if ( wf.sd(ispin,kp) != 0 ) {
-                sd_[ispin][kp] = new SlaterDet(*sdcontext_[ispin][ikp],*my_col_ctxt,kpoint_[kp],ultrasoft_);
+                 sd_[ispin][kp] = new SlaterDet(*sdcontext_[ispin][ikp],*my_col_ctxt,kpoint_[kp],ultrasoft_,force_complex_wf_);
                 mysdctxt_[kp] = ikp;
                 if (reshape_context_)
                   sd_[ispin][kp]->set_gram_reshape(reshape_context_);
@@ -257,7 +260,7 @@ void Wavefunction::allocate(void) {
             delete col_ctxt;
         }
 
-        sd_[ispin][0] = new SlaterDet(*sdcontext_[ispin][0],*my_col_ctxt,kpoint_[0],ultrasoft_);
+        sd_[ispin][0] = new SlaterDet(*sdcontext_[ispin][0],*my_col_ctxt,kpoint_[0],ultrasoft_,force_complex_wf_);
         if (reshape_context_)
           sd_[ispin][0]->set_gram_reshape(reshape_context_);
         mysdctxt_[0] = 0;
@@ -303,7 +306,7 @@ void Wavefunction::allocate(void) {
               if (sdcontext_[ispin][k]->oncoutpe())
                 cout << "<!-- creating SlaterDet for kp = " << kp << " -->" << endl;
 
-              sd_[ispin][kp] = new SlaterDet(*sdcontext_[ispin][k],*my_col_ctxt,kpoint_[kp],ultrasoft_);
+              sd_[ispin][kp] = new SlaterDet(*sdcontext_[ispin][k],*my_col_ctxt,kpoint_[kp],ultrasoft_,force_complex_wf_);
               mysdctxt_[kp] = k;
 
               kptloc_[localcnt++] = kp;
@@ -830,7 +833,7 @@ void Wavefunction::reshape(void) {
             else
               delete col_ctxt;
           }
-          tmpsd = new SlaterDet(*newctxt,*my_col_ctxt,kpoint_[0],ultrasoft_);
+          tmpsd = new SlaterDet(*newctxt,*my_col_ctxt,kpoint_[0],ultrasoft_,force_complex_wf_);
           tmpsd->resize(cell_,refcell_,ecut_,nst_[ispin]);
           if (reshape_context_)
             tmpsd->set_gram_reshape(reshape_context_);
@@ -869,7 +872,7 @@ void Wavefunction::reshape(void) {
                     delete col_ctxt; 
                 }
 
-                tmpsd = new SlaterDet(*subctxt_,*my_col_ctxt,kpoint_[ikp],ultrasoft_);
+                tmpsd = new SlaterDet(*subctxt_,*my_col_ctxt,kpoint_[ikp],ultrasoft_,force_complex_wf_);
                 if (reshape_context_)
                   tmpsd->set_gram_reshape(reshape_context_);
               }
@@ -1002,6 +1005,48 @@ void Wavefunction::randomize_us(double amplitude, AtomSet& as, bool highmem) {
           sd_[ispin][ikp]->randomize_us(amplitude,as);
         }
       }
+    }
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+void Wavefunction::randomize_real(double amplitude)
+{
+  for ( int ispin = 0; ispin < nspin_; ispin++ )
+  {
+    for ( int ikp = 0; ikp < kpoint_.size(); ikp++ )
+    {
+      sd_[ispin][ikp]->randomize_real(amplitude);
+    }
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// AS: shift state n_state by the vector (shift_x, shift_y, shift_z)
+void Wavefunction::shift_wf(double shift_x,double shift_y,double shift_z, int n_state)
+{
+  for ( int ispin = 0; ispin < nspin_; ispin++ )
+  {
+    for ( int ikp = 0; ikp < kpoint_.size(); ikp++ )
+    {
+      sd_[ispin][ikp]->shift_wf(shift_x,shift_y,shift_z,n_state);
+    }
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// AS: change phase of the wave function to make it real for Gamma only
+void Wavefunction::phase_wf_real(void)
+{
+  // AS: DEBUG
+  cout << " AS: changing phase of WF to make it real" << endl;
+
+  for ( int ispin = 0; ispin < nspin_; ispin++ )
+  {
+    for ( int ikp = 0; ikp < kpoint_.size(); ikp++ )
+    {
+      sd_[ispin][ikp]->phase_wf_real();
+      sd_[ispin][ikp]->gram();
     }
   }
 }
@@ -1456,6 +1501,7 @@ void Wavefunction::diag(Wavefunction& dwf, bool eigvec) {
                   else {   // no context reshaping
                     if ( eigvec ) {
                       ComplexMatrix z(c.context(),c.n(),c.n(),c.nb(),c.nb());
+                      //h.heevx('l',w,z);
                       h.heevd('l',w,z);
                       //h.heev('l',w,z);
                         
@@ -2004,10 +2050,11 @@ void Wavefunction::write_dump(string filebase) {
 
   os.open(mypefile.c_str(),ofstream::binary);
 
-  // hack to make checkpointing work with BlueGene compilers
+  // hack to make checkpointing work w. BlueGene compilers
 #ifdef BGQ
   os.write(mypefile.c_str(),sizeof(char)*mypefile.length());
 #endif
+  
   int wkploc = nkptloc_;
   int kp0 = kptloc_[0];         // global index of local kpoint
   int wnst = sd(0,kp0)->nst();
@@ -2078,12 +2125,11 @@ void Wavefunction::read_dump(string filebase) {
      char* tmpfilename = new char[256];
      is.read(tmpfilename,sizeof(char)*mypefile.length());
 #endif
-     
-     int wkploc = nkptloc_;
-     int kp0 = kptloc_[0];         // global index of local kpoint
-     int wnst = sd(0,kp0)->nst();
-     //is.read((char*)&wkploc,sizeof(int));
-     //is.read((char*)&wnst,sizeof(int));
+    int wkploc = nkptloc_;
+    int kp0 = kptloc_[0];         // global index of local kpoint
+    int wnst = sd(0,kp0)->nst();
+    //is.read((char*)&wkploc,sizeof(int));
+    //is.read((char*)&wnst,sizeof(int));
 
     // read in wave function
     for ( int ispin = 0; ispin < nspin_; ispin++ ) {
@@ -2170,9 +2216,9 @@ void Wavefunction::write_states(string filebase, string format) {
                     // hack to make checkpointing work w. BlueGene compilers
 #ifdef BGQ
                     if (format == "binary") 
-                      os.write(statefile.c_str(),sizeof(char)*statefile.length());
+                       os.write(statefile.c_str(),sizeof(char)*statefile.length());
 #endif
-                    
+
                     // headers for visualization formats
                     if (format == "molmol" || format == "text") {
                       D3vector a0 = cell_.a(0);
@@ -2280,7 +2326,7 @@ void Wavefunction::write_states(string filebase, string format) {
                     // hack to make checkpointing work w. BlueGene compilers
 #ifdef BGQ
                     os.write(statefile.c_str(),sizeof(char)*statefile.length());
-#endif                    
+#endif
                     os.write((char*)&peig[0],sizeof(double)*nst);
                     os.write((char*)&pocc[0],sizeof(double)*nst);
                     os.close();
@@ -2344,11 +2390,11 @@ void Wavefunction::read_states(string filebase) {
                     is.open(statefile.c_str(),ofstream::binary);
                     if (is.is_open()) {
 
-                       // hack to make checkpointing work w. BlueGene compilers
+                      // hack to make checkpointing work with BlueGene compilers
 #ifdef BGQ
-                       int len = statefile.length();
-                       char* tmpfilename = new char[256];
-                       is.read(tmpfilename,sizeof(char)*statefile.length());
+                      int len = statefile.length();
+                      char* tmpfilename = new char[256];
+                      is.read(tmpfilename,sizeof(char)*statefile.length());
 #endif
                        
                       // open files and reads data
@@ -2425,13 +2471,13 @@ void Wavefunction::read_states(string filebase) {
                     is.open(statefile.c_str(),ofstream::binary);
 
                     if (is.is_open()) {
-                       // hack to make checkpointing work w. BlueGene compilers
+                      // hack to make checkpointing work with BlueGene compilers
 #ifdef BGQ
                       int len = statefile.length();
                       char* tmpfilename = new char[256];
                       is.read(tmpfilename,sizeof(char)*statefile.length());
 #endif
-                      
+
                       is.read((char*)&eigtmp[0],sizeof(double)*nst);
                       is.read((char*)&occtmp[0],sizeof(double)*nst);
                       is.close();
@@ -2541,7 +2587,7 @@ void Wavefunction::print_casino(ostream& os) const {
 // pes not involved in basis print need to wait before sending data to pe0
   wfcontext_->barrier();  
 
-  if ( spincontext_[0]->onpe0() ) {
+  if ( spincontext_[0]->oncoutpe() ) {
     os << "WAVE FUNCTION" << endl;
     os << "-------------" << endl;
     os << "Number of k-points" << endl;
@@ -2593,7 +2639,7 @@ void Wavefunction::print_casino(ostream& os) const {
         }
       }
 
-      if ( wfcontext_->onpe0() ) {
+      if ( wfcontext_->oncoutpe() ) {
         for ( int ispin = 0; ispin < nspin_; ispin++ ) {
           if (spinactive(ispin)) {
             //for ( int ikp=0; ikp<nkp(); ikp++) {
@@ -2838,6 +2884,41 @@ void Wavefunction::print_vmd(string filebase, const AtomSet& as) const {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+// AS: is true when wave function has to be forced to complex also for kpoint == (0,0,0)
+bool Wavefunction::force_complex_set(void) const { return force_complex_wf_; }
+
+////////////////////////////////////////////////////////////////////////////////
+// AS: enable or disable forcing of complex wave functions
+void Wavefunction::force_complex(bool new_force_complex_wf)
+{
+   //ewd
+   //deallocate();
+
+  force_complex_wf_ = new_force_complex_wf;
+
+  /* ewd
+  kpoint_.resize(1);
+  kpoint_[0] = D3vector(0,0,0);
+  weight_.resize(1);
+  weight_[0] = 1.0;
+  compute_nst();
+  //create_contexts();
+  allocate();
+  */  
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// AS: is true when the wave function is made real for Gamma only
+bool Wavefunction::phase_real_set(void) const { return wf_phase_real_; }
+
+////////////////////////////////////////////////////////////////////////////////
+// AS: change phase of the wave function to make it real for Gamma only
+void Wavefunction::phase_real(bool new_wf_phase_real)
+{
+  wf_phase_real_ = new_wf_phase_real;
+}
+
+////////////////////////////////////////////////////////////////////////////////
 ostream& operator<<(ostream& os, Wavefunction& wf)
 {
   wf.print(os,"text","wavefunction");
@@ -2862,6 +2943,8 @@ Wavefunction& Wavefunction::operator=(const Wavefunction& wf)
   weight_ = wf.weight_;
   kpoint_ = wf.kpoint_;
   ultrasoft_ = wf.ultrasoft_;
+  force_complex_wf_ = wf.force_complex_wf_;
+  wf_phase_real_ = wf.wf_phase_real_;
   
   nkptloc_ = wf.nkptloc_;
   kptloc_ = wf.kptloc_;

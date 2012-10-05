@@ -46,7 +46,7 @@ class ListConstraintsCmd : public Cmd
 
   int action(int argc, char **argv)
   {
-    if ( s->ctxt_.onpe0() ) s->constraints.list_constraints(cout);
+    if ( s->ctxt_.oncoutpe() ) s->constraints.list_constraints(cout);
     return 0;
   }
 };

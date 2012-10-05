@@ -25,7 +25,9 @@ struct Control
   double ecutprec;
 
   string wf_diag;
-  
+  // AS: control the calculation of the total energy during non-selfconsistent electronic steps
+  bool non_selfc_energy; 
+
   string tcp;
   double tcp_rcut;
   double tcp_sigma;
@@ -56,6 +58,10 @@ struct Control
   int nkpoints; // number of kpoints; wait to allocate Wavefunction until all are input
 
   double dt;
+  double tddt; // AS: time step for the wave function propagation
+  int na_overlap_min; // AS: minimum band index for the calculation of non-adiabatic overlaps
+  int na_overlap_max; // AS: maximum band index for the calculation of non-adiabatic overlaps
+  int print_density_every; // AS: print the density every N number of MD steps
   int iprint;
   int timeout;
   double threshold_scf,threshold_nonscf;  // energy thresholds for electronic iteration loops
@@ -79,6 +85,7 @@ struct Control
   bool timer_savecmd;
   bool timer_savesyscmd;
     
+  bool tddft_involved;
   bool dft_plus_u;
   bool ultrasoft;
   bool nlcc;         // non-linear core correction

@@ -33,10 +33,11 @@ class AtomsDyn : public Var
     }
     
     string v = argv[1];
-    if ( !( v == "LOCKED" || v == "SD" || v == "SDA" || v == "MD" || v == "CG" || v == "BMD" ) )
+    if ( !( v == "LOCKED" || v == "SD" || v == "SDA" || v == "MD" ||
+            v == "CG" || v == "BMD" || v == "IMPULSIVE" ) )
     {
       if ( ui->oncoutpe() )
-        cout << " <ERROR> atoms_dyn must be LOCKED, SD, SDA, CG, BMD or MD </ERROR>" << endl;
+        cout << " <ERROR> atoms_dyn must be LOCKED, SD, SDA, CG, BMD, IMPULSIVE or MD </ERROR>" << endl;
       return 1;
     }
 

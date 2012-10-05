@@ -103,7 +103,7 @@ void AndersonMixer::update(double* x, double* f, double* xbar, double* fbar)
     // solve on task 0 and bcast result
 
     //ewd: try doing this on every task, w. no communication
-    //if ( pctxt_ == 0 || pctxt_->onpe0() )
+    //if ( pctxt_ == 0 || pctxt_->oncoutpe() )
     {
       const bool diag = false;
       if ( diag )
@@ -217,7 +217,7 @@ void AndersonMixer::update(double* x, double* f, double* xbar, double* fbar)
         }
       }
 
-      if ( pctxt_->onpe0() ) {
+      if ( pctxt_->oncoutpe() ) {
         cout << " AndersonMixer: theta = ";
         for ( int i = 0; i < theta.size(); i++ )
           cout << theta[i] << " ";
@@ -230,7 +230,7 @@ void AndersonMixer::update(double* x, double* f, double* xbar, double* fbar)
     // broadcast theta from task 0
     if ( pctxt_ != 0 )
     {
-      if ( pctxt_->onpe0() )
+      if ( pctxt_->oncoutpe() )
         pctxt_->dbcast_send(n_,1,&theta[0],n_);
       else
         pctxt_->dbcast_recv(n_,1,&theta[0],n_,0,0);

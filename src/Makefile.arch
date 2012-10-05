@@ -7,10 +7,10 @@ ifeq ($(HOSTNAME),bgqfen)
 endif
 ifeq ($(HOSTNAME),seqlac)  
 #  ARCHGUESS = bgq
-  ARCHGUESS = bgq_hpm
+  ARCHGUESS = bgq_ctf
 endif
 ifeq ($(HOSTNAME),rzuseqlac)  
-  ARCHGUESS = bgq_hpm
+  ARCHGUESS = bgq_ctf
 endif
 ifeq ($(HOSTNAME),dawn)  
   ARCHGUESS = ibm_bgp_xlc

@@ -87,10 +87,11 @@ int LoadCmd::action(int argc, char **argv) {
       
     // ewd:  read rhor_last from file, send to appropriate pes
     ChargeDensity cd_(*s);
+    cd_.update_density();
 
     //ewd DEBUG
-    cd_.update_usfns();
-    cd_.update_density();
+    if (s->ctrl.ultrasoft)    
+       cd_.update_usfns();
     
     const Context* wfctxt = s->wf.wfcontext();
     const Context* vctxt = &cd_.vcontext();
@@ -132,7 +133,7 @@ int LoadCmd::action(int argc, char **argv) {
           wfctxt->isend(1,1,&rhorsize,1,0,0);
         }
 
-        if (wfctxt->oncoutpe()) {
+        if (wfctxt->onpe0()) {
           cout << "<!-- LoadCmd:  loading mixed charge density from file. -->" << endl;
           // hack to make checkpointing work w. BlueGene compilers
 #ifdef BGQ
@@ -207,12 +208,11 @@ int LoadCmd::action(int argc, char **argv) {
 
     // ewd:  read rhor_last from file, send to appropriate pes
     ChargeDensity cd_(*s);
+    cd_.update_density();
 
     //ewd DEBUG
-    cd_.update_usfns();
-    cd_.update_density();
-    
-
+    if (s->ctrl.ultrasoft)    
+       cd_.update_usfns();
 
     const Context* wfctxt = s->wf.wfcontext();
     const Context* vctxt = &cd_.vcontext();
@@ -254,7 +254,7 @@ int LoadCmd::action(int argc, char **argv) {
           wfctxt->isend(1,1,&rhorsize,1,0,0);
         }
 
-        if (wfctxt->oncoutpe()) {
+        if (wfctxt->onpe0()) {
           cout << "<!-- LoadCmd:  loading mixed charge density from file. -->" << endl;
           // hack to make checkpointing work w. BlueGene compilers
 #ifdef BGQ

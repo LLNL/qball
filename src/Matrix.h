@@ -362,6 +362,7 @@ class ComplexMatrix
     }    
     
     void print(ostream& os) const;
+    void print_norm(std::ostream& os) const;                  
     
     explicit ComplexMatrix(const Context& ctxt) : ctxt_(ctxt),
         m_(0), n_(0), mb_(0), nb_(0), size_(0), reference_(false), val(0) {}
@@ -392,7 +393,6 @@ class ComplexMatrix
     { 
       if ( !reference_ ) delete[] val;
     }
-                  
     ComplexMatrix& operator=(const ComplexMatrix& a);
     
     ComplexMatrix& operator+=(const ComplexMatrix& a);

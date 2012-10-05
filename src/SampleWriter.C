@@ -37,7 +37,7 @@ void SampleWriter::writeSample(const Sample& s, const string filename,
   if ( serial )
   {
     ofstream os;
-    if ( ctxt_.onpe0() )
+    if ( ctxt_.oncoutpe() )
     {
       os.open(filename_cstr);
       cout << "  SaveCmd: saving to file " << filename
@@ -64,7 +64,7 @@ void SampleWriter::writeSample(const Sample& s, const string filename,
         s.wfv->print(os,encoding,"wavefunction_velocity");
     }
 
-    if ( ctxt_.onpe0() )
+    if ( ctxt_.oncoutpe() )
       os << "</fpmd:sample>" << endl;
 
     os.close();
@@ -87,7 +87,7 @@ void SampleWriter::writeSample(const Sample& s, const string filename,
     ctxt_.barrier();
 
     MPI_Status status;
-    if ( ctxt_.onpe0() )
+    if ( ctxt_.oncoutpe() )
     {
       string header("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
       "<fpmd:sample xmlns:fpmd=\"");
@@ -127,7 +127,7 @@ void SampleWriter::writeSample(const Sample& s, const string filename,
 
     sfp.sync();
 
-    if ( ctxt_.onpe0() )
+    if ( ctxt_.oncoutpe() )
     {
       char *trailer = "</fpmd:sample>\n";
       int len = strlen(trailer);
@@ -149,7 +149,7 @@ void SampleWriter::writeSample(const Sample& s, const string filename,
   }
 
   tm.stop();
-  if ( ctxt_.onpe0() )
+  if ( ctxt_.oncoutpe() )
   {
     cout << " SampleWriter: write time: "
          << setprecision(3) << tm.real() << " s"

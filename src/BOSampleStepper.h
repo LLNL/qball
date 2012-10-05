@@ -12,6 +12,8 @@
 #include "EnergyFunctional.h"
 #include "Sample.h"
 #include "Wavefunction.h"
+#include "PlotCmd.h"
+#include <deque>
 class WavefunctionStepper;
 class IonicStepper;
 using namespace std;
@@ -22,6 +24,8 @@ class BOSampleStepper : public SampleStepper
   
   Wavefunction dwf;
   Wavefunction* wfv;
+  deque<Wavefunction*> wfdeque;
+  
   int nitscf_;
   int nite_;
   ChargeDensity cd_;
@@ -31,6 +35,7 @@ class BOSampleStepper : public SampleStepper
   IonicStepper* ionic_stepper;
 
   bool initial_atomic_density;
+  bool tddft_involved_;
   
   // Do not allow construction of BOSampleStepper unrelated to a Sample
   BOSampleStepper(void);

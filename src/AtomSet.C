@@ -104,7 +104,7 @@ bool AtomSet::addAtom(Atom *a)
   if ( findAtom(a->name()) )
   {
     // this name is already in the atom list, reject atom definition
-    if ( ctxt_.onpe0() )
+    if ( ctxt_.oncoutpe() )
       cout << " AtomSet:addAtom: atom " << a->name()
            << " is already defined" << endl;
     return false;
@@ -116,7 +116,7 @@ bool AtomSet::addAtom(Atom *a)
   if ( !s )
   {
     // species not found, cannot define atom
-    if ( ctxt_.onpe0() )
+    if ( ctxt_.oncoutpe() )
       cout << " AtomSet:addAtom: species " << spname
            << " is undefined" << endl;
     return false;
@@ -208,7 +208,7 @@ bool AtomSet::delAtom(string name)
   }
 
   // this name was not found in the atom list
-  if ( ctxt_.onpe0() )
+  if ( ctxt_.oncoutpe() )
     cout << " AtomSet:delAtom: no such atom: " << name << endl;
   return false;
 }
@@ -390,7 +390,7 @@ void AtomSet::listAtoms(void) const
   {
     for ( int ia = 0; ia < atom_list[is].size(); ia++ )
     {
-      if ( ctxt_.onpe0() )
+      if ( ctxt_.oncoutpe() )
         cout << *atom_list[is][ia];
     }
   }
@@ -401,7 +401,7 @@ void AtomSet::listSpecies(void) const
 {
   for ( int is = 0; is < species_list.size(); is++ )
   {
-    if ( ctxt_.onpe0() )
+    if ( ctxt_.oncoutpe() )
     {
       cout << endl << " species " << spname[is] << ":" << endl;
       species_list[is]->info(cout);
@@ -787,7 +787,7 @@ void AtomSet::randomize_velocities(double temp) {
          ekin_ += 0.5 * mass * (vv.x*vv.x + vv.y*vv.y + vv.z*vv.z);
       }
    }
-   if (ctxt_.onpe0())
+   if (ctxt_.oncoutpe())
       cout << "<!-- AtomSet::randomize_velocities:  kinetic energy = " << ekin_/boltz << " K, temp = " << temp << " K -->" << endl;
    //ewd DEBUG
    
@@ -899,7 +899,7 @@ void AtomSet::sync()
   {
     int m = r[is].size();
     double* p = &r[is][0];
-    if ( ctxt_.onpe0() )
+    if ( ctxt_.oncoutpe() )
     {
       ctxt_.dbcast_send(m,1,p,m);
     }
@@ -912,7 +912,7 @@ void AtomSet::sync()
   {
     int m = v[is].size();
     double* p = &v[is][0];
-    if ( ctxt_.onpe0() )
+    if ( ctxt_.oncoutpe() )
     {
       ctxt_.dbcast_send(m,1,p,m);
     }
@@ -928,7 +928,7 @@ void AtomSet::sync()
   {
     int m = r[is+offset].size();
     double* p = &r[is+offset][0];
-    if ( ctxt_.onpe0() )
+    if ( ctxt_.oncoutpe() )
     {
       ctxt_.dbcast_send(m,1,p,m);
     }
@@ -941,7 +941,7 @@ void AtomSet::sync()
   {
     int m = v[is+offset].size();
     double* p = &v[is+offset][0];
-    if ( ctxt_.onpe0() )
+    if ( ctxt_.oncoutpe() )
     {
       ctxt_.dbcast_send(m,1,p,m);
     }
@@ -1176,7 +1176,7 @@ void AtomSet::print_casino(ostream& os) const {
 ////////////////////////////////////////////////////////////////////////////////
 ostream& operator << ( ostream &os, const AtomSet &as )
 {
-  if ( as.context().onpe0() )
+  if ( as.context().oncoutpe() )
   {
     os << "<atomset>\n";
     os << as.cell();

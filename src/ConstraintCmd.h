@@ -51,10 +51,10 @@ class ConstraintCmd : public Cmd
 
   int action(int argc, char **argv)
   {
-    const bool onpe0 = s->ctxt_.onpe0();
+    const bool oncoutpe = s->ctxt_.oncoutpe();
     if ( argc < 2 )
     {
-      if ( onpe0 )
+      if ( oncoutpe )
         cout << help_msg();
       return 1;
     }
@@ -80,12 +80,12 @@ class ConstraintCmd : public Cmd
     }
     else if ( subcmd == "list" )
     {
-      if ( onpe0 )
+      if ( oncoutpe )
         s->constraints.list_constraints(cout);
     }
     else
     {
-      if ( onpe0 )
+      if ( oncoutpe )
         cout << help_msg();
     }
 

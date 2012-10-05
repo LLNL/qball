@@ -49,7 +49,7 @@ int main(int argc, char **argv)
       n = atoi(argv[4]);
     }
     else {
-      cerr << "Usage:  testEigenSolvers nprow npcol m n" << endl;
+      cerr << "Usage:  testGram nprow npcol m n" << endl;
 #if USE_MPI
       MPI_Abort(MPI_COMM_WORLD,2);
 #else
@@ -103,7 +103,38 @@ int main(int argc, char **argv)
       cout << "Done." << endl;
     tmap["total"].stop();
 
+    //ewd DEBUG:  check that orthogonalization was successful
+    if (true)
+    {
+       if (mype == 0) 
+          cout << "Checking orthogonality by computing overlap matrix:  s = " << n << " x " << n << ", nb = " << nb << endl;
+       s.gemm('c','n',1.0,c,c,0.0);
 
+       cout << "OVERLAP, mype = " << mype << ", localsize = " << s.localsize() << endl;
+       
+       if (s.localsize() > 0)
+       {
+          for ( int in = 0; in < nb; in++ ) {
+             complex<double>* sp = s.valptr(nb*in);
+             for ( int im = 0; im < nb; im++ ) {
+                if (im == in)
+                {
+                   if (abs(real(sp[im])-1.0) > 1.E-6)
+                      cout << "ORTHOG ERROR, mype = " << mype << ", im = " << im << ", in = " << in << ", s val = " << real(sp[im]) << "  " << imag(sp[im]) << endl;
+                }
+                else
+                {
+                   if (abs(real(sp[im])) > 1.E-6 || abs(imag(sp[im]) > 1.E-6))
+                      cout << "ORTHOG ERROR, mype = " << mype << ", im = " << im << ", in = " << in << ", s val = " << real(sp[im]) << "  " << imag(sp[im]) << endl;
+                }
+             }
+          }
+       }
+    }
+    MPI_Barrier(MPI_COMM_WORLD);
+    //ewd DEBUG    
+
+    
     for ( map<string,Timer>::iterator i = tmap.begin(); i != tmap.end(); i++ )
     {
        double time = (*i).second.cpu();
