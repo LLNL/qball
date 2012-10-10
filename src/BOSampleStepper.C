@@ -280,6 +280,7 @@ void BOSampleStepper::step(int niter)
     preconditioner = new Preconditioner(s_,s_.wf,ef_);
   }
 
+  //EWD TDDFT DIFF
   // initialize occupation
   wf.update_occ(s_.ctrl.smearing_width,s_.ctrl.smearing_ngauss);
 
@@ -1266,6 +1267,9 @@ void BOSampleStepper::step(int niter)
                         for ( int i=0; i < drhog[ispin].size(); i++ )
                            drhog[ispin][i] /= wls[i];
                     
+                        //EWD TDDFT DIFF:  AS computes on column 0, bcasts
+
+
                         //ewd:  try running this on every task
                         mixer[ispin]->update((double*)&rhog_in[ispin][0],(double*)&drhog[ispin][0],
                                              (double*)&rhobar[ispin][0],(double*)&drhobar[ispin][0]);
@@ -1851,7 +1855,7 @@ void BOSampleStepper::step(int niter)
               }
             } // for ite
             // subspace diagonalization
-            if ( compute_eigvec || s_.ctrl.wf_diag == "EIGVAL" || usdiag && (!tddft_involved_))
+            if ( ( compute_eigvec || s_.ctrl.wf_diag == "EIGVAL" || usdiag ) && (!tddft_involved_))
             {
               ef_.energy(true,dwf,false,fion,false,sigma_eks);
               tmap["diag"].start();
