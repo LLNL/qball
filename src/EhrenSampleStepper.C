@@ -1,19 +1,15 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
-// BOSampleStepper.C
+// EhrenSampleStepper.C
 //
 ////////////////////////////////////////////////////////////////////////////////
-// $Id: BOSampleStepper.C,v 1.76 2010/08/30 20:55:43 draeger1 Exp $
+// $Id: EhrenSampleStepper.C,v 1.76 2010/08/30 20:55:43 draeger1 Exp $
 
-#include "BOSampleStepper.h"
+#include "EhrenSampleStepper.h"
 #include "EnergyFunctional.h"
 #include "SlaterDet.h"
 #include "Basis.h"
 #include "WavefunctionStepper.h"
-#include "SDWavefunctionStepper.h"
-#include "JDWavefunctionStepper.h"
-#include "PSDWavefunctionStepper.h"
-#include "PSDAWavefunctionStepper.h"
 #include "SOTDWavefunctionStepper.h"
 #include "SORKTDWavefunctionStepper.h"
 #include "FORKTDWavefunctionStepper.h"
@@ -24,8 +20,6 @@
 #include "MDIonicStepper.h"
 #include "BMDIonicStepper.h"
 #include "SDCellStepper.h"
-#include "Preconditioner.h"
-#include "AndersonMixer.h"
 #include "MLWFTransform.h"
 #include "SimpleConvergenceDetector.h"
 #include "Hugoniostat.h"
@@ -45,138 +39,47 @@ extern "C" void HPM_Stop(char *);
 using namespace std;
 
 ////////////////////////////////////////////////////////////////////////////////
-BOSampleStepper::BOSampleStepper(Sample& s, int nitscf, int nite) :
+EhrenSampleStepper::EhrenSampleStepper(Sample& s, int nitscf, int nite) :
   SampleStepper(s), cd_(s), ef_(s,s.wf,cd_),dwf(s.wf), wfv(s.wfv), nitscf_(nitscf),
   nite_(nite), initial_atomic_density(false)
 {
    const string wf_dyn = s_.ctrl.wf_dyn;
    tddft_involved_ = s_.ctrl.tddft_involved;
-   if (tddft_involved_)
-   {
-      Wavefunction* wf0 = new Wavefunction(dwf);
-      Wavefunction* wf1 = new Wavefunction(s.wf);
-      Wavefunction* wf2 = new Wavefunction(s.wf);
-      Wavefunction* wf3 = new Wavefunction(s.wf);
-      Wavefunction* wf4 = new Wavefunction(s.wf);
 
-      wfdeque.push_back ( wf0 );
-      wfdeque.push_back ( wf1 );
-      wfdeque.push_back ( wf2 );
-      wfdeque.push_back ( wf3 );
-      wfdeque.push_back ( wf4 );
-   }
+   Wavefunction* wf0 = new Wavefunction(dwf);
+   Wavefunction* wf1 = new Wavefunction(s.wf);
+   Wavefunction* wf2 = new Wavefunction(s.wf);
+   Wavefunction* wf3 = new Wavefunction(s.wf);
+   Wavefunction* wf4 = new Wavefunction(s.wf);
+   
+   wfdeque.push_back ( wf0 );
+   wfdeque.push_back ( wf1 );
+   wfdeque.push_back ( wf2 );
+   wfdeque.push_back ( wf3 );
+   wfdeque.push_back ( wf4 );
+
 }
 ////////////////////////////////////////////////////////////////////////////////
-BOSampleStepper::~BOSampleStepper()
+EhrenSampleStepper::~EhrenSampleStepper()
 {
    // delete any created Wavefunctions
-   if (tddft_involved_)
-      for (deque<Wavefunction*>::const_iterator it = wfdeque.begin(); it != wfdeque.end(); ++it)
-         delete *it;
+   for (deque<Wavefunction*>::const_iterator it = wfdeque.begin(); it != wfdeque.end(); ++it)
+      delete *it;
 }
 ////////////////////////////////////////////////////////////////////////////////
-void BOSampleStepper::initialize_density(void)
-{
-  // initialize cd_ with a sum of atomic densities
-
-  double atom_radius[] =
-      {
-          0.00,  0.80,  0.59,  3.16,  2.12,  // null H  He  Li  Be
-          1.64,  1.27,  1.06,  0.91,  0.79,  //  B   C   N   O   F
-          0.72,  3.59,  2.74,  2.23,  2.10,  // Ne  Na  Mg  Al  Si
-          1.85,  1.66,  1.49,  1.34,  4.59,  //  P   S  Cl  Ar   K
-          3.67,  3.48,  3.33,  3.23,  3.14,  // Ca  Sc  Ti   V  Cr
-          3.04,  2.95,  2.87,  2.82,  2.74,  // Mn  Fe  Co  Ni  Cu
-          2.68,  2.57,  2.36,  2.15,  1.95,  // Zn  Ga  Ge  As  Se
-          1.78,  1.66,  5.01,  4.14,  4.01,  // Br  Kr  Rb  Sr   Y
-          3.89,  3.74,  3.59,  3.46,  3.36,  // Zr  Nb  Mo  Tc  Ru
-          3.27,  3.19,  3.12,  3.04,  2.95,  // Rh  Pd  Ag  Cd  In
-          2.74,  2.51,  2.32,  2.17,  2.04,  // Sn  Sb  Te   I  Xe
-          5.63,  4.78,  0.00,  0.00,  4.67,  // Cs  Ba  La  Ce  Pr
-          3.89,  3.87,  4.50,  4.37,  4.40,  // Nd  Pm  Sm  Eu  Gd
-          4.25,  4.31,  0.00,  4.27,  4.20,  // Tb  Dy  Ho  Er  Tm
-          4.20,  4.10,  3.93,  3.78,  3.65,  // Yb  Lu  Hf  Ta   W
-          4.25,  4.31,  0.00,  4.27,  4.20,  // Tb  Dy  Ho  Er  Tm
-          4.20,  4.10,  3.93,  3.78,  3.65,  // Yb  Lu  Hf  Ta   W
-          3.55,  3.50,  3.40,  3.34,  3.29,  // Re  Os  Ir  Pt  Au
-          3.23,  2.95,  2.91,  2.70,  2.55,  // Hg  Tl  Pb  Bi  Po
-          4.00,  2.27,  4.00,  4.00,  4.00,  // At  Rn  Fr  Ra  Ac
-          4.00,  4.00,  4.00,  4.00,  4.00,  // Th  Pa   U  Np  Pu
-          4.00,  4.00,  4.00,  4.00,  4.00,  // Am  Cm  Bk  Cf  Es
-          4.00,  4.00,  4.00,  4.00          // Fm  Md  No  Lr
-      };
-  
-
-  if (!s_.wf.hasdata())
-    s_.wf.set_hasdata(true);
-
-  const AtomSet& atoms = s_.atoms;
-  const Basis* const vbasis = cd_.vbasis();
-  const int ngloc = vbasis->localsize();
-  vector<vector<complex<double> > > rhops;
-  const int nsp = atoms.nsp();
-  rhops.resize(nsp);
-  vector<complex<double> > rhopst(ngloc);
-  const double * const g2 = vbasis->g2_ptr();
-  
-  for ( int is = 0; is < nsp; is++ )
-  {
-    rhops[is].resize(ngloc);
-    Species *s = atoms.species_list[is];
-    const int zval = s->zval();
-    const int atomic_number = s->atomic_number();
-    assert(atomic_number < sizeof(atom_radius)/sizeof(double));
-    // scaling factor 2.0 in next line is empirically adjusted
-    double rc = 2.0 * atom_radius[atomic_number];
-    for ( int ig = 0; ig < ngloc; ig++ )
-    {
-      double arg = 0.25 * rc * rc * g2[ig];
-      rhops[is][ig] = zval * exp( -arg );
-    }
-  }
-  
-  vector<vector<double> > tau0;
-  tau0.resize(nsp);
-  for ( int is = 0; is < nsp; is++ )
-    tau0.resize(3*atoms.na(is));
-  atoms.get_positions(tau0);
-  StructureFactor sf;
-  sf.init(tau0,*vbasis);
-  sf.update(tau0,*vbasis);
-  
-  memset( (void*)&rhopst[0], 0, 2*ngloc*sizeof(double) );
-  for ( int is = 0; is < nsp; is++ )
-  {
-    complex<double> *s = &sf.sfac[is][0];
-    for ( int ig = 0; ig < ngloc; ig++ )
-    {
-      const complex<double> sg = s[ig];
-      rhopst[ig] += sg * rhops[is][ig];
-    }
-  }
-
-  for (int ispin = 0; ispin < s_.wf.nspin(); ispin++) {
-    //if (s_.wf.spinactive(ispin)) {
-      cd_.rhog[ispin].resize(ngloc);
-      for (int i = 0; i < ngloc; i++) {
-        cd_.rhog[ispin][i] = rhopst[i];
-      }
-      //}
-  }
-  initial_atomic_density = true;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-void BOSampleStepper::step(int niter)
+void EhrenSampleStepper::step(int niter)
 {
   const bool oncoutpe = s_.ctxt_.oncoutpe();
+  if (!tddft_involved_)
+  {
+     if ( oncoutpe )
+        cout << "<ERROR> EhrenSampleStepper can not be used when tddft_involved = false!</ERROR>" << endl;
+      return;
+   }
 
-  const bool anderson_charge_mixing = ( s_.ctrl.charge_mix_ndim > 0 );
-  
   // determine whether eigenvectors must be computed
   // eigenvectors are computed if explicitly requested with wf_diag==T
   // or if the SlaterDet has fractionally occupied states
-  //const bool fractional_occ = (s_.wf.nspin() * s_.wf.nel() != 2 * s_.wf.nst());
   int occtest = (2 * s_.wf.nst()) - s_.wf.nspin() * s_.wf.nel();
   const bool fractional_occ = (occtest != 0 && occtest != 1);
   const bool compute_eigvec = fractional_occ || s_.ctrl.wf_diag == "T";
@@ -185,22 +88,18 @@ void BOSampleStepper::step(int niter)
   enum ortho_type { GRAM, LOWDIN, ORTHO_ALIGN, RICCATI };
 
   if (fractional_occ && oncoutpe)
-       cout << "<!-- BOSampleStepper:  fractional occupation detected. -->" << endl;
+       cout << "<!-- EhrenSampleStepper:  fractional occupation detected. -->" << endl;
   else if (oncoutpe)
-       cout << "<!-- BOSampleStepper:  fractional occupation not detected. -->" << endl;
+       cout << "<!-- EhrenSampleStepper:  fractional occupation not detected. -->" << endl;
    
-  
-  if (s_.ctrl.reshape_context)
+    if (s_.ctrl.reshape_context)
     s_.wf.set_reshape_context(s_.ctrl.reshape_context);
   
   AtomSet& atoms = s_.atoms;
   Wavefunction& wf = s_.wf;
   const int nspin = wf.nspin();
-
   const UnitCell& cell = wf.cell();
-
   const double dt = s_.ctrl.dt;
-
   const string wf_dyn = s_.ctrl.wf_dyn;
   const string atoms_dyn = s_.ctrl.atoms_dyn;
   const string cell_dyn = s_.ctrl.cell_dyn;
@@ -209,42 +108,11 @@ void BOSampleStepper::step(int niter)
   bool wfv_is_new = false;
   const bool extrapolate_wf = ( atoms_dyn == "MD" ) && ( nite_ == 1 ) && (!tddft_involved_);
 
-
-  //ewd DEBUG
-  //if (tddft_involved_ && oncoutpe)
-  //   cout << "DEBUG:  TDDFT_INVOLVED SET TO TRUE!" << endl;
-  //ewd DEBUG
-
-  
-  const bool ntc_extrapolation =
-    s_.ctrl.debug.find("NTC_EXTRAPOLATION") != string::npos;
-  const bool asp_extrapolation =
-    s_.ctrl.debug.find("ASP_EXTRAPOLATION") != string::npos;
-
-  //ewd check for case where PSDA used (incorrectly) with nite = 1 and empty states
-  if (wf_dyn == "PSDA" && nite_ == 1 && compute_eigvec) {
-    if ( oncoutpe ) {
-      cout << "<ERROR> BOSampleStepper:  PSDA unstable with empty states and nite = 1. </ERROR>" << endl;
-      cout << "<ERROR> BOSampleStepper:  Increase nite or use wf_dyn = PSD. </ERROR>" << endl;
-    }
-    return;
-  }
-
-  
-  Wavefunction* wfmm;
-  if ( extrapolate_wf && ( ntc_extrapolation || asp_extrapolation ) )
-    wfmm = new Wavefunction(wf);
-
-  // Next lines: special value of niter = 0: GS calculation only
   const bool atoms_move = ( niter > 0 && atoms_dyn != "LOCKED" );
   const bool compute_stress = ( s_.ctrl.stress == "ON" );
   const bool cell_moves = ( niter > 0 && compute_stress &&
                             cell_dyn != "LOCKED" );
-  // GS-only calculation:
-  const bool gs_only = !atoms_move && !cell_moves;
   const bool use_confinement = ( s_.ctrl.ecuts > 0.0 );
-
-  const string charge_mixing = s_.ctrl.charge_mixing;
 
   const bool ultrasoft = s_.ctrl.ultrasoft;
   const bool usdiag = (ultrasoft && atoms_move);
@@ -254,13 +122,13 @@ void BOSampleStepper::step(int niter)
   //ewd check that MLWF not being used with ultrasoft (not yet implemented)
   if (ultrasoft && (compute_mlwf || compute_mlwfc)) {
     if ( oncoutpe ) 
-      cout << "<ERROR> BOSampleStepper:  Maximally-localized Wannier Functions not yet implemented with ultrasoft. </ERROR>" << endl;
+      cout << "<ERROR> EhrenSampleStepper:  Maximally-localized Wannier Functions not yet implemented with ultrasoft. </ERROR>" << endl;
     return;
   }
   if (oncoutpe && ultrasoft && compute_stress)
-      cout << "<WARNING> BOSampleStepper:  stress not yet implemented with ultrasoft!  Results WILL be wrong. </WARNING>" << endl;
+      cout << "<WARNING> EhrenSampleStepper:  stress not yet implemented with ultrasoft!  Results WILL be wrong. </WARNING>" << endl;
   if (oncoutpe && nlcc && compute_stress)
-      cout << "<WARNING> BOSampleStepper:  stress not yet implemented with non-linear core corrections!  Results WILL be wrong. </WARNING>" << endl;
+      cout << "<WARNING> EhrenSampleStepper:  stress not yet implemented with non-linear core corrections!  Results WILL be wrong. </WARNING>" << endl;
   
   // use extra memory for SlaterDets if memory variable = normal, large or huge
   if (s_.ctrl.extra_memory >= 3) 
@@ -271,34 +139,12 @@ void BOSampleStepper::step(int niter)
   
   Timer tm_iter;
 
-  const bool use_preconditioner = wf_dyn == "PSD" || wf_dyn == "PSDA" || wf_dyn == "JD";
-  Preconditioner *preconditioner = 0;
-  if ( use_preconditioner )
-  {
-    // create a preconditioner using the information about wf in s_.wf
-    // and the information about the hessian in df
-    preconditioner = new Preconditioner(s_,s_.wf,ef_);
-  }
-
   //EWD TDDFT DIFF
   // initialize occupation
   wf.update_occ(s_.ctrl.smearing_width,s_.ctrl.smearing_ngauss);
 
   WavefunctionStepper* wf_stepper = 0;
-  if ( wf_dyn == "SD" )
-  {
-    const double emass = s_.ctrl.emass;
-    double dt2bye = (emass == 0.0) ? 0.5 / wf.ecut() : dt*dt/emass;
-
-    // divide dt2bye by facs coefficient if stress == ON
-    const double facs = 2.0;
-    if ( s_.ctrl.stress == "ON" )
-    {
-      dt2bye /= facs;
-    }
-    wf_stepper = new SDWavefunctionStepper(wf,dt2bye,tmap);
-  }
-  else if ( wf_dyn == "TDEULER" )
+  if ( wf_dyn == "TDEULER" )
      wf_stepper = new TDEULERWavefunctionStepper(wf,s_.ctrl.tddt,tmap);
   else if ( wf_dyn == "SOTD" )
   {
@@ -323,13 +169,6 @@ void BOSampleStepper::step(int niter)
      wf_stepper = new SORKTDWavefunctionStepper(wf,s_.ctrl.tddt,tmap,&wfdeque);
   else if ( wf_dyn == "FORKTD" )
      wf_stepper = new FORKTDWavefunctionStepper(wf,s_.ctrl.tddt,tmap,&wfdeque);
-  else if ( wf_dyn == "PSD" )
-    wf_stepper = new PSDWavefunctionStepper(wf,*preconditioner,tmap);
-  else if ( wf_dyn == "PSDA" )
-    wf_stepper = new PSDAWavefunctionStepper(wf,*preconditioner,tmap);  
-  else if ( wf_dyn == "JD" )
-    wf_stepper = new JDWavefunctionStepper(wf,*preconditioner,ef_,tmap);  
-  // wf_stepper == 0 indicates that wf_dyn == LOCKED
 
   IonicStepper* ionic_stepper = 0;
   if ( atoms_dyn == "SD" )
@@ -351,16 +190,6 @@ void BOSampleStepper::step(int niter)
   if ( cell_dyn == "SD" )
     cell_stepper = new SDCellStepper(s_);
 
-  // Allocate wavefunction velocity if not available
-  if ( atoms_move && extrapolate_wf )
-  {
-    if ( s_.wfv == 0 )
-    {
-      s_.wfv = new Wavefunction(wf);
-      s_.wfv->clear();
-    }
-  }
-
   MLWFTransform* mlwft=0;
 
   if ( compute_mlwf || compute_mlwfc )
@@ -371,9 +200,9 @@ void BOSampleStepper::step(int niter)
     {
       if ( oncoutpe )
       {
-        cout << "<ERROR> BOSampleStepper::step: MLWF can be computed at k=0 only </ERROR>"
+        cout << "<ERROR> EhrenSampleStepper::step: MLWF can be computed at k=0 only </ERROR>"
              << endl;
-        cout << "<ERROR> BOSampleStepper::step: cannot run </ERROR>" << endl;
+        cout << "<ERROR> EhrenSampleStepper::step: cannot run </ERROR>" << endl;
       }
       return;
     }
@@ -535,11 +364,11 @@ void BOSampleStepper::step(int niter)
     if (ionic_converge) {
       if ( s_.ctxt_.oncoutpe() ) {
         cout.setf(ios::scientific,ios::floatfield);
-        cout << "  <!-- BOSampleStepper: ionic convergence reached:  -->" << endl;
+        cout << "  <!-- EhrenSampleStepper: ionic convergence reached:  -->" << endl;
         if (atoms_move)
-          cout << "  <!-- BOSampleStepper:  ionic convergence, maximum forces varied by less than " << conv_force.threshold() << " a.u. over last " << conv_force.nsteps() << " steps -->" << endl;
+          cout << "  <!-- EhrenSampleStepper:  ionic convergence, maximum forces varied by less than " << conv_force.threshold() << " a.u. over last " << conv_force.nsteps() << " steps -->" << endl;
         if (compute_stress)
-          cout << "  <!-- BOSampleStepper:  ionic convergence, maximum stress varied by less than " << conv_stress.threshold() << " GPa over last " << conv_stress.nsteps() << " steps -->" << endl;
+          cout << "  <!-- EhrenSampleStepper:  ionic convergence, maximum stress varied by less than " << conv_stress.threshold() << " GPa over last " << conv_stress.nsteps() << " steps -->" << endl;
       }
       iter = niter;
     }
@@ -1198,7 +1027,7 @@ void BOSampleStepper::step(int niter)
           if (conv_scf.isConverged()) {
             if ( s_.ctxt_.oncoutpe() ) {
               cout.setf(ios::scientific,ios::floatfield);
-              cout << "  <!-- BOSampleStepper: scf convergence at itscf = " << itscf << ", energy varied by less than " << setprecision(2) 
+              cout << "  <!-- EhrenSampleStepper: scf convergence at itscf = " << itscf << ", energy varied by less than " << setprecision(2) 
                    << conv_scf.threshold() << " a.u. over " << conv_scf.nsteps() 
                    << " scf steps. -->" << endl;
             }
@@ -1211,7 +1040,7 @@ void BOSampleStepper::step(int niter)
               conv_scf.addValue(ef_.etotal());
             
             if ( nite_ > 1 && oncoutpe )
-              cout << "  <!-- BOSampleStepper: start scf iteration -->" << endl;
+              cout << "  <!-- EhrenSampleStepper: start scf iteration -->" << endl;
 
             // compute new density in cd_.rhog
             tmap["charge"].start();
@@ -1376,7 +1205,7 @@ void BOSampleStepper::step(int niter)
                          << flush;
                   }
                   cout.setf(ios::scientific,ios::floatfield);
-                  cout << "  <!-- BOSampleStepper: non-scf threshold " << setprecision(2) << nonscfthresh << " reached. -->" << endl;
+                  cout << "  <!-- EhrenSampleStepper: non-scf threshold " << setprecision(2) << nonscfthresh << " reached. -->" << endl;
                 }
                 ite = nite_;
               }
@@ -1898,7 +1727,7 @@ void BOSampleStepper::step(int niter)
             }
             
             if ( nite_ > 1 && oncoutpe )
-              cout << "  <!-- BOSampleStepper: end scf iteration -->" << endl;
+              cout << "  <!-- EhrenSampleStepper: end scf iteration -->" << endl;
           }
         } // for itscf
 
@@ -2427,7 +2256,7 @@ void BOSampleStepper::step(int niter)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-void BOSampleStepper::get_forces(vector<vector<double> >& f) const {
+void EhrenSampleStepper::get_forces(vector<vector<double> >& f) const {
   AtomSet& atoms = s_.atoms;
   if (f.size() < atoms.atom_list.size()) 
     f.resize(atoms.atom_list.size());
@@ -2463,7 +2292,7 @@ void BOSampleStepper::get_forces(vector<vector<double> >& f) const {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-double BOSampleStepper::get_energy(string ename) {
+double EhrenSampleStepper::get_energy(string ename) {
   if (ename == "ekin") { return ef_.ekin(); }
   else if (ename == "econf") { return ef_.econf(); }
   else if (ename == "eps") { return ef_.eps(); }
@@ -2479,7 +2308,7 @@ double BOSampleStepper::get_energy(string ename) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-valarray<double> BOSampleStepper::get_stress(string sname) {
+valarray<double> EhrenSampleStepper::get_stress(string sname) {
   if (sname == "total") { return sigma; }
   else if (sname == "ext") { return sigma_ext; }
   else if (sname == "eks") { return sigma_eks; }

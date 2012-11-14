@@ -133,7 +133,7 @@ testPgemm: $(OBJDIR)/testPgemm.o $(OBJDIR)/Matrix.o $(OBJDIR)/Context.o
 	$(LD) $(DFLAGS) -o $@-$(ARCH) $^ $(LDFLAGS)
 testPzheev: $(OBJDIR)/testPzheev.o $(OBJDIR)/Matrix.o $(OBJDIR)/Context.o
 	$(LD) $(DFLAGS) -o $@-$(ARCH) $^ $(LDFLAGS)
-testEigenSolvers: $(OBJDIR)/testEigenSolvers.o $(OBJDIR)/Matrix.o $(OBJDIR)/Context.o
+testEigenSolvers: $(OBJDIR)/testEigenSolvers.o $(OBJDIR)/Matrix.o $(OBJDIR)/Context.o $(OBJDIR)/jacobi.o
 	$(LD) $(DFLAGS) -o $@-$(ARCH) $^ $(LDFLAGS)
 xmlSpecies: xmlSpecies.o qbox_xmlns.o
 	$(LD) $(DFLAGS) -o $@ $^ $(LDFLAGS)
