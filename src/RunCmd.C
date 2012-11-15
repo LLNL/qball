@@ -10,6 +10,7 @@
 using namespace std;
 #include "BOSampleStepper.h"
 #include "CPSampleStepper.h"
+#include "EhrenSampleStepper.h"
 
 #include<ctime>
 #include<cassert>
@@ -93,6 +94,8 @@ int RunCmd::action(int argc, char **argv)
   
   if ( s->ctrl.wf_dyn == "MD" )
     stepper = new CPSampleStepper(*s);
+  else if (s->ctrl.wf_dyn == "TDEULER" || s->ctrl.wf_dyn == "SOTD" || s->ctrl.wf_dyn == "SORKTD" || s->ctrl.wf_dyn == "FORKTD")
+    stepper = new EhrenSampleStepper(*s,nitscf,nite);
   else
     stepper = new BOSampleStepper(*s,nitscf,nite);
   

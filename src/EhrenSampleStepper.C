@@ -41,7 +41,7 @@ using namespace std;
 ////////////////////////////////////////////////////////////////////////////////
 EhrenSampleStepper::EhrenSampleStepper(Sample& s, int nitscf, int nite) :
   SampleStepper(s), cd_(s), ef_(s,s.wf,cd_),dwf(s.wf), wfv(s.wfv), nitscf_(nitscf),
-  nite_(nite), initial_atomic_density(false)
+  nite_(nite)
 {
    const string wf_dyn = s_.ctrl.wf_dyn;
    tddft_involved_ = s_.ctrl.tddft_involved;
@@ -134,7 +134,7 @@ void EhrenSampleStepper::step(int niter)
   if (s_.ctrl.extra_memory >= 3) 
     wf.set_highmem();
   
-  if (!gs_only && s_.ctrl.dft_plus_u && oncoutpe)
+  if (s_.ctrl.dft_plus_u && oncoutpe)
     cout << "<WARNING> Forces and stress not currently implemented with DFT+U! </WARNING>" << endl;
   
   Timer tm_iter;
@@ -169,7 +169,13 @@ void EhrenSampleStepper::step(int niter)
      wf_stepper = new SORKTDWavefunctionStepper(wf,s_.ctrl.tddt,tmap,&wfdeque);
   else if ( wf_dyn == "FORKTD" )
      wf_stepper = new FORKTDWavefunctionStepper(wf,s_.ctrl.tddt,tmap,&wfdeque);
-
+  else
+  {
+     if ( oncoutpe )
+        cout << "<ERROR> EhrenSampleStepper:  undefined wf_dyn = " << wf_dyn << "! </ERROR>" << endl;
+     return;
+  }
+  
   IonicStepper* ionic_stepper = 0;
   if ( atoms_dyn == "SD" )
     ionic_stepper = new SDIonicStepper(s_);
@@ -212,91 +218,6 @@ void EhrenSampleStepper::step(int niter)
     mlwft = new MLWFTransform(*wf.sd(0,0));
   }
 
-  //ewd:  experimental Hugoniostat for Kyle and Sebastien
-  Hugoniostat* hugstat = 0;
-  if (s_.ctrl.hugoniostat == "ON") {
-    hugstat = new Hugoniostat(s_.ctrl.hug_etot,s_.ctrl.hug_volume,s_.ctrl.hug_pressure,ionic_stepper->temp(),s_.ctxt_.oncoutpe());
-    hugstat->set_deltatemp(s_.ctrl.hug_deltatemp);
-    hugstat->set_updatefreq(s_.ctrl.hug_freq);
-  }
-
-  // Charge mixing variables
-  vector<vector<complex<double> > > rhog_in;
-  vector<vector<complex<double> > > drhog;
-  vector<vector<complex<double> > > rhobar;
-  vector<vector<complex<double> > > drhobar;
-
-  rhog_in.resize(nspin);
-  drhog.resize(nspin);
-  rhobar.resize(nspin);
-  drhobar.resize(nspin);
-  for (int ispin = 0; ispin < nspin; ispin++) {
-    rhog_in[ispin].resize(cd_.rhog[ispin].size());
-    drhog[ispin].resize(cd_.rhog[ispin].size());
-    rhobar[ispin].resize(cd_.rhog[ispin].size());
-    drhobar[ispin].resize(cd_.rhog[ispin].size());
-  }
-
-  vector<double> wkerker(rhog_in[0].size());
-  vector<double> wls(rhog_in[0].size());
-
-  const int anderson_ndim = s_.ctrl.charge_mix_ndim;
-
-  vector<AndersonMixer*> mixer;
-  mixer.resize(nspin);
-  for (int ispin = 0; ispin < nspin; ispin++)
-    //if (s_.wf.spinactive(ispin))
-      mixer[ispin] = new AndersonMixer(2*rhog_in[ispin].size(),anderson_ndim,&cd_.vcontext());
-      
-  // compute Kerker preconditioning
-  // real space Kerker cutoff in a.u.
-  const double rc_Kerker = s_.ctrl.charge_mix_rcut;
-  const double *const g2 = cd_.vbasis()->g2_ptr();
-
-  // define q1 cutoff for row weighting of LS charge mixing
-  // Use rc1 = 3 a.u. default cutoff
-  double rc1 = 3.0;
-  // check if override from the debug variable
-  // use: set debug RC1 <value>
-  if ( s_.ctrl.debug.find("RC1") != string::npos )
-  {
-    istringstream is(s_.ctrl.debug);
-    string s;
-    is >> s >> rc1;
-    cout << " override rc1 value: rc1 = " << rc1 << endl;
-    assert(rc1 >= 0.0);
-  }
-
-  if ( rc1 != 0.0 )
-  {
-    const double q1 = 2.0 * M_PI / rc1;
-    for ( int i=0; i < wls.size(); i++ )
-    {
-      if ( g2[i] != 0.0 )
-        wls[i] = sqrt(g2[i] / ( g2[i] + q1*q1 ));
-      else
-        wls[i] = 1.0;
-    }
-  }
-  else
-  {
-    for ( int i=0; i < wls.size(); i++ )
-      wls[i] = 1.0;
-  }
-
-  if ( rc_Kerker > 0.0 )
-  {
-    const double q0_kerker = 2 * M_PI / rc_Kerker;
-    const double q0_kerker2 = q0_kerker * q0_kerker;
-    for ( int i=0; i < wkerker.size(); i++ )
-      wkerker[i] = g2[i] / ( g2[i] + q0_kerker2 );
-  }
-  else
-  {
-    for ( int i=0; i < wkerker.size(); i++ )
-      wkerker[i] = 1.0;
-  }
-
   // if ultrasoft, calculate position-dependent functions
   if (ultrasoft) {
      tmap["usfns"].start();
@@ -308,11 +229,6 @@ void EhrenSampleStepper::step(int niter)
   if (nlcc)
      cd_.update_nlcc();
   
-  double tmpthresh = (atoms_move ? s_.ctrl.threshold_force : 0.0 );
-  SimpleConvergenceDetector conv_force(s_.ctrl.threshold_force_nsteps, tmpthresh);
-  tmpthresh = (compute_stress ? s_.ctrl.threshold_stress : 0.0 );
-  SimpleConvergenceDetector conv_stress(s_.ctrl.threshold_stress_nsteps, tmpthresh);
-
   // calculate time available to avoid exceeding run_timer
   double tbase, tleft;
   bool testtimer = true;
@@ -321,8 +237,8 @@ void EhrenSampleStepper::step(int niter)
     tleft = s_.ctrl.run_timer - (tbase - s_.ctrl.time_init);
   }
   
-  // Next line: special case of niter=0: compute GS only        
-  for ( int iter = 0; iter < max(niter,1); iter++ )
+  tmap["total_niter"].start();
+  for ( int iter = 0; iter < niter; iter++ )
   {
 
     // check timing
@@ -351,130 +267,60 @@ void EhrenSampleStepper::step(int niter)
       }
     }
     
-    // ionic iteration
-    // test convergence of forces and/or stress
-    bool ionic_converge = true;
-    if (atoms_move && !conv_force.isConverged())
-      ionic_converge = false;
-    if (compute_stress && !conv_stress.isConverged())
-      ionic_converge = false;
-    if (gs_only)
-      ionic_converge = false;
-
-    if (ionic_converge) {
-      if ( s_.ctxt_.oncoutpe() ) {
-        cout.setf(ios::scientific,ios::floatfield);
-        cout << "  <!-- EhrenSampleStepper: ionic convergence reached:  -->" << endl;
-        if (atoms_move)
-          cout << "  <!-- EhrenSampleStepper:  ionic convergence, maximum forces varied by less than " << conv_force.threshold() << " a.u. over last " << conv_force.nsteps() << " steps -->" << endl;
-        if (compute_stress)
-          cout << "  <!-- EhrenSampleStepper:  ionic convergence, maximum stress varied by less than " << conv_stress.threshold() << " GPa over last " << conv_stress.nsteps() << " steps -->" << endl;
-      }
-      iter = niter;
-    }
-    else {
-
-      // check for change in basis size which can cause errors in charge mixing between iterations
-      for (int ispin = 0; ispin < nspin; ispin++) {
-        //if (s_.wf.spinactive(ispin)) {
-          if (rhog_in[ispin].size() != cd_.rhog[ispin].size()) {
-            if ( s_.ctxt_.oncoutpe() ) 
-              cout << "<ERROR> ChargeDensity basis mismatch!  A ref_cell may be needed. </ERROR>" << endl;
-            s_.ctxt_.abort(1);
-          }
-          //}
-      }
-
-      //ewd: add if statement for case when threshold undefined?
-      if (iter > 0) {
-        // calculate max force and stress values, add to convergence detectors
-        if (atoms_move) {
-          double maxforce = 0.0;
-          for ( int is = 0; is < atoms.atom_list.size(); is++ ) 
-            for ( int ia = 0; ia < atoms.atom_list[is].size(); ia++ ) 
-              for (int q=0; q<3; q++) 
-                if (fabs(fion[is][3*ia+q]) > maxforce) maxforce = fabs(fion[is][3*ia+q]);
-
-          conv_force.addValue(maxforce);
-        }
-        if (compute_stress) {
-          // ewd:  add more significant figures to conversion
-          const double gpa = 29421.0120;
-          //const double gpa = 29421.5;
-          double maxstress = 0.0;
-          for (int q=0; q<6; q++) 
-            if (fabs(sigma_eks[q]) > maxstress) maxstress = fabs(sigma_eks[q]);
-
-          conv_stress.addValue(gpa*maxstress);
-        }
-      }
-      
-
-      tm_iter.start();
+    tm_iter.start();
 #ifdef USE_APC
-      ApcStart(1);
+    ApcStart(1);
 #endif
       
-      if ( oncoutpe )
-        cout << "<iteration count=\"" << iter+1 << "\">\n";
+    if ( oncoutpe )
+       cout << "<iteration count=\"" << iter+1 << "\">\n";
 
-      if ( ionic_stepper )
-        atoms.sync();
+    if ( ionic_stepper )
+       atoms.sync();
 
-      // compute energy and ionic forces using existing wavefunction
+    // compute energy and ionic forces using existing wavefunction
       
-      if ( !gs_only )
-      {
-        tmap["charge"].start();
-        if ( initial_atomic_density ) {
-          cd_.update_rhor();
-          if (ultrasoft)
-            //ewd DEBUG:  need to renormalize ultrasoft density so tot_charge is correct?
-            assert(false);
-        }
-        else 
-          cd_.update_density();
-        if (tddft_involved_)
-           ( ef_.hamil_cd() )->update_density();
-        tmap["charge"].stop();
+    tmap["charge"].start();
+    cd_.update_density();
+    ( ef_.hamil_cd() )->update_density();
+    tmap["charge"].stop();
 
-        if (tddft_involved_)
-           ef_.update_hamiltonian();
-        ef_.update_vhxc();
-        const bool compute_forces = true;
+    ef_.update_hamiltonian();
+    ef_.update_vhxc();
+    const bool compute_forces = true;
 
-        // if symmetry is used, need to calculate set of symmetry-equivalent atoms for 
-        // force averaging
-        if ( s_.symmetries.nsym() > 0) {
-          atoms.findSymmetricAtoms(s_.symmetries);
-        }
+    // if symmetry is used, need to calculate set of symmetry-equivalent atoms for 
+    // force averaging
+    if ( s_.symmetries.nsym() > 0) {
+       atoms.findSymmetricAtoms(s_.symmetries);
+    }
 
-        // need eigenvalues to compute forces w. ultrasoft
-        if (ultrasoft) { 
-          tmap["gram"].start();
-          s_.wf.gram();
-          tmap["gram"].stop();
-          ef_.energy(true,dwf,false,fion,false,sigma_eks);
-          tmap["diag"].start();
-          s_.wf.diag(dwf,true);
-          tmap["diag"].stop();
-          tmap["usfns"].start();
-          s_.wf.update_usfns();
-          tmap["usfns"].stop();
-          s_.wf.printeig();
-        }
+    // need eigenvalues to compute forces w. ultrasoft
+    if (ultrasoft) { 
+       tmap["gram"].start();
+       s_.wf.gram();
+       tmap["gram"].stop();
+       ef_.energy(true,dwf,false,fion,false,sigma_eks);
+       tmap["diag"].start();
+       s_.wf.diag(dwf,true);
+       tmap["diag"].stop();
+       tmap["usfns"].start();
+       s_.wf.update_usfns();
+       tmap["usfns"].stop();
+       s_.wf.printeig();
+    }
         
-        double energy =
-            ef_.energy(false,dwf,compute_forces,fion,compute_stress,sigma_eks);
+    double energy =
+        ef_.energy(false,dwf,compute_forces,fion,compute_stress,sigma_eks);
 
-        // average forces over symmetric atoms
-        if ( compute_forces && s_.symmetries.nsym() > 0) {
-          const int nsym_ = s_.symmetries.nsym();
-          for ( int is = 0; is < atoms.atom_list.size(); is++ ) {
-            for ( int ia = 0; ia < atoms.atom_list[is].size(); ia++ ) {
-              // start with identity symmetry operation
-              D3vector fsym(fion[is][3*ia],fion[is][3*ia+1],fion[is][3*ia+2]);
-              for ( int isym = 0; isym < nsym_; isym++) {
+    // average forces over symmetric atoms
+    if ( compute_forces && s_.symmetries.nsym() > 0) {
+       const int nsym_ = s_.symmetries.nsym();
+       for ( int is = 0; is < atoms.atom_list.size(); is++ ) {
+          for ( int ia = 0; ia < atoms.atom_list[is].size(); ia++ ) {
+             // start with identity symmetry operation
+             D3vector fsym(fion[is][3*ia],fion[is][3*ia+1],fion[is][3*ia+2]);
+             for ( int isym = 0; isym < nsym_; isym++) {
                 int ja = atoms.symatomid(is,ia,isym);
                 D3vector ftmp(fion[is][3*ja],fion[is][3*ja+1],fion[is][3*ja+2]);
                 //fsym = fsym + s_.symmetries.symlist[isym]->applyToVector(ftmp,false);
@@ -483,199 +329,138 @@ void EhrenSampleStepper::step(int niter)
                 D3vector ftmp_xtal = cell.cart_to_crystal(ftmp);
                 D3vector fsym_xtal = s_.symmetries.symlist[isym]->applyToVector(ftmp_xtal,false);
                 fsym = fsym + cell.crystal_to_cart(fsym_xtal);
-              }
-              fion[is][3*ia] = fsym.x/(double)(nsym_+1);
-              fion[is][3*ia+1] = fsym.y/(double)(nsym_+1);
-              fion[is][3*ia+2] = fsym.z/(double)(nsym_+1);
-            }
-          }       
-        }
-
-        if (compute_forces && atoms.add_fion_ext()) {
-          for ( int is = 0; is < atoms.atom_list.size(); is++ ) {
-            for ( int ia = 0; ia < atoms.atom_list[is].size(); ia++ ) {
-              D3vector ftmp = atoms.get_fion_ext(is,ia);
-              fion[is][3*ia] += ftmp.x;
-              fion[is][3*ia+1] += ftmp.y;
-              fion[is][3*ia+2] += ftmp.z;
-            }
+             }
+             fion[is][3*ia] = fsym.x/(double)(nsym_+1);
+             fion[is][3*ia+1] = fsym.y/(double)(nsym_+1);
+             fion[is][3*ia+2] = fsym.z/(double)(nsym_+1);
           }
-        }
+       }       
+    }
 
-        if ( oncoutpe )
-        {
-          cout.setf(ios::fixed,ios::floatfield);
-          cout.setf(ios::right,ios::adjustfield);
-          cout << "  <ekin>   " << setprecision(8)
-               << setw(15) << ef_.ekin() << " </ekin>\n";
-          if ( use_confinement )
-            cout << "  <econf>  " << setw(15) << ef_.econf() << " </econf>\n";
-          cout << "  <eps>    " << setw(15) << ef_.eps() << " </eps>\n"
-               << "  <enl>    " << setw(15) << ef_.enl() << " </enl>\n"
-               << "  <ecoul>  " << setw(15) << ef_.ecoul() << " </ecoul>\n"
-               << "  <exc>    " << setw(15) << ef_.exc() << " </exc>\n"
-               << "  <esr>    " << setw(15) << ef_.esr() << " </esr>\n"
-               << "  <eself>  " << setw(15) << ef_.eself() << " </eself>\n"
-               << "  <ets>    " << setw(15) << ef_.ets() << " </ets>\n"
-               << "  <etotal> " << setw(15) << ef_.etotal() << " </etotal>\n";
-          if ( compute_stress )
-          {
-            const double pext = (sigma_ext[0]+sigma_ext[1]+sigma_ext[2])/3.0;
-            const double enthalpy = ef_.etotal() + pext * cell.volume();
-            cout << "  <pv>     " << setw(15) << pext * cell.volume()
-                 << " </pv>" << endl;
-            cout << "  <enthalpy> " << setw(15) << enthalpy << " </enthalpy>\n"
-                 << flush;
+    if (compute_forces && atoms.add_fion_ext()) {
+       for ( int is = 0; is < atoms.atom_list.size(); is++ ) {
+          for ( int ia = 0; ia < atoms.atom_list[is].size(); ia++ ) {
+             D3vector ftmp = atoms.get_fion_ext(is,ia);
+             fion[is][3*ia] += ftmp.x;
+             fion[is][3*ia+1] += ftmp.y;
+             fion[is][3*ia+2] += ftmp.z;
           }
-        }
+       }
+    }
+
+    if ( oncoutpe )
+    {
+       cout.setf(ios::fixed,ios::floatfield);
+       cout.setf(ios::right,ios::adjustfield);
+       cout << "  <ekin>   " << setprecision(8)
+            << setw(15) << ef_.ekin() << " </ekin>\n";
+       if ( use_confinement )
+          cout << "  <econf>  " << setw(15) << ef_.econf() << " </econf>\n";
+       cout << "  <eps>    " << setw(15) << ef_.eps() << " </eps>\n"
+            << "  <enl>    " << setw(15) << ef_.enl() << " </enl>\n"
+            << "  <ecoul>  " << setw(15) << ef_.ecoul() << " </ecoul>\n"
+            << "  <exc>    " << setw(15) << ef_.exc() << " </exc>\n"
+            << "  <esr>    " << setw(15) << ef_.esr() << " </esr>\n"
+            << "  <eself>  " << setw(15) << ef_.eself() << " </eself>\n"
+            << "  <ets>    " << setw(15) << ef_.ets() << " </ets>\n"
+            << "  <etotal> " << setw(15) << ef_.etotal() << " </etotal>\n";
+       if ( compute_stress )
+       {
+          const double pext = (sigma_ext[0]+sigma_ext[1]+sigma_ext[2])/3.0;
+          const double enthalpy = ef_.etotal() + pext * cell.volume();
+          cout << "  <pv>     " << setw(15) << pext * cell.volume()
+               << " </pv>" << endl;
+          cout << "  <enthalpy> " << setw(15) << enthalpy << " </enthalpy>\n"
+               << flush;
+       }
+    }
         
-        // Add empirical forces (if any) to ions
-        double epot_mmion = 0.0;
-        if (atoms.empirical_list.size() > 0) {
-          const int nspqm_ = atoms.atom_list.size();
-          for (int k=0; k<atoms.empirical_list.size(); k++) {
-          
-            int is1 = atoms.empirical_list[k]->is1;
-            int is2 = atoms.empirical_list[k]->is2;
-
-            double prefac = 1.0;
-            if (is1 == is2) prefac = 0.5;
-            
-            vector<Atom*>::iterator pa1; 
-            vector<Atom*>::iterator pa2; 
-            if (is1 >= nspqm_) 
-              pa1 = atoms.mmatom_list[is1-nspqm_].begin();
-            else 
-              pa1 = atoms.atom_list[is1].begin();
-            for (int ia=0; ia<atoms.na(is1); ia++) {
-              if (is2 >= nspqm_)
-                pa2 = atoms.mmatom_list[is2-nspqm_].begin();
-              else 
-                pa2 = atoms.atom_list[is2].begin();
-              for (int ja=0; ja<atoms.na(is2); ja++) {
-                D3vector r12 = (*pa1)->position() - (*pa2)->position();
-                cell.fold_in_ws(r12);
-                
-                double r12val = length(r12);
-                if (r12val > 0.0) 
-                  epot_mmion += prefac*atoms.empirical_list[k]->pot(r12val);
-              
-                if ( compute_forces) {
-                  D3vector emp_force = prefac*atoms.empirical_list[k]->force(r12);
-                  fion[is1][3*ia] += emp_force.x;
-                  fion[is1][3*ia+1] += emp_force.y;
-                  fion[is1][3*ia+2] += emp_force.z;
-                  fion[is2][3*ja] -= emp_force.x;
-                  fion[is2][3*ja+1] -= emp_force.y;
-                  fion[is2][3*ja+2] -= emp_force.z;
-                }
-                pa2++;
-              }
-              pa1++;
-            }
-          }
-        }
       
-        if ( iter > 0 && ionic_stepper )
-        {
-          ionic_stepper->compute_v(energy,fion);
-        }
-        // at this point, positions r0, velocities v0 and forces fion are
-        // consistent
-        double ekin_ion = 0.0, temp_ion = 0.0;
-        if ( ionic_stepper )
-        {
-          ekin_ion = ionic_stepper->ekin();
-          temp_ion = ionic_stepper->temp();
-        }
-        
-        // if hugoniostat is turned on, add current total energy, pressure and volume
-        if (s_.ctrl.hugoniostat == "ON") { 
-          double pext = 0.0;
-          if ( compute_stress )
-            pext = (sigma_ext[0]+sigma_ext[1]+sigma_ext[2])/3.0;
-          hugstat->addValues(ef_.etotal(),cell.volume(),pext,ionic_stepper->temp());
-          if (hugstat->updatenow) {
-            double currthtemp = s_.ctrl.th_temp;
-            hugstat->updateTemp(currthtemp);
-            s_.ctrl.th_temp = currthtemp;
-          }
-        }
+    if ( iter > 0 && ionic_stepper )
+    {
+       ionic_stepper->compute_v(energy,fion);
+    }
+    // at this point, positions r0, velocities v0 and forces fion are
+    // consistent
+    double ekin_ion = 0.0, temp_ion = 0.0;
+    if ( ionic_stepper )
+    {
+       ekin_ion = ionic_stepper->ekin();
+       temp_ion = ionic_stepper->temp();
+    }
 
-        //ewd:  only print every iprint steps?
+    //ewd:  only print every iprint steps?
 
-        // print positions, velocities and forces at time t0
-        if ( oncoutpe )
-        {
-          cout << "<atomset>" << endl;
-          cout << atoms.cell();
-          for ( int is = 0; is < atoms.atom_list.size(); is++ )
+    // print positions, velocities and forces at time t0
+    if ( oncoutpe )
+    {
+       cout << "<atomset>" << endl;
+       cout << atoms.cell();
+       for ( int is = 0; is < atoms.atom_list.size(); is++ )
+       {
+          int i = 0;
+          for ( int ia = 0; ia < atoms.atom_list[is].size(); ia++ )
           {
-            int i = 0;
-            for ( int ia = 0; ia < atoms.atom_list[is].size(); ia++ )
-            {
-              Atom* pa = atoms.atom_list[is][ia];
-              cout << "  <atom name=\"" << pa->name() << "\""
-                   << " species=\"" << pa->species()
-                   << "\">\n"
-                   << "    <position> " << pa->position() << " </position>\n"
-                   << "    <velocity> " << pa->velocity() << " </velocity>\n"
-                   << "    <force> "
-                   << fion[is][i] << " "
-                   << fion[is][i+1] << " "
-                   << fion[is][i+2]
-                   << " </force>\n";
-              cout << "  </atom>" << endl;
-              i += 3;
-            }
+             Atom* pa = atoms.atom_list[is][ia];
+             cout << "  <atom name=\"" << pa->name() << "\""
+                  << " species=\"" << pa->species()
+                  << "\">\n"
+                  << "    <position> " << pa->position() << " </position>\n"
+                  << "    <velocity> " << pa->velocity() << " </velocity>\n"
+                  << "    <force> "
+                  << fion[is][i] << " "
+                  << fion[is][i+1] << " "
+                  << fion[is][i+2]
+                  << " </force>\n";
+             cout << "  </atom>" << endl;
+             i += 3;
           }
-          // MM atoms
-          for ( int is = 0; is < atoms.mmatom_list.size(); is++ ) {
-            int i = 0;
-            const int offset = atoms.atom_list.size();
-            for ( int ia = 0; ia < atoms.mmatom_list[is].size(); ia++ ) {
-              Atom* pa = atoms.mmatom_list[is][ia];
-              cout << "  <mmatom name=\"" << pa->name() << "\""
-                   << " species=\"" << pa->species()
-                   << "\">\n"
-                   << "    <position> " 
-                   << ionic_stepper->r0(is+offset,i) << " "
-                   << ionic_stepper->r0(is+offset,i+1) << " " 
-                   << ionic_stepper->r0(is+offset,i+2) << " </position>\n"
-                   << "    <velocity> " 
-                   << ionic_stepper->v0(is+offset,i) << " "
-                   << ionic_stepper->v0(is+offset,i+1) << " " 
-                   << ionic_stepper->v0(is+offset,i+2) << " </velocity>\n"
-                   << "    <force> " 
-                   << fion[is+offset][i] << " "
-                   << fion[is+offset][i+1] << " " 
-                   << fion[is+offset][i+2]
-                   << " </force>\n  </mmatom>" << endl;
-              
-              i += 3;
-            }
-          }
-          cout << "</atomset>" << endl;
-          cout << "  <econst> " << energy+ekin_ion << " </econst>\n";
-          if (atoms.mmatom_list.size() > 0) 
-            cout << "  <epot_mmion> " << epot_mmion << " </epot_mmion>\n";
-          cout << "  <ekin_ion> " << ekin_ion << " </ekin_ion>\n";
-          cout << "  <temp_ion> " << temp_ion << " </temp_ion>\n";
-        }
+       }
+       cout << "</atomset>" << endl;
+       cout << "  <econst> " << energy+ekin_ion << " </econst>\n";
+       cout << "  <ekin_ion> " << ekin_ion << " </ekin_ion>\n";
+       cout << "  <temp_ion> " << temp_ion << " </temp_ion>\n";
+    }
         
-        if ( atoms_move )
-        {
-           if ( s_.constraints.size() > 0 )
+    if ( atoms_move )
+    {
+       if ( s_.constraints.size() > 0 )
+       {
+          s_.constraints.compute_forces(ionic_stepper->r0(), fion);
+          if ( oncoutpe )
           {
-            s_.constraints.compute_forces(ionic_stepper->r0(), fion);
-            if ( oncoutpe )
-            {
-              s_.constraints.list_constraints(cout);
-            }
+             s_.constraints.list_constraints(cout);
           }
-          // move atoms to new position: r0 <- r0 + v0*dt + dt2/m * fion
-          ionic_stepper->compute_r(energy,fion);
-          ef_.atoms_moved();
+       }
+       // move atoms to new position: r0 <- r0 + v0*dt + dt2/m * fion
+       ionic_stepper->compute_r(energy,fion);
+       ef_.atoms_moved();
+       if (ultrasoft) {
+          tmap["usfns"].start();
+          cd_.update_usfns();
+          wf.update_usfns();
+          tmap["usfns"].stop();
+       }
+       tmap["charge"].start();
+       if (nlcc)
+          cd_.update_nlcc();
+       tmap["charge"].stop();
+    }
+
+    if ( compute_stress )
+    {
+       compute_sigma();
+       print_stress();
+
+       if ( cell_moves )
+       {
+          cell_stepper->compute_new_cell(sigma);
+
+          // Update cell
+          cell_stepper->update_cell();
+
+          ef_.cell_moved();
+          ef_.atoms_moved(); // modifications of the cell also move ions
           if (ultrasoft) {
              tmap["usfns"].start();
              cd_.update_usfns();
@@ -686,531 +471,137 @@ void EhrenSampleStepper::step(int niter)
           if (nlcc)
              cd_.update_nlcc();
           tmap["charge"].stop();
-        }
+          
+       }
+    }
 
-        if ( compute_stress )
-        {
-          compute_sigma();
-          print_stress();
+    // do nitscf self-consistent iterations, each with nite electronic steps
+    if ( wf_stepper != 0 )
+    {
+       wf_stepper->preprocess();
 
-          if ( cell_moves )
-          {
-            cell_stepper->compute_new_cell(sigma);
-
-            // Update cell
-            cell_stepper->update_cell();
-
-            ef_.cell_moved();
-            ef_.atoms_moved(); // modifications of the cell also move ions
-            if (ultrasoft) {
-              tmap["usfns"].start();
-              cd_.update_usfns();
-              wf.update_usfns();
-              tmap["usfns"].stop();
-            }
-            tmap["charge"].start();
-            if (nlcc)
-               cd_.update_nlcc();
-            tmap["charge"].stop();
-
-            if ( use_preconditioner )
-              preconditioner->update();
-          }
-        }
-      } // if !gs_only
-
-      // Recalculate ground state wavefunctions
-      
-      // wavefunction extrapolation
-      if ( atoms_move && extrapolate_wf )
-      {
-        for ( int ispin = 0; ispin < nspin; ispin++ )
-        {
-          if (s_.wf.spinactive(ispin))
-          {
-            for ( int ikp = 0; ikp < s_.wf.nkp(); ikp++ )
-            {
-              if (s_.wf.kptactive(ikp))
-              {
-                assert(s_.wf.sd(ispin,ikp) != 0);
-                if ( ntc_extrapolation )
-                {
-                  double* c = (double*) s_.wf.sd(ispin,ikp)->c().cvalptr();
-                  double* cv = (double*) s_.wfv->sd(ispin,ikp)->c().cvalptr();
-                  double* cmm = (double*) wfmm->sd(ispin,ikp)->c().cvalptr();
-                  const int mloc = s_.wf.sd(ispin,ikp)->c().mloc();
-                  const int nloc = s_.wf.sd(ispin,ikp)->c().nloc();
-                  const int len = 2*mloc*nloc;
-                  if ( iter == 0 )
-                  {
-                    // copy c on cv
-                    for ( int i = 0; i < len; i++ )
-                    {
-                      const double x = c[i];
-                      const double v = cv[i];
-                      // extrapolation using velocity in cv
-                      c[i] = x + dt * v;
-                      cv[i] = x;
-                    }
-                    if (ultrasoft) {
-                      tmap["usfns"].start();
-                      s_.wf.sd(ispin,ikp)->update_usfns();
-                      tmap["usfns"].stop();
-                    }
-                    tmap["gram"].start();
-                    s_.wf.sd(ispin,ikp)->gram();
-                    tmap["gram"].stop();
-                  }
-                  else if ( iter == 1 )
-                  {
-                     s_.wfv->align(s_.wf);
-                    for ( int i = 0; i < len; i++ )
-                    {
-                      const double x = c[i];
-                      const double xm = cv[i];
-                      c[i] = 2.0 * x - xm;
-                      cv[i] = x;
-                      cmm[i] = xm;
-                    }
-                    if (ultrasoft) {
-                      tmap["usfns"].start();
-                      s_.wf.sd(ispin,ikp)->update_usfns();
-                      tmap["usfns"].stop();
-                    }
-                    tmap["gram"].start();
-                    s_.wf.sd(ispin,ikp)->gram();
-                    tmap["gram"].stop();
-                  }
-                  else
-                  {
-                    // align wf with wfmm before extrapolation
-                    // s_.wf.align(*wfmm);
-                    wfmm->align(s_.wf);
-                  
-                    // extrapolate
-                    for ( int i = 0; i < len; i++ )
-                    {
-                      const double x = c[i];   // current wf (scf converged) at t
-                      const double xm = cv[i]; // extrapolated wf at t
-                      const double xmm = cmm[i]; // extrapolated wf at t-dt
-                      c[i] = 2.0 * x - xmm;
-                      // save extrapolated value at t in cmm
-                      cmm[i] = xm;
-                    }
-
-                    // orthogonalize the extrapolated value
-                    if (ultrasoft) {
-                      tmap["usfns"].start();
-                      s_.wf.sd(ispin,ikp)->update_usfns();
-                      tmap["usfns"].stop();
-                    }
-                    tmap["gram"].start();
-                    s_.wf.sd(ispin,ikp)->gram();
-                    tmap["gram"].stop();
-                    //tmap["lowdin"].start();
-                    //s_.wf.sd(ispin,ikp)->lowdin();
-                    //tmap["lowdin"].stop();
-                  
-                    // c[i] now contains the extrapolated value
-                    // save a copy in cv[i]
-                    for ( int i = 0; i < len; i++ )
-                    {
-                      cv[i] = c[i];
-                    }
-                  }
-                  // c[i] is now ready for electronic iterations
-                }
-                else if ( asp_extrapolation )
-                {
-                  double* c = (double*) s_.wf.sd(ispin,ikp)->c().cvalptr();
-                  double* cv = (double*) s_.wfv->sd(ispin,ikp)->c().cvalptr();
-                  double* cmm = (double*) wfmm->sd(ispin,ikp)->c().cvalptr();
-                  const int mloc = s_.wf.sd(ispin,ikp)->c().mloc();
-                  const int nloc = s_.wf.sd(ispin,ikp)->c().nloc();
-                  const int len = 2*mloc*nloc;
-                  if ( iter == 0 )
-                  {
-                    for ( int i = 0; i < len; i++ )
-                    {
-                      const double x = c[i];
-                      const double v = cv[i];
-                      // extrapolation using velocity in cv
-                      c[i] = x + dt * v;
-                      cv[i] = x;
-                    }
-                    if (ultrasoft) {
-                      tmap["usfns"].start();
-                      s_.wf.sd(ispin,ikp)->update_usfns();
-                      tmap["usfns"].stop();
-                    }
-                    tmap["gram"].start();
-                    s_.wf.sd(ispin,ikp)->gram();
-                    tmap["gram"].stop();
-                  }
-                  else if ( iter == 1 )
-                  {
-                    //s_.wfv->align(s_.wf);
-                    for ( int i = 0; i < len; i++ )
-                    {
-                      const double x = c[i];
-                      const double xm = cv[i];
-                      c[i] = 2.0 * x - xm;
-                      cv[i] = x;
-                      cmm[i] = xm;
-                    }
-                    if (ultrasoft) {
-                      tmap["usfns"].start();
-                      s_.wf.sd(ispin,ikp)->update_usfns();
-                      tmap["usfns"].stop();
-                    }
-                    tmap["gram"].start();
-                    s_.wf.sd(ispin,ikp)->gram();
-                    tmap["gram"].stop();
-                  }
-                  else
-                  {
-                    // align wf with wfmm before extrapolation
-                    // s_.wf.align(*wfmm);
-                    // wfmm->align(s_.wf);
-                  
-                    // extrapolate
-                    for ( int i = 0; i < len; i++ )
-                    {
-                      const double x = c[i];   // current wf (scf converged) at t
-                      const double xm = cv[i]; // extrapolated wf at t
-                      const double xmm = cmm[i]; // extrapolated wf at t-dt
-                      const double asp_a1 = 0.5;
-                      c[i] = 2.0 * x - xm +
-                          asp_a1 * ( x - 2.0 * xm + xmm );
-                      //c[i] = 2.5 * x - 2.0 * xm + 0.5 * xmm;
-                      cmm[i] = xm;
-                      cv[i] = x;
-                    }
-                    
-                    // orthogonalize the extrapolated value
-                    if (ultrasoft) {
-                      tmap["usfns"].start();
-                      s_.wf.sd(ispin,ikp)->update_usfns();
-                      tmap["usfns"].stop();
-                    }
-                    tmap["gram"].start();
-                    s_.wf.sd(ispin,ikp)->gram();
-                    tmap["gram"].stop();
-                    //tmap["lowdin"].start();
-                    //s_.wf.sd(ispin,ikp)->lowdin();
-                    //tmap["lowdin"].stop();
-                  
-                    // c[i] now contains the extrapolated value
-                  }
-                  // c[i] is now ready for electronic iterations
-                }
-                else // normal extrapolation
-                {
-                  double* c = (double*) s_.wf.sd(ispin,ikp)->c().cvalptr();
-                  double* cv = (double*) s_.wfv->sd(ispin,ikp)->c().cvalptr();
-                  const int mloc = s_.wf.sd(ispin,ikp)->c().mloc();
-                  const int nloc = s_.wf.sd(ispin,ikp)->c().nloc();
-                  const int len = 2*mloc*nloc;
-                  if ( iter == 0 )
-                  {
-                    // copy c to cv
-                    for ( int i = 0; i < len; i++ )
-                    {
-                      const double x = c[i];
-                      const double v = cv[i];
-                      c[i] = x + dt * v;
-                      cv[i] = x;
-                    }
-                    //tmap["lowdin"].start();
-                    //s_.wf.sd(ispin,ikp)->lowdin();
-                    //tmap["lowdin"].stop();
-                    if (ultrasoft) {
-                      tmap["usfns"].start();
-                      s_.wf.sd(ispin,ikp)->update_usfns();
-                      tmap["usfns"].stop();
-                    }
-                    tmap["gram"].start();
-                    s_.wf.sd(ispin,ikp)->gram();
-                    tmap["gram"].stop();
-                  }
-                  else
-                  {
-                    tmap["align"].start();
-                    s_.wfv->align(s_.wf);
-                    tmap["align"].stop();
-                  
-                    // linear extrapolation
-                    for ( int i = 0; i < len; i++ )
-                    {
-                      const double x = c[i];
-                      const double xm = cv[i];
-                      c[i] = 2.0 * x - xm;
-                      cv[i] = x;
-                    }
-                    //tmap["ortho_align"].start();
-                    //s_.wf.sd(ispin,ikp)->ortho_align(*s_.wfv->sd(ispin,ikp));
-                    //tmap["ortho_align"].stop();
-                    
-                    //tmap["riccati"].start();
-                    //s_.wf.sd(ispin,ikp)->riccati(*s_.wfv->sd(ispin,ikp));
-                    //tmap["riccati"].stop();
-                    
-                    if (ultrasoft) {
-                      tmap["usfns"].start();
-                      s_.wf.sd(ispin,ikp)->update_usfns();
-                      tmap["usfns"].stop();
-                    }
-                    //ewd: lowdin doesn't yet work correctly with ultrasoft
-                    //tmap["lowdin"].start();
-                    //s_.wf.sd(ispin,ikp)->lowdin();
-                    //tmap["lowdin"].stop();
-                    tmap["gram"].start();
-                    s_.wf.sd(ispin,ikp)->gram();
-                    tmap["gram"].stop();
-                  }
-                }
-              }
-            }
-          }
-        }
-      } // atoms_move && extrapolate_wf
-
-      // do nitscf self-consistent iterations, each with nite electronic steps
-      if ( wf_stepper != 0 )
-      {
-        wf_stepper->preprocess();
-        if ( anderson_charge_mixing && !tddft_involved_)
-          for (int ispin = 0; ispin < nspin; ispin++)
-            //if (s_.wf.spinactive(ispin))
-              mixer[ispin]->restart();
-
-        SimpleConvergenceDetector conv_scf(s_.ctrl.threshold_scf_nsteps, s_.ctrl.threshold_scf);
-        bool convflag = false;
+       SimpleConvergenceDetector conv_scf(s_.ctrl.threshold_scf_nsteps, s_.ctrl.threshold_scf);
+       bool convflag = false;
 
 #ifdef HPM  
-        HPM_Start("scfloop");
+       HPM_Start("scfloop");
 #endif
 #ifdef TAU
-        QB_Pstart(14,scfloop);
+       QB_Pstart(14,scfloop);
 #endif
-        // SCF LOOP
-        for ( int itscf = 0; itscf < nitscf_; itscf++ )
-        {
+       // SCF LOOP
+       for ( int itscf = 0; itscf < nitscf_; itscf++ )
+       {
 
           // check timing
           if (niter <= 1 && s_.ctrl.run_timer > 0.0 && nitscf_ > 1 && itscf > 1 && testtimer) {
-            double tnow = MPI_Wtime();
-            double sofar = tnow - tbase;
-            double tleft = s_.ctrl.run_timer - ( tnow - s_.ctrl.time_init); 
-            double tscf = sofar/itscf; // avg. time per iteration
-            double tmaxiter;
-            MPI_Allreduce(&tscf, &tmaxiter, 1, MPI_DOUBLE, MPI_MAX, s_.ctxt_.comm());
-            double maxtime = tmaxiter*(nitscf_-itscf);
-            if (maxtime > tleft) { // we'll exceed timer, lower nitscf_
-              s_.ctrl.timer_hit = true;
-              int newiter = (int)(tleft/tmaxiter);
-              int tmpnitscf = itscf + newiter - 1;
-              if (tmpnitscf != nitscf_) {
-                nitscf_ = tmpnitscf;
-                if ( s_.ctxt_.oncoutpe() )
-                  cout << "<!-- estimated scf iteration time = " << setprecision(3) << tmaxiter << " sec will exceed run_timer, changing nscf to " << nitscf_ << " -->" << endl;
-              }
-              else {
-                testtimer = false;
-                if ( s_.ctxt_.oncoutpe() )
-                  cout << "<!-- estimated scf iteration time = " << setprecision(3) << tmaxiter << " sec is stable, using nscf = " << nitscf_ << " -->" << endl;
-              }
-            }
+             double tnow = MPI_Wtime();
+             double sofar = tnow - tbase;
+             double tleft = s_.ctrl.run_timer - ( tnow - s_.ctrl.time_init); 
+             double tscf = sofar/itscf; // avg. time per iteration
+             double tmaxiter;
+             MPI_Allreduce(&tscf, &tmaxiter, 1, MPI_DOUBLE, MPI_MAX, s_.ctxt_.comm());
+             double maxtime = tmaxiter*(nitscf_-itscf);
+             if (maxtime > tleft) { // we'll exceed timer, lower nitscf_
+                s_.ctrl.timer_hit = true;
+                int newiter = (int)(tleft/tmaxiter);
+                int tmpnitscf = itscf + newiter - 1;
+                if (tmpnitscf != nitscf_) {
+                   nitscf_ = tmpnitscf;
+                   if ( s_.ctxt_.oncoutpe() )
+                      cout << "<!-- estimated scf iteration time = " << setprecision(3) << tmaxiter << " sec will exceed run_timer, changing nscf to " << nitscf_ << " -->" << endl;
+                }
+                else {
+                   testtimer = false;
+                   if ( s_.ctxt_.oncoutpe() )
+                      cout << "<!-- estimated scf iteration time = " << setprecision(3) << tmaxiter << " sec is stable, using nscf = " << nitscf_ << " -->" << endl;
+                }
+             }
           }
           
           // check convergence
           if (conv_scf.isConverged()) {
-            if ( s_.ctxt_.oncoutpe() ) {
-              cout.setf(ios::scientific,ios::floatfield);
-              cout << "  <!-- EhrenSampleStepper: scf convergence at itscf = " << itscf << ", energy varied by less than " << setprecision(2) 
-                   << conv_scf.threshold() << " a.u. over " << conv_scf.nsteps() 
-                   << " scf steps. -->" << endl;
-            }
-            itscf = nitscf_;
-            convflag = true;
+             if ( s_.ctxt_.oncoutpe() ) {
+                cout.setf(ios::scientific,ios::floatfield);
+                cout << "  <!-- EhrenSampleStepper: scf convergence at itscf = " << itscf << ", energy varied by less than " << setprecision(2) 
+                     << conv_scf.threshold() << " a.u. over " << conv_scf.nsteps() 
+                     << " scf steps. -->" << endl;
+             }
+             itscf = nitscf_;
+             convflag = true;
           }          
           // continue itscf loop
           else {
-            if (itscf > 0)
-              conv_scf.addValue(ef_.etotal());
-            
-            if ( nite_ > 1 && oncoutpe )
-              cout << "  <!-- EhrenSampleStepper: start scf iteration -->" << endl;
-
-            // compute new density in cd_.rhog
-            tmap["charge"].start();
-            if ( itscf==0 && initial_atomic_density ) {
-              cd_.update_rhor();
-              // AS: TODO: double check what to use here
-              if (tddft_involved_)
-                 ( ef_.hamil_cd() )->update_rhor();
-              if (ultrasoft)
-                assert(false);  // ewd DEBUG: need to implement this for ultrasoft
-            }
-            else
-              cd_.update_density();
-            tmap["charge"].stop();
-
-            if ( charge_mixing != "off" && nite_ > 1) {
-               if ( itscf == 0) {
-                  //ewd:  read rhog_in from checkpoint if possible
-                  for ( int ispin = 0; ispin < nspin; ispin++ ) {
-                     int rhogflag = 1;
-
-                     if (cell_dyn == "LOCKED" && (atoms_dyn == "LOCKED" || dt == 0.0) && s_.rhog_last.size() == rhog_in[ispin].size()) {
-                        if (s_.rhog_last[ispin].size() == rhog_in[ispin].size()) {
-                           rhogflag = 0;
-                           for ( int i=0; i < rhog_in[ispin].size(); i++ ) 
-                              rhog_in[ispin][i] = s_.rhog_last[ispin][i];
-                        }
-                     }
-                  
-                     if (rhogflag) {
-                        for ( int i=0; i < rhog_in[ispin].size(); i++ )
-                        {
-                           if (tddft_involved_)
-                              rhog_in[ispin][i] = ( ef_.hamil_cd() )->rhog[ispin][i];
-                           else
-                              rhog_in[ispin][i] = cd_.rhog[ispin][i];
-                        }
-                     }
-                  }
-               }
-               // itscf > 0
-               else {
-
-                  for ( int ispin = 0; ispin < nspin; ispin++ ) {
-                     // compute correction drhog
-                     for ( int i=0; i < rhog_in[ispin].size(); i++ )
-                     {
-                        drhog[ispin][i] = (cd_.rhog[ispin][i] - rhog_in[ispin][i]);
-                     }
-                     
-                     const double alpha = s_.ctrl.charge_mix_coeff;
-                     // Anderson acceleration
-                     if ( anderson_charge_mixing )
-                     {
-                        // row weighting of LS calculation
-                        for ( int i=0; i < drhog[ispin].size(); i++ )
-                           drhog[ispin][i] /= wls[i];
-                    
-                        //EWD TDDFT DIFF:  AS computes on column 0, bcasts
+             if (itscf > 0)
+                conv_scf.addValue(ef_.etotal());
+             
+             if ( nite_ > 1 && oncoutpe )
+                cout << "  <!-- EhrenSampleStepper: start scf iteration -->" << endl;
 
 
-                        //ewd:  try running this on every task
-                        mixer[ispin]->update((double*)&rhog_in[ispin][0],(double*)&drhog[ispin][0],
-                                             (double*)&rhobar[ispin][0],(double*)&drhobar[ispin][0]);
+             //EWD:  didn't we just update cd?
+             
+             // compute new density in cd_.rhog
+             tmap["charge"].start();
+             cd_.update_density();
+             tmap["charge"].stop();
 
-                        for ( int i=0; i < drhobar[ispin].size(); i++ )
-                           drhobar[ispin][i] *= wls[i];
-                    
-                        for ( int i=0; i < rhog_in[ispin].size(); i++ )
-                           rhog_in[ispin][i] = rhobar[ispin][i] + alpha * drhobar[ispin][i] * wkerker[i];
-                     }
-                     else {
-                        for ( int i=0; i < rhog_in[ispin].size(); i++ )
-                           rhog_in[ispin][i] += alpha * drhog[ispin][i] * wkerker[i];
-                     }
 
-                     if (tddft_involved_)
-                     {
-                        for ( int i=0; i < rhog_in[ispin].size(); i++ )
-                           ( ef_.hamil_cd() )->rhog[ispin][i] = rhog_in[ispin][i];
-                        ( ef_.hamil_cd() )->update_rhor();                     
-                     }
-                     
-                     // Apply correction
-                     for ( int i=0; i < rhog_in[ispin].size(); i++ )
-                        cd_.rhog[ispin][i] = rhog_in[ispin][i];
-                  }
-                  cd_.update_rhor();
-               }              
-            }
-
-            // AS: update the Hamiltonian, the potential, and the energy before propagation
-            // starts and/or after the mixing
-            if (tddft_involved_)
-               ef_.update_hamiltonian();
+             // AS: update the Hamiltonian, the potential, and the energy before propagation
+             // starts and/or after the mixing
+             ef_.update_hamiltonian();
               
-            ef_.update_vhxc();
-            //ef_.update_exc_ehart_eps();
+             ef_.update_vhxc();
+             //ef_.update_exc_ehart_eps();
 
-            // AS: the first step is an EULER one in the case of the second-order propagation
-            if ( ( wf_dyn == "SOTD" ) && wfv_is_new ) {
-               // AS: |psi(t-tddt)> is the wave function in the very beginning
-               *wfdeque[0]=wf;
+             // AS: the first step is an EULER one in the case of the second-order propagation
+             if ( ( wf_dyn == "SOTD" ) && wfv_is_new ) {
+                // AS: |psi(t-tddt)> is the wave function in the very beginning
+                *wfdeque[0]=wf;
 
-               // AS: |psi(t)> is calculated by doing one TDEULER step using the EULER stepper
-               WavefunctionStepper* wf_init_stepper = new TDEULERWavefunctionStepper(wf,s_.ctrl.tddt,tmap);
+                // AS: |psi(t)> is calculated by doing one TDEULER step using the EULER stepper
+                WavefunctionStepper* wf_init_stepper = new TDEULERWavefunctionStepper(wf,s_.ctrl.tddt,tmap);
                
-               cout << wf_dyn << " initialization energy: " << ef_.energy(true,dwf,false,fion,false,sigma_eks) << endl;
-               cout << wf_dyn << " initialization expectation value: " << s_.wf.dot(dwf) << endl;
+                cout << wf_dyn << " initialization energy: " << ef_.energy(true,dwf,false,fion,false,sigma_eks) << endl;
+                cout << wf_dyn << " initialization expectation value: " << s_.wf.dot(dwf) << endl;
 
-               wf_init_stepper->update(dwf);
-               // AS: now we have |psi(t)>
-               *wfdeque[1]=wf;
-               (*s_.hamil_wf)=s_.wf;
+                wf_init_stepper->update(dwf);
+                // AS: now we have |psi(t)>
+                *wfdeque[1]=wf;
+                (*s_.hamil_wf)=s_.wf;
 
-               // AS: the wave functions used in the Hamiltonian are NOT updated here
-               cd_.update_density();
-               ( ef_.hamil_cd() )->update_density();
+                // AS: the wave functions used in the Hamiltonian are NOT updated here
+                cd_.update_density();
+                ( ef_.hamil_cd() )->update_density();
 
-               // AS: update the Hamiltonian after the first EULER step
-               ef_.update_hamiltonian();
-               ef_.update_vhxc();
-               // AS: modified version of EnergyFunctional::update_vhxc(void) which leaves the potential
-               // untouched and only recalculates the energy terms
-               //ef_.update_exc_ehart_eps();   
-               // AS: we are ready to go with the SOTD
-               if ( wf_dyn == "SOTD" ) wfv_is_new=false;
-            }
-          
-            if (wf_dyn=="FORKTD") {
-               // AS: initialize wfdeque[0] with 0, it will be k_1
-               *wfdeque[0]=dwf;
-               // AS: initialize wfdeque[1] with 0, it will be k_2
-               *wfdeque[1]=s_.wf;
-               // AS: initialize wfdeque[2] with 0, it will be k_3
-               *wfdeque[2]=s_.wf;
-               // AS: initialize wfdeque[3] with 0, it will be k_4
-               *wfdeque[3]=s_.wf;
-               // AS: initialize wfdeque[4] with wf, to keep a copy
-               *wfdeque[4]=s_.wf;
-            }
-            
-            // reset stepper only if multiple non-selfconsistent steps
-            if ( nite_ > 1 ) wf_stepper->preprocess();
-            double lastnonscfetot;
-            const double nonscfthresh = s_.ctrl.threshold_nonscf;
-            for ( int ite = 0; ite < nite_; ite++ )
-            {
-              double energy = ef_.energy(true,dwf,false,fion,false,sigma_eks);
-              double delta_etotnonscf = abs(energy-lastnonscfetot);
-              if (ite > 0 && delta_etotnonscf < nonscfthresh) {
-                if ( s_.ctxt_.oncoutpe() ) {
-                  cout.setf(ios::fixed,ios::floatfield);
-                  cout.setf(ios::right,ios::adjustfield);
-                  cout << "  <etotal_int> " << setw(15) << setprecision(8)
-                       << energy << " </etotal_int>\n";
-                  if ( compute_stress ) {
-                    const double pext = (sigma_ext[0]+sigma_ext[1]+sigma_ext[2])/3.0;
-                    const double enthalpy = energy + pext * cell.volume();
-                    cout << "  <enthalpy_int> " << setw(15) 
-                         << enthalpy << " </enthalpy_int>\n"
-                         << flush;
-                  }
-                  cout.setf(ios::scientific,ios::floatfield);
-                  cout << "  <!-- EhrenSampleStepper: non-scf threshold " << setprecision(2) << nonscfthresh << " reached. -->" << endl;
-                }
-                ite = nite_;
-              }
-              else {
-                lastnonscfetot = energy;
+                // AS: update the Hamiltonian after the first EULER step
+                ef_.update_hamiltonian();
+                ef_.update_vhxc();
+                // AS: modified version of EnergyFunctional::update_vhxc(void) which leaves the potential
+                // untouched and only recalculates the energy terms
+                //ef_.update_exc_ehart_eps();   
+                // AS: we are ready to go with the SOTD
+                if ( wf_dyn == "SOTD" ) wfv_is_new=false;
+             }
+             
+             if (wf_dyn=="FORKTD") {
+                // AS: initialize wfdeque[0] with 0, it will be k_1
+                *wfdeque[0]=dwf;
+                // AS: initialize wfdeque[1] with 0, it will be k_2
+                *wfdeque[1]=s_.wf;
+                // AS: initialize wfdeque[2] with 0, it will be k_3
+                *wfdeque[2]=s_.wf;
+                // AS: initialize wfdeque[3] with 0, it will be k_4
+                *wfdeque[3]=s_.wf;
+                // AS: initialize wfdeque[4] with wf, to keep a copy
+                *wfdeque[4]=s_.wf;
+             }
+             
+             // reset stepper only if multiple non-selfconsistent steps
+             if ( nite_ > 1 ) wf_stepper->preprocess();
+             for ( int ite = 0; ite < nite_; ite++ )
+             {
+                double energy = ef_.energy(true,dwf,false,fion,false,sigma_eks);
                 // compute the sum of eigenvalues (with fixed weight)
                 // to measure convergence of the subspace update
                 // compute trace of the Hamiltonian matrix Y^T H Y
@@ -1231,12 +622,10 @@ void EhrenSampleStepper::step(int niter)
                          << eigenvalue_sum << " </eigenvalue_sum>" << endl;
                 }
 
-
-
                 // AS: calculation and output of < psi(t) | H(t_0) | psi(t) > , i.e., the expectation values
                 // AS: in the case the wave functions are propagated in time
                 // AS: code taken from Wavefunction::diag(Wavefunction& dwf, bool eigvec)
-                if ( tddft_involved_ && s_.ctrl.wf_diag == "EIGVAL" )
+                if ( s_.ctrl.wf_diag == "EIGVAL" )
                 {
                    if ( oncoutpe ) cout << "<" << wf_dyn << " expectation set>" << endl;
 
@@ -1272,10 +661,10 @@ void EhrenSampleStepper::step(int niter)
                    if ( oncoutpe ) cout << "</" << wf_dyn << " expectation set>" << endl;
                    delete(to_diag_wf1);
                 }
-
+             
                 // AS: calculation and output of < psi(t) | psi(t) > , i.e., the orthonormalization
                 // AS: code adopted from SlaterDet::gram(void)
-                if ( tddft_involved_ && s_.ctrl.wf_diag == "EIGVAL" )
+                if ( s_.ctrl.wf_diag == "EIGVAL" )
                 {
                    for ( int ispin = 0; ispin < (wf).nspin(); ispin++ )
                    {
@@ -1317,7 +706,7 @@ void EhrenSampleStepper::step(int niter)
                          ((s_.wf).sd(ispin,ikp)->c()).axpy(0.5, (*wfdeque[0]).sd(ispin,ikp)->c() );
                       }
                    }
-
+                   
                    // AS: for the correct output of the nonscf energy
                    if (s_.ctrl.non_selfc_energy)
                    {
@@ -1408,12 +797,14 @@ void EhrenSampleStepper::step(int niter)
                    //ewd DEBUG
                    tmap["forktd_wfcp"].stop();
                    tmap["forktd_cd"].start();
+                   tmap["charge"].start();
                    //ewd DEBUG
 
                    ( ef_.hamil_cd() )->update_density();
 
                    //ewd DEBUG
                    tmap["forktd_cd"].stop();
+                   tmap["charge"].stop();
                    tmap["forktd_efup"].start();
                    //ewd DEBUG
 
@@ -1466,7 +857,7 @@ void EhrenSampleStepper::step(int niter)
                       // potential untouched and only recalculates the energy terms
                       //ef_.update_exc_ehart_eps();
                    }
-                   
+
                    // AS: set the Hamiltonian accordingly
 
                    //ewd DEBUG
@@ -1585,6 +976,7 @@ void EhrenSampleStepper::step(int niter)
                    tmap["forktd_tot"].stop();
                    //ewd DEBUG
                 }
+
                 // AS: energy renormalization is currently disabled
                 // output of the renormalized energy
                 // double wf_dyn_energy;
@@ -1605,40 +997,32 @@ void EhrenSampleStepper::step(int niter)
                 
                 // update ultrasoft functions if needed, call gram
                 for ( int ispin = 0; ispin < s_.wf.nspin(); ispin++ ) {
-                  if (s_.wf.spinactive(ispin)) {
-                    for ( int ikp = 0; ikp < s_.wf.nkp(); ikp++ ) {
-                      if (s_.wf.kptactive(ikp)) {
-                        assert(s_.wf.sd(ispin,ikp) != 0);
-                        //if (ultrasoft) { 
-                        //  tmap["usfns"].start();
-                        //  s_.wf.sd(ispin,ikp)->update_usfns(); // calculate betapsi, spsi
-                        //  tmap["usfns"].stop();
-                        //}
-                        tmap["gram"].start();
-                        s_.wf.sd(ispin,ikp)->gram();
-                        tmap["gram"].stop();
-
-                        //if (ultrasoft) { 
-                        //  tmap["usfns"].start();
-                        //  s_.wf.sd(ispin,ikp)->calc_betapsi(); // calculate betapsi
-                        //  tmap["usfns"].stop();
-                        //}
+                   if (s_.wf.spinactive(ispin)) {
+                      for ( int ikp = 0; ikp < s_.wf.nkp(); ikp++ ) {
+                         if (s_.wf.kptactive(ikp)) {
+                            assert(s_.wf.sd(ispin,ikp) != 0);
+                            //if (ultrasoft) { 
+                            //  tmap["usfns"].start();
+                            //  s_.wf.sd(ispin,ikp)->update_usfns(); // calculate betapsi, spsi
+                            //  tmap["usfns"].stop();
+                            //}
+                            tmap["gram"].start();
+                            s_.wf.sd(ispin,ikp)->gram();
+                            tmap["gram"].stop();
+                            
+                            //if (ultrasoft) { 
+                            //  tmap["usfns"].start();
+                            //  s_.wf.sd(ispin,ikp)->calc_betapsi(); // calculate betapsi
+                            //  tmap["usfns"].stop();
+                            //}
+                         }
                       }
-                    }
-                  }
+                   }
                 }
 
                 // AS: change the phase of the wave function if the respective variable is set
-                if ( s_.wf.phase_real_set() ) {
+                if ( s_.wf.phase_real_set() )
                    s_.wf.phase_wf_real();
-
-                   //ewd DEBUG
-                   //if (oncoutpe)
-                   //cout << "DEBUG:  PHASE_WF_REAL SET TO TRUE!" << endl;
-                   //ewd DEBUG
-  
-                }
-                
                 
                 if ( oncoutpe )
                 {
@@ -1648,14 +1032,14 @@ void EhrenSampleStepper::step(int niter)
                        << energy << " </etotal_int>\n";
                   if ( compute_stress )
                   {
-                    const double pext = (sigma_ext[0]+sigma_ext[1]+sigma_ext[2])/3.0;
-                    const double enthalpy = energy + pext * cell.volume();
-                    cout << "  <enthalpy_int> " << setw(15)
-                         << enthalpy << " </enthalpy_int>\n"
-                         << flush;
+                     const double pext = (sigma_ext[0]+sigma_ext[1]+sigma_ext[2])/3.0;
+                     const double enthalpy = energy + pext * cell.volume();
+                     cout << "  <enthalpy_int> " << setw(15)
+                          << enthalpy << " </enthalpy_int>\n"
+                          << flush;
                   }                  
                 }
-                
+             
                 if ( ( nite_ > 1 ) && ( (wf_dyn=="SORKTD") || (wf_dyn=="FORKTD") ) ) {
                    (*s_.hamil_wf)=s_.wf;
                    ( ef_.hamil_cd() )->update_density();
@@ -1684,52 +1068,36 @@ void EhrenSampleStepper::step(int niter)
                    // AS: recalculates the energy terms
                    ef_.update_exc_ehart_eps();
                 }
-              }
-            } // for ite
-            // subspace diagonalization
-            if ( ( compute_eigvec || s_.ctrl.wf_diag == "EIGVAL" || usdiag ) && (!tddft_involved_))
-            {
-              ef_.energy(true,dwf,false,fion,false,sigma_eks);
-              tmap["diag"].start();
-              s_.wf.diag(dwf,compute_eigvec);
-              tmap["diag"].stop();
+             }
+          } // for ite
 
-              // update ultrasoft functions w. new eigenvectors
-              if (compute_eigvec && ultrasoft)
-                 s_.wf.update_usfns();
-
-              if (itscf%s_.ctrl.iprint == 0)
-                s_.wf.printeig();
-            }
-
-            // update occupation numbers if fractionally occupied states
-            if ( fractional_occ )
-            {
-              wf.update_occ(s_.ctrl.smearing_width,s_.ctrl.smearing_ngauss);
-              if (itscf%s_.ctrl.iprint == 0)
+          // update occupation numbers if fractionally occupied states
+          //EWD:  we shouldn't be doing this for TDDFT, right?
+          if ( false && fractional_occ )
+          {
+             wf.update_occ(s_.ctrl.smearing_width,s_.ctrl.smearing_ngauss);
+             if (itscf%s_.ctrl.iprint == 0)
                 s_.wf.printocc();
-              const double wf_entropy = wf.entropy();
-              if ( oncoutpe )
-              {
+             const double wf_entropy = wf.entropy();
+             if ( oncoutpe )
+             {
                 cout << "  <!-- Wavefunction entropy: " << wf_entropy << " -->" << endl;
                 //const double boltz = 1.0 / ( 11605.0 * 2.0 * 13.6058 );
                 cout << "  <!-- Entropy contribution to free energy: "
                      << - wf_entropy * s_.ctrl.smearing_width * 2.0 << " -->" << endl;
-              }
-            }
-
-            // AS: after the first set of non-selfconsistent steps the Hamiltonian is no longer fixed
-            // AS: this makes the Hamiltonian time dependent
-            if (tddft_involved_)
-            {
-               (*s_.hamil_wf)=s_.wf;
-               ( ef_.hamil_cd() )->update_density();
-            }
-            
-            if ( nite_ > 1 && oncoutpe )
-              cout << "  <!-- EhrenSampleStepper: end scf iteration -->" << endl;
+             }
           }
-        } // for itscf
+          
+          // AS: after the first set of non-selfconsistent steps the Hamiltonian is no longer fixed
+          // AS: this makes the Hamiltonian time dependent
+          (*s_.hamil_wf)=s_.wf;
+          ( ef_.hamil_cd() )->update_density();
+       
+            
+          if ( nite_ > 1 && oncoutpe )
+             cout << "  <!-- EhrenSampleStepper: end scf iteration -->" << endl;
+
+       } // for itscf
 
 #ifdef TAU  
         QB_Pstop(scfloop);
@@ -1759,11 +1127,11 @@ void EhrenSampleStepper::step(int niter)
                  if ( wf.force_complex_set() ) {
                     ComplexMatrix overlap1(wf.sd(ispin,ikp)->context(),(wf.sd(ispin,ikp)->c()).n(),(wf.sd(ispin,ikp)->c()).n(),(wf.sd(ispin,ikp)->c()).nb(),(wf.sd(ispin,ikp)->c()).nb());
                     ComplexMatrix overlap2(wf.sd(ispin,ikp)->context(),(wf.sd(ispin,ikp)->c()).n(),(wf.sd(ispin,ikp)->c()).n(),(wf.sd(ispin,ikp)->c()).nb(),(wf.sd(ispin,ikp)->c()).nb());
-
+                    
                     // AS: The following two lines should give something like the d_jk
                     // overlap1.gemm('c','n',-1.0*(complex<double>(0,1))/2.0/s_.ctrl.dt,(*s_.previous_wf).sd(ispin,ikp)->c(),wf.sd(ispin,ikp)->c(),0.0);
                     // overlap1.gemm('c','n',1.0*(complex<double>(0,1))/2.0/s_.ctrl.dt,wf.sd(ispin,ikp)->c(),(*s_.previous_wf).sd(ispin,ikp)->c(),1.0);
-
+                    
                     // AS: The following two lines are the same stuff without the complex i
                     overlap1.gemm('c','n',-1.0/2.0/s_.ctrl.dt,(*s_.previous_wf).sd(ispin,ikp)->c(),wf.sd(ispin,ikp)->c(),0.0);
                     overlap2.gemm('c','n',1.0/2.0/s_.ctrl.dt,wf.sd(ispin,ikp)->c(),(*s_.previous_wf).sd(ispin,ikp)->c(),0.0);
@@ -1822,22 +1190,18 @@ void EhrenSampleStepper::step(int niter)
            char* argv[] = {const_cast<char*>(arg1.c_str()), const_cast<char*>(arg2.c_str()), const_cast<char*>(arg3.c_str())};
            plot_density_from_stepper.action(3,argv);
         }
-
-            
-     
-
   
         if (!convflag && s_.ctrl.threshold_scf > 0.0) 
           if ( s_.ctxt_.oncoutpe() ) 
             cout << "<WARNING> Ionic iteration finished without triggering scf convergence threshold, consider increasing nscf = " << nitscf_ << " </WARNING>" << endl;
-                      
+        
         if ( compute_mlwf || compute_mlwfc )
         {
           SlaterDet& sd = *(wf.sd(0,0));
           mlwft->compute_transform();
 
           if ( compute_mlwf )
-            mlwft->apply_transform(sd);
+             mlwft->apply_transform(sd);
           
           if ( oncoutpe )
           {
@@ -1869,109 +1233,7 @@ void EhrenSampleStepper::step(int niter)
           }
         }
 
-
-        // If GS calculation only, print energy and atomset at end of iterations
-        bool fastend = false;
-#ifdef BGQ        
-        fastend = true;
-#endif        
-
-        if ( gs_only && !fastend)
-        {
-           // need eigenvalues to compute forces w. ultrasoft
-          if (ultrasoft) { 
-            ef_.energy(true,dwf,false,fion,false,sigma_eks);
-            tmap["diag"].start();
-            s_.wf.diag(dwf,compute_eigvec);
-            //s_.wf.diag(dwf,true);  // ewd:  why true?  Why did I do this??
-            tmap["diag"].stop();
-
-            // update ultrasoft functions w. new eigenvectors
-            if (compute_eigvec && ultrasoft) { 
-               tmap["usfns"].start();
-               s_.wf.update_usfns();
-               tmap["usfns"].stop();
-            }
-            s_.wf.printeig();
-          }
-
-           tmap["charge"].start();
-           cd_.update_density();
-           tmap["charge"].stop();
-
-           if (tddft_involved_)
-           {
-              ( ef_.hamil_cd() )->update_density();
-              ef_.update_hamiltonian();
-           }
-           
-          ef_.update_vhxc();
-          const bool compute_forces = true;
-          ef_.energy(false,dwf,compute_forces,fion,compute_stress,sigma_eks);
-
-          if (s_.atoms.add_fion_ext()) {
-            for ( int is = 0; is < atoms.atom_list.size(); is++ ) {
-              for ( int ia = 0; ia < atoms.atom_list[is].size(); ia++ ) {
-                D3vector ftmp = s_.atoms.get_fion_ext(is,ia);
-                fion[is][3*ia] += ftmp.x;
-                fion[is][3*ia+1] += ftmp.y;
-                fion[is][3*ia+2] += ftmp.z;
-              }
-            }
-          }
-
-          if ( oncoutpe )
-          {
-            cout << ef_;
-            cout << "<atomset>" << endl;
-            cout << atoms.cell();
-            for ( int is = 0; is < atoms.atom_list.size(); is++ )
-            {
-              int i = 0;
-              for ( int ia = 0; ia < atoms.atom_list[is].size(); ia++ )
-              {
-                Atom* pa = atoms.atom_list[is][ia];
-                cout << "  <atom name=\"" << pa->name() << "\""
-                     << " species=\"" << pa->species()
-                     << "\">\n"
-                     << "    <position> " << pa->position() << " </position>\n"
-                     << "    <velocity> " << pa->velocity() << " </velocity>\n"
-                     << "    <force> "
-                     << fion[is][i] << " "
-                     << fion[is][i+1] << " "
-                     << fion[is][i+2]
-                     << " </force>\n";
-                cout << "  </atom>" << endl;
-                i += 3;
-              }
-            }
-            cout << "</atomset>" << endl;
-            if ( compute_stress )
-            {
-              compute_sigma();
-              print_stress();
-            }
-          }
-        }
-        else if (gs_only && fastend) {
-           if ( oncoutpe )
-              cout << ef_;
-        }
         wf_stepper->postprocess();
-      }
-      else
-      {
-        // wf_stepper == 0, wf_dyn == LOCKED
-        // evaluate and print energy
-        tmap["charge"].start();
-        cd_.update_density();
-        tmap["charge"].stop();
-        ef_.update_vhxc();
-        ef_.energy(true,dwf,false,fion,false,sigma_eks);
-        if ( oncoutpe )
-        {
-          cout << ef_;
-        }
       }
 
 #ifdef USE_APC
@@ -1994,8 +1256,12 @@ void EhrenSampleStepper::step(int niter)
       }
       if ( atoms_move )
         s_.constraints.update_constraints(dt);
-    } // else (not converged)
   } // for iter
+
+  tmap["total_niter"].stop();
+
+
+
   // print memory usage of main data objects
   if (s_.ctxt_.oncoutpe()) {
     double memtot = 0.0;
@@ -2038,21 +1304,6 @@ void EhrenSampleStepper::step(int niter)
      }
   }
 #endif  
-  
-  
-  //ewd save last charge density 
-  if (cell_dyn == "LOCKED") {
-    s_.rhog_last.resize(s_.wf.nspin());
-    for ( int ispin = 0; ispin < s_.wf.nspin(); ispin++ )
-    {
-      if (s_.wf.spinactive(ispin))
-      {
-        s_.rhog_last[ispin].resize(rhog_in[ispin].size());
-        for ( int i=0; i < rhog_in[ispin].size(); i++ )
-          s_.rhog_last[ispin][i] = rhog_in[ispin][i];
-      }
-    }
-  }
   
   if ( atoms_move )
   {
@@ -2112,86 +1363,17 @@ void EhrenSampleStepper::step(int niter)
     // positions r0 and velocities v0 are consistent
   }
 
-  if ( atoms_move && extrapolate_wf )
-  {
-    // compute wavefunction velocity after last iteration
-    // s_.wfv contains the previous wavefunction
+  // compute ionic forces at last position to update velocities
+  // consistently with last position
+  tmap["charge"].start();
+  cd_.update_density();
+  tmap["charge"].stop();
 
-    s_.wfv->align(s_.wf);
-
-    if (ultrasoft) {
-      for ( int ispin = 0; ispin < s_.wf.nspin(); ispin++ ) {
-        if (s_.wf.spinactive(ispin)) {
-          for ( int ikp = 0; ikp < s_.wf.nkp(); ikp++ ) {
-            if (s_.wf.kptactive(ikp)) {
-              assert(s_.wf.sd(ispin,ikp) != 0);
-              tmap["usfns"].start();
-              s_.wf.sd(ispin,ikp)->update_usfns();
-              tmap["usfns"].stop();
-            }
-          }
-        }
-      }
-    }
-
-    for ( int ispin = 0; ispin < s_.wf.nspin(); ispin++ )
-    {
-      if (s_.wf.spinactive(ispin))
-      {
-        for ( int ikp = 0; ikp < s_.wf.nkp(); ikp++ )
-        {
-          if (s_.wf.kptactive(ikp))
-          {
-            assert(s_.wf.sd(ispin,ikp) != 0);
-            double* c = (double*) s_.wf.sd(ispin,ikp)->c().cvalptr();
-            double* cm = (double*) s_.wfv->sd(ispin,ikp)->c().cvalptr();
-            const int mloc = s_.wf.sd(ispin,ikp)->c().mloc();
-            const int nloc = s_.wf.sd(ispin,ikp)->c().nloc();
-            const int len = 2*mloc*nloc;
-            double dt_inv;
-            if (dt == 0.0) dt_inv = 0.0;
-            else dt_inv = 1.0 / dt;
-            if ( ntc_extrapolation )
-            {
-              double* cmm = (double*) wfmm->sd(ispin,ikp)->c().cvalptr();
-              for ( int i = 0; i < len; i++ )
-              {
-                const double x = c[i];
-                const double xmm = cmm[i];
-                cm[i] = dt_inv * ( x - xmm );
-              }
-              tmap["gram"].start();
-              s_.wf.sd(ispin,ikp)->gram();
-              tmap["gram"].stop();
-            }
-            else // normal extrapolation or asp_extrapolation
-            {
-              for ( int i = 0; i < len; i++ )
-              {
-                const double x = c[i];
-                const double xm = cm[i];
-                cm[i] = dt_inv * ( x - xm );
-              }
-              tmap["gram"].start();
-              s_.wf.sd(ispin,ikp)->gram();
-              tmap["gram"].stop();
-            }
-          }
-        }
-      }
-    }
-
-    // compute ionic forces at last position to update velocities
-    // consistently with last position
-    tmap["charge"].start();
-    cd_.update_density();
-    tmap["charge"].stop();
-
-    ef_.update_vhxc();
-    const bool compute_forces = true;
-    double energy =
+  ef_.update_vhxc();
+  const bool compute_forces = true;
+  double energy =
       ef_.energy(false,dwf,compute_forces,fion,compute_stress,sigma_eks);
-
+  
     // average forces over symmetric atoms
     if ( compute_forces && s_.symmetries.nsym() > 0) {
       int nsym_ = s_.symmetries.nsym();
@@ -2224,35 +1406,23 @@ void EhrenSampleStepper::step(int niter)
       
     ionic_stepper->compute_v(energy,fion);
     // positions r0 and velocities v0 are consistent
-  }
-  else if (wf_dyn != "SOTD")
-  {
-    // delete wavefunction velocities
-     // AS: only if we don't need them anymore; for SOTD we do need them later on
-     if ( s_.wfv != 0 )
-      delete s_.wfv;
-    s_.wfv = 0;
-  }
 
-  delete mlwft;
+    if (wf_dyn != "SOTD")
+    {
+       // delete wavefunction velocities
+       // AS: only if we don't need them anymore; for SOTD we do need them later on
+       if ( s_.wfv != 0 )
+          delete s_.wfv;
+       s_.wfv = 0;
+    }
 
-  // delete steppers
-  delete wf_stepper;
-  delete ionic_stepper;
-  delete cell_stepper;
+    delete mlwft;
 
-  // delete preconditioner
-  if ( use_preconditioner ) delete preconditioner;
-  if ( ntc_extrapolation || asp_extrapolation ) delete wfmm;
+    // delete steppers
+    delete wf_stepper;
+    delete ionic_stepper;
+    delete cell_stepper;
 
-  // delete Hugoniostat
-  if (hugstat != 0) delete hugstat;
-
-  for (int ispin = 0; ispin < nspin; ispin++) 
-    if (s_.wf.spinactive(ispin))
-      delete mixer[ispin];
-
-  initial_atomic_density = false;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
