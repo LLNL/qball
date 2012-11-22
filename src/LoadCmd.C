@@ -86,96 +86,99 @@ int LoadCmd::action(int argc, char **argv) {
       s->wf.init_usfns(&s->atoms);
       
     // ewd:  read rhor_last from file, send to appropriate pes
-    ChargeDensity cd_(*s);
-    cd_.update_density();
+    if (! s->ctrl.tddft_involved)
+    {
+       ChargeDensity cd_(*s);
+       cd_.update_density();
 
-    //ewd DEBUG
-    if (s->ctrl.ultrasoft)    
-       cd_.update_usfns();
+       //ewd DEBUG
+       if (s->ctrl.ultrasoft)    
+          cd_.update_usfns();
     
-    const Context* wfctxt = s->wf.wfcontext();
-    const Context* vctxt = &cd_.vcontext();
-    FourierTransform* ft_ = cd_.vft();
-    const double omega = cd_.vbasis()->cell().volume();
-    const int nspin = s->wf.nspin();
-    s->rhog_last.resize(nspin);
-    for (int ispin = 0; ispin < nspin; ispin++) {
-      valarray<complex<double> > rhortmp(ft_->np012loc());
-      int rhorsize = cd_.rhor[ispin].size();
-      ifstream is;
-      string rhorfile;
+       const Context* wfctxt = s->wf.wfcontext();
+       const Context* vctxt = &cd_.vcontext();
+       FourierTransform* ft_ = cd_.vft();
+       const double omega = cd_.vbasis()->cell().volume();
+       const int nspin = s->wf.nspin();
+       s->rhog_last.resize(nspin);
+       for (int ispin = 0; ispin < nspin; ispin++) {
+          valarray<complex<double> > rhortmp(ft_->np012loc());
+          int rhorsize = cd_.rhor[ispin].size();
+          ifstream is;
+          string rhorfile;
 
-      if (nspin == 1)
-        rhorfile = filestr + ".lastrhor";
-      else {
-        ostringstream oss;
-        oss.width(1);  oss.fill('0');  oss << ispin;
-        rhorfile = filestr + ".s" + oss.str() + ".lastrhor";
-      }
-
-      int file_exists = 0;
-      if (wfctxt->myrow() == 0) {
-        is.open(rhorfile.c_str(),ifstream::binary);
-        if (is.is_open()) 
-          file_exists = 1;
-        else 
-          file_exists = -1;
-
-        // send file_exists flag to other pes in column
-        for ( int i = 0; i < wfctxt->nprow(); i++ ) {
-          wfctxt->isend(1,1,&file_exists,1,i,wfctxt->mycol());
-        }
-      }
-      wfctxt->irecv(1,1,&file_exists,1,0,wfctxt->mycol());
-      if (file_exists == 1) { 
-        // send local charge density size from each pe in column to row 0
-        if (wfctxt->mycol() == 0) {
-          wfctxt->isend(1,1,&rhorsize,1,0,0);
-        }
-
-        if (wfctxt->onpe0()) {
-          cout << "<!-- LoadCmd:  loading mixed charge density from file. -->" << endl;
-          // hack to make checkpointing work w. BlueGene compilers
-#ifdef BGQ
-          char* tmpfilename = new char[256];
-          is.read(tmpfilename,sizeof(char)*rhorfile.length());
-#endif          
-          for ( int i = 0; i < wfctxt->nprow(); i++ ) {
-            int tmpsize;
-            wfctxt->irecv(1,1,&tmpsize,1,i,0);
-            vector<double> tmpr(tmpsize);
-            // read this portion of charge density, send to all pes in row i
-            is.read((char*)&tmpr[0],sizeof(double)*tmpsize);
-            if (tmpsize > 0) 
-              for ( int j = 0; j < wfctxt->npcol(); j++ ) 
-                wfctxt->dsend(tmpsize,1,&tmpr[0],1,i,j);
+          if (nspin == 1)
+             rhorfile = filestr + ".lastrhor";
+          else {
+             ostringstream oss;
+             oss.width(1);  oss.fill('0');  oss << ispin;
+             rhorfile = filestr + ".s" + oss.str() + ".lastrhor";
           }
-        }
-        if (rhorsize > 0) {
-          vector<double> rhorrecv(rhorsize);
-          wfctxt->drecv(rhorsize,1,&rhorrecv[0],1,0,0);
-          // copy rhor to complex<double> array for Fourier transform
-          for (int j = 0; j < rhorsize; j++)
-            rhortmp[j] = complex<double>(omega*rhorrecv[j],0.0);
-        }
-        int rhogsize = cd_.rhog[ispin].size();
-        vector<complex<double> > rhogtmp(rhogsize);
-        ft_->forward(&rhortmp[0],&rhogtmp[0]);
-        s->rhog_last[ispin].resize(rhogsize);
-        //complex<double> *rhogp = &s->rhog_last[ispin];
-        //for (int j = 0; j < rhogsize; j++)
-        //  rhogp[j] = rhogtmp[j];
-        for (int j = 0; j < rhogsize; j++)
-          s->rhog_last[ispin][j] = rhogtmp[j];
-      }
-      else {
-        if ( ui->oncoutpe() )
-          cout << "<!-- LoadCmd: mixed charge density checkpoint file not found. -->" << endl;
-      }
-      if (wfctxt->myrow() == 0) 
-        is.close();
-    }
 
+          int file_exists = 0;
+          if (wfctxt->myrow() == 0) {
+             is.open(rhorfile.c_str(),ifstream::binary);
+             if (is.is_open()) 
+                file_exists = 1;
+             else 
+                file_exists = -1;
+             
+             // send file_exists flag to other pes in column
+             for ( int i = 0; i < wfctxt->nprow(); i++ ) {
+                wfctxt->isend(1,1,&file_exists,1,i,wfctxt->mycol());
+             }
+          }
+          wfctxt->irecv(1,1,&file_exists,1,0,wfctxt->mycol());
+          if (file_exists == 1) { 
+             // send local charge density size from each pe in column to row 0
+             if (wfctxt->mycol() == 0) {
+                wfctxt->isend(1,1,&rhorsize,1,0,0);
+             }
+             
+             if (wfctxt->onpe0()) {
+                cout << "<!-- LoadCmd:  loading mixed charge density from file. -->" << endl;
+                // hack to make checkpointing work w. BlueGene compilers
+#ifdef BGQ
+                char* tmpfilename = new char[256];
+                is.read(tmpfilename,sizeof(char)*rhorfile.length());
+#endif          
+                for ( int i = 0; i < wfctxt->nprow(); i++ ) {
+                   int tmpsize;
+                   wfctxt->irecv(1,1,&tmpsize,1,i,0);
+                   vector<double> tmpr(tmpsize);
+                   // read this portion of charge density, send to all pes in row i
+                   is.read((char*)&tmpr[0],sizeof(double)*tmpsize);
+                   if (tmpsize > 0) 
+                      for ( int j = 0; j < wfctxt->npcol(); j++ ) 
+                         wfctxt->dsend(tmpsize,1,&tmpr[0],1,i,j);
+                }
+             }
+             if (rhorsize > 0) {
+                vector<double> rhorrecv(rhorsize);
+                wfctxt->drecv(rhorsize,1,&rhorrecv[0],1,0,0);
+                // copy rhor to complex<double> array for Fourier transform
+                for (int j = 0; j < rhorsize; j++)
+                   rhortmp[j] = complex<double>(omega*rhorrecv[j],0.0);
+             }
+             int rhogsize = cd_.rhog[ispin].size();
+             vector<complex<double> > rhogtmp(rhogsize);
+             ft_->forward(&rhortmp[0],&rhogtmp[0]);
+             s->rhog_last[ispin].resize(rhogsize);
+             //complex<double> *rhogp = &s->rhog_last[ispin];
+             //for (int j = 0; j < rhogsize; j++)
+             //  rhogp[j] = rhogtmp[j];
+             for (int j = 0; j < rhogsize; j++)
+                s->rhog_last[ispin][j] = rhogtmp[j];
+          }
+          else {
+             if ( ui->oncoutpe() )
+                cout << "<!-- LoadCmd: mixed charge density checkpoint file not found. -->" << endl;
+          }
+          if (wfctxt->myrow() == 0) 
+             is.close();
+       }
+    }
+    
     if (readvel) { 
       const string atoms_dyn = s->ctrl.atoms_dyn;
       const bool compute_forces = ( atoms_dyn != "LOCKED" );
@@ -207,97 +210,100 @@ int LoadCmd::action(int argc, char **argv) {
       s->wf.init_usfns(&s->atoms);
 
     // ewd:  read rhor_last from file, send to appropriate pes
-    ChargeDensity cd_(*s);
-    cd_.update_density();
+    if (! s->ctrl.tddft_involved)
+    {
+       ChargeDensity cd_(*s);
+       cd_.update_density();
 
-    //ewd DEBUG
-    if (s->ctrl.ultrasoft)    
-       cd_.update_usfns();
+       //ewd DEBUG
+       if (s->ctrl.ultrasoft)    
+          cd_.update_usfns();
 
-    const Context* wfctxt = s->wf.wfcontext();
-    const Context* vctxt = &cd_.vcontext();
-    FourierTransform* ft_ = cd_.vft();
-    const double omega = cd_.vbasis()->cell().volume();
-    const int nspin = s->wf.nspin();
-    s->rhog_last.resize(nspin);
-    for (int ispin = 0; ispin < nspin; ispin++) {
-      valarray<complex<double> > rhortmp(ft_->np012loc());
-      int rhorsize = cd_.rhor[ispin].size();
-      ifstream is;
-      string rhorfile;
+       const Context* wfctxt = s->wf.wfcontext();
+       const Context* vctxt = &cd_.vcontext();
+       FourierTransform* ft_ = cd_.vft();
+       const double omega = cd_.vbasis()->cell().volume();
+       const int nspin = s->wf.nspin();
+       s->rhog_last.resize(nspin);
+       for (int ispin = 0; ispin < nspin; ispin++) {
+          valarray<complex<double> > rhortmp(ft_->np012loc());
+          int rhorsize = cd_.rhor[ispin].size();
+          ifstream is;
+          string rhorfile;
 
-      if (nspin == 1)
-        rhorfile = filestr + ".lastrhor";
-      else {
-        ostringstream oss;
-        oss.width(1);  oss.fill('0');  oss << ispin;
-        rhorfile = filestr + ".s" + oss.str() + ".lastrhor";
-      }
-
-      int file_exists = 0;
-      if (wfctxt->myrow() == 0) {
-        is.open(rhorfile.c_str(),ifstream::binary);
-        if (is.is_open()) 
-          file_exists = 1;
-        else 
-          file_exists = -1;
-
-        // send file_exists flag to other pes in column
-        for ( int i = 0; i < wfctxt->nprow(); i++ ) {
-          wfctxt->isend(1,1,&file_exists,1,i,wfctxt->mycol());
-        }
-      }
-      wfctxt->irecv(1,1,&file_exists,1,0,wfctxt->mycol());
-      if (file_exists == 1) { 
-        // send local charge density size from each pe in column to row 0
-        if (wfctxt->mycol() == 0) {
-          wfctxt->isend(1,1,&rhorsize,1,0,0);
-        }
-
-        if (wfctxt->onpe0()) {
-          cout << "<!-- LoadCmd:  loading mixed charge density from file. -->" << endl;
-          // hack to make checkpointing work w. BlueGene compilers
-#ifdef BGQ
-          char* tmpfilename = new char[256];
-          is.read(tmpfilename,sizeof(char)*rhorfile.length());
-#endif
-          
-          for ( int i = 0; i < wfctxt->nprow(); i++ ) {
-            int tmpsize;
-            wfctxt->irecv(1,1,&tmpsize,1,i,0);
-            vector<double> tmpr(tmpsize);
-            // read this portion of charge density, send to all pes in row i
-            is.read((char*)&tmpr[0],sizeof(double)*tmpsize);
-            if (tmpsize > 0) 
-              for ( int j = 0; j < wfctxt->npcol(); j++ ) 
-                wfctxt->dsend(tmpsize,1,&tmpr[0],1,i,j);
+          if (nspin == 1)
+             rhorfile = filestr + ".lastrhor";
+          else {
+             ostringstream oss;
+             oss.width(1);  oss.fill('0');  oss << ispin;
+             rhorfile = filestr + ".s" + oss.str() + ".lastrhor";
           }
-        }
-        if (rhorsize > 0) {
-          vector<double> rhorrecv(rhorsize);
-          wfctxt->drecv(rhorsize,1,&rhorrecv[0],1,0,0);
-          // copy rhor to complex<double> array for Fourier transform
-          for (int j = 0; j < rhorsize; j++)
-            rhortmp[j] = complex<double>(omega*rhorrecv[j],0.0);
-        }
-        int rhogsize = cd_.rhog[ispin].size();
-        vector<complex<double> > rhogtmp(rhogsize);
-        ft_->forward(&rhortmp[0],&rhogtmp[0]);
-        s->rhog_last[ispin].resize(rhogsize);
-        //complex<double> *rhogp = &s->rhog_last[ispin];
-        //for (int j = 0; j < rhogsize; j++)
-        //  rhogp[j] = rhogtmp[j];
-        for (int j = 0; j < rhogsize; j++)
-          s->rhog_last[ispin][j] = rhogtmp[j];
-      }
-      else {
-        if ( ui->oncoutpe() )
-          cout << "<!-- LoadCmd: mixed charge density checkpoint file not found. -->" << endl;
-      }
-      if (wfctxt->myrow() == 0) 
-        is.close();
-    }
 
+          int file_exists = 0;
+          if (wfctxt->myrow() == 0) {
+             is.open(rhorfile.c_str(),ifstream::binary);
+             if (is.is_open()) 
+                file_exists = 1;
+             else 
+                file_exists = -1;
+
+             // send file_exists flag to other pes in column
+             for ( int i = 0; i < wfctxt->nprow(); i++ ) {
+                wfctxt->isend(1,1,&file_exists,1,i,wfctxt->mycol());
+             }
+          }
+          wfctxt->irecv(1,1,&file_exists,1,0,wfctxt->mycol());
+          if (file_exists == 1) { 
+             // send local charge density size from each pe in column to row 0
+             if (wfctxt->mycol() == 0) {
+                wfctxt->isend(1,1,&rhorsize,1,0,0);
+             }
+             
+             if (wfctxt->onpe0()) {
+                cout << "<!-- LoadCmd:  loading mixed charge density from file. -->" << endl;
+                // hack to make checkpointing work w. BlueGene compilers
+#ifdef BGQ
+                char* tmpfilename = new char[256];
+                is.read(tmpfilename,sizeof(char)*rhorfile.length());
+#endif
+                
+                for ( int i = 0; i < wfctxt->nprow(); i++ ) {
+                   int tmpsize;
+                   wfctxt->irecv(1,1,&tmpsize,1,i,0);
+                   vector<double> tmpr(tmpsize);
+                   // read this portion of charge density, send to all pes in row i
+                   is.read((char*)&tmpr[0],sizeof(double)*tmpsize);
+                   if (tmpsize > 0) 
+                      for ( int j = 0; j < wfctxt->npcol(); j++ ) 
+                         wfctxt->dsend(tmpsize,1,&tmpr[0],1,i,j);
+                }
+             }
+             if (rhorsize > 0) {
+                vector<double> rhorrecv(rhorsize);
+                wfctxt->drecv(rhorsize,1,&rhorrecv[0],1,0,0);
+                // copy rhor to complex<double> array for Fourier transform
+                for (int j = 0; j < rhorsize; j++)
+                   rhortmp[j] = complex<double>(omega*rhorrecv[j],0.0);
+             }
+             int rhogsize = cd_.rhog[ispin].size();
+             vector<complex<double> > rhogtmp(rhogsize);
+             ft_->forward(&rhortmp[0],&rhogtmp[0]);
+             s->rhog_last[ispin].resize(rhogsize);
+             //complex<double> *rhogp = &s->rhog_last[ispin];
+             //for (int j = 0; j < rhogsize; j++)
+             //  rhogp[j] = rhogtmp[j];
+             for (int j = 0; j < rhogsize; j++)
+                s->rhog_last[ispin][j] = rhogtmp[j];
+          }
+          else {
+             if ( ui->oncoutpe() )
+                cout << "<!-- LoadCmd: mixed charge density checkpoint file not found. -->" << endl;
+          }
+          if (wfctxt->myrow() == 0) 
+             is.close();
+       }
+    }
+    
     if (readvel) { 
       const string atoms_dyn = s->ctrl.atoms_dyn;
       const bool compute_forces = ( atoms_dyn != "LOCKED" );

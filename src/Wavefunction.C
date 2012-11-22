@@ -359,9 +359,11 @@ void Wavefunction::allocate(void) {
   reset();
 
   //ewd DEBUG:  do we need this?
-  update_occ(0.0,0);
-  if ( ctxt_.oncoutpe() )
+    update_occ(0.0,0);
+    if ( ctxt_.oncoutpe() )
     cout << "<!-- Updated occupation of wf -->" << endl;
+  //if ( ctxt_.oncoutpe() )
+    //cout << "<!-- Occupation NOT updated during wf allocate, testing... -->" << endl;
 
 }
 ////////////////////////////////////////////////////////////////////////////////
