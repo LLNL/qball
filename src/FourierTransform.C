@@ -1092,7 +1092,8 @@ void FourierTransform::fwd(complex<double>* val)
   }
   int len = zvec_.size();
   double fac = 1.0 / ( np0_ * np1_ * np2_ );
-  zdscal(&len,&fac,&zvec_[0],&np2_);
+  int inc1 = 1;
+  zdscal(&len,&fac,&zvec_[0],&inc1);
 #else
   // No library
   /* Transform along z */
