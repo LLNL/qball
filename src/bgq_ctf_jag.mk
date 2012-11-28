@@ -24,7 +24,7 @@
  HPMLIBS = -L/usr/local/tools/mpitrace/lib -lmpihpm_smp -L/bgsys/drivers/ppcfloor/bgpm/lib -lbgpm
  JAGGEMMLIB = $(LIBHOME)/jaggemm_opt/libjaggemm.a
  CTFDIR = $(LIBHOME)/ctf-latest/cyclopstf
- CTFLIB = -L$(CTFDIR)/lib -lcyclopstf
+ CTFLIB = -L$(LIBHOME)/lib -lcyclopstf.jag
 
 
  BGQ_SDK_PATH = /bgsys/drivers/ppcfloor
