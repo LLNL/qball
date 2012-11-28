@@ -23,7 +23,7 @@
 #include <complex>
 #include <vector>
 
-#if USE_FFTW
+#if USE_FFTW || USE_SPIRAL
 #include "fftw.h"
 #endif
 
@@ -48,7 +48,11 @@ class FourierTransform
   std::vector<int> np2_loc_; // np2_loc_[iproc], iproc=0, nprocs_-1
   std::vector<int> np2_first_; // np2_first_[iproc], iproc=0, nprocs_-1
   std::vector<std::complex<double> > zvec_;
-
+#ifdef USE_SPIRAL
+  std::vector<std::complex<double> > zout_;
+  std::vector<std::complex<double> > vin_;
+  std::vector<std::complex<double> > vout_;
+#endif
   std::vector<int> scounts, sdispl, rcounts, rdispl;
   std::vector<std::complex<double> > sbuf, rbuf;
 
@@ -68,7 +72,7 @@ class FourierTransform
   std::vector<double> aux2;
   int naux1x,naux1y,naux1z,naux2;
 #endif
-#elif USE_FFTW || USE_FFTW3
+#elif USE_FFTW || USE_FFTW3 || USE_SPIRAL
   fftw_plan fwplan0,fwplan1,fwplan2,bwplan0,bwplan1,bwplan2;
 #else
   // no library

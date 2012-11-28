@@ -25,7 +25,7 @@ using namespace std;
 typedef int MPI_Comm;
 #endif
 
-#if USE_FFTW
+#if USE_FFTW || USE_SPIRAL
 #include "fftw.h"
 #ifdef ADD_
 #define zdscal zdscal_
@@ -63,7 +63,7 @@ extern "C" {
 ////////////////////////////////////////////////////////////////////////////////
 FourierTransform::~FourierTransform()
 {
-#if USE_FFTW
+#if USE_FFTW || USE_SPIRAL
   fftw_destroy_plan(fwplan0);
   fftw_destroy_plan(fwplan1);
   fftw_destroy_plan(fwplan2);
@@ -142,6 +142,12 @@ FourierTransform::FourierTransform (const Basis &basis,
   
   // resize array zvec holding columns
   zvec_.resize(nvec_ * np2_);
+#ifdef USE_SPIRAL
+  zout_.resize(nvec_ * np2_);
+  vin_.resize(np0_*np1_);
+  int len = np012loc();
+  vout_.resize(len);
+#endif  
   
   // Initialize FT library auxiliary arrays
   init_lib();
@@ -540,18 +546,18 @@ void FourierTransform::bwd(complex<double>* val)
     *    FFTW_COMPLEX *out, int ostride, int odist);
     */
 
-  int ntrans, inc1, inc2;
-
-  ntrans = nvec_;
-  inc1 = 1;
-  inc2 = np2_;
-  
 #pragma omp parallel for
-  for (int it = 0; it < ntrans; it++)
-     fftw(bwplan2,1,(FFTW_COMPLEX*)&zvec_[0]+it*inc2,inc1,inc2,
+  for (int it = 0; it < nvec_; it++)
+     fftw(bwplan2,1,(FFTW_COMPLEX*)&zvec_[0]+it*np2_,1,np2_,
           (FFTW_COMPLEX*)0,0,0);
-  //  fftw(bwplan2,ntrans,(FFTW_COMPLEX*)&zvec_[0],inc1,inc2,
-  //                    (FFTW_COMPLEX*)0,0,0);
+#elif USE_SPIRAL
+#pragma omp parallel for
+  for (int it = 0; it < nvec_; it++)
+  {
+     fftw_one(bwplan2,(FFTW_COMPLEX*)&zvec_[0]+it*np2_,(FFTW_COMPLEX*)&zout_[0]+it*np2_);
+     for (int ii=0; ii<np2_; ii++)
+        zvec_[it*np2_ + ii] = zout_[it*np2_ + ii];
+  }
 #else
   // No library
   /* Transform along z */
@@ -723,8 +729,6 @@ void FourierTransform::bwd(complex<double>* val)
 #endif  
 #elif USE_FFTW
     int inc1, inc2, istart;
-    
-#if 1
     int ntrans = ntrans0_;
     // Transform first block along x: positive y indices
     inc1 = 1;
@@ -742,26 +746,54 @@ void FourierTransform::bwd(complex<double>* val)
     for (int it = 0; it < ntrans; it++)
        fftw(bwplan0,1,(FFTW_COMPLEX*)&val[istart]+it*inc2,inc1,inc2,
             (FFTW_COMPLEX*)0,0,0);
-#else
-    // debug: transform along x for all values of y
-    int ntrans = np1_;
-    inc1 = 1;
-    inc2 = np0_;
-    istart = k * np0_ * np1_; 
-    fftw(bwplan0,ntrans,(FFTW_COMPLEX*)&val[istart],inc1,inc2,
-                        (FFTW_COMPLEX*)0,0,0);
-    
-#endif
-                    
+
     // transform along y for all values of x
-    ntrans = np0_;
-    inc1 = np0_;
-    inc2 = 1;
     istart = k * np0_ * np1_; 
 #pragma omp parallel for
-    for (int it = 0; it < ntrans; it++)
-       fftw(bwplan1,1,(FFTW_COMPLEX*)&val[istart]+it*inc2,inc1,inc2,
+    for (int it = 0; it < np0_; it++)
+       fftw(bwplan1,1,(FFTW_COMPLEX*)&val[istart]+it,np0_,1,
             (FFTW_COMPLEX*)0,0,0);
+
+#elif USE_SPIRAL
+    int istart;
+    // Transform first block along x: positive y indices
+    istart = k * np0_ * np1_; 
+#pragma omp parallel for
+    for (int it = 0; it < ntrans0_; it++)
+    {
+       fftw_one(bwplan0,(FFTW_COMPLEX*)&val[istart]+it*np0_,
+                (FFTW_COMPLEX*)&vout_[istart]+it*np0_);
+       for (int ii=0; ii<np0_; ii++)
+          val[istart + it*np0_ + ii] = vout_[istart + it*np0_ + ii];
+    }
+    
+    // Transform second block along x: negative y indices
+    istart = np0_ * ( (np1_-ntrans0_) + k * np1_ );
+#pragma omp parallel for
+    for (int it = 0; it < ntrans0_; it++)
+    {
+       fftw_one(bwplan0,(FFTW_COMPLEX*)&val[istart]+it*np0_,
+                (FFTW_COMPLEX*)&vout_[istart]+it*np0_);
+       for (int ii=0; ii<np0_; ii++)
+          val[istart + it*np0_ + ii] = vout_[istart + it*np0_ + ii];
+    }
+                    
+    // transform along y for all values of x
+    istart = k * np0_ * np1_; 
+
+#pragma omp parallel for
+    for (int it = 0; it < np0_; it++)
+    {
+       for (int jj=0; jj<np1_; jj++)
+          vin_[it*np1_ + jj] = val[istart + np0_*jj + it];
+       
+       fftw_one(bwplan1,(FFTW_COMPLEX*)&vin_[0]+it*np1_,(FFTW_COMPLEX*)&vout_[0]+it*np1_);
+
+       for (int jj=0; jj<np1_; jj++)
+          val[istart + np0_*jj + it] = vout_[it*np1_ + jj];
+
+    }
+
 #else
     // No library
     // transform along x for non-zero elements
@@ -881,6 +913,43 @@ void FourierTransform::fwd(complex<double>* val)
        fftw(fwplan0,1,(FFTW_COMPLEX*)&val[istart]+it*inc2,inc1,inc2,
             (FFTW_COMPLEX*)0,0,0);
                         
+#elif USE_SPIRAL
+    int istart;
+    // transform along y for all values of x
+    istart = k * np0_ * np1_; 
+
+#pragma omp parallel for
+    for (int it = 0; it < np0_; it++)
+    {
+       for (int jj=0; jj<np1_; jj++)
+          vin_[it*np1_ + jj] = val[istart + np0_*jj + it];
+       fftw_one(fwplan1,(FFTW_COMPLEX*)&vin_[0]+it*np1_,(FFTW_COMPLEX*)&vout_[0]+it*np1_);
+       for (int jj=0; jj<np1_; jj++)
+          val[istart + np0_*jj + it] = vout_[it*np1_ + jj];
+    }
+
+    // Transform first block along x: positive y indices
+    istart = k * np0_ * np1_; 
+#pragma omp parallel for
+    for (int it = 0; it < ntrans0_; it++)
+    {
+       fftw_one(fwplan0,(FFTW_COMPLEX*)&val[istart]+it*np0_,
+                (FFTW_COMPLEX*)&vout_[istart]+it*np0_);
+       for (int ii=0; ii<np0_; ii++)
+          val[istart + it*np0_ + ii] = vout_[istart + it*np0_ + ii];
+    }
+    
+    // Transform second block along x: negative y indices
+    istart = np0_ * ( (np1_-ntrans0_) + k * np1_ );
+#pragma omp parallel for
+    for (int it = 0; it < ntrans0_; it++)
+    {
+       fftw_one(fwplan0,(FFTW_COMPLEX*)&val[istart]+it*np0_,
+                (FFTW_COMPLEX*)&vout_[istart]+it*np0_);
+       for (int ii=0; ii<np0_; ii++)
+          val[istart + it*np0_ + ii] = vout_[istart + it*np0_ + ii];
+    }
+
 #else
     // No library
     // transform along y for all values of x
@@ -1013,6 +1082,17 @@ void FourierTransform::fwd(complex<double>* val)
   int len = zvec_.size();
   double fac = 1.0 / ( np0_ * np1_ * np2_ );
   zdscal(&len,&fac,&zvec_[0],&inc1);
+#elif USE_SPIRAL
+#pragma omp parallel for
+  for (int it = 0; it < nvec_; it++)
+  {
+     fftw_one(fwplan2,(FFTW_COMPLEX*)&zvec_[0]+it*np2_,(FFTW_COMPLEX*)&zout_[0]+it*np2_);
+     for (int ii=0; ii<np2_; ii++)
+        zvec_[it*np2_ + ii] = zout_[it*np2_ + ii];
+  }
+  int len = zvec_.size();
+  double fac = 1.0 / ( np0_ * np1_ * np2_ );
+  zdscal(&len,&fac,&zvec_[0],&np2_);
 #else
   // No library
   /* Transform along z */
@@ -1129,6 +1209,15 @@ void FourierTransform::init_lib(void)
         &isign,&scale,&aux1zf[0],&naux1z,&aux2[0],&naux2);
 
 #endif
+#elif USE_SPIRAL
+  // FFTW_MEASURE
+  fwplan0 = fftw_create_plan(np0_,FFTW_FORWARD,FFTW_MEASURE);
+  fwplan1 = fftw_create_plan(np1_,FFTW_FORWARD,FFTW_MEASURE);
+  fwplan2 = fftw_create_plan(np2_,FFTW_FORWARD,FFTW_MEASURE);
+  bwplan0 = fftw_create_plan(np0_,FFTW_BACKWARD,FFTW_MEASURE);
+  bwplan1 = fftw_create_plan(np1_,FFTW_BACKWARD,FFTW_MEASURE);
+  bwplan2 = fftw_create_plan(np2_,FFTW_BACKWARD,FFTW_MEASURE);
+
 #elif USE_FFTW
 
 #if FFTWMEASURE
