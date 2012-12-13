@@ -3,7 +3,7 @@
 // jade.C
 //
 ////////////////////////////////////////////////////////////////////////////////
-// $Id: jade.C,v 1.1 2008/05/13 18:28:54 draeger1 Exp $
+// $Id: jade.C,v 1.4 2008-09-08 15:56:20 draeger Exp $
 
 #include <cmath>
 #include <cassert>
@@ -406,7 +406,8 @@ int jade(int maxsweep, double tol, vector<DoubleMatrix*> a,
 
         // exchange column vectors
 
-        if ( ctxt.mycol() < last_active_process_col )
+        //ewdif ( ctxt.mycol() < last_active_process_col )
+        if ( ctxt.mycol() < last_active_process_col && bufsize > 0)
         {
           for ( int k = 0; k < a.size(); k++ )
           {
@@ -429,7 +430,8 @@ int jade(int maxsweep, double tol, vector<DoubleMatrix*> a,
           //cout << ctxt.mype() << ": received vector jglobal="
           //     << jglobal[bot[nploc-1]] << " from right" << endl;
         }
-        if ( ctxt.mycol() != 0 )
+        //ewdif ( ctxt.mycol() != 0 )
+        if ( ctxt.mycol() != 0 && bufsize > 0 )
         {
           for ( int k = 0; k < a.size(); k++ )
           {
@@ -497,7 +499,7 @@ int jade(int maxsweep, double tol, vector<DoubleMatrix*> a,
       }
       ctxt.dsum('r',1,1,&diag_sum,1);
       const double diag_sum_increase = diag_sum - previous_diag_sum;
-      if ( ctxt.oncoutpe() )
+      if ( ctxt.onpe0() )
         cout << " jade: nsweep=" << nsweep
              << " dsum: "
              << setw(15) << setprecision(10) << diag_sum
@@ -505,7 +507,7 @@ int jade(int maxsweep, double tol, vector<DoubleMatrix*> a,
              << setw(15) << setprecision(10) << diag_sum_increase << endl;
     }
 
-    if ( ctxt.oncoutpe() )
+    if ( ctxt.onpe0() )
       cout << " jade: nsweep=" << nsweep
            << " dchange: "
            << setw(15) << setprecision(10) << diag_change << endl;
@@ -559,7 +561,7 @@ int jade(int maxsweep, double tol, vector<DoubleMatrix*> a,
     // u contains the orthogonal transformation minimizing the spread
   }
 
-  if ( ctxt.oncoutpe() )
+  if ( ctxt.onpe0() )
     cout << " jade: comm time: " << tm_comm.real() << endl;
 
   return nsweep;

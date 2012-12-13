@@ -187,12 +187,12 @@ struct ContextRep
   
   void dsend(int m, int n, double* a, int lda, int rdest, int cdest) const
   {
-    Cdgesd2d(ictxt_,m,n,a,lda,rdest,cdest);
+     Cdgesd2d(ictxt_,m,n,a,lda,rdest,cdest);
   }
  
   void drecv(int m, int n, double* a, int lda, int rsrc, int csrc) const
   {
-    Cdgerv2d(ictxt_,m,n,a,lda,rsrc,csrc);
+     Cdgerv2d(ictxt_,m,n,a,lda,rsrc,csrc);
   }
  
   void dsum(char scope, char topology, int m, int n, double* a, int lda,
@@ -298,7 +298,8 @@ struct ContextRep
     if ( len%(sizeof(int)/sizeof(char)) != 0 ) ilen++;
     int* ibuf = new int[ilen];
     s.copy((char*)ibuf,string::npos);
-    isend(ilen,1,ibuf,1,rdest,cdest);
+    //isend(ilen,1,ibuf,1,rdest,cdest);
+    isend(ilen,1,ibuf,ilen,rdest,cdest);
     delete [] ibuf;
 #endif
   }
@@ -311,7 +312,8 @@ struct ContextRep
     int ilen = len/(sizeof(int)/sizeof(char));
     if ( len%(sizeof(int)/sizeof(char)) != 0 ) ilen++;
     int* ibuf = new int[ilen];
-    irecv(ilen,1,ibuf,1,rsrc,csrc);
+    //irecv(ilen,1,ibuf,1,rsrc,csrc);
+    irecv(ilen,1,ibuf,ilen,rsrc,csrc);
     s.resize(len);
     s.assign((char*)ibuf,len);
     delete [] ibuf;
