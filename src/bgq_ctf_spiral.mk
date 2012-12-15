@@ -16,15 +16,18 @@
 
  FFTWDIR=$(LIBHOME)/fftw/fftw-bgq/fftw-2.1.3/fftw
  FFTWLIB=$(FFTWDIR)/libfftw.a
+ SPIRALDIR=$(LIBHOME)/fftw2-spiral
+ SPIRALLIB=$(SPIRALDIR)/libfftw.a
+
  BLASDIR=$(LIBHOME)/blas/blas-bgq-xlc
  LAPACKDIR=$(LIBHOME)/lapack/lapack-bgq-xlc
- SCALAPACK_DIR = $(LIBHOME)/scalapack-2.0/scalapack-bgq-xlc
+ SCALAPACK_DIR = $(LIBHOME)/scalapack-2.0/scalapack-bgq-xlc-jaggemm
  SCALAPACKLIB  = $(SCALAPACK_DIR)/libscalapack.a
  ESSLDIR = /usr/local/tools/essl/5.1
  HPMLIBS = -L/usr/local/tools/mpitrace/lib -lmpihpm_smp -L/bgsys/drivers/ppcfloor/bgpm/lib -lbgpm
- #JAGGEMMLIB = $(LIBHOME)/jaggemm_opt/libjaggemm.a
+ JAGGEMMLIB = $(LIBHOME)/jaggemm_opt/libjaggemm.a
  CTFDIR = $(LIBHOME)/ctf-latest/cyclopstf
- CTFLIB = -L$(LIBHOME)/lib -lcyclopstf.nojag
+ CTFLIB = -L$(LIBHOME)/lib -lcyclopstf.jag
 
 
  BGQ_SDK_PATH = /bgsys/drivers/ppcfloor
@@ -33,15 +36,16 @@
 
  LD=$(CXX)
 
- DFLAGS += -DPRINTALL -DUSE_CTF -DUSE_FFTW -DUSE_CSTDIO_LFS -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DHPM
+ DFLAGS += -DPRINTALL -DUSE_CTF -DUSE_JAGGEMM -DUSE_SPIRAL -DUSE_CSTDIO_LFS -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DHPM
  
  INCLUDE = -I$(FFTWDIR) -I$(ESSLDIR)/include -I$(CTFDIR)/include
+# INCLUDE = -I$(SPIRALDIR) -I$(ESSLDIR)/include -I$(CTFDIR)/include
  
  CXXFLAGS= -g -O3 -qarch=qp -DUSE_MPI -DSCALAPACK -D$(PLT) $(INCLUDE) $(DFLAGS)
  CFLAGS= -qhot=novector -qsimd=auto -g -O3 -DUSE_MPI -DSCALAPACK -D$(PLT) $(INCLUDE) $(DFLAGS)
 
- LIBPATH = -L$(FFTWDIR) -L$(LAPACKDIR) -L$(BLASDIR) -L$(ESSLDIR)/lib -L/opt/ibmcmp/xlsmp/bg/3.1/bglib64 -L/opt/ibmcmp/xlf/bg/14.1/bglib64
- LIBS =  $(CTFLIB) $(SCALAPACKLIB) -lfftw -lesslsmpbg -lblas -llapack -lxlf90_r -lxlsmp -lxlfmath $(HPMLIBS)
+ LIBPATH = -L$(LAPACKDIR) -L$(BLASDIR) -L$(ESSLDIR)/lib -L/opt/ibmcmp/xlsmp/bg/3.1/bglib64 -L/opt/ibmcmp/xlf/bg/14.1/bglib64
+ LIBS =  $(CTFLIB) $(SCALAPACKLIB) $(JAGGEMMLIB) $(SPIRALLIB) -lesslsmpbg -lblas -llapack -lxlf90_r -lxlsmp -lxlfmath $(HPMLIBS)
  LDFLAGS = $(LIBPATH) $(LIBS) -qarch=qp -lc -lnss_files -lnss_dns -lresolv
 
 #TAUROOTDIR = $(LIBHOME)/tau/tau-2.21.2
