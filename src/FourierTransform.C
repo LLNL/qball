@@ -542,19 +542,20 @@ void FourierTransform::bwd(complex<double>* val)
 #elif USE_FFTW
    /* 
     * void fftw(fftw_plan plan, int howmany,
-    *    FFTW_COMPLEX *in, int istride, int idist,
-    *    FFTW_COMPLEX *out, int ostride, int odist);
+    *    fftw_complex *in, int istride, int idist,
+    *    fftw_complex *out, int ostride, int odist);
     */
 
 #pragma omp parallel for
   for (int it = 0; it < nvec_; it++)
-     fftw(bwplan2,1,(FFTW_COMPLEX*)&zvec_[0]+it*np2_,1,np2_,
-          (FFTW_COMPLEX*)0,0,0);
+     fftw(bwplan2,1,(fftw_complex*)&zvec_[0]+it*np2_,1,np2_,
+          (fftw_complex*)0,0,0);
 #elif USE_SPIRAL
 #pragma omp parallel for
   for (int it = 0; it < nvec_; it++)
   {
-     fftw_one(bwplan2,(FFTW_COMPLEX*)&zvec_[0]+it*np2_,(FFTW_COMPLEX*)&zout_[0]+it*np2_);
+     fftw_one(bwplan2,(fftw_complex*)&zvec_[0]+it*np2_,
+              (fftw_complex*)&zout_[0]+it*np2_);
      for (int ii=0; ii<np2_; ii++)
         zvec_[it*np2_ + ii] = zout_[it*np2_ + ii];
   }
@@ -736,23 +737,23 @@ void FourierTransform::bwd(complex<double>* val)
     istart = k * np0_ * np1_; 
 #pragma omp parallel for
     for (int it = 0; it < ntrans; it++)
-       fftw(bwplan0,1,(FFTW_COMPLEX*)&val[istart]+it*inc2,inc1,inc2,
-            (FFTW_COMPLEX*)0,0,0);
+       fftw(bwplan0,1,(fftw_complex*)&val[istart]+it*inc2,inc1,inc2,
+            (fftw_complex*)0,0,0);
     // Transform second block along x: negative y indices
     inc1 = 1;
     inc2 = np0_;
     istart = np0_ * ( (np1_-ntrans) + k * np1_ );
 #pragma omp parallel for
     for (int it = 0; it < ntrans; it++)
-       fftw(bwplan0,1,(FFTW_COMPLEX*)&val[istart]+it*inc2,inc1,inc2,
-            (FFTW_COMPLEX*)0,0,0);
+       fftw(bwplan0,1,(fftw_complex*)&val[istart]+it*inc2,inc1,inc2,
+            (fftw_complex*)0,0,0);
 
     // transform along y for all values of x
     istart = k * np0_ * np1_; 
 #pragma omp parallel for
     for (int it = 0; it < np0_; it++)
-       fftw(bwplan1,1,(FFTW_COMPLEX*)&val[istart]+it,np0_,1,
-            (FFTW_COMPLEX*)0,0,0);
+       fftw(bwplan1,1,(fftw_complex*)&val[istart]+it,np0_,1,
+            (fftw_complex*)0,0,0);
 
 #elif USE_SPIRAL
     int istart;
@@ -761,8 +762,8 @@ void FourierTransform::bwd(complex<double>* val)
 #pragma omp parallel for
     for (int it = 0; it < ntrans0_; it++)
     {
-       fftw_one(bwplan0,(FFTW_COMPLEX*)&val[istart]+it*np0_,
-                (FFTW_COMPLEX*)&vout_[istart]+it*np0_);
+       fftw_one(bwplan0,(fftw_complex*)&val[istart]+it*np0_,
+                (fftw_complex*)&vout_[istart]+it*np0_);
        for (int ii=0; ii<np0_; ii++)
           val[istart + it*np0_ + ii] = vout_[istart + it*np0_ + ii];
     }
@@ -772,8 +773,8 @@ void FourierTransform::bwd(complex<double>* val)
 #pragma omp parallel for
     for (int it = 0; it < ntrans0_; it++)
     {
-       fftw_one(bwplan0,(FFTW_COMPLEX*)&val[istart]+it*np0_,
-                (FFTW_COMPLEX*)&vout_[istart]+it*np0_);
+       fftw_one(bwplan0,(fftw_complex*)&val[istart]+it*np0_,
+                (fftw_complex*)&vout_[istart]+it*np0_);
        for (int ii=0; ii<np0_; ii++)
           val[istart + it*np0_ + ii] = vout_[istart + it*np0_ + ii];
     }
@@ -787,7 +788,7 @@ void FourierTransform::bwd(complex<double>* val)
        for (int jj=0; jj<np1_; jj++)
           vin_[it*np1_ + jj] = val[istart + np0_*jj + it];
        
-       fftw_one(bwplan1,(FFTW_COMPLEX*)&vin_[0]+it*np1_,(FFTW_COMPLEX*)&vout_[0]+it*np1_);
+       fftw_one(bwplan1,(fftw_complex*)&vin_[0]+it*np1_,(fftw_complex*)&vout_[0]+it*np1_);
 
        for (int jj=0; jj<np1_; jj++)
           val[istart + np0_*jj + it] = vout_[it*np1_ + jj];
@@ -892,8 +893,8 @@ void FourierTransform::fwd(complex<double>* val)
     istart = k * np0_ * np1_; 
 #pragma omp parallel for
     for (int it = 0; it < ntrans; it++)
-       fftw(fwplan1,1,(FFTW_COMPLEX*)&val[istart]+it*inc2,inc1,inc2,
-            (FFTW_COMPLEX*)0,0,0);
+       fftw(fwplan1,1,(fftw_complex*)&val[istart]+it*inc2,inc1,inc2,
+            (fftw_complex*)0,0,0);
     ntrans = ntrans0_;
     // Transform first block along x: positive y indices
     inc1 = 1;
@@ -901,8 +902,8 @@ void FourierTransform::fwd(complex<double>* val)
     istart = k * np0_ * np1_; 
 #pragma omp parallel for
     for (int it = 0; it < ntrans; it++)
-       fftw(fwplan0,1,(FFTW_COMPLEX*)&val[istart]+it*inc2,inc1,inc2,
-            (FFTW_COMPLEX*)0,0,0);
+       fftw(fwplan0,1,(fftw_complex*)&val[istart]+it*inc2,inc1,inc2,
+            (fftw_complex*)0,0,0);
     
     // Transform second block along x: negative y indices
     inc1 = 1;
@@ -910,8 +911,8 @@ void FourierTransform::fwd(complex<double>* val)
     istart = np0_ * ( (np1_-ntrans) + k * np1_ );
 #pragma omp parallel for
     for (int it = 0; it < ntrans; it++)
-       fftw(fwplan0,1,(FFTW_COMPLEX*)&val[istart]+it*inc2,inc1,inc2,
-            (FFTW_COMPLEX*)0,0,0);
+       fftw(fwplan0,1,(fftw_complex*)&val[istart]+it*inc2,inc1,inc2,
+            (fftw_complex*)0,0,0);
                         
 #elif USE_SPIRAL
     int istart;
@@ -923,7 +924,7 @@ void FourierTransform::fwd(complex<double>* val)
     {
        for (int jj=0; jj<np1_; jj++)
           vin_[it*np1_ + jj] = val[istart + np0_*jj + it];
-       fftw_one(fwplan1,(FFTW_COMPLEX*)&vin_[0]+it*np1_,(FFTW_COMPLEX*)&vout_[0]+it*np1_);
+       fftw_one(fwplan1,(fftw_complex*)&vin_[0]+it*np1_,(fftw_complex*)&vout_[0]+it*np1_);
        for (int jj=0; jj<np1_; jj++)
           val[istart + np0_*jj + it] = vout_[it*np1_ + jj];
     }
@@ -933,8 +934,8 @@ void FourierTransform::fwd(complex<double>* val)
 #pragma omp parallel for
     for (int it = 0; it < ntrans0_; it++)
     {
-       fftw_one(fwplan0,(FFTW_COMPLEX*)&val[istart]+it*np0_,
-                (FFTW_COMPLEX*)&vout_[istart]+it*np0_);
+       fftw_one(fwplan0,(fftw_complex*)&val[istart]+it*np0_,
+                (fftw_complex*)&vout_[istart]+it*np0_);
        for (int ii=0; ii<np0_; ii++)
           val[istart + it*np0_ + ii] = vout_[istart + it*np0_ + ii];
     }
@@ -944,8 +945,8 @@ void FourierTransform::fwd(complex<double>* val)
 #pragma omp parallel for
     for (int it = 0; it < ntrans0_; it++)
     {
-       fftw_one(fwplan0,(FFTW_COMPLEX*)&val[istart]+it*np0_,
-                (FFTW_COMPLEX*)&vout_[istart]+it*np0_);
+       fftw_one(fwplan0,(fftw_complex*)&val[istart]+it*np0_,
+                (fftw_complex*)&vout_[istart]+it*np0_);
        for (int ii=0; ii<np0_; ii++)
           val[istart + it*np0_ + ii] = vout_[istart + it*np0_ + ii];
     }
@@ -1068,8 +1069,8 @@ void FourierTransform::fwd(complex<double>* val)
 #elif USE_FFTW
  /*
   * void fftw(fftw_plan plan, int howmany,
-  *    FFTW_COMPLEX *in, int istride, int idist,
-  *    FFTW_COMPLEX *out, int ostride, int odist);
+  *    fftw_complex *in, int istride, int idist,
+  *    fftw_complex *out, int ostride, int odist);
   */
   int ntrans, inc1, inc2;
   ntrans = nvec_;
@@ -1077,8 +1078,8 @@ void FourierTransform::fwd(complex<double>* val)
   inc2 = np2_;
 #pragma omp parallel for
     for (int it = 0; it < ntrans; it++)
-       fftw(fwplan2,1,(FFTW_COMPLEX*)&zvec_[0]+it*inc2,inc1,inc2,
-            (FFTW_COMPLEX*)0,0,0);
+       fftw(fwplan2,1,(fftw_complex*)&zvec_[0]+it*inc2,inc1,inc2,
+            (fftw_complex*)0,0,0);
   int len = zvec_.size();
   double fac = 1.0 / ( np0_ * np1_ * np2_ );
   zdscal(&len,&fac,&zvec_[0],&inc1);
@@ -1086,7 +1087,7 @@ void FourierTransform::fwd(complex<double>* val)
 #pragma omp parallel for
   for (int it = 0; it < nvec_; it++)
   {
-     fftw_one(fwplan2,(FFTW_COMPLEX*)&zvec_[0]+it*np2_,(FFTW_COMPLEX*)&zout_[0]+it*np2_);
+     fftw_one(fwplan2,(fftw_complex*)&zvec_[0]+it*np2_,(fftw_complex*)&zout_[0]+it*np2_);
      for (int ii=0; ii<np2_; ii++)
         zvec_[it*np2_ + ii] = zout_[it*np2_ + ii];
   }

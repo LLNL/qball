@@ -146,62 +146,65 @@ int SaveCmd::action(int argc, char **argv) {
     s->wf.write_dump(filestr);
 
     // ewd:  write rhor_last to file
-    ChargeDensity cd_(*s);
+    if (!s->ctrl.tddft_involved)
+    {
+       ChargeDensity cd_(*s);
 
-    const int nspin = s->wf.nspin();
-    // load mixed charge density into cd_
-    for (int ispin = 0; ispin < nspin; ispin++) {
-      for ( int i=0; i < s->rhog_last[ispin].size(); i++ )
-        cd_.rhog[ispin][i] = s->rhog_last[ispin][i];
-    }
-    cd_.update_rhor();
+       const int nspin = s->wf.nspin();
+       // load mixed charge density into cd_
+       for (int ispin = 0; ispin < nspin; ispin++) {
+          for ( int i=0; i < s->rhog_last[ispin].size(); i++ )
+             cd_.rhog[ispin][i] = s->rhog_last[ispin][i];
+       }
+       cd_.update_rhor();
+       
+       const Context* wfctxt = s->wf.wfcontext();
+       const Context* vctxt = &cd_.vcontext();
+       FourierTransform* ft_ = cd_.vft();
+       for (int ispin = 0; ispin < nspin; ispin++) {
+          if (wfctxt->mycol() == 0) {
+             vector<double> rhortmp(ft_->np012loc());
+             for (int j = 0; j < ft_->np012loc(); j++)
+                rhortmp[j] = cd_.rhor[ispin][j];
 
-    const Context* wfctxt = s->wf.wfcontext();
-    const Context* vctxt = &cd_.vcontext();
-    FourierTransform* ft_ = cd_.vft();
-    for (int ispin = 0; ispin < nspin; ispin++) {
-      if (wfctxt->mycol() == 0) {
-        vector<double> rhortmp(ft_->np012loc());
-        for (int j = 0; j < ft_->np012loc(); j++)
-          rhortmp[j] = cd_.rhor[ispin][j];
-
-        ofstream os;
-        string rhorfile;
-        if (nspin == 1)
-          rhorfile = filestr + ".lastrhor";
-        else {
-          ostringstream oss;
-          oss.width(1);  oss.fill('0');  oss << ispin;
-          rhorfile = filestr + ".s" + oss.str() + ".lastrhor";
-        }
-          
-        if (wfctxt->onpe0()) {
-           os.open(rhorfile.c_str(),ofstream::binary);
-           // hack to make checkpointing work w. BlueGene compilers
+             ofstream os;
+             string rhorfile;
+             if (nspin == 1)
+                rhorfile = filestr + ".lastrhor";
+             else {
+                ostringstream oss;
+                oss.width(1);  oss.fill('0');  oss << ispin;
+                rhorfile = filestr + ".s" + oss.str() + ".lastrhor";
+             }
+             
+             if (wfctxt->onpe0()) {
+                os.open(rhorfile.c_str(),ofstream::binary);
+                // hack to make checkpointing work w. BlueGene compilers
 #ifdef BGQ
-           os.write(rhorfile.c_str(),sizeof(char)*rhorfile.length());
+                os.write(rhorfile.c_str(),sizeof(char)*rhorfile.length());
 #endif
-           
-        }
-        for ( int i = 0; i < wfctxt->nprow(); i++ ) {
-          if ( i == wfctxt->myrow() ) {
-            int size = ft_->np012loc();
-            wfctxt->isend(1,1,&size,1,0,0);
-            wfctxt->dsend(size,1,&rhortmp[0],1,0,0);
+                
+             }
+             for ( int i = 0; i < wfctxt->nprow(); i++ ) {
+                if ( i == wfctxt->myrow() ) {
+                   int size = ft_->np012loc();
+                   wfctxt->isend(1,1,&size,1,0,0);
+                   wfctxt->dsend(size,1,&rhortmp[0],1,0,0);
+                }
+             }
+             if ( wfctxt->onpe0() ) {
+                for ( int i = 0; i < wfctxt->nprow(); i++ ) {
+                   int size = 0;
+                   wfctxt->irecv(1,1,&size,1,i,0);
+                   wfctxt->drecv(size,1,&rhortmp[0],1,i,0);
+                   os.write((char*)&rhortmp[0],sizeof(double)*size);
+                }
+                os.close();
+             }
           }
-        }
-        if ( wfctxt->onpe0() ) {
-          for ( int i = 0; i < wfctxt->nprow(); i++ ) {
-            int size = 0;
-            wfctxt->irecv(1,1,&size,1,i,0);
-            wfctxt->drecv(size,1,&rhortmp[0],1,i,0);
-            os.write((char*)&rhortmp[0],sizeof(double)*size);
-          }
-          os.close();
-        }
-      }
+       }
     }
-
+    
     if (writevel) { 
       const string atoms_dyn = s->ctrl.atoms_dyn;
       const bool compute_forces = ( atoms_dyn != "LOCKED" );
@@ -227,61 +230,64 @@ int SaveCmd::action(int argc, char **argv) {
     s->wf.write_states(filename,format);
 
     // ewd:  write rhor_last to file
-    ChargeDensity cd_(*s);
+    if (!s->ctrl.tddft_involved)
+    {
+       ChargeDensity cd_(*s);
 
-    const int nspin = s->wf.nspin();
-    // load mixed charge density into cd_
-    for (int ispin = 0; ispin < nspin; ispin++) {
-      for ( int i=0; i < s->rhog_last[ispin].size(); i++ )
-        cd_.rhog[ispin][i] = s->rhog_last[ispin][i];
-    }
-    cd_.update_rhor();
+       const int nspin = s->wf.nspin();
+       // load mixed charge density into cd_
+       for (int ispin = 0; ispin < nspin; ispin++) {
+          for ( int i=0; i < s->rhog_last[ispin].size(); i++ )
+             cd_.rhog[ispin][i] = s->rhog_last[ispin][i];
+       }
+       cd_.update_rhor();
 
-    const Context* wfctxt = s->wf.wfcontext();
-    const Context* vctxt = &cd_.vcontext();
-    FourierTransform* ft_ = cd_.vft();
-    for (int ispin = 0; ispin < nspin; ispin++) {
-      if (wfctxt->mycol() == 0) {
-        vector<double> rhortmp(ft_->np012loc());
-        for (int j = 0; j < ft_->np012loc(); j++)
-          rhortmp[j] = cd_.rhor[ispin][j];
+       const Context* wfctxt = s->wf.wfcontext();
+       const Context* vctxt = &cd_.vcontext();
+       FourierTransform* ft_ = cd_.vft();
+       for (int ispin = 0; ispin < nspin; ispin++) {
+          if (wfctxt->mycol() == 0) {
+             vector<double> rhortmp(ft_->np012loc());
+             for (int j = 0; j < ft_->np012loc(); j++)
+                rhortmp[j] = cd_.rhor[ispin][j];
 
-        ofstream os;
-        string rhorfile;
-        if (nspin == 1)
-          rhorfile = filestr + ".lastrhor";
-        else {
-          ostringstream oss;
-          oss.width(1);  oss.fill('0');  oss << ispin;
-          rhorfile = filestr + ".s" + oss.str() + ".lastrhor";
-        }
-          
-        if (wfctxt->onpe0()) {
-           os.open(rhorfile.c_str(),ofstream::binary);
-           // hack to make checkpointing work w. BlueGene compilers
+             ofstream os;
+             string rhorfile;
+             if (nspin == 1)
+                rhorfile = filestr + ".lastrhor";
+             else {
+                ostringstream oss;
+                oss.width(1);  oss.fill('0');  oss << ispin;
+                rhorfile = filestr + ".s" + oss.str() + ".lastrhor";
+             }
+             
+             if (wfctxt->onpe0()) {
+                os.open(rhorfile.c_str(),ofstream::binary);
+                // hack to make checkpointing work w. BlueGene compilers
 #ifdef BGQ
-           os.write(rhorfile.c_str(),sizeof(char)*rhorfile.length());
+                os.write(rhorfile.c_str(),sizeof(char)*rhorfile.length());
 #endif          
-        }
-        for ( int i = 0; i < wfctxt->nprow(); i++ ) {
-          if ( i == wfctxt->myrow() ) {
-            int size = ft_->np012loc();
-            wfctxt->isend(1,1,&size,1,0,0);
-            wfctxt->dsend(size,1,&rhortmp[0],1,0,0);
+             }
+             for ( int i = 0; i < wfctxt->nprow(); i++ ) {
+                if ( i == wfctxt->myrow() ) {
+                   int size = ft_->np012loc();
+                   wfctxt->isend(1,1,&size,1,0,0);
+                   wfctxt->dsend(size,1,&rhortmp[0],1,0,0);
+                }
+             }
+             if ( wfctxt->onpe0() ) {
+                for ( int i = 0; i < wfctxt->nprow(); i++ ) {
+                   int size = 0;
+                   wfctxt->irecv(1,1,&size,1,i,0);
+                   wfctxt->drecv(size,1,&rhortmp[0],1,i,0);
+                   os.write((char*)&rhortmp[0],sizeof(double)*size);
+                }
+                os.close();
+             }
           }
-        }
-        if ( wfctxt->onpe0() ) {
-          for ( int i = 0; i < wfctxt->nprow(); i++ ) {
-            int size = 0;
-            wfctxt->irecv(1,1,&size,1,i,0);
-            wfctxt->drecv(size,1,&rhortmp[0],1,i,0);
-            os.write((char*)&rhortmp[0],sizeof(double)*size);
-          }
-          os.close();
-        }
-      }
+       }
     }
-
+    
     if (writevel) { 
       const string atoms_dyn = s->ctrl.atoms_dyn;
       const bool compute_forces = ( atoms_dyn != "LOCKED" );
