@@ -2051,7 +2051,8 @@ void Wavefunction::write_dump(string filebase) {
   bool ifempty = (nempty_ > 0);
 
   os.open(mypefile.c_str(),ofstream::binary);
-
+  //fopenFILE* PEFILE = fopen(mypefile.c_str(),"wb");
+  
   // hack to make checkpointing work w. BlueGene compilers
 #ifdef BGQ
   os.write(mypefile.c_str(),sizeof(char)*mypefile.length());
@@ -2075,6 +2076,8 @@ void Wavefunction::write_dump(string filebase) {
           const complex<double>* p = sd_[ispin][ikp]->c().cvalptr();
           for ( int n = 0; n < nloc; n++ )
             os.write((char*)&p[n*mloc],sizeof(complex<double>)*ngwloc);
+          //fopen for ( int n = 0; n < nloc; n++ )
+          //fopen    fwrite(&p[n*mloc],sizeof(complex<double>),ngwloc,PEFILE);
           
           // if there are empty states, save occupation and eigenvalues
           if (ifempty) {
@@ -2083,13 +2086,15 @@ void Wavefunction::write_dump(string filebase) {
             const double* pocc = sd_[ispin][ikp]->occ_ptr();
             os.write((char*)&peig[0],sizeof(double)*nst);
             os.write((char*)&pocc[0],sizeof(double)*nst);
+            //fopen fwrite(&peig[0],sizeof(double),nst,PEFILE);
+            //fopen fwrite(&pocc[0],sizeof(double),nst,PEFILE);
           }
         }
       }
     }
   }  
   os.close();
-
+  //fopen fclose(PEFILE);
 
 }
 

@@ -1151,18 +1151,18 @@ void EhrenSampleStepper::step(int niter)
     // need eigenvalues to compute forces w. ultrasoft
     if (ultrasoft) { 
       ef_.energy(true,dwf,false,fion,false,sigma_eks);
-      tmap["diag"].start();
+      tmap["post_diag"].start();
       //s_.wf.diag(dwf,compute_eigvec);
       s_.wf.diag(dwf,true);
-      tmap["diag"].stop();
+      tmap["post_diag"].stop();
       s_.wf.printeig();
     }
 
     // compute ionic forces at last position to update velocities
     // consistently with last position
-    tmap["charge"].start();
+    tmap["post_charge"].start();
     cd_.update_density();
-    tmap["charge"].stop();
+    tmap["post_charge"].stop();
 
     ef_.update_vhxc();
     const bool compute_forces = true;
@@ -1205,9 +1205,9 @@ void EhrenSampleStepper::step(int niter)
 
   // compute ionic forces at last position to update velocities
   // consistently with last position
-  tmap["charge"].start();
+  tmap["post_charge"].start();
   cd_.update_density();
-  tmap["charge"].stop();
+  tmap["post_charge"].stop();
 
   ef_.update_vhxc();
   double energy =

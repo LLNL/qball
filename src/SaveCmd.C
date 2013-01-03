@@ -144,10 +144,15 @@ int SaveCmd::action(int argc, char **argv) {
   // binary output
   if (encoding == "dump" ) {
     s->wf.write_dump(filestr);
-
-    // ewd:  write rhor_last to file
-    if (!s->ctrl.tddft_involved)
+    if (s->ctrl.tddft_involved)
     {
+       // write s->hamil_wf
+       string hamwffile = filestr + "hamwf";
+       s->hamil_wf->write_dump(hamwffile);
+    }
+    else
+    {
+       // ewd:  write rhor_last to file
        ChargeDensity cd_(*s);
 
        const int nspin = s->wf.nspin();
@@ -229,8 +234,13 @@ int SaveCmd::action(int argc, char **argv) {
   else if (encoding == "states" ) {
     s->wf.write_states(filename,format);
 
-    // ewd:  write rhor_last to file
-    if (!s->ctrl.tddft_involved)
+    if (s->ctrl.tddft_involved)
+    {
+       // write s->hamil_wf
+       string hamwffile = filestr + "hamwf";
+       s->hamil_wf->write_states(hamwffile,format);
+    }
+    else
     {
        ChargeDensity cd_(*s);
 

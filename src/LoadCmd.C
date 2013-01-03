@@ -85,9 +85,18 @@ int LoadCmd::action(int argc, char **argv) {
     if (s->ctrl.ultrasoft)
       s->wf.init_usfns(&s->atoms);
       
-    // ewd:  read rhor_last from file, send to appropriate pes
-    if (! s->ctrl.tddft_involved)
+    if (s->ctrl.tddft_involved)
     {
+        string hamwffile = filestr + "hamwf";
+        if ( s->hamil_wf == 0 ) {
+          s->hamil_wf = new Wavefunction(s->wf);
+          s->hamil_wf->clear();
+        }
+        s->hamil_wf->read_dump(hamwffile);
+    }
+    else
+    {
+       // ewd:  read rhor_last from file, send to appropriate pes
        ChargeDensity cd_(*s);
        cd_.update_density();
 
@@ -209,9 +218,18 @@ int LoadCmd::action(int argc, char **argv) {
     if (s->ctrl.ultrasoft)
       s->wf.init_usfns(&s->atoms);
 
-    // ewd:  read rhor_last from file, send to appropriate pes
-    if (! s->ctrl.tddft_involved)
+    if (s->ctrl.tddft_involved)
     {
+        string hamwffile = filestr + "hamwf";
+        if ( s->hamil_wf == 0 ) {
+          s->hamil_wf = new Wavefunction(s->wf);
+          s->hamil_wf->clear();
+        }
+        s->hamil_wf->read_states(hamwffile);
+    }
+    else
+    {
+       // ewd:  read rhor_last from file, send to appropriate pes
        ChargeDensity cd_(*s);
        cd_.update_density();
 
