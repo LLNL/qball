@@ -90,7 +90,9 @@ int LoadCmd::action(int argc, char **argv) {
         string hamwffile = filestr + "hamwf";
         if ( s->hamil_wf == 0 ) {
           s->hamil_wf = new Wavefunction(s->wf);
-          s->hamil_wf->clear();
+          (*s->hamil_wf) = s->wf;
+          (*s->hamil_wf).update_occ(0.0,0);
+          //s->hamil_wf->clear();
         }
         s->hamil_wf->read_dump(hamwffile);
     }
@@ -223,7 +225,9 @@ int LoadCmd::action(int argc, char **argv) {
         string hamwffile = filestr + "hamwf";
         if ( s->hamil_wf == 0 ) {
           s->hamil_wf = new Wavefunction(s->wf);
-          s->hamil_wf->clear();
+          (*s->hamil_wf) = s->wf;
+          (*s->hamil_wf).update_occ(0.0,0);
+          //s->hamil_wf->clear();
         }
         s->hamil_wf->read_states(hamwffile);
     }

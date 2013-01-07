@@ -39,7 +39,7 @@ class Sample {
   SymmetrySet symmetries;
   vector<vector<complex<double> > > rhog_last; // previous charge density (to avoid discontinuity in restart)
 
-  Sample(const Context& ctxt) : ctxt_(ctxt), atoms(ctxt), wf(ctxt), wfv(0), hamil_wf(&wf),
+  Sample(const Context& ctxt) : ctxt_(ctxt), atoms(ctxt), wf(ctxt), wfv(0), hamil_wf(0),
       symmetries(ctxt), constraints(ctxt) { ctrl.sigmas = 0.5; ctrl.facs = 2.0; }
   ~Sample(void) { delete wfv; }
   void reset(void)

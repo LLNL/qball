@@ -146,6 +146,8 @@ int SaveCmd::action(int argc, char **argv) {
     s->wf.write_dump(filestr);
     if (s->ctrl.tddft_involved)
     {
+       if ( ui->oncoutpe() )
+          cout << "<!-- SaveCmd:  wf write finished, writing hamil_wf... -->" << endl;
        // write s->hamil_wf
        string hamwffile = filestr + "hamwf";
        s->hamil_wf->write_dump(hamwffile);
