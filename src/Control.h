@@ -92,6 +92,8 @@ struct Control
   double ecutden;
     
   int extra_memory;  // guides use of extra memory to speed computation
+
+  int mditer; // store global iteration count to help with checkpointing
     
 };
 #endif

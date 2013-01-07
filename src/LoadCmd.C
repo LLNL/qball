@@ -78,7 +78,7 @@ int LoadCmd::action(int argc, char **argv) {
 
   /////  DUMP CHECKPOINTING  /////
   if (encoding == "dump" ) {
-    s->wf.read_dump(filestr);
+     s->wf.read_dump(filestr,s->ctrl.mditer);
 
     if (s->ctrl.extra_memory >= 3)
       s->wf.set_highmem();    
@@ -94,7 +94,8 @@ int LoadCmd::action(int argc, char **argv) {
           (*s->hamil_wf).update_occ(0.0,0);
           //s->hamil_wf->clear();
         }
-        s->hamil_wf->read_dump(hamwffile);
+        int tmp;
+        s->hamil_wf->read_dump(hamwffile,tmp);
     }
     else
     {
@@ -199,7 +200,8 @@ int LoadCmd::action(int argc, char **argv) {
           s->wfv = new Wavefunction(s->wf);
           s->wfv->clear();
         }
-        s->wfv->read_dump(wfvfile);
+        int tmp;
+        s->wfv->read_dump(wfvfile,tmp);
       }
       else {
         if ( ui->oncoutpe() )
@@ -213,7 +215,7 @@ int LoadCmd::action(int argc, char **argv) {
   }
   /////  STATES CHECKPOINTING  /////
   else if (encoding == "states" ) {
-    s->wf.read_states(filestr);
+     s->wf.read_states(filestr,s->ctrl.mditer);
 
     if (s->ctrl.extra_memory >= 3)
       s->wf.set_highmem();    
@@ -229,7 +231,8 @@ int LoadCmd::action(int argc, char **argv) {
           (*s->hamil_wf).update_occ(0.0,0);
           //s->hamil_wf->clear();
         }
-        s->hamil_wf->read_states(hamwffile);
+        int tmp;
+        s->hamil_wf->read_states(hamwffile,tmp);
     }
     else
     {
@@ -335,7 +338,8 @@ int LoadCmd::action(int argc, char **argv) {
           s->wfv = new Wavefunction(s->wf);
           s->wfv->clear();
         }
-        s->wfv->read_states(wfvfile);
+        int tmp;
+        s->wfv->read_states(wfvfile,tmp);
       }
       else {
         if ( ui->oncoutpe() )

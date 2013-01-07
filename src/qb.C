@@ -124,6 +124,7 @@ using namespace std;
 #include "RunTimer.h"
 #include "HubbardU.h"
 #include "Memory.h"
+#include "MDIter.h"
 #include "profile.h"
 
 #ifdef USE_CTF
@@ -376,6 +377,7 @@ int main(int argc, char **argv, char **envp)
   ui->addVar(new RunTimer(s));
   ui->addVar(new HubbardU(s));
   ui->addVar(new Memory(s));
+  ui->addVar(new MDIter(s));
   ui->addVar(new Force_Complex_WF(s));
   ui->addVar(new Non_Selfconsistent_Energy_Output(s));
   ui->addVar(new TDDt(s));

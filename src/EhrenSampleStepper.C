@@ -1100,6 +1100,10 @@ void EhrenSampleStepper::step(int niter)
     }
     if ( atoms_move )
        s_.constraints.update_constraints(dt);
+
+    if ( atoms_move )
+       s_.ctrl.mditer++;
+
   } // for iter
 
   tmap["total_niter"].stop();

@@ -2032,7 +2032,7 @@ void Wavefunction::write(SharedFilePtr& sfp, string encoding, string tag) const 
     }
 }
 ////////////////////////////////////////////////////////////////////////////////
-void Wavefunction::write_dump(string filebase) {
+void Wavefunction::write_dump(string filebase, int mditer) {
 
   // make unique filename for each process by appending process number to filename
 
@@ -2096,10 +2096,17 @@ void Wavefunction::write_dump(string filebase) {
   os.close();
   //fopen fclose(PEFILE);
 
+  // write out mditer
+  string mditerfile = filebase + ".mditer";
+  ofstream osmd;
+  osmd.open(mditerfile.c_str());
+  osmd.write((char*)&mditer,sizeof(int));
+  osmd.close();
+  
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-void Wavefunction::read_dump(string filebase) {
+void Wavefunction::read_dump(string filebase, int& mditer) {
 
   if (!hasdata_) {
     hasdata_ = true;
@@ -2163,16 +2170,35 @@ void Wavefunction::read_dump(string filebase) {
         }
       }
     }  
+
+    // check for mditer file
+    if (mditer > -1)
+    {
+       string mditerfile = filebase + ".mditer";
+       ifstream ismd;
+       ismd.open(mditerfile.c_str());
+       int mdtmp = -1;
+       if (ismd.is_open()) {
+          ismd.read((char*)&mdtmp,sizeof(int));
+          ismd.close();
+       }
+       if (mdtmp > 0 && mdtmp < 999999999)
+       {
+          mditer = mdtmp;
+          if ( ctxt_.oncoutpe())
+             cout << "<!-- LoadCmd:  setting MD iteration count to " << mditer << ". -->" << endl;       
+       }
+    }
   }
   else {
-    if ( ctxt_.oncoutpe())
-      cout << "<!-- LoadCmd:  checkpoint files not found, skipping load. -->" << endl;
+     if ( ctxt_.oncoutpe())
+        cout << "<!-- LoadCmd:  checkpoint files not found, skipping load. -->" << endl;
   }
   is.close();
-
+  
 }
 ////////////////////////////////////////////////////////////////////////////////
-void Wavefunction::write_states(string filebase, string format) {
+void Wavefunction::write_states(string filebase, string format, int mditer) {
   for ( int ispin = 0; ispin < nspin_; ispin++ ) {
     if (spinactive(ispin)) {
       for ( int ikp = 0; ikp < sdcontext_[ispin].size(); ikp++ ) {
@@ -2347,10 +2373,17 @@ void Wavefunction::write_states(string filebase, string format) {
     }
   }
 
+  // write out mditer
+  string mditerfile = filebase + ".mditer";
+  ofstream osmd;
+  osmd.open(mditerfile.c_str());
+  osmd.write((char*)&mditer,sizeof(int));
+  osmd.close();
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-void Wavefunction::read_states(string filebase) {
+void Wavefunction::read_states(string filebase, int& mditer) {
 
   if (!hasdata_) {
     hasdata_ = true;
@@ -2526,6 +2559,25 @@ void Wavefunction::read_states(string filebase) {
         }
       }
     }
+  }
+
+  // check for mditer file
+  if (mditer > -1)
+  {
+     string mditerfile = filebase + ".mditer";
+     ifstream ismd;
+     ismd.open(mditerfile.c_str());
+     int mdtmp = -1;
+     if (ismd.is_open()) {
+        ismd.read((char*)&mdtmp,sizeof(int));
+        ismd.close();
+     }
+     if (mdtmp > 0 && mdtmp < 999999999)
+     {
+        mditer = mdtmp;
+        if ( ctxt_.oncoutpe())
+           cout << "<!-- LoadCmd:  setting MD iteration count to " << mditer << ". -->" << endl;       
+     }
   }
   
 }

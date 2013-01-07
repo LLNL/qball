@@ -143,14 +143,14 @@ int SaveCmd::action(int argc, char **argv) {
 
   // binary output
   if (encoding == "dump" ) {
-    s->wf.write_dump(filestr);
+     s->wf.write_dump(filestr,s->ctrl.mditer);
     if (s->ctrl.tddft_involved)
     {
        if ( ui->oncoutpe() )
           cout << "<!-- SaveCmd:  wf write finished, writing hamil_wf... -->" << endl;
        // write s->hamil_wf
        string hamwffile = filestr + "hamwf";
-       s->hamil_wf->write_dump(hamwffile);
+       s->hamil_wf->write_dump(hamwffile,-1);
     }
     else
     {
@@ -217,7 +217,7 @@ int SaveCmd::action(int argc, char **argv) {
       const bool compute_forces = ( atoms_dyn != "LOCKED" );
       if (compute_forces) {
         string wfvfile = filestr + "wfv";
-        s->wfv->write_dump(wfvfile);
+        s->wfv->write_dump(wfvfile,-1);
       }
       else {
         if ( ui->oncoutpe() )
@@ -234,13 +234,13 @@ int SaveCmd::action(int argc, char **argv) {
         cout << "<!-- SaveCmd:  " << format << " flag only used with -states output, ignoring. -->" << endl;  }
 
   else if (encoding == "states" ) {
-    s->wf.write_states(filename,format);
+     s->wf.write_states(filename,format,s->ctrl.mditer);
 
     if (s->ctrl.tddft_involved)
     {
        // write s->hamil_wf
        string hamwffile = filestr + "hamwf";
-       s->hamil_wf->write_states(hamwffile,format);
+       s->hamil_wf->write_states(hamwffile,format,-1);
     }
     else
     {
@@ -305,7 +305,7 @@ int SaveCmd::action(int argc, char **argv) {
       const bool compute_forces = ( atoms_dyn != "LOCKED" );
       if (compute_forces) {
         string wfvfile = filestr + "wfv";
-        s->wfv->write_states(wfvfile,format);
+        s->wfv->write_states(wfvfile,format,-1);
       }
       else {
         if ( ui->oncoutpe() )
