@@ -2097,12 +2097,16 @@ void Wavefunction::write_dump(string filebase, int mditer) {
   //fopen fclose(PEFILE);
 
   // write out mditer
-  string mditerfile = filebase + ".mditer";
-  ofstream osmd;
-  osmd.open(mditerfile.c_str());
-  osmd.write((char*)&mditer,sizeof(int));
-  osmd.close();
-  
+  if (mype == 0)
+  {
+     cout << "<!-- Wavefunction::write_dump, writing mditer to file:  " << mditer << " -->" << endl;
+     string mditerfile = filebase + ".mditer";
+     ofstream osmd;
+     osmd.open(mditerfile.c_str());
+     osmd << mditer << endl;
+     osmd.flush();
+     osmd.close();
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -2199,6 +2203,12 @@ void Wavefunction::read_dump(string filebase, int& mditer) {
 }
 ////////////////////////////////////////////////////////////////////////////////
 void Wavefunction::write_states(string filebase, string format, int mditer) {
+  int mype;
+#if USE_MPI
+  MPI_Comm_rank(MPI_COMM_WORLD,&mype);
+#else
+  mype = 0;
+#endif
   for ( int ispin = 0; ispin < nspin_; ispin++ ) {
     if (spinactive(ispin)) {
       for ( int ikp = 0; ikp < sdcontext_[ispin].size(); ikp++ ) {
@@ -2374,12 +2384,16 @@ void Wavefunction::write_states(string filebase, string format, int mditer) {
   }
 
   // write out mditer
-  string mditerfile = filebase + ".mditer";
-  ofstream osmd;
-  osmd.open(mditerfile.c_str());
-  osmd.write((char*)&mditer,sizeof(int));
-  osmd.close();
-
+  if (mype == 0)
+  {
+     cout << "<!-- Wavefunction::write_states, writing mditer to file:  " << mditer << " -->" << endl;
+     string mditerfile = filebase + ".mditer";
+     ofstream osmd;
+     osmd.open(mditerfile.c_str());
+     osmd << mditer << endl;
+     osmd.flush();
+     osmd.close();
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////

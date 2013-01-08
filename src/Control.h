@@ -82,6 +82,7 @@ struct Control
   double run_timer;  // total maximum run time in seconds
   double time_init;
   bool timer_hit;
+  bool timer_mdsavecmd;
   bool timer_savecmd;
   bool timer_savesyscmd;
     

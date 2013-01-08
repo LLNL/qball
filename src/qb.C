@@ -41,6 +41,7 @@ using namespace std;
 #include "RandomizeRealWfCmd.h"
 #include "RandomizeVelCmd.h"
 #include "RunCmd.h"
+#include "MDSaveCmd.h"
 #include "SaveCmd.h"
 #include "SavesysCmd.h"
 #include "SavedenCmd.h"
@@ -290,6 +291,7 @@ int main(int argc, char **argv, char **envp)
   //store timing for run_timer
   s->ctrl.time_init = MPI_Wtime();
   s->ctrl.timer_hit = false;
+  s->ctrl.timer_mdsavecmd = false;
   s->ctrl.timer_savecmd = false;
   s->ctrl.timer_savesyscmd = false;
   
@@ -307,6 +309,7 @@ int main(int argc, char **argv, char **envp)
   ui->addCmd(new RandomizeRealWfCmd(s));
   ui->addCmd(new RandomizeVelCmd(s));
   ui->addCmd(new RunCmd(s));
+  ui->addCmd(new MDSaveCmd(s));
   ui->addCmd(new SaveCmd(s));
   ui->addCmd(new SavesysCmd(s));
   ui->addCmd(new SavedenCmd(s));
