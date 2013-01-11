@@ -2196,7 +2196,7 @@ void Wavefunction::read_dump(string filebase, int& mditer) {
   }
   else {
      if ( ctxt_.oncoutpe())
-        cout << "<!-- LoadCmd:  checkpoint files not found, skipping load. -->" << endl;
+        cout << "<!-- LoadCmd: " << filebase << " checkpoint files not found, skipping load. -->" << endl;
   }
   is.close();
   
@@ -2462,7 +2462,7 @@ void Wavefunction::read_states(string filebase, int& mditer) {
                     }
                     else { // file not found
                       if ( ctxt_.oncoutpe() && n == 0 && ikp == 0 && kloc == 0)
-                        cout << "<!-- LoadCmd:  checkpoint files not found, skipping load. -->" << endl;
+                         cout << "<!-- LoadCmd: " << filebase << " checkpoint files not found, skipping load. -->" << endl;
 
                       for ( int i = 0; i < tctxt->nprow(); i++ ) {
                         int size = -1;
