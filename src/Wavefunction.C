@@ -2183,7 +2183,8 @@ void Wavefunction::read_dump(string filebase, int& mditer) {
        ismd.open(mditerfile.c_str());
        int mdtmp = -1;
        if (ismd.is_open()) {
-          ismd.read((char*)&mdtmp,sizeof(int));
+          ismd >> mdtmp;
+          //ismd.read((char*)&mdtmp,sizeof(int));
           ismd.close();
        }
        if (mdtmp > 0 && mdtmp < 999999999)
@@ -2583,7 +2584,8 @@ void Wavefunction::read_states(string filebase, int& mditer) {
      ismd.open(mditerfile.c_str());
      int mdtmp = -1;
      if (ismd.is_open()) {
-        ismd.read((char*)&mdtmp,sizeof(int));
+        //ismd.read((char*)&mdtmp,sizeof(int));
+        ismd >> mdtmp;
         ismd.close();
      }
      if (mdtmp > 0 && mdtmp < 999999999)

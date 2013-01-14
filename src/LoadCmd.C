@@ -94,7 +94,7 @@ int LoadCmd::action(int argc, char **argv) {
           (*s->hamil_wf).update_occ(0.0,0);
           //s->hamil_wf->clear();
         }
-        int tmp;
+        int tmp = -1;
         s->hamil_wf->read_dump(hamwffile,tmp);
     }
     else
@@ -231,7 +231,7 @@ int LoadCmd::action(int argc, char **argv) {
           (*s->hamil_wf).update_occ(0.0,0);
           //s->hamil_wf->clear();
         }
-        int tmp;
+        int tmp = -1;
         s->hamil_wf->read_states(hamwffile,tmp);
     }
     else

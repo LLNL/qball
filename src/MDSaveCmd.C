@@ -120,13 +120,15 @@ int MDSaveCmd::action(int argc, char **argv) {
 
   // binary output
   if (encoding == "dump" ) {
+     if ( ui->oncoutpe() )
+        cout << "<!-- MDSaveCmd:  writing wf to " << filestr << "... -->" << endl;
      s->wf.write_dump(filestr,s->ctrl.mditer);
      if (s->ctrl.tddft_involved)
      {
-        if ( ui->oncoutpe() )
-           cout << "<!-- MDSaveCmd:  wf write finished, writing hamil_wf... -->" << endl;
-        // write s->hamil_wf
         string hamwffile = filestr + "hamwf";
+        if ( ui->oncoutpe() )
+           cout << "<!-- MDSaveCmd:  wf write finished, writing hamil_wf to " << hamwffile << "... -->" << endl;
+        // write s->hamil_wf
         s->hamil_wf->write_dump(hamwffile,-1);
      }
      else
@@ -190,12 +192,16 @@ int MDSaveCmd::action(int argc, char **argv) {
      }
   }    
   else if (encoding == "states" ) {
+     if ( ui->oncoutpe() )
+        cout << "<!-- MDSaveCmd:  writing wf to " << filestr << "... -->" << endl;
      s->wf.write_states(filename,format,s->ctrl.mditer);
      
      if (s->ctrl.tddft_involved)
      {
         // write s->hamil_wf
         string hamwffile = filestr + "hamwf";
+        if ( ui->oncoutpe() )
+           cout << "<!-- MDSaveCmd:  wf write finished, writing hamil_wf to " << hamwffile << "... -->" << endl;
         s->hamil_wf->write_states(hamwffile,format,-1);
      }
      else
