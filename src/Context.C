@@ -187,12 +187,12 @@ struct ContextRep
   
   void dsend(int m, int n, double* a, int lda, int rdest, int cdest) const
   {
-    Cdgesd2d(ictxt_,m,n,a,lda,rdest,cdest);
+     Cdgesd2d(ictxt_,m,n,a,lda,rdest,cdest);
   }
  
   void drecv(int m, int n, double* a, int lda, int rsrc, int csrc) const
   {
-    Cdgerv2d(ictxt_,m,n,a,lda,rsrc,csrc);
+     Cdgerv2d(ictxt_,m,n,a,lda,rsrc,csrc);
   }
  
   void dsum(char scope, char topology, int m, int n, double* a, int lda,
@@ -298,7 +298,8 @@ struct ContextRep
     if ( len%(sizeof(int)/sizeof(char)) != 0 ) ilen++;
     int* ibuf = new int[ilen];
     s.copy((char*)ibuf,string::npos);
-    isend(ilen,1,ibuf,1,rdest,cdest);
+    //isend(ilen,1,ibuf,1,rdest,cdest);
+    isend(ilen,1,ibuf,ilen,rdest,cdest);
     delete [] ibuf;
 #endif
   }
@@ -311,7 +312,8 @@ struct ContextRep
     int ilen = len/(sizeof(int)/sizeof(char));
     if ( len%(sizeof(int)/sizeof(char)) != 0 ) ilen++;
     int* ibuf = new int[ilen];
-    irecv(ilen,1,ibuf,1,rsrc,csrc);
+    //irecv(ilen,1,ibuf,1,rsrc,csrc);
+    irecv(ilen,1,ibuf,ilen,rsrc,csrc);
     s.resize(len);
     s.assign((char*)ibuf,len);
     delete [] ibuf;
@@ -394,7 +396,7 @@ ContextRep::ContextRep() : ictxt_(-1), myrow_(-1), mycol_(-1)
   myproc_ = myrow_ < 0 ? -1 : mycol_ + npcol_ * myrow_;
   onpe0_ = ( mype_ == 0 );
   coutpe_ = 0;
-  oncoutpe_ = oncoutpe_;
+  oncoutpe_ = onpe0_;
   active_ = ( ictxt_ >= 0 );
 
   pmap_.resize(size_);
@@ -437,7 +439,7 @@ ContextRep::ContextRep(int nprow, int npcol) :
   myproc_ = Cblacs_pnum(ictxt_,myrow_,mycol_);
   onpe0_ = ( mype_ == 0 );
   coutpe_ = 0;
-  oncoutpe_ = oncoutpe_;
+  oncoutpe_ = onpe0_;
   active_ = ( ictxt_ >= 0 );
   
   pmap_.resize(size_);
@@ -602,7 +604,7 @@ ictxt_(-1), myrow_(-1), mycol_(-1), nprow_(nprow), npcol_(npcol) {
   myproc_ = Cblacs_pnum(ictxt_,myrow_,mycol_);
   onpe0_ = ( mype_ == 0 );
   coutpe_ = 0;
-  oncoutpe_ = oncoutpe_;
+  oncoutpe_ = onpe0_;
   active_ = ( ictxt_ >= 0 );
 
   pmap_.resize(size_);
@@ -770,7 +772,7 @@ int Context::pmap(int irow, int icol) const
 { return (*pimpl_)->pmap(irow,icol); }
 
 ////////////////////////////////////////////////////////////////////////////////
-bool Context::onpe0(void) const { return (*pimpl_)->onpe0(); }
+bool Context::oncoutpe(void) const { return (*pimpl_)->oncoutpe(); }
 
 ////////////////////////////////////////////////////////////////////////////////
 int Context::coutpe(void) const { return (*pimpl_)->coutpe(); }
@@ -779,7 +781,7 @@ int Context::coutpe(void) const { return (*pimpl_)->coutpe(); }
 void Context::set_coutpe(int num) { (*pimpl_)->set_coutpe(num); }
 
 ////////////////////////////////////////////////////////////////////////////////
-bool Context::oncoutpe(void) const { return (*pimpl_)->oncoutpe(); }
+bool Context::onpe0(void) const { return (*pimpl_)->onpe0(); }
 
 ////////////////////////////////////////////////////////////////////////////////
 bool Context::active(void) const { return (*pimpl_)->active(); }

@@ -2074,8 +2074,13 @@ void Wavefunction::write_dump(string filebase, int mditer) {
           int nloc = sd_[ispin][ikp]->c().nloc();
           int ngwloc = sd_[ispin][ikp]->basis().localsize();
           const complex<double>* p = sd_[ispin][ikp]->c().cvalptr();
-          for ( int n = 0; n < nloc; n++ )
-            os.write((char*)&p[n*mloc],sizeof(complex<double>)*ngwloc);
+
+          // implement single large write for less I/O node contention on BG/Q
+          //for ( int n = 0; n < nloc; n++ )
+          //   os.write((char*)&p[n*mloc],sizeof(complex<double>)*ngwloc);
+
+          os.write((char*)&p[0],sizeof(complex<double>)*nloc*mloc);
+
           //fopen for ( int n = 0; n < nloc; n++ )
           //fopen    fwrite(&p[n*mloc],sizeof(complex<double>),ngwloc,PEFILE);
           
