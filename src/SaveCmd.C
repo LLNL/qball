@@ -36,6 +36,7 @@ int SaveCmd::action(int argc, char **argv) {
       cout << "  <!-- use: save [encoding options] [state format options] filename   -->" << endl;
       cout << "  <!--     encoding options:                                          -->" << endl;
       cout << "  <!--       -dump:  one binary file for each process                 -->" << endl;
+      cout << "  <!--       -fast:  one binary file for each I/O node                 -->" << endl;
       cout << "  <!--       -states:  one file for each state                        -->" << endl;
       cout << "  <!--       -xml:  entire system in one xml file (Gamma-point only)  -->" << endl;
       cout << "  <!--       -casino:  wavefunction in CASINO trial function format  -->" << endl;
@@ -64,6 +65,8 @@ int SaveCmd::action(int argc, char **argv) {
     
     if ( arg=="-dump" )
       encoding = "dump";
+    else if ( arg=="-fast" )
+      encoding = "fast";
     else if ( arg=="-states" )
       encoding = "states";
     else if ( arg=="-xml" )
@@ -145,14 +148,15 @@ int SaveCmd::action(int argc, char **argv) {
   if (encoding == "dump" ) {
      if ( ui->oncoutpe() )
         cout << "<!-- SaveCmd:  writing wf " << filestr << "... -->" << endl;
-     s->wf.write_dump(filestr,s->ctrl.mditer);
-    if (s->ctrl.tddft_involved)
-    {
+     s->wf.write_dump(filestr);
+     s->wf.write_mditer(filestr,s->ctrl.mditer);
+     if (s->ctrl.tddft_involved)
+     {
        // write s->hamil_wf
        string hamwffile = filestr + "hamwf";
        if ( ui->oncoutpe() )
           cout << "<!-- SaveCmd:  wf write finished, writing hamil_wf " << hamwffile << "... -->" << endl;
-       s->hamil_wf->write_dump(hamwffile,-1);
+       s->hamil_wf->write_dump(hamwffile);
     }
     else
     {
@@ -219,7 +223,7 @@ int SaveCmd::action(int argc, char **argv) {
       const bool compute_forces = ( atoms_dyn != "LOCKED" );
       if (compute_forces) {
         string wfvfile = filestr + "wfv";
-        s->wfv->write_dump(wfvfile,-1);
+        s->wfv->write_dump(wfvfile);
       }
       else {
         if ( ui->oncoutpe() )
@@ -235,10 +239,108 @@ int SaveCmd::action(int argc, char **argv) {
       if ( ui->oncoutpe() )
         cout << "<!-- SaveCmd:  " << format << " flag only used with -states output, ignoring. -->" << endl;  }
 
+  // binary output
+  else if (encoding == "fast" ) {
+     if ( ui->oncoutpe() )
+        cout << "<!-- SaveCmd:  writing wf " << filestr << "... -->" << endl;
+     s->wf.write_fast(filestr);
+     s->wf.write_mditer(filestr,s->ctrl.mditer);
+     if (s->ctrl.tddft_involved)
+     {
+       // write s->hamil_wf
+       string hamwffile = filestr + "hamwf";
+       if ( ui->oncoutpe() )
+          cout << "<!-- SaveCmd:  wf write finished, writing hamil_wf " << hamwffile << "... -->" << endl;
+       s->hamil_wf->write_fast(hamwffile);
+    }
+    else
+    {
+       // ewd:  write rhor_last to file
+       ChargeDensity cd_(*s);
+
+       const int nspin = s->wf.nspin();
+       // load mixed charge density into cd_
+       for (int ispin = 0; ispin < nspin; ispin++) {
+          for ( int i=0; i < s->rhog_last[ispin].size(); i++ )
+             cd_.rhog[ispin][i] = s->rhog_last[ispin][i];
+       }
+       cd_.update_rhor();
+       
+       const Context* wfctxt = s->wf.wfcontext();
+       const Context* vctxt = &cd_.vcontext();
+       FourierTransform* ft_ = cd_.vft();
+       for (int ispin = 0; ispin < nspin; ispin++) {
+          if (wfctxt->mycol() == 0) {
+             vector<double> rhortmp(ft_->np012loc());
+             for (int j = 0; j < ft_->np012loc(); j++)
+                rhortmp[j] = cd_.rhor[ispin][j];
+
+             ofstream os;
+             string rhorfile;
+             if (nspin == 1)
+                rhorfile = filestr + ".lastrhor";
+             else {
+                ostringstream oss;
+                oss.width(1);  oss.fill('0');  oss << ispin;
+                rhorfile = filestr + ".s" + oss.str() + ".lastrhor";
+             }
+             
+             if (wfctxt->onpe0()) {
+                os.open(rhorfile.c_str(),ofstream::binary);
+                // hack to make checkpointing work w. BlueGene compilers
+#ifdef BGQ
+                os.write(rhorfile.c_str(),sizeof(char)*rhorfile.length());
+#endif
+                
+             }
+             for ( int i = 0; i < wfctxt->nprow(); i++ ) {
+                if ( i == wfctxt->myrow() ) {
+                   int size = ft_->np012loc();
+                   wfctxt->isend(1,1,&size,1,0,0);
+                   wfctxt->dsend(size,1,&rhortmp[0],1,0,0);
+                }
+             }
+             if ( wfctxt->onpe0() ) {
+                for ( int i = 0; i < wfctxt->nprow(); i++ ) {
+                   int size = 0;
+                   wfctxt->irecv(1,1,&size,1,i,0);
+                   wfctxt->drecv(size,1,&rhortmp[0],1,i,0);
+                   os.write((char*)&rhortmp[0],sizeof(double)*size);
+                }
+                os.close();
+             }
+          }
+       }
+    }
+    
+    if (writevel) { 
+      const string atoms_dyn = s->ctrl.atoms_dyn;
+      const bool compute_forces = ( atoms_dyn != "LOCKED" );
+      if (compute_forces) {
+        string wfvfile = filestr + "wfv";
+        s->wfv->write_fast(wfvfile);
+      }
+      else {
+        if ( ui->oncoutpe() )
+          cout << "<WARNING>SaveCmd:  wavefunction velocities only available when atoms_dyn set, not saving.</WARNING>" << endl;
+      }
+    }
+
+    if (atomsonly)
+      if ( ui->oncoutpe() )
+        cout << "<!-- SaveCmd:  atomsonly flag only used with xml output, ignoring. -->" << endl;
+
+    if (format != "binary" )
+      if ( ui->oncoutpe() )
+        cout << "<!-- SaveCmd:  " << format << " flag only used with -states output, ignoring. -->" << endl;
+    
+  }
+
   else if (encoding == "states" ) {
      if ( ui->oncoutpe() )
         cout << "<!-- SaveCmd:  writing wf " << filestr << "... -->" << endl;
-     s->wf.write_states(filename,format,s->ctrl.mditer);
+     s->wf.write_states(filename,format);
+     s->wf.write_mditer(filestr,s->ctrl.mditer);
 
     if (s->ctrl.tddft_involved)
     {
@@ -246,7 +348,7 @@ int SaveCmd::action(int argc, char **argv) {
        string hamwffile = filestr + "hamwf";
        if ( ui->oncoutpe() )
           cout << "<!-- SaveCmd:  wf write finished, writing hamil_wf " << hamwffile << "... -->" << endl;
-       s->hamil_wf->write_states(hamwffile,format,-1);
+       s->hamil_wf->write_states(hamwffile,format);
     }
     else
     {
@@ -311,7 +413,7 @@ int SaveCmd::action(int argc, char **argv) {
       const bool compute_forces = ( atoms_dyn != "LOCKED" );
       if (compute_forces) {
         string wfvfile = filestr + "wfv";
-        s->wfv->write_states(wfvfile,format,-1);
+        s->wfv->write_states(wfvfile,format);
       }
       else {
         if ( ui->oncoutpe() )

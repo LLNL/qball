@@ -45,6 +45,7 @@ int MDSaveCmd::action(int argc, char **argv) {
   // set default encoding and format
   string format = "binary";
   string encoding = "dump";
+  //string encoding = "fast";
   string dirbase = "md.";
   char* filename = "mdchk";
 
@@ -56,6 +57,8 @@ int MDSaveCmd::action(int argc, char **argv) {
       encoding = "dump";
     else if ( arg=="-states" )
       encoding = "states";
+    else if ( arg=="-fast" )
+      encoding = "fast";
     else if ( arg=="-binary" )
       format = "binary";
     else if ( arg[0] != '-' && i == argc-1 )
@@ -122,14 +125,89 @@ int MDSaveCmd::action(int argc, char **argv) {
   if (encoding == "dump" ) {
      if ( ui->oncoutpe() )
         cout << "<!-- MDSaveCmd:  writing wf to " << filestr << "... -->" << endl;
-     s->wf.write_dump(filestr,s->ctrl.mditer);
+     s->wf.write_dump(filestr);
+     s->wf.write_mditer(filestr,s->ctrl.mditer);
      if (s->ctrl.tddft_involved)
      {
         string hamwffile = filestr + "hamwf";
         if ( ui->oncoutpe() )
            cout << "<!-- MDSaveCmd:  wf write finished, writing hamil_wf to " << hamwffile << "... -->" << endl;
         // write s->hamil_wf
-        s->hamil_wf->write_dump(hamwffile,-1);
+        s->hamil_wf->write_dump(hamwffile);
+     }
+     else
+     {
+        // ewd:  write rhor_last to file
+        ChargeDensity cd_(*s);
+
+        const int nspin = s->wf.nspin();
+        // load mixed charge density into cd_
+        for (int ispin = 0; ispin < nspin; ispin++) {
+           for ( int i=0; i < s->rhog_last[ispin].size(); i++ )
+              cd_.rhog[ispin][i] = s->rhog_last[ispin][i];
+        }
+        cd_.update_rhor();
+       
+        const Context* wfctxt = s->wf.wfcontext();
+        const Context* vctxt = &cd_.vcontext();
+        FourierTransform* ft_ = cd_.vft();
+        for (int ispin = 0; ispin < nspin; ispin++) {
+           if (wfctxt->mycol() == 0) {
+              vector<double> rhortmp(ft_->np012loc());
+              for (int j = 0; j < ft_->np012loc(); j++)
+                 rhortmp[j] = cd_.rhor[ispin][j];
+
+              ofstream os;
+              string rhorfile;
+              if (nspin == 1)
+                 rhorfile = filestr + ".lastrhor";
+              else {
+                 ostringstream oss;
+                 oss.width(1);  oss.fill('0');  oss << ispin;
+                 rhorfile = filestr + ".s" + oss.str() + ".lastrhor";
+              }
+             
+              if (wfctxt->onpe0()) {
+                 os.open(rhorfile.c_str(),ofstream::binary);
+                 // hack to make checkpointing work w. BlueGene compilers
+#ifdef BGQ
+                 os.write(rhorfile.c_str(),sizeof(char)*rhorfile.length());
+#endif
+                
+              }
+              for ( int i = 0; i < wfctxt->nprow(); i++ ) {
+                 if ( i == wfctxt->myrow() ) {
+                    int size = ft_->np012loc();
+                    wfctxt->isend(1,1,&size,1,0,0);
+                    wfctxt->dsend(size,1,&rhortmp[0],1,0,0);
+                 }
+              }
+              if ( wfctxt->onpe0() ) {
+                 for ( int i = 0; i < wfctxt->nprow(); i++ ) {
+                    int size = 0;
+                    wfctxt->irecv(1,1,&size,1,i,0);
+                    wfctxt->drecv(size,1,&rhortmp[0],1,i,0);
+                    os.write((char*)&rhortmp[0],sizeof(double)*size);
+                 }
+                 os.close();
+              }
+           }
+        }
+     }
+  }    
+  // binary output
+  else if (encoding == "fast" ) {
+     if ( ui->oncoutpe() )
+        cout << "<!-- MDSaveCmd:  writing wf to " << filestr << "... -->" << endl;
+     s->wf.write_fast(filestr);
+     s->wf.write_mditer(filestr,s->ctrl.mditer);
+     if (s->ctrl.tddft_involved)
+     {
+        string hamwffile = filestr + "hamwf";
+        if ( ui->oncoutpe() )
+           cout << "<!-- MDSaveCmd:  wf write finished, writing hamil_wf to " << hamwffile << "... -->" << endl;
+        // write s->hamil_wf
+        s->hamil_wf->write_fast(hamwffile);
      }
      else
      {
@@ -194,7 +272,8 @@ int MDSaveCmd::action(int argc, char **argv) {
   else if (encoding == "states" ) {
      if ( ui->oncoutpe() )
         cout << "<!-- MDSaveCmd:  writing wf to " << filestr << "... -->" << endl;
-     s->wf.write_states(filename,format,s->ctrl.mditer);
+     s->wf.write_states(filename,format);
+     s->wf.write_mditer(filestr,s->ctrl.mditer);
      
      if (s->ctrl.tddft_involved)
      {
@@ -202,7 +281,7 @@ int MDSaveCmd::action(int argc, char **argv) {
         string hamwffile = filestr + "hamwf";
         if ( ui->oncoutpe() )
            cout << "<!-- MDSaveCmd:  wf write finished, writing hamil_wf to " << hamwffile << "... -->" << endl;
-        s->hamil_wf->write_states(hamwffile,format,-1);
+        s->hamil_wf->write_states(hamwffile,format);
      }
      else
      {

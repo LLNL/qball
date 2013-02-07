@@ -626,6 +626,13 @@ double EnergyFunctional::energy(bool compute_hpsi, Wavefunction& dwf,
           // nn = global n index
           const int nnbase = sdctxt.mycol() * c.nb();
           const double * const occ = sd.occ_ptr(nnbase);
+          const double *const kpg2  = wfbasis.kpg2_ptr();
+          const double *const kpg_x = wfbasis.kpgx_ptr(0);
+          const double *const kpg_y = wfbasis.kpgx_ptr(1);
+          const double *const kpg_z = wfbasis.kpgx_ptr(2);
+          tsum = 0.0;
+
+#pragma omp parallel for
           for ( int ig = 0; ig < ngwloc; ig++ ) {
             double tmpsum = 0.0;
             for ( int n = 0; n < nloc; n++ ) {
@@ -633,17 +640,8 @@ double EnergyFunctional::energy(bool compute_hpsi, Wavefunction& dwf,
               tmpsum += fac * occ[n] * psi2;
             }
             psi2sum[ig] = tmpsum;
-          }
         
-          // accumulate contributions to ekin,econf,sigma_ekin,sigma_econf in tsum
-          // Note: next lines to be changed to kpg_ptr for nkp>1
-          const double *const kpg2  = wfbasis.kpg2_ptr();
-          const double *const kpg_x = wfbasis.kpgx_ptr(0);
-          const double *const kpg_y = wfbasis.kpgx_ptr(1);
-          const double *const kpg_z = wfbasis.kpgx_ptr(2);
-          tsum = 0.0;
-          
-          for ( int ig = 0; ig < ngwloc; ig++ ) {
+            // accumulate contributions to ekin,econf,sigma_ekin,sigma_econf in tsum
             const double psi2s = psi2sum[ig];
             // tsum[0]: ekin partial sum
             tsum[0] += psi2s * kpg2[ig];
@@ -691,7 +689,7 @@ double EnergyFunctional::energy(bool compute_hpsi, Wavefunction& dwf,
               // tsum[7-13] contains the contributions to
               // econf,sigma_econf from vector ig
             } // ig
-          }            
+          }
           sum += weight * tsum;
         }
       }
@@ -1079,6 +1077,7 @@ double EnergyFunctional::energy(bool compute_hpsi, Wavefunction& dwf,
                //ewd:  OMP HERE?
                // AS: e_n are currently only hard-coded and renormalization is disabled by default
                // double as_renorm[4] = {-28.70987,-28.70987,-28.70987,-3.13510};
+#pragma omp parallel for
                for ( int n = 0; n < sd.nstloc(); n++ ) {
                 for ( int ig = 0; ig < ngwloc; ig++ ) {
                   cp[ig+mloc*n] += 0.5 * kpg2[ig] * c[ig+mloc*n];
@@ -1111,6 +1110,7 @@ double EnergyFunctional::energy(bool compute_hpsi, Wavefunction& dwf,
     const double* gx2 = vbasis_->gx_ptr(2);
     vector<complex<double> > trhog;
     for ( int is = 0; is < nsp_; is++ ) {
+#pragma omp parallel for
        for ( int ig = 0; ig < ngloc; ig++ ) {
           double tmp = fpi * rhops[is][ig] * g2i[ig];
           vtemp[ig] =  tmp * conj(rhogt[ig]) + vps[is][ig] * conj(rhoelg[ig]);
@@ -1135,6 +1135,7 @@ double EnergyFunctional::energy(bool compute_hpsi, Wavefunction& dwf,
           double *s0 = sf.sin0_ptr(is,ia);
           double *s1 = sf.sin1_ptr(is,ia);
           double *s2 = sf.sin2_ptr(is,ia);
+#pragma omp parallel for
           for ( int ig = 0; ig < ngloc; ig++ ) {
              // compute Exp[igr] in 3D as a product of 1D contributions
              // complex<double> teigr = ei0[kv[3*ig+0]] *
@@ -1275,6 +1276,7 @@ void EnergyFunctional::atoms_moved(void)
   for ( int is = 0; is < atoms.nsp(); is++ )
   {
     complex<double> *s = &sf.sfac[is][0];
+#pragma omp parallel for
     for ( int ig = 0; ig < ngloc; ig++ )
     {
       const complex<double> sg = s[ig];
@@ -1386,6 +1388,7 @@ void EnergyFunctional::cell_moved(void) {
     Species *s = atoms.species_list[is];
     const double * const g = vbasis_->g_ptr();
     double v,dv;  
+#pragma omp parallel for
     for ( int ig = 0; ig < ngloc; ig++ ) {
       rhops[is][ig] = s->rhopsg(g[ig]) * omega_inv;
       s->dvlocg(g[ig],v,dv);

@@ -78,7 +78,10 @@ int LoadCmd::action(int argc, char **argv) {
 
   /////  DUMP CHECKPOINTING  /////
   if (encoding == "dump" ) {
-     s->wf.read_dump(filestr,s->ctrl.mditer);
+     s->wf.read_dump(filestr);
+     s->wf.read_mditer(filestr,s->ctrl.mditer);
+     if ( ui->oncoutpe())
+        cout << "<!-- LoadCmd:  setting MD iteration count to " << s->ctrl.mditer << ". -->" << endl;       
 
     if (s->ctrl.extra_memory >= 3)
       s->wf.set_highmem();    
@@ -94,8 +97,7 @@ int LoadCmd::action(int argc, char **argv) {
           (*s->hamil_wf).update_occ(0.0,0);
           //s->hamil_wf->clear();
         }
-        int tmp = -1;
-        s->hamil_wf->read_dump(hamwffile,tmp);
+        s->hamil_wf->read_dump(hamwffile);
     }
     else
     {
@@ -200,8 +202,7 @@ int LoadCmd::action(int argc, char **argv) {
           s->wfv = new Wavefunction(s->wf);
           s->wfv->clear();
         }
-        int tmp;
-        s->wfv->read_dump(wfvfile,tmp);
+        s->wfv->read_dump(wfvfile);
       }
       else {
         if ( ui->oncoutpe() )
@@ -215,7 +216,10 @@ int LoadCmd::action(int argc, char **argv) {
   }
   /////  STATES CHECKPOINTING  /////
   else if (encoding == "states" ) {
-     s->wf.read_states(filestr,s->ctrl.mditer);
+     s->wf.read_states(filestr);
+     s->wf.read_mditer(filestr,s->ctrl.mditer);
+     if ( ui->oncoutpe())
+        cout << "<!-- LoadCmd:  setting MD iteration count to " << s->ctrl.mditer << ". -->" << endl;       
 
     if (s->ctrl.extra_memory >= 3)
       s->wf.set_highmem();    
@@ -231,8 +235,7 @@ int LoadCmd::action(int argc, char **argv) {
           (*s->hamil_wf).update_occ(0.0,0);
           //s->hamil_wf->clear();
         }
-        int tmp = -1;
-        s->hamil_wf->read_states(hamwffile,tmp);
+        s->hamil_wf->read_states(hamwffile);
     }
     else
     {
@@ -338,8 +341,7 @@ int LoadCmd::action(int argc, char **argv) {
           s->wfv = new Wavefunction(s->wf);
           s->wfv->clear();
         }
-        int tmp;
-        s->wfv->read_states(wfvfile,tmp);
+        s->wfv->read_states(wfvfile);
       }
       else {
         if ( ui->oncoutpe() )

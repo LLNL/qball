@@ -2032,7 +2032,7 @@ void Wavefunction::write(SharedFilePtr& sfp, string encoding, string tag) const 
     }
 }
 ////////////////////////////////////////////////////////////////////////////////
-void Wavefunction::write_dump(string filebase, int mditer) {
+void Wavefunction::write_dump(string filebase) {
 
   // make unique filename for each process by appending process number to filename
 
@@ -2056,6 +2056,7 @@ void Wavefunction::write_dump(string filebase, int mditer) {
   // hack to make checkpointing work w. BlueGene compilers
 #ifdef BGQ
   os.write(mypefile.c_str(),sizeof(char)*mypefile.length());
+  os.flush();
 #endif
   
   int wkploc = nkptloc_;
@@ -2080,7 +2081,8 @@ void Wavefunction::write_dump(string filebase, int mditer) {
           //   os.write((char*)&p[n*mloc],sizeof(complex<double>)*ngwloc);
 
           os.write((char*)&p[0],sizeof(complex<double>)*nloc*mloc);
-
+          os.flush();
+          
           //fopen for ( int n = 0; n < nloc; n++ )
           //fopen    fwrite(&p[n*mloc],sizeof(complex<double>),ngwloc,PEFILE);
           
@@ -2091,6 +2093,7 @@ void Wavefunction::write_dump(string filebase, int mditer) {
             const double* pocc = sd_[ispin][ikp]->occ_ptr();
             os.write((char*)&peig[0],sizeof(double)*nst);
             os.write((char*)&pocc[0],sizeof(double)*nst);
+            os.flush();
             //fopen fwrite(&peig[0],sizeof(double),nst,PEFILE);
             //fopen fwrite(&pocc[0],sizeof(double),nst,PEFILE);
           }
@@ -2101,21 +2104,120 @@ void Wavefunction::write_dump(string filebase, int mditer) {
   os.close();
   //fopen fclose(PEFILE);
 
-  // write out mditer
-  if (mype == 0)
-  {
-     cout << "<!-- Wavefunction::write_dump, writing mditer to file:  " << mditer << " -->" << endl;
-     string mditerfile = filebase + ".mditer";
-     ofstream osmd;
-     osmd.open(mditerfile.c_str());
-     osmd << mditer << endl;
-     osmd.flush();
-     osmd.close();
-  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-void Wavefunction::read_dump(string filebase, int& mditer) {
+void Wavefunction::write_fast(string filebase) {
+
+   // write_fast uses C fwrite calls to dump checkpoint data to a subset of
+   // files (ideal for machines like BG/Q where the number of I/O nodes is << npes)
+
+   int mype, npes;
+#if USE_MPI
+  MPI_Comm_rank(MPI_COMM_WORLD,&mype);
+  MPI_Comm_size(MPI_COMM_WORLD,&npes);
+#else
+  mype = 0;
+  npes = 1;
+#endif
+
+  int nFiles = npes;
+  int filenum = mype;
+  int writerTask = mype;
+  int nTasksPerFile = 1;
+#ifdef BGQ
+  nTasksPerFile = 32;
+  nFiles = npes/nTasksPerFile;
+#endif
+
+  if (mype == 0)
+     cout << "Wavefunction::write_fast:  writing data from " << npes << " tasks to " << nFiles << " files." << endl;
+
+  // if nFiles != npes, need to calculate which tasks write to which file
+  if (nFiles != npes)
+  {
+     nTasksPerFile = ( npes%nFiles == 0 ? npes/nFiles : npes/nFiles + 1);
+     assert(nTasksPerFile > 1);
+     filenum = mype/nTasksPerFile;
+     writerTask = filenum*nTasksPerFile;
+  }
+  
+  // all tasks send their data to their writer task, who writes it to file
+
+  ostringstream oss;
+  oss.width(6);  oss.fill('0');  oss << filenum;
+  string mypefile = filebase + oss.str(); 
+  ofstream os;
+  bool ifempty = (nempty_ > 0);
+
+  if (mype == writerTask)  // open file
+     os.open(mypefile.c_str(),ofstream::binary);
+     //fopenFILE* PEFILE = fopen(mypefile.c_str(),"wb");
+    
+  // write out wave function
+  for ( int ispin = 0; ispin < nspin_; ispin++ ) {
+    if (spinactive(ispin)) {
+      for ( int ikp=0; ikp<nkp(); ikp++) {
+        if (kptactive(ikp)) {
+          assert(sd_[ispin][ikp] != 0);
+
+          if (mype == writerTask)  // write local data
+          {
+          int mloc = sd_[ispin][ikp]->c().mloc();
+          int nloc = sd_[ispin][ikp]->c().nloc();
+          const complex<double>* p = sd_[ispin][ikp]->c().cvalptr();
+
+          os.write((char*)&p[0],sizeof(complex<double>)*nloc*mloc);
+          os.flush();
+          //fopen for ( int n = 0; n < nloc; n++ )
+          //fopen    fwrite(&p[n*mloc],sizeof(complex<double>),ngwloc,PEFILE);
+          }
+          
+          for (int jj=1; jj<nTasksPerFile; jj++)
+          {
+             int dataTask = jj + writerTask;
+             if (mype == dataTask)
+             {
+                int mloc = sd_[ispin][ikp]->c().mloc();
+                int nloc = sd_[ispin][ikp]->c().nloc();
+                int nComplex = mloc*nloc;
+                MPI_Send(&nComplex,1,MPI_INT,writerTask,dataTask,MPI_COMM_WORLD);
+                complex<double>* p = sd_[ispin][ikp]->c().valptr();
+                MPI_Send(&p[0],nComplex,MPI_DOUBLE_COMPLEX,writerTask,dataTask,MPI_COMM_WORLD);
+             }
+             if (mype == writerTask)
+             {
+                int nComplex;
+                MPI_Recv(&nComplex,1,MPI_INT,dataTask,dataTask,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+                vector<complex<double> > data;
+                data.resize(nComplex);
+                MPI_Recv(&data[0],nComplex,MPI_DOUBLE_COMPLEX,dataTask,dataTask,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+                os.write((char*)&data[0],sizeof(complex<double>)*nComplex);
+                os.flush();                
+             }
+          }
+          
+          // if there are empty states, save occupation and eigenvalues
+          if (ifempty && mype == writerTask) {
+             int nst = sd_[ispin][ikp]->nst();
+             const double* peig = sd_[ispin][ikp]->eig_ptr();
+             const double* pocc = sd_[ispin][ikp]->occ_ptr();
+             os.write((char*)&peig[0],sizeof(double)*nst);
+             os.write((char*)&pocc[0],sizeof(double)*nst);
+             os.flush();
+          }
+        }
+      }
+    }
+  }  
+  
+  if (mype == writerTask)  // close file
+     os.close();
+  //fopen fclose(PEFILE);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+void Wavefunction::read_dump(string filebase) {
 
   if (!hasdata_) {
     hasdata_ = true;
@@ -2179,26 +2281,6 @@ void Wavefunction::read_dump(string filebase, int& mditer) {
         }
       }
     }  
-
-    // check for mditer file
-    if (mditer > -1)
-    {
-       string mditerfile = filebase + ".mditer";
-       ifstream ismd;
-       ismd.open(mditerfile.c_str());
-       int mdtmp = -1;
-       if (ismd.is_open()) {
-          ismd >> mdtmp;
-          //ismd.read((char*)&mdtmp,sizeof(int));
-          ismd.close();
-       }
-       if (mdtmp > 0 && mdtmp < 999999999)
-       {
-          mditer = mdtmp;
-          if ( ctxt_.oncoutpe())
-             cout << "<!-- LoadCmd:  setting MD iteration count to " << mditer << ". -->" << endl;       
-       }
-    }
   }
   else {
      if ( ctxt_.oncoutpe())
@@ -2208,7 +2290,129 @@ void Wavefunction::read_dump(string filebase, int& mditer) {
   
 }
 ////////////////////////////////////////////////////////////////////////////////
-void Wavefunction::write_states(string filebase, string format, int mditer) {
+void Wavefunction::read_fast(string filebase) {
+
+  if (!hasdata_) {
+    hasdata_ = true;
+    allocate();
+  }
+   // read_fast reads checkpoint data written using write_fast, distributes
+
+   int mype, npes;
+#if USE_MPI
+  MPI_Comm_rank(MPI_COMM_WORLD,&mype);
+  MPI_Comm_size(MPI_COMM_WORLD,&npes);
+#else
+  mype = 0;
+  npes = 1;
+#endif
+
+  int nFiles = npes;
+  int filenum = mype;
+  int readerTask = mype;
+  int nTasksPerFile = 1;
+#ifdef BGQ
+  nTasksPerFile = 32;
+  nFiles = npes/nTasksPerFile;
+#endif
+
+  if (mype == 0)
+     cout << "Wavefunction::read_fast:  reading data for " << npes << " tasks from " << nFiles << " files." << endl;
+
+  // if nFiles != npes, need to calculate which tasks wrote to which file
+  if (nFiles != npes)
+  {
+     nTasksPerFile = ( npes%nFiles == 0 ? npes/nFiles : npes/nFiles + 1);
+     assert(nTasksPerFile > 1);
+     filenum = mype/nTasksPerFile;
+     readerTask = filenum*nTasksPerFile;
+  }
+  
+  ostringstream oss;
+  oss.width(6);  oss.fill('0');  oss << filenum;
+  string mypefile = filebase + oss.str(); 
+  ifstream is;
+  bool ifempty = (nempty_ > 0);
+
+  if (mype == readerTask)
+     is.open(mypefile.c_str(),ofstream::binary);
+
+  // read in wave function
+  for ( int ispin = 0; ispin < nspin_; ispin++ ) {
+     if (spinactive(ispin)) {
+        for ( int ikp=0; ikp<nkp(); ikp++) {
+           if (kptactive(ikp)) {
+              assert(sd_[ispin][ikp] != 0);
+
+              if (mype == readerTask)  // read local data
+              {
+                 int mloc = sd_[ispin][ikp]->c().mloc();
+                 int nloc = sd_[ispin][ikp]->c().nloc();
+                 const complex<double>* p = sd_[ispin][ikp]->c().cvalptr();
+                 if (is.is_open())
+                    is.read((char*)&p[0],sizeof(complex<double>)*nloc*mloc);
+                 else
+                    if ( ctxt_.oncoutpe())
+                       cout << "<!-- LoadCmd: " << filebase << " checkpoint files not found, skipping load. -->" << endl;
+              }                       
+               
+              for (int jj=1; jj<nTasksPerFile; jj++)
+              {
+                 int dataTask = jj + readerTask;
+                 if (mype == dataTask)
+                 {
+                    int mloc = sd_[ispin][ikp]->c().mloc();
+                    int nloc = sd_[ispin][ikp]->c().nloc();
+                    int nComplex = mloc*nloc;
+                    MPI_Send(&nComplex,1,MPI_INT,readerTask,dataTask,MPI_COMM_WORLD);
+                    complex<double>* p = sd_[ispin][ikp]->c().valptr();
+                    MPI_Recv(&p[0],nComplex,MPI_DOUBLE_COMPLEX,readerTask,dataTask,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+                 }
+                 if (mype == readerTask)
+                 {
+                    int nComplex;
+                    MPI_Recv(&nComplex,1,MPI_INT,dataTask,dataTask,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+                    vector<complex<double> > data;
+                    data.resize(nComplex);
+                    if (is.is_open())
+                       is.read((char*)&data[0],sizeof(complex<double>)*nComplex);
+                    MPI_Send(&data[0],nComplex,MPI_DOUBLE_COMPLEX,dataTask,dataTask,MPI_COMM_WORLD);
+                 }
+              }
+
+              // if there are empty states, load occupation and eigenvalues
+              if (ifempty)
+              {
+                 int nst = sd_[ispin][ikp]->nst();
+                 double* peig = (double*)sd_[ispin][ikp]->eig_ptr();
+                 double* pocc = (double*)sd_[ispin][ikp]->occ_ptr();
+                 if (mype == readerTask) {
+                    is.read((char*)&peig[0],sizeof(double)*nst);
+                    is.read((char*)&pocc[0],sizeof(double)*nst);
+                    for (int jj=1; jj<nTasksPerFile; jj++)
+                    {
+                       int dataTask = jj + readerTask;
+                       MPI_Send(&peig[0],nst,MPI_DOUBLE,dataTask,dataTask,MPI_COMM_WORLD);
+                       MPI_Send(&pocc[0],nst,MPI_DOUBLE,dataTask,dataTask,MPI_COMM_WORLD);
+                    }
+                 }
+                 else
+                 {
+                    MPI_Recv(&peig[0],nst,MPI_DOUBLE,readerTask,mype,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+                    MPI_Recv(&pocc[0],nst,MPI_DOUBLE,readerTask,mype,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+                 }
+              }
+           }
+        }
+     }  
+  }
+  
+  if (mype == readerTask)
+     is.close();
+  
+}
+////////////////////////////////////////////////////////////////////////////////
+void Wavefunction::write_states(string filebase, string format) {
   int mype;
 #if USE_MPI
   MPI_Comm_rank(MPI_COMM_WORLD,&mype);
@@ -2264,8 +2468,10 @@ void Wavefunction::write_states(string filebase, string format, int mditer) {
 
                     // hack to make checkpointing work w. BlueGene compilers
 #ifdef BGQ
-                    if (format == "binary") 
+                    if (format == "binary") {
                        os.write(statefile.c_str(),sizeof(char)*statefile.length());
+                       os.flush();
+                    }
 #endif
 
                     // headers for visualization formats
@@ -2324,8 +2530,11 @@ void Wavefunction::write_states(string filebase, string format, int mditer) {
                       int size = 0;
                       tctxt->irecv(1,1,&size,1,i,pcol);
                       tctxt->drecv(size,1,&wftmpr[0],1,i,pcol);
-                      if (format == "binary") 
+                      if (format == "binary")
+                      {
                         os.write((char*)&wftmpr[0],sizeof(double)*size);
+                        os.flush();
+                      }
                       else if (format == "molmol" || format == "gopenmol")
                       {
                         // write out |wf|^2 on grid, with x varying fastest
@@ -2336,6 +2545,7 @@ void Wavefunction::write_states(string filebase, string format, int mditer) {
                           oss << wftmpr[j]*wftmpr[j]+wftmpr[j+1]*wftmpr[j+1] << endl;
                         string tos = oss.str();
                         os.write(tos.c_str(),tos.length());
+                        os.flush();
                       }
                       else if (format == "text")
                       {
@@ -2347,6 +2557,7 @@ void Wavefunction::write_states(string filebase, string format, int mditer) {
                           os << wftmpr[j] << "  " << wftmpr[j+1] << "  " << wftmpr[j]*wftmpr[j]+wftmpr[j+1]*wftmpr[j+1] << endl;
                         string tos = oss.str();
                         os.write(tos.c_str(),tos.length());
+                        os.flush();
                       }
                     }
                     os.close();
@@ -2378,6 +2589,7 @@ void Wavefunction::write_states(string filebase, string format, int mditer) {
 #endif
                     os.write((char*)&peig[0],sizeof(double)*nst);
                     os.write((char*)&pocc[0],sizeof(double)*nst);
+                    os.flush();
                     os.close();
                   }
                 }
@@ -2388,22 +2600,10 @@ void Wavefunction::write_states(string filebase, string format, int mditer) {
       }
     }
   }
-
-  // write out mditer
-  if (mype == 0)
-  {
-     cout << "<!-- Wavefunction::write_states, writing mditer to file:  " << mditer << " -->" << endl;
-     string mditerfile = filebase + ".mditer";
-     ofstream osmd;
-     osmd.open(mditerfile.c_str());
-     osmd << mditer << endl;
-     osmd.flush();
-     osmd.close();
-  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-void Wavefunction::read_states(string filebase, int& mditer) {
+void Wavefunction::read_states(string filebase) {
 
   if (!hasdata_) {
     hasdata_ = true;
@@ -2580,29 +2780,59 @@ void Wavefunction::read_states(string filebase, int& mditer) {
       }
     }
   }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+void Wavefunction::write_mditer(string filebase, int mditer) {
+  int mype;
+#if USE_MPI
+  MPI_Comm_rank(MPI_COMM_WORLD,&mype);
+#else
+  mype = 0;
+#endif
+
+  // write out mditer
+  if (mype == 0)
+  {
+     string mditerfile = filebase + ".mditer";
+     cout << "<!-- Wavefunction::write_states, writing mditer " << mditer << " to file " << mditerfile << " -->" << endl;
+     ofstream osmd;
+     osmd.open(mditerfile.c_str());
+     osmd << mditer << endl;
+     osmd.flush();
+     osmd.close();
+  }
+}
+////////////////////////////////////////////////////////////////////////////////
+void Wavefunction::read_mditer(string filebase, int& mditer) {
+  int mype;
+#if USE_MPI
+  MPI_Comm_rank(MPI_COMM_WORLD,&mype);
+#else
+  mype = 0;
+#endif
 
   // check for mditer file
-  if (mditer > -1)
+  int mdtmp = -1;
+  if (mype == 0)
   {
      string mditerfile = filebase + ".mditer";
      ifstream ismd;
      ismd.open(mditerfile.c_str());
-     int mdtmp = -1;
      if (ismd.is_open()) {
         //ismd.read((char*)&mdtmp,sizeof(int));
         ismd >> mdtmp;
         ismd.close();
      }
-     if (mdtmp > 0 && mdtmp < 999999999)
-     {
-        mditer = mdtmp;
-        if ( ctxt_.oncoutpe())
-           cout << "<!-- LoadCmd:  setting MD iteration count to " << mditer << ". -->" << endl;       
-     }
   }
+#if USE_MPI
+  MPI_Bcast(&mdtmp, 1, MPI_INT, 0, MPI_COMM_WORLD);     
+#endif
   
+  if (mdtmp > 0 && mdtmp < 999999999)
+     mditer = mdtmp;
 }
-
+  
 ////////////////////////////////////////////////////////////////////////////////
 void Wavefunction::info(ostream& os, string tag)
 {
