@@ -564,7 +564,7 @@ void SlaterDet::copyTo(SlaterDet* newsd) {
         // pe 0 will tell source and destination pes about each other
         int srcpe = -1;
         int destpe = -1;
-        if (ctxt_.oncoutpe()) {
+        if (ctxt_.onpe0()) {
           for (int i=0; i<ctxt_.size(); i++) {
             int tmpnew, tmpold;
             MPI_Recv(&tmpnew,1,MPI_INT,i,i,ctxt_.comm(),&status);
