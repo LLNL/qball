@@ -564,7 +564,7 @@ void SlaterDet::copyTo(SlaterDet* newsd) {
         // pe 0 will tell source and destination pes about each other
         int srcpe = -1;
         int destpe = -1;
-        if (ctxt_.onpe0()) {
+        if (ctxt_.oncoutpe()) {
           for (int i=0; i<ctxt_.size(); i++) {
             int tmpnew, tmpold;
             MPI_Recv(&tmpnew,1,MPI_INT,i,i,ctxt_.comm(),&status);
@@ -764,6 +764,9 @@ void SlaterDet::compute_density(FourierTransform& ft,
       const double fac = prefac * occ_[nn];
       if ( fac > 0.0 ) {
         ft.backward(c_.cvalptr(n*c_.mloc()),&tmp[0]);
+        //ewd DEBUG:  try threading this loop:
+        
+        #pragma omp parallel for
         for ( int i = 0; i < np012loc; i++ )
           rho[i] += fac * norm(tmp[i]);
       }

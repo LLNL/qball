@@ -188,31 +188,50 @@ void ChargeDensity::initializeSymmetries(const Sample& s)
 }
 ////////////////////////////////////////////////////////////////////////////////
 ChargeDensity::~ChargeDensity(void) {
-  delete vbasis_;
-  delete vft_;
-  for ( int ispin = 0; ispin < wf_.nspin(); ispin++ ) 
-    for ( int ikp = 0; ikp < ft_[ispin].size(); ikp++ )
-      delete ft_[ispin][ikp];
+   delete vbasis_;
+   delete vft_;
+   for ( int ispin = 0; ispin < wf_.nspin(); ispin++ ) 
+      for ( int ikp = 0; ikp < ft_[ispin].size(); ikp++ )
+         delete ft_[ispin][ikp];
 }
 ////////////////////////////////////////////////////////////////////////////////
-void ChargeDensity::print_timing() {
+void ChargeDensity::print_timing()
+{
 
-  for ( TimerMap::iterator i = tmap.begin(); i != tmap.end(); i++ ) {
-    double time = (*i).second.real();
-    double tmin = time;
-    double tmax = time;
-    ctxt_.dmin(1,1,&tmin,1);
-    ctxt_.dmax(1,1,&tmax,1);
-    //if ( ctxt_.myproc()==0 ) {
-    if ( ctxt_.mype()==0 ) {
-       cout << left << setw(34) << "<timing where=\"charge\""
-           << setw(8) << " name=\""
-           << setw(15) << (*i).first << "\""
-           << " min=\"" << setprecision(3) << setw(9) << tmin << "\""
-           << " max=\"" << setprecision(3) << setw(9) << tmax << "\"/>"
-           << endl;
-    }
-  }
+   //ewd DEBUG
+   // print FourierTransform timers
+   if ( ctxt_.mype()==0 )
+   {
+      cout << " bwd: tm_b_fft:    " << ft_[0][0]->tm_b_fft.real() << endl;
+      cout << " bwd: tm_b_mpi:    " << ft_[0][0]->tm_b_mpi.real() << endl;
+      cout << " bwd: tm_b_pack:   " << ft_[0][0]->tm_b_pack.real() << endl;
+      cout << " bwd: tm_b_unpack: " << ft_[0][0]->tm_b_unpack.real() << endl;
+      cout << " bwd: tm_b_zero:   " << ft_[0][0]->tm_b_zero.real() << endl;
+      cout << " bwd: tm_b_map:    " << ft_[0][0]->tm_b_map.real() << endl;
+      cout << " bwd: tm_b_total:  " << ft_[0][0]->tm_b_fft.real() +
+          ft_[0][0]->tm_b_mpi.real() +
+          ft_[0][0]->tm_b_pack.real() +
+          ft_[0][0]->tm_b_unpack.real() +
+          ft_[0][0]->tm_b_zero.real() +
+          ft_[0][0]->tm_b_map.real() << endl;
+   }
+
+   for ( TimerMap::iterator i = tmap.begin(); i != tmap.end(); i++ ) {
+      double time = (*i).second.real();
+      double tmin = time;
+      double tmax = time;
+      ctxt_.dmin(1,1,&tmin,1);
+      ctxt_.dmax(1,1,&tmax,1);
+      //if ( ctxt_.myproc()==0 ) {
+      if ( ctxt_.mype()==0 ) {
+         cout << left << setw(34) << "<timing where=\"charge\""
+              << setw(8) << " name=\""
+              << setw(15) << (*i).first << "\""
+              << " min=\"" << setprecision(3) << setw(9) << tmin << "\""
+              << " max=\"" << setprecision(3) << setw(9) << tmax << "\"/>"
+              << endl;
+      }
+   }
 }
 ////////////////////////////////////////////////////////////////////////////////
 void ChargeDensity::update_density() {
