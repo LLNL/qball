@@ -764,11 +764,12 @@ void SlaterDet::compute_density(FourierTransform& ft,
       const double fac = prefac * occ_[nn];
       if ( fac > 0.0 ) {
         ft.backward(c_.cvalptr(n*c_.mloc()),&tmp[0]);
+
         //ewd DEBUG:  try threading this loop:
-        
         #pragma omp parallel for
         for ( int i = 0; i < np012loc; i++ )
-          rho[i] += fac * norm(tmp[i]);
+           rho[i] += fac * (real(tmp[i])*real(tmp[i]) + imag(tmp[i])*imag(tmp[i]));
+        //rho[i] += fac * norm(tmp[i]);
       }
     }
   }
@@ -838,6 +839,7 @@ void SlaterDet::rs_mul_add(FourierTransform& ft,
     // only one transform at a time
     for ( int n = 0; n < nstloc(); n++ ) {
       ft.backward(c_.cvalptr(n*mloc),&tmp[0]);
+      #pragma omp parallel for
       for ( int i = 0; i < np012loc; i++ )
         tmp[i] *= v[i];
       ft.forward(&tmp[0], &ctmp[0]);
