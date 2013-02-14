@@ -317,7 +317,7 @@ void EhrenSampleStepper::step(int niter)
        tmap["gram"].start();
        s_.wf.gram();
        tmap["gram"].stop();
-       ef_.energy(true,dwf,false,fion,false,sigma_eks);
+       ef_.energy(true,dwf,false,fion,false,sigma_eks,false);
        tmap["diag"].start();
        s_.wf.diag(dwf,true);
        tmap["diag"].stop();
@@ -329,7 +329,7 @@ void EhrenSampleStepper::step(int niter)
         
     tmap["efn"].start();
     double energy =
-        ef_.energy(false,dwf,compute_forces,fion,compute_stress,sigma_eks);
+        ef_.energy(false,dwf,compute_forces,fion,compute_stress,sigma_eks,false);
     tmap["efn"].stop();
 
     // average forces over symmetric atoms
@@ -515,7 +515,7 @@ void EhrenSampleStepper::step(int niter)
        WavefunctionStepper* wf_init_stepper = new TDEULERWavefunctionStepper(wf,s_.ctrl.tddt,tmap);
                
        tmap["efn"].start();
-       cout << wf_dyn << " initialization energy: " << ef_.energy(true,dwf,false,fion,false,sigma_eks) << endl;
+       cout << wf_dyn << " initialization energy: " << ef_.energy(true,dwf,false,fion,false,sigma_eks,false) << endl;
        tmap["efn"].stop();
        cout << wf_dyn << " initialization expectation value: " << s_.wf.dot(dwf) << endl;
 
@@ -559,7 +559,7 @@ void EhrenSampleStepper::step(int niter)
     }
              
     tmap["efn"].start();
-    energy = ef_.energy(true,dwf,false,fion,false,sigma_eks);
+    energy = ef_.energy(true,dwf,false,fion,false,sigma_eks,false);
     tmap["efn"].stop();
     // compute the sum of eigenvalues (with fixed weight)
     // to measure convergence of the subspace update
@@ -692,7 +692,7 @@ void EhrenSampleStepper::step(int niter)
        ef_.update_hamiltonian();
        ef_.update_vhxc();
        // AS: apply the Hamiltonian to |psi(t)+0.5*k_1>
-       ef_.energy(true,dwf,false,fion,false,sigma_eks);
+       ef_.energy(true,dwf,false,fion,false,sigma_eks,false);
        tmap["efn"].stop();
 
        for ( int ispin = 0; ispin < wf.nspin(); ispin++ )
@@ -754,7 +754,7 @@ void EhrenSampleStepper::step(int niter)
        ef_.update_hamiltonian();
        ef_.update_vhxc();
        // AS: apply the Hamiltonian to |psi(t)+0.5*k_1>
-       ef_.energy(true,dwf,false,fion,false,sigma_eks);
+       ef_.energy(true,dwf,false,fion,false,sigma_eks,false);
        tmap["efn"].stop();
 
        // AS: setting wf back to |psi(t)>
@@ -795,7 +795,7 @@ void EhrenSampleStepper::step(int niter)
        ef_.update_hamiltonian();
        ef_.update_vhxc();
        // AS: apply the Hamiltonian to |psi(t)+0.5*k_2>
-       ef_.energy(true,dwf,false,fion,false,sigma_eks);
+       ef_.energy(true,dwf,false,fion,false,sigma_eks,false);
        tmap["efn"].stop();
 
        // AS: setting wf back to |psi(t)>
@@ -835,7 +835,7 @@ void EhrenSampleStepper::step(int niter)
        ef_.update_hamiltonian();
        ef_.update_vhxc();
        // AS: apply the Hamiltonian to |psi(t)+k_3>
-       ef_.energy(true,dwf,false,fion,false,sigma_eks);
+       ef_.energy(true,dwf,false,fion,false,sigma_eks,false);
        tmap["efn"].stop();
 
        for ( int ispin = 0; ispin < wf.nspin(); ispin++ )
@@ -1162,7 +1162,7 @@ void EhrenSampleStepper::step(int niter)
 
     // need eigenvalues to compute forces w. ultrasoft
     if (ultrasoft) { 
-      ef_.energy(true,dwf,false,fion,false,sigma_eks);
+      ef_.energy(true,dwf,false,fion,false,sigma_eks,false);
       tmap["post_diag"].start();
       //s_.wf.diag(dwf,compute_eigvec);
       s_.wf.diag(dwf,true);
@@ -1179,7 +1179,7 @@ void EhrenSampleStepper::step(int niter)
     ef_.update_vhxc();
     const bool compute_forces = true;
     double energy =
-      ef_.energy(false,dwf,compute_forces,fion,compute_stress,sigma_eks);
+      ef_.energy(false,dwf,compute_forces,fion,compute_stress,sigma_eks,false);
 
     // average forces over symmetric atoms
     if ( compute_forces && s_.symmetries.nsym() > 0) {
@@ -1223,7 +1223,7 @@ void EhrenSampleStepper::step(int niter)
 
   ef_.update_vhxc();
   double energy =
-      ef_.energy(false,dwf,compute_forces,fion,compute_stress,sigma_eks);
+      ef_.energy(false,dwf,compute_forces,fion,compute_stress,sigma_eks,false);
   
   // average forces over symmetric atoms
   if ( compute_forces && s_.symmetries.nsym() > 0) {

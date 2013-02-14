@@ -187,9 +187,9 @@ void BOSampleStepper::step(int niter)
     s_.ctrl.debug.find("ASP_EXTRAPOLATION") != string::npos;
 
   //ewd check for case where PSDA used (incorrectly) with nite = 1 and empty states
-  if (wf_dyn == "PSDA" && nite_ == 1 && compute_eigvec) {
+  if (wf_dyn == "PSDA" && nite_ == 0 && compute_eigvec) {
     if ( onpe0 ) {
-      cout << "<ERROR> BOSampleStepper:  PSDA unstable with empty states and nite = 1. </ERROR>" << endl;
+      cout << "<ERROR> BOSampleStepper:  PSDA unstable with empty states and nite = 0. </ERROR>" << endl;
       cout << "<ERROR> BOSampleStepper:  Increase nite or use wf_dyn = PSD. </ERROR>" << endl;
     }
     return;
@@ -560,7 +560,7 @@ void BOSampleStepper::step(int niter)
           tmap["gram"].start();
           s_.wf.gram();
           tmap["gram"].stop();
-          ef_.energy(true,dwf,false,fion,false,sigma_eks);
+          ef_.energy(true,dwf,false,fion,false,sigma_eks,false);
           tmap["diag"].start();
           s_.wf.diag(dwf,true);
           tmap["diag"].stop();
@@ -571,7 +571,7 @@ void BOSampleStepper::step(int niter)
         }
         
         double energy =
-            ef_.energy(false,dwf,compute_forces,fion,compute_stress,sigma_eks);
+            ef_.energy(false,dwf,compute_forces,fion,compute_stress,sigma_eks,false);
 
         // average forces over symmetric atoms
         if ( compute_forces && s_.symmetries.nsym() > 0) {
@@ -1161,7 +1161,9 @@ void BOSampleStepper::step(int niter)
               cd_.update_density();
             tmap["charge"].stop();
 
-            if ( charge_mixing != "off" && nite_ > 1) {
+            ef_.update_harris();
+            
+            if ( charge_mixing != "off" && nite_ > 0) {
               if ( itscf == 0) {
                 //ewd:  read rhog_in from checkpoint if possible
                 for ( int ispin = 0; ispin < nspin; ispin++ ) {
@@ -1224,12 +1226,13 @@ void BOSampleStepper::step(int niter)
             ef_.update_vhxc();
           
             // reset stepper only if multiple non-selfconsistent steps
-            if ( nite_ > 1 ) wf_stepper->preprocess();
+            if ( nite_ > 0 ) wf_stepper->preprocess();
             double lastnonscfetot;
             const double nonscfthresh = s_.ctrl.threshold_nonscf;
-            for ( int ite = 0; ite < nite_; ite++ )
+            int nitemin_ = ( nite_ > 0 ? nite_ : 1);
+            for ( int ite = 0; ite < nitemin_; ite++ )
             {
-              double energy = ef_.energy(true,dwf,false,fion,false,sigma_eks);
+               double energy = ef_.energy(true,dwf,false,fion,false,sigma_eks,true);
               double delta_etotnonscf = abs(energy-lastnonscfetot);
               if (ite > 0 && delta_etotnonscf < nonscfthresh) {
                 if ( s_.ctxt_.oncoutpe() ) {
@@ -1247,7 +1250,7 @@ void BOSampleStepper::step(int niter)
                   cout.setf(ios::scientific,ios::floatfield);
                   cout << "  <!-- BOSampleStepper: non-scf threshold " << setprecision(2) << nonscfthresh << " reached. -->" << endl;
                 }
-                ite = nite_;
+                ite = nitemin_;
               }
               else {
                 lastnonscfetot = energy;
@@ -1320,7 +1323,7 @@ void BOSampleStepper::step(int niter)
             // subspace diagonalization
             if ( compute_eigvec || s_.ctrl.wf_diag == "EIGVAL" || usdiag)
             {
-              ef_.energy(true,dwf,false,fion,false,sigma_eks);
+               ef_.energy(true,dwf,false,fion,false,sigma_eks,false);
               tmap["diag"].start();
               s_.wf.diag(dwf,compute_eigvec);
               tmap["diag"].stop();
@@ -1417,7 +1420,7 @@ void BOSampleStepper::step(int niter)
 
           // need eigenvalues to compute forces w. ultrasoft
           if (ultrasoft) { 
-            ef_.energy(true,dwf,false,fion,false,sigma_eks);
+             ef_.energy(true,dwf,false,fion,false,sigma_eks,false);
             tmap["diag"].start();
             s_.wf.diag(dwf,compute_eigvec);
             //s_.wf.diag(dwf,true);  // ewd:  why true?  Why did I do this??
@@ -1439,7 +1442,7 @@ void BOSampleStepper::step(int niter)
 
           ef_.update_vhxc();
           const bool compute_forces = true;
-          ef_.energy(false,dwf,compute_forces,fion,compute_stress,sigma_eks);
+          ef_.energy(false,dwf,compute_forces,fion,compute_stress,sigma_eks,false);
 
           if (s_.atoms.add_fion_ext()) {
             for ( int is = 0; is < atoms.atom_list.size(); is++ ) {
@@ -1499,7 +1502,7 @@ void BOSampleStepper::step(int niter)
         cd_.update_density();
         tmap["charge"].stop();
         ef_.update_vhxc();
-        ef_.energy(true,dwf,false,fion,false,sigma_eks);
+        ef_.energy(true,dwf,false,fion,false,sigma_eks,false);
         if ( onpe0 )
         {
           cout << ef_;
@@ -1591,7 +1594,7 @@ void BOSampleStepper::step(int niter)
 
     // need eigenvalues to compute forces w. ultrasoft
     if (ultrasoft) { 
-      ef_.energy(true,dwf,false,fion,false,sigma_eks);
+       ef_.energy(true,dwf,false,fion,false,sigma_eks,false);
       tmap["diag"].start();
       //s_.wf.diag(dwf,compute_eigvec);
       s_.wf.diag(dwf,true);
@@ -1608,7 +1611,7 @@ void BOSampleStepper::step(int niter)
     ef_.update_vhxc();
     const bool compute_forces = true;
     double energy =
-      ef_.energy(false,dwf,compute_forces,fion,compute_stress,sigma_eks);
+        ef_.energy(false,dwf,compute_forces,fion,compute_stress,sigma_eks,false);
 
     // average forces over symmetric atoms
     if ( compute_forces && s_.symmetries.nsym() > 0) {
@@ -1722,7 +1725,7 @@ void BOSampleStepper::step(int niter)
     ef_.update_vhxc();
     const bool compute_forces = true;
     double energy =
-      ef_.energy(false,dwf,compute_forces,fion,compute_stress,sigma_eks);
+        ef_.energy(false,dwf,compute_forces,fion,compute_stress,sigma_eks,false);
 
     // average forces over symmetric atoms
     if ( compute_forces && s_.symmetries.nsym() > 0) {

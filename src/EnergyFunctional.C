@@ -212,6 +212,8 @@ EnergyFunctional::EnergyFunctional(const Sample& s, const Wavefunction& wf, Char
   if (s_.ctrl.enthalpy_pressure != 0.0) 
     epvf = new EnthalpyFunctional(cd_,s_.ctrl.enthalpy_pressure,s_.ctrl.enthalpy_threshold);
 
+  eharris_ = 0.0;
+  
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -482,6 +484,74 @@ void EnergyFunctional::update_vhxc(void) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+void EnergyFunctional::update_harris(void) {
+   // update terms needed to compute Harris-Foulkes estimate of the energy
+   // called when the charge density is calculated, before mixing
+   //
+   // NOTE: this routine fills v_r, rhoelg with unmixed values.  Call update_vhxc after mixing.
+   
+   tmap["harris"].start();
+
+   const UnitCell& cell = wf_.cell();
+   const double omega = cell.volume();
+   const double omega_inv = 1.0 / omega;
+   const double *const g2i = vbasis_->g2i_ptr();
+   const double fpi = 4.0 * M_PI;
+   const int ngloc = vbasis_->localsize();
+   double tsum[2];
+   
+   // compute total electronic density: rhoelg = rho_up + rho_dn
+   if ( wf_.nspin() == 1 ) {
+      for ( int ig = 0; ig < ngloc; ig++ ) {
+         rhoelg[ig] = omega_inv * cd_.rhog[0][ig];
+      }
+   }
+   else {
+      for ( int ig = 0; ig < ngloc; ig++ ) {
+         rhoelg[ig] = omega_inv * ( cd_.rhog[0][ig] + cd_.rhog[1][ig] );
+      }
+   }
+  
+   // update XC energy and potential
+  xcp->update(v_r);
+  eharris_ = xcp->exc();
+
+  // compute local potential energy: 
+  // integral of el. charge times ionic local pot.
+  int len=2*ngloc,inc1=1;
+  if (vbasis_->real()) { 
+    tsum[0] = 2.0 * ddot(&len,(double*)&rhoelg[0],&inc1,
+                         (double*)&vion_local_g[0],&inc1);
+    // remove double counting for G=0
+    if ( vbasis_->context().myrow() == 0 ) {
+      tsum[0] -= real(conj(rhoelg[0])*vion_local_g[0]);
+    }
+  }
+  else {
+    tsum[0] = ddot(&len,(double*)&rhoelg[0],&inc1,
+                         (double*)&vion_local_g[0],&inc1);
+  }
+  tsum[0] *= omega;
+  
+  // Hartree energy
+  ehart_ = 0.0;
+  double ehsum = 0.0;
+  for ( int ig = 0; ig < ngloc; ig++ ) {
+    const complex<double> tmp = rhoelg[ig] + rhopst[ig];
+    ehsum += norm(tmp) * g2i[ig];
+    rhogt[ig] = tmp;
+  }
+  double vfact = vbasis_->real() ? 1.0 : 0.5;
+  tsum[1] = vfact * omega * fpi * ehsum;
+  
+  vbasis_->context().dsum(2,1,&tsum[0],2);
+  eharris_ += tsum[0] + tsum[1];
+
+  tmap["harris"].stop();
+
+}
+
+////////////////////////////////////////////////////////////////////////////////
 // AS: modified version of EnergyFunctional::update_vhxc(void) which leaves the potential
 // untouched and only recalculates the energy terms
 void EnergyFunctional::update_exc_ehart_eps(void)
@@ -558,7 +628,7 @@ void EnergyFunctional::update_exc_ehart_eps(void)
 ////////////////////////////////////////////////////////////////////////////////
 double EnergyFunctional::energy(bool compute_hpsi, Wavefunction& dwf,
               bool compute_forces, vector<vector<double> >& fion,
-              bool compute_stress, valarray<double>& sigma) {
+                                bool compute_stress, valarray<double>& sigma, bool compute_harris) {
   const bool debug_stress = compute_stress && 
     s_.ctrl.debug.find("STRESS") != string::npos;
   const double fpi = 4.0 * M_PI;
@@ -1017,6 +1087,14 @@ double EnergyFunctional::energy(bool compute_hpsi, Wavefunction& dwf,
   }
   etotal_ = ekin_ + econf_ + eps_ + enl_ + ecoul_ + exc_ + ets_ + epv_ + ehub_;
 
+  //ewd DEBUG:  print out Harris-Foulkes estimate of the energy here
+  if (compute_harris)
+  {
+     double etot_harris = ekin_ + econf_ + enl_ + ets_ + epv_ + ehub_ + eharris_ + esr_ - eself_;
+     if ( s_.ctxt_.oncoutpe() )
+        cout << "Harris-Foulkes estimate = " << etot_harris << ", eharris = " << eharris_ << endl;
+  }
+  
   //ewd DEBUG
   //print(cout);
   

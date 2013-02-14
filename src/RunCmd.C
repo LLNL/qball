@@ -60,7 +60,7 @@ int RunCmd::action(int argc, char **argv)
   }
 
   int niter = atoi(argv[iarg]);
-  int nite = 1;
+  int nite = 0;
   int nitscf = 1;
   if ( argc == 3 )
   {

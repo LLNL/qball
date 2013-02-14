@@ -40,6 +40,7 @@ int SpeciesCmd::action(int argc, char **argv) {
       s->ctrl.ultrasoft = true;
       s->wf.set_ultrasoft(true);
     }
+    
     if (sp->nlcc()) {
        s->ctrl.nlcc = true;
     }

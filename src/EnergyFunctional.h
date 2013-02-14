@@ -63,6 +63,8 @@ class EnergyFunctional
   int nsp_;
   double ekin_, econf_, eps_, enl_, ehub_, ehart_, 
       ecoul_, exc_, esr_, eself_, ets_, epv_, eexf_, etotal_;
+  double eharris_;  // terms for Harris-Foulkes estimate for convergence detection
+  
   valarray<double> sigma_ekin,sigma_econf,sigma_eps,sigma_ehart,sigma_exc,
     sigma_enl, sigma_esr, sigma;
 
@@ -80,7 +82,7 @@ class EnergyFunctional
 
   double energy(bool compute_hpsi, Wavefunction& dwf,
     bool compute_forces, vector<vector<double> >& fion,
-    bool compute_stress, valarray<double>& sigma);
+                bool compute_stress, valarray<double>& sigma, bool compute_harris);
   
   double etotal(void) const { return etotal_; }
   double ekin(void) const { return ekin_; }
@@ -96,10 +98,13 @@ class EnergyFunctional
   double epv(void) const { return epv_; }
   double eexf(void) const { return eexf_; }
   double ehub(void) const { return ehub_; }
+  double eharris(void) const { return eharris_; }
   
   const ConfinementPotential *confpot(int ispin, int ikp) const { return cfp[ispin][ikp]; }
   
   void update_vhxc(void);
+  void update_harris(void);
+
   // AS: modified version of EnergyFunctional::update_vhxc(void) which leaves the potential untouched and only
   // AS: recalculates the energy terms
   void update_exc_ehart_eps(void);
