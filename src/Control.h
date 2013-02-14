@@ -64,7 +64,7 @@ struct Control
   int print_density_every; // AS: print the density every N number of MD steps
   int iprint;
   int timeout;
-  double threshold_scf,threshold_nonscf;  // energy thresholds for electronic iteration loops
+  double threshold_scf;      // energy threshold for electronic iteration loops
   int threshold_scf_nsteps;  // number of scf steps over which threshold is evaluated
   double threshold_force,threshold_stress;  // thresholds for ionic iteration loops
   int threshold_force_nsteps,threshold_stress_nsteps;  // number of ionic steps over which threshold is evaluated

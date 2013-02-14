@@ -1227,111 +1227,85 @@ void BOSampleStepper::step(int niter)
           
             // reset stepper only if multiple non-selfconsistent steps
             if ( nite_ > 0 ) wf_stepper->preprocess();
-            double lastnonscfetot;
-            const double nonscfthresh = s_.ctrl.threshold_nonscf;
             int nitemin_ = ( nite_ > 0 ? nite_ : 1);
             for ( int ite = 0; ite < nitemin_; ite++ )
             {
                double energy = ef_.energy(true,dwf,false,fion,false,sigma_eks);
-              double delta_etotnonscf = abs(energy-lastnonscfetot);
-              if (ite > 0 && delta_etotnonscf < nonscfthresh) {
-                if ( s_.ctxt_.oncoutpe() ) {
-                  cout.setf(ios::fixed,ios::floatfield);
-                  cout.setf(ios::right,ios::adjustfield);
-                  cout << "  <etotal_int> " << setw(15) << setprecision(8)
-                       << energy << " </etotal_int>\n";
-                  if ( compute_stress ) {
-                    const double pext = (sigma_ext[0]+sigma_ext[1]+sigma_ext[2])/3.0;
-                    const double enthalpy = energy + pext * cell.volume();
-                    cout << "  <enthalpy_int> " << setw(15) 
-                         << enthalpy << " </enthalpy_int>\n"
-                         << flush;
-                  }
-                  cout << "  <eharris" << ite << "> " << setw(15) << setprecision(8)
-                       << ef_.etotal_harris() << " </eharris>\n";
-                  
-                  cout.setf(ios::scientific,ios::floatfield);
-                  cout << "  <!-- BOSampleStepper: non-scf threshold " << setprecision(2) << nonscfthresh << " reached. -->" << endl;
-                }
-                ite = nitemin_;
-              }
-              else {
-                lastnonscfetot = energy;
-                // compute the sum of eigenvalues (with fixed weight)
-                // to measure convergence of the subspace update
-                // compute trace of the Hamiltonian matrix Y^T H Y
-                // scalar product of Y and (HY): tr Y^T (HY) = sum_ij Y_ij (HY)_ij
-                // Note: since the hamiltonian is hermitian and dwf=H*wf
-                // the dot product in the following line is real
 
-                if (ultrasoft) { 
+               // compute the sum of eigenvalues (with fixed weight)
+               // to measure convergence of the subspace update
+               // compute trace of the Hamiltonian matrix Y^T H Y
+               // scalar product of Y and (HY): tr Y^T (HY) = sum_ij Y_ij (HY)_ij
+               // Note: since the hamiltonian is hermitian and dwf=H*wf
+               // the dot product in the following line is real
+
+               if (ultrasoft) { 
                   const double us_eigenvalue_sum = s_.wf.sdot(dwf);
                   if ( onpe0 )
-                    cout  << "  <eigenvalue_sum> "
-                          << us_eigenvalue_sum << " </eigenvalue_sum>" << endl;
-                }
-                else {
+                     cout  << "  <eigenvalue_sum> "
+                           << us_eigenvalue_sum << " </eigenvalue_sum>" << endl;
+               }
+               else {
                   const double eigenvalue_sum = s_.wf.dot(dwf);
                   if ( onpe0 )
-                    cout << "  <eigenvalue_sum> "
-                         << eigenvalue_sum << " </eigenvalue_sum>" << endl;
-                }
-
-                wf_stepper->update(dwf);
-                if (ultrasoft)
-                   wf.update_usfns();
-                
-                // update ultrasoft functions if needed, call gram
-                for ( int ispin = 0; ispin < s_.wf.nspin(); ispin++ ) {
+                     cout << "  <eigenvalue_sum> "
+                          << eigenvalue_sum << " </eigenvalue_sum>" << endl;
+               }
+               
+               wf_stepper->update(dwf);
+               if (ultrasoft)
+                  wf.update_usfns();
+               
+               // update ultrasoft functions if needed, call gram
+               for ( int ispin = 0; ispin < s_.wf.nspin(); ispin++ ) {
                   if (s_.wf.spinactive(ispin)) {
-                    for ( int ikp = 0; ikp < s_.wf.nkp(); ikp++ ) {
-                      if (s_.wf.kptactive(ikp)) {
-                        assert(s_.wf.sd(ispin,ikp) != 0);
-                        //if (ultrasoft) { 
-                        //  tmap["usfns"].start();
-                        //  s_.wf.sd(ispin,ikp)->update_usfns(); // calculate betapsi, spsi
-                        //  tmap["usfns"].stop();
-                        //}
-                        tmap["gram"].start();
-                        s_.wf.sd(ispin,ikp)->gram();
-                        tmap["gram"].stop();
-
-                        //if (ultrasoft) { 
-                        //  tmap["usfns"].start();
-                        //  s_.wf.sd(ispin,ikp)->calc_betapsi(); // calculate betapsi
-                        //  tmap["usfns"].stop();
-                        //}
-                      }
-                    }
+                     for ( int ikp = 0; ikp < s_.wf.nkp(); ikp++ ) {
+                        if (s_.wf.kptactive(ikp)) {
+                           assert(s_.wf.sd(ispin,ikp) != 0);
+                           //if (ultrasoft) { 
+                           //  tmap["usfns"].start();
+                           //  s_.wf.sd(ispin,ikp)->update_usfns(); // calculate betapsi, spsi
+                           //  tmap["usfns"].stop();
+                           //}
+                           tmap["gram"].start();
+                           s_.wf.sd(ispin,ikp)->gram();
+                           tmap["gram"].stop();
+                           
+                           //if (ultrasoft) { 
+                           //  tmap["usfns"].start();
+                           //  s_.wf.sd(ispin,ikp)->calc_betapsi(); // calculate betapsi
+                           //  tmap["usfns"].stop();
+                           //}
+                        }
+                     }
                   }
-                }
+               }
                 
-                if ( onpe0 )
-                {
+               if ( onpe0 )
+               {
                   cout.setf(ios::fixed,ios::floatfield);
                   cout.setf(ios::right,ios::adjustfield);
                   cout << "  <etotal_int> " << setw(15) << setprecision(8)
                        << energy << " </etotal_int>\n";
                   if ( compute_stress )
                   {
-                    const double pext = (sigma_ext[0]+sigma_ext[1]+sigma_ext[2])/3.0;
-                    const double enthalpy = energy + pext * cell.volume();
-                    cout << "  <enthalpy_int> " << setw(15)
-                         << enthalpy << " </enthalpy_int>\n"
-                         << flush;
+                     const double pext = (sigma_ext[0]+sigma_ext[1]+sigma_ext[2])/3.0;
+                     const double enthalpy = energy + pext * cell.volume();
+                     cout << "  <enthalpy_int> " << setw(15)
+                          << enthalpy << " </enthalpy_int>\n"
+                          << flush;
                   }
-                  cout << "  <eharris" << ite << "> " << setw(15) << setprecision(8)
-                       << ef_.etotal_harris() << " </eharris>\n";
-                }
-              }
+                  if (ite == 0)
+                     cout << "  <eharris> " << setw(15) << setprecision(8) << ef_.etotal_harris() << " </eharris>\n";
+               }
             } // for ite
             // subspace diagonalization
             if ( compute_eigvec || s_.ctrl.wf_diag == "EIGVAL" || usdiag)
             {
                ef_.energy(true,dwf,false,fion,false,sigma_eks);
-              tmap["diag"].start();
-              s_.wf.diag(dwf,compute_eigvec);
-              tmap["diag"].stop();
+               tmap["diag"].start();
+               s_.wf.diag(dwf,compute_eigvec);
+               tmap["diag"].stop();
 
               // update ultrasoft functions w. new eigenvectors
               if (compute_eigvec && ultrasoft)
