@@ -1094,7 +1094,8 @@ void BOSampleStepper::step(int niter)
 
         SimpleConvergenceDetector conv_scf(s_.ctrl.threshold_scf_nsteps, s_.ctrl.threshold_scf);
         bool convflag = false;
-
+        double etot_harris;
+        
 #ifdef HPM  
   HPM_Start("scfloop");
 #endif
@@ -1145,7 +1146,8 @@ void BOSampleStepper::step(int niter)
           // continue itscf loop
           else {
             if (itscf > 0)
-              conv_scf.addValue(ef_.etotal());
+              conv_scf.addValue(etot_harris);
+              //conv_scf.addValue(ef_.etotal());
             
             if ( nite_ > 1 && onpe0 )
               cout << "  <!-- BOSampleStepper: start scf iteration -->" << endl;
@@ -1296,7 +1298,10 @@ void BOSampleStepper::step(int niter)
                           << flush;
                   }
                   if (ite == 0)
-                     cout << "  <eharris> " << setw(15) << setprecision(8) << ef_.etotal_harris() << " </eharris>\n";
+                  {
+                     etot_harris = ef_.etotal_harris();
+                     cout << "  <eharris> " << setw(15) << setprecision(8) << etot_harris << " </eharris>\n";
+                  }
                }
             } // for ite
             // subspace diagonalization
