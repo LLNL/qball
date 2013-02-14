@@ -628,7 +628,7 @@ void EnergyFunctional::update_exc_ehart_eps(void)
 ////////////////////////////////////////////////////////////////////////////////
 double EnergyFunctional::energy(bool compute_hpsi, Wavefunction& dwf,
               bool compute_forces, vector<vector<double> >& fion,
-                                bool compute_stress, valarray<double>& sigma, bool compute_harris) {
+                                bool compute_stress, valarray<double>& sigma) {
   const bool debug_stress = compute_stress && 
     s_.ctrl.debug.find("STRESS") != string::npos;
   const double fpi = 4.0 * M_PI;
@@ -1087,14 +1087,6 @@ double EnergyFunctional::energy(bool compute_hpsi, Wavefunction& dwf,
   }
   etotal_ = ekin_ + econf_ + eps_ + enl_ + ecoul_ + exc_ + ets_ + epv_ + ehub_;
 
-  //ewd DEBUG:  print out Harris-Foulkes estimate of the energy here
-  if (compute_harris)
-  {
-     double etot_harris = ekin_ + econf_ + enl_ + ets_ + epv_ + ehub_ + eharris_ + esr_ - eself_;
-     if ( s_.ctxt_.oncoutpe() )
-        cout << "Harris-Foulkes estimate = " << etot_harris << ", eharris = " << eharris_ << endl;
-  }
-  
   //ewd DEBUG
   //print(cout);
   

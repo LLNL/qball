@@ -243,11 +243,12 @@ int LoadCmd::action(int argc, char **argv) {
     {
        // ewd:  read rhor_last from file, send to appropriate pes
        ChargeDensity cd_(*s);
-       cd_.update_density();
 
        //ewd DEBUG
        if (s->ctrl.ultrasoft)    
           cd_.update_usfns();
+
+       cd_.update_density();
     
        const Context* wfctxt = s->wf.wfcontext();
        const Context* vctxt = &cd_.vcontext();
@@ -381,11 +382,12 @@ int LoadCmd::action(int argc, char **argv) {
     {
        // ewd:  read rhor_last from file, send to appropriate pes
        ChargeDensity cd_(*s);
-       cd_.update_density();
 
        //ewd DEBUG
        if (s->ctrl.ultrasoft)    
           cd_.update_usfns();
+       
+       cd_.update_density();
 
        const Context* wfctxt = s->wf.wfcontext();
        const Context* vctxt = &cd_.vcontext();

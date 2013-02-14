@@ -450,7 +450,7 @@ int SaveCmd::action(int argc, char **argv) {
     for ( int is = 0; is < fion.size(); is++ )
       fion[is].resize(3*s->atoms.na(is));
 
-    ef_.energy(false,dwf,false,fion,false,sigma_eks,false);
+    ef_.energy(false,dwf,false,fion,false,sigma_eks);
 
     if ( ui->oncoutpe() ) {
       os.open(filestr.c_str(),ofstream::out);

@@ -82,7 +82,7 @@ class EnergyFunctional
 
   double energy(bool compute_hpsi, Wavefunction& dwf,
     bool compute_forces, vector<vector<double> >& fion,
-                bool compute_stress, valarray<double>& sigma, bool compute_harris);
+                bool compute_stress, valarray<double>& sigma);
   
   double etotal(void) const { return etotal_; }
   double ekin(void) const { return ekin_; }
@@ -99,7 +99,7 @@ class EnergyFunctional
   double eexf(void) const { return eexf_; }
   double ehub(void) const { return ehub_; }
   double eharris(void) const { return eharris_; }
-  
+  double etotal_harris(void) const { return (ekin_ + econf_ + enl_ + ets_ + epv_ + ehub_ + eharris_ + esr_ - eself_); };  
   const ConfinementPotential *confpot(int ispin, int ikp) const { return cfp[ispin][ikp]; }
   
   void update_vhxc(void);
