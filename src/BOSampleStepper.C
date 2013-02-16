@@ -1136,19 +1136,22 @@ void BOSampleStepper::step(int niter)
           if (conv_scf.isConverged()) {
             if ( s_.ctxt_.oncoutpe() ) {
               cout.setf(ios::scientific,ios::floatfield);
-              cout << "  <!-- BOSampleStepper: scf convergence at itscf = " << itscf << ", energy varied by less than " << setprecision(2) 
+              cout << "  <!-- BOSampleStepper: scf convergence at itscf = " << itscf << ", Harris-Foulkes energy varied by less than " << setprecision(2) 
                    << conv_scf.threshold() << " a.u. over " << conv_scf.nsteps() 
                    << " scf steps. -->" << endl;
+              cout.flush();
             }
             itscf = nitscf_;
             convflag = true;
           }          
           // continue itscf loop
           else {
-            if (itscf > 0)
-              conv_scf.addValue(etot_harris);
-              //conv_scf.addValue(ef_.etotal());
-            
+            if (itscf > 0) {
+               if (ultrasoft)
+                  conv_scf.addValue(ef_.etotal()); // Harris-Foulkes estimate not implemented for ultrasoft yet (need enl_)
+               else
+                  conv_scf.addValue(etot_harris);
+            }            
             if ( nite_ > 1 && onpe0 )
               cout << "  <!-- BOSampleStepper: start scf iteration -->" << endl;
 
@@ -1164,7 +1167,7 @@ void BOSampleStepper::step(int niter)
             tmap["charge"].stop();
 
             ef_.update_harris();
-            
+
             if ( charge_mixing != "off" && nite_ > 0) {
               if ( itscf == 0) {
                 //ewd:  read rhog_in from checkpoint if possible
@@ -1225,15 +1228,15 @@ void BOSampleStepper::step(int niter)
                 cd_.update_rhor();
               }              
             }
+            
             ef_.update_vhxc();
-          
+
             // reset stepper only if multiple non-selfconsistent steps
             if ( nite_ > 0 ) wf_stepper->preprocess();
             int nitemin_ = ( nite_ > 0 ? nite_ : 1);
             for ( int ite = 0; ite < nitemin_; ite++ )
             {
                double energy = ef_.energy(true,dwf,false,fion,false,sigma_eks);
-
                // compute the sum of eigenvalues (with fixed weight)
                // to measure convergence of the subspace update
                // compute trace of the Hamiltonian matrix Y^T H Y
@@ -1257,7 +1260,7 @@ void BOSampleStepper::step(int niter)
                wf_stepper->update(dwf);
                if (ultrasoft)
                   wf.update_usfns();
-               
+
                // update ultrasoft functions if needed, call gram
                for ( int ispin = 0; ispin < s_.wf.nspin(); ispin++ ) {
                   if (s_.wf.spinactive(ispin)) {
@@ -1282,7 +1285,7 @@ void BOSampleStepper::step(int niter)
                      }
                   }
                }
-                
+               
                if ( onpe0 )
                {
                   cout.setf(ios::fixed,ios::floatfield);
@@ -1297,13 +1300,15 @@ void BOSampleStepper::step(int niter)
                           << enthalpy << " </enthalpy_int>\n"
                           << flush;
                   }
-                  if (ite == 0)
-                  {
-                     etot_harris = ef_.etotal_harris();
+               }
+               if (ite == 0)
+               {
+                  etot_harris = ef_.etotal_harris();
+                  if (onpe0)
                      cout << "  <eharris> " << setw(15) << setprecision(8) << etot_harris << " </eharris>\n";
-                  }
                }
             } // for ite
+
             // subspace diagonalization
             if ( compute_eigvec || s_.ctrl.wf_diag == "EIGVAL" || usdiag)
             {
@@ -1312,12 +1317,12 @@ void BOSampleStepper::step(int niter)
                s_.wf.diag(dwf,compute_eigvec);
                tmap["diag"].stop();
 
-              // update ultrasoft functions w. new eigenvectors
-              if (compute_eigvec && ultrasoft)
-                 s_.wf.update_usfns();
+               // update ultrasoft functions w. new eigenvectors
+               if (compute_eigvec && ultrasoft)
+                  s_.wf.update_usfns();
 
-              if (itscf%s_.ctrl.iprint == 0)
-                s_.wf.printeig();
+               if (itscf%s_.ctrl.iprint == 0)
+                  s_.wf.printeig();
             }
 
             // update occupation numbers if fractionally occupied states

@@ -539,7 +539,6 @@ void EnergyFunctional::update_harris(void) {
   for ( int ig = 0; ig < ngloc; ig++ ) {
     const complex<double> tmp = rhoelg[ig] + rhopst[ig];
     ehsum += norm(tmp) * g2i[ig];
-    rhogt[ig] = tmp;
   }
   double vfact = vbasis_->real() ? 1.0 : 0.5;
   tsum[1] = vfact * omega * fpi * ehsum;

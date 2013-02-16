@@ -101,7 +101,6 @@ using namespace std;
 #include "Stress.h"
 #include "Thermostat.h"
 #include "ThresholdScf.h"
-#include "ThresholdNonscf.h"
 #include "ThresholdForce.h"
 #include "ThresholdStress.h"
 #include "ThTemp.h"
@@ -357,7 +356,6 @@ int main(int argc, char **argv, char **envp)
   ui->addVar(new Stress(s));
   ui->addVar(new Thermostat(s));
   ui->addVar(new ThresholdScf(s));
-  ui->addVar(new ThresholdNonscf(s));
   ui->addVar(new ThresholdForce(s));
   ui->addVar(new ThresholdStress(s));
   ui->addVar(new ThTemp(s));

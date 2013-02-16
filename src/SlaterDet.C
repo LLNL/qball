@@ -2004,12 +2004,6 @@ void SlaterDet::calc_betapsi(void) {
         ComplexMatrix bgsf(ctxt_,betag_[is]->m(),betag_[is]->n(),betag_[is]->mb(),betag_[is]->nb());
         complex<double>* bgsfp = bgsf.valptr();
         for (int ibl = 0; ibl < naloc_max; ibl++) {
-
-           //ewd DEBUG
-           if (ctxt_.mype() == 0)
-              cout << "SD.CALC_BETAPSI ibl = " << ibl << ", naloc_max = " << naloc_max << endl;
-           //ewd DEBUG
-           
           if (ibl < naloc) { 
             int ia = atoms_->usloc_atind[is][ibl]; 
             // calculate structure factor

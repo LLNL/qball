@@ -162,6 +162,8 @@ int SaveCmd::action(int argc, char **argv) {
     {
        // ewd:  write rhor_last to file
        ChargeDensity cd_(*s);
+       if (s->ctrl.ultrasoft)    
+          cd_.update_usfns();
 
        const int nspin = s->wf.nspin();
        // load mixed charge density into cd_
@@ -257,6 +259,8 @@ int SaveCmd::action(int argc, char **argv) {
     {
        // ewd:  write rhor_last to file
        ChargeDensity cd_(*s);
+       if (s->ctrl.ultrasoft)    
+          cd_.update_usfns();
 
        const int nspin = s->wf.nspin();
        // load mixed charge density into cd_
@@ -353,6 +357,8 @@ int SaveCmd::action(int argc, char **argv) {
     else
     {
        ChargeDensity cd_(*s);
+       if (s->ctrl.ultrasoft)    
+          cd_.update_usfns();
 
        const int nspin = s->wf.nspin();
        // load mixed charge density into cd_
