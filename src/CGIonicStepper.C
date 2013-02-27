@@ -28,7 +28,7 @@ void CGIonicStepper::compute_r(double e0, const vector<vector< double> >& f0)
 
   if ( largest_force > max_force )
   {
-    if ( s_.ctxt_.onpe0() )
+    if ( s_.ctxt_.oncoutpe() )
       cout << "  CGIonicStepper: force exceeds limit, taking SD step " << endl;
     // take a steepest descent step with limited displacement and exit
     const double alpha_sd = max_force/largest_force;
@@ -64,7 +64,7 @@ void CGIonicStepper::compute_r(double e0, const vector<vector< double> >& f0)
       }
     }
     wolfe2 = fabs(fp0) < sigma2_ * fabs(fpc_);
-    if ( s_.ctxt_.onpe0() )
+    if ( s_.ctxt_.oncoutpe() )
     {
       cout << "  CGIonicStepper: fpc = " << fpc_ << endl;
       cout << "  CGIonicStepper: fp0 = " << fp0 << endl;
@@ -101,7 +101,7 @@ void CGIonicStepper::compute_r(double e0, const vector<vector< double> >& f0)
       }
       double beta = den > 0.0 ? num/den : 0.0;
       beta = max(beta,0.0);
-      if ( s_.ctxt_.onpe0() )
+      if ( s_.ctxt_.oncoutpe() )
         cout << "  CGIonicStepper: beta = " << beta << endl;
       for ( int is = 0; is < r0_.size(); is++ )
       {
@@ -130,7 +130,7 @@ void CGIonicStepper::compute_r(double e0, const vector<vector< double> >& f0)
 
   alpha_ = linmin_.newalpha(alpha_,e0,fp0);
 
-  if ( s_.ctxt_.onpe0() )
+  if ( s_.ctxt_.oncoutpe() )
     cout << "  CGIonicStepper: alpha = " << alpha_ << endl;
 
   // rp = rc + alpha * pc

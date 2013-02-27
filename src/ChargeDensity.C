@@ -25,40 +25,57 @@ extern "C" void cdLoop2(const int size, double* v1, double* v2, double* vout);
 using namespace std;
 
 ////////////////////////////////////////////////////////////////////////////////
-ChargeDensity::ChargeDensity(Sample& s) : wf_(s.wf),atoms_(s.atoms),ctxt_(s.wf.context()) {
-  ultrasoft_ = s.ctrl.ultrasoft;
-  nlcc_ = s.ctrl.nlcc;
-  highmem_ = false;
-  if (s.ctrl.extra_memory >= 9)
-    highmem_ = true;
-  D3vector tmpkpoint(0.0,0.0,0.0);
-  vcontext_ = wf_.sdloc(0)->basis().context();
-  vbasis_ = new Basis(vcontext_, tmpkpoint, ultrasoft_);
-  if (s.ctrl.ecutden > 0.0)
-     vbasis_->resize(wf_.cell(),wf_.refcell(),s.ctrl.ecutden);
-  else
-     vbasis_->resize(wf_.cell(),wf_.refcell(),4.0*wf_.ecut());
-  
-  // define vft_, FT on vbasis context for transforming the density  
-  // add 2 to grid size to avoid aliasing when using non-zero k-points
-  // adding 1 would suffice, but add 2 to keep even numbers
+ChargeDensity::ChargeDensity(const Sample& s) : wf_((Wavefunction&)s.wf),
+                                                atoms_((AtomSet&)s.atoms),
+                                                ctxt_(s.wf.context())
+{
+   initialize(s);
+}
 
-  int np0v = vbasis_->np(0) + 2;
-  int np1v = vbasis_->np(1) + 2;
-  int np2v = vbasis_->np(2) + 2;
-  while (!vbasis_->factorizable(np0v)) np0v += 2;
-  while (!vbasis_->factorizable(np1v)) np1v += 2;
-  while (!vbasis_->factorizable(np2v)) np2v += 2;
-  
-  vft_ = new FourierTransform(*vbasis_,np0v,np1v,np2v);
+////////////////////////////////////////////////////////////////////////////////
+ChargeDensity::ChargeDensity(const Sample& s, Wavefunction& cdwf) : wf_(cdwf),
+                                                                    atoms_((AtomSet&)s.atoms),
+                                                                    ctxt_(cdwf.context())
+{
+   initialize(s);
+}
+////////////////////////////////////////////////////////////////////////////////
+void ChargeDensity::initialize(const Sample& s)
+{
+   ultrasoft_ = s.ctrl.ultrasoft;
+   nlcc_ = s.ctrl.nlcc;
+   tddft_involved_ = s.ctrl.tddft_involved;
+   
+   highmem_ = false;
+   if (s.ctrl.extra_memory >= 9)
+      highmem_ = true;
+   D3vector tmpkpoint(0.0,0.0,0.0);
+   vcontext_ = wf_.sdloc(0)->basis().context();
+   vbasis_ = new Basis(vcontext_, tmpkpoint, ultrasoft_);
+   if (s.ctrl.ecutden > 0.0)
+      vbasis_->resize(wf_.cell(),wf_.refcell(),s.ctrl.ecutden);
+   else
+      vbasis_->resize(wf_.cell(),wf_.refcell(),4.0*wf_.ecut());
+   
+   // define vft_, FT on vbasis context for transforming the density  
+   // add 2 to grid size to avoid aliasing when using non-zero k-points
+   // adding 1 would suffice, but add 2 to keep even numbers
+   np0v_ = vbasis_->np(0) + 2;
+   np1v_ = vbasis_->np(1) + 2;
+   np2v_ = vbasis_->np(2) + 2;
+   while (!vbasis_->factorizable(np0v_)) np0v_ += 2;
+   while (!vbasis_->factorizable(np1v_)) np1v_ += 2;
+   while (!vbasis_->factorizable(np2v_)) np2v_ += 2;
+   
+  vft_ = new FourierTransform(*vbasis_,np0v_,np1v_,np2v_);
   rhor.resize(wf_.nspin());
   rhog.resize(wf_.nspin());
   for ( int ispin = 0; ispin < wf_.nspin(); ispin++ ) {
-    rhor[ispin].resize(vft_->np012loc());
-    rhog[ispin].resize(vbasis_->localsize());
+     rhor[ispin].resize(vft_->np012loc());
+     rhog[ispin].resize(vbasis_->localsize());
   }
   rhotmp.resize(vft_->np012loc());
-
+  
   if (nlcc_)
   {
      xcrhor.resize(wf_.nspin());
@@ -71,133 +88,154 @@ ChargeDensity::ChargeDensity(Sample& s) : wf_(s.wf),atoms_(s.atoms),ctxt_(s.wf.c
   
   // if nsym>0, identify symmetry-equivalent points for later averaging across procs
   nsym_ = s.symmetries.nsym();
-  if (nsym_ > 0) {
-    int np012loc = vft_->np012loc();
-    symindexloc.resize(np012loc);
-    symmultloc.resize(np012loc);
-    for (int i=0; i<np012loc; i++) {
-      symindexloc[i] = -1;
-      symmultloc[i] = 0;
-    }
-    nsymgrp_ = 0;
-    int np2first = vft_->np2_first(vcontext_.myrow());
-    int np2last = np2first + vft_->np2_loc(vcontext_.myrow());
-
-    for (int sy=0; sy<nsym_; sy++) {
-      if (s.symmetries.symlist[sy]->setGrid(np0v,np1v,np2v)) {
-        if ( vcontext_.oncoutpe() )
-          cout << "<WARNING> symmetry " << sy << " does not match grid! </WARNING>" << endl;
-      }
-    }
-    if ( vcontext_.oncoutpe() )
-      cout << "<!-- nsym = " << nsym_ << " -->" << endl;
-
-    vector<vector<vector<int > > > doneit;
-    doneit.resize(np0v);
-    for (int i=0; i<np0v; i++) 
-      doneit[i].resize(np1v);
-    for (int i=0; i<np0v; i++) 
-      for (int j=0; j<np1v; j++) 
-        doneit[i][j].resize(np2v);
-    
-    for (int i=0; i<np0v; i++) 
-      for (int j=0; j<np1v; j++) 
-        for (int k=0; k<np2v; k++) 
-          doneit[i][j][k] = 0;
-
-    for (int i=0; i<np0v; i++) {
-      for (int j=0; j<np1v; j++) {
-        for (int k=0; k<np2v; k++) {
-          if (doneit[i][j][k] == 0) {
-            doneit[i][j][k] = 1;
-
-            // check if k is on local proc
-            if (k >= np2first && k < np2last) {
-              int locindex = (k-np2first)*np1v*np0v + j*np0v + i;
-              symindexloc[locindex]=nsymgrp_;
-              symmultloc[locindex]++;
-            }
-
-            for (int sy=0; sy<nsym_; sy++) {
-
-              // map i,j,k to local index, set symindexloc[that] = nsymgrp_
-              // symmultloc[that]++
-
-              int istar,jstar,kstar;
-              s.symmetries.symlist[sy]->applyToGridPoint(i,j,k,istar,jstar,kstar);
-              doneit[istar][jstar][kstar] = 1;
-              // check if kstar is on local proc
-              if (kstar >= np2first && kstar < np2last) {
-                int locindex = (kstar-np2first)*np1v*np0v + jstar*np0v + istar;
-                symindexloc[locindex]=nsymgrp_;
-                symmultloc[locindex]++;
-              }
-            }
-            nsymgrp_++;
-            
-          }
-        }
-      }
-    }
-
-    if (vcontext_.oncoutpe()) 
-      cout << "<!-- Finished mapping symmetric grid points:  nsymgrp = " << nsymgrp_ << ", np012 = " << np0v*np1v*np2v << ", vbasis.size = " << vbasis_->size() << ", nsym = " << nsym_ << " -->" << endl;
-
-  }
-
+  if (nsym_ > 0) 
+     initializeSymmetries(s);
+  
   // FT for interpolation of wavefunctions on the fine grid
   ft_.resize(wf_.nspin());
   for ( int ispin = 0; ispin < wf_.nspin(); ispin++ )
-    ft_[ispin].resize(wf_.nkp());
+     ft_[ispin].resize(wf_.nkp());
 
   for ( int ispin = 0; ispin < wf_.nspin(); ispin++ )
-    for (int kp=0; kp<wf_.nkp(); kp++)
-      ft_[ispin][kp] = 0;
+     for (int kp=0; kp<wf_.nkp(); kp++)
+        ft_[ispin][kp] = 0;
 
   for ( int ispin = 0; ispin < wf_.nspin(); ispin++ ) {
-    if (wf_.spinactive(ispin)) {
-      for ( int ikp=0; ikp<wf_.nkp(); ikp++) {
-        if (wf_.kptactive(ikp)) {
-          assert(wf_.sd(ispin,ikp) != 0);
-          ft_[ispin][ikp] =
-              new FourierTransform(wf_.sd(ispin,ikp)->basis(),np0v,np1v,np2v);
+     if (wf_.spinactive(ispin)) {
+        for ( int ikp=0; ikp<wf_.nkp(); ikp++) {
+           if (wf_.kptactive(ikp)) {
+              assert(wf_.sd(ispin,ikp) != 0);
+              ft_[ispin][ikp] =
+                  new FourierTransform(wf_.sd(ispin,ikp)->basis(),np0v_,np1v_,np2v_);
+           }
         }
-      }
-    }
+     }
   }
 }
+////////////////////////////////////////////////////////////////////////////////
+void ChargeDensity::initializeSymmetries(const Sample& s)
+{
+   int np012loc = vft_->np012loc();
+   symindexloc.resize(np012loc);
+   symmultloc.resize(np012loc);
+   for (int i=0; i<np012loc; i++) {
+      symindexloc[i] = -1;
+      symmultloc[i] = 0;
+   }
+   nsymgrp_ = 0;
+   int np2first = vft_->np2_first(vcontext_.myrow());
+   int np2last = np2first + vft_->np2_loc(vcontext_.myrow());
 
+   for (int sy=0; sy<nsym_; sy++) {
+      if (s.symmetries.symlist[sy]->setGrid(np0v_,np1v_,np2v_)) {
+         if ( vcontext_.oncoutpe() )
+            cout << "<WARNING> symmetry " << sy << " does not match grid! </WARNING>" << endl;
+      }
+   }
+   if ( vcontext_.oncoutpe() )
+      cout << "<!-- nsym = " << nsym_ << " -->" << endl;
+   
+   vector<vector<vector<int > > > doneit;
+   doneit.resize(np0v_);
+   for (int i=0; i<np0v_; i++) 
+      doneit[i].resize(np1v_);
+   for (int i=0; i<np0v_; i++) 
+      for (int j=0; j<np1v_; j++) 
+         doneit[i][j].resize(np2v_);
+     
+   for (int i=0; i<np0v_; i++) 
+      for (int j=0; j<np1v_; j++) 
+         for (int k=0; k<np2v_; k++) 
+            doneit[i][j][k] = 0;
+     
+   for (int i=0; i<np0v_; i++) {
+      for (int j=0; j<np1v_; j++) {
+         for (int k=0; k<np2v_; k++) {
+            if (doneit[i][j][k] == 0) {
+               doneit[i][j][k] = 1;
+
+               // check if k is on local proc
+               if (k >= np2first && k < np2last) {
+                  int locindex = (k-np2first)*np1v_*np0v_ + j*np0v_ + i;
+                  symindexloc[locindex]=nsymgrp_;
+                  symmultloc[locindex]++;
+               }
+                 
+               for (int sy=0; sy<nsym_; sy++) {
+                  
+                  // map i,j,k to local index, set symindexloc[that] = nsymgrp_
+                  // symmultloc[that]++
+
+                  int istar,jstar,kstar;
+                  s.symmetries.symlist[sy]->applyToGridPoint(i,j,k,istar,jstar,kstar);
+                  doneit[istar][jstar][kstar] = 1;
+                  // check if kstar is on local proc
+                  if (kstar >= np2first && kstar < np2last) {
+                     int locindex = (kstar-np2first)*np1v_*np0v_ + jstar*np0v_ + istar;
+                     symindexloc[locindex]=nsymgrp_;
+                     symmultloc[locindex]++;
+                  }
+               }
+               nsymgrp_++;
+            }
+         }
+      }
+   }
+
+   if (vcontext_.oncoutpe()) 
+      cout << "<!-- Finished mapping symmetric grid points:  nsymgrp = " << nsymgrp_ << ", np012 = " << np0v_*np1v_*np2v_ << ", vbasis.size = " << vbasis_->size() << ", nsym = " << nsym_ << " -->" << endl;
+
+}
 ////////////////////////////////////////////////////////////////////////////////
 ChargeDensity::~ChargeDensity(void) {
-  delete vbasis_;
-  delete vft_;
-  for ( int ispin = 0; ispin < wf_.nspin(); ispin++ ) 
-    for ( int ikp = 0; ikp < ft_[ispin].size(); ikp++ )
-      delete ft_[ispin][ikp];
+   delete vbasis_;
+   delete vft_;
+   for ( int ispin = 0; ispin < wf_.nspin(); ispin++ ) 
+      for ( int ikp = 0; ikp < ft_[ispin].size(); ikp++ )
+         delete ft_[ispin][ikp];
 }
 ////////////////////////////////////////////////////////////////////////////////
-void ChargeDensity::print_timing() {
+void ChargeDensity::print_timing()
+{
 
-  for ( TimerMap::iterator i = tmap.begin(); i != tmap.end(); i++ ) {
-    double time = (*i).second.real();
-    double tmin = time;
-    double tmax = time;
-    ctxt_.dmin(1,1,&tmin,1);
-    ctxt_.dmax(1,1,&tmax,1);
-    //if ( ctxt_.myproc()==0 ) {
-    if ( ctxt_.mype()==0 ) {
-       cout << left << setw(34) << "<timing where=\"charge\""
-           << setw(8) << " name=\""
-           << setw(15) << (*i).first << "\""
-           << " min=\"" << setprecision(3) << setw(9) << tmin << "\""
-           << " max=\"" << setprecision(3) << setw(9) << tmax << "\"/>"
-           << endl;
-    }
-  }
+   //ewd DEBUG
+   // print FourierTransform timers
+   if ( ctxt_.mype()==0 )
+   {
+      cout << " bwd: tm_b_fft:    " << ft_[0][0]->tm_b_fft.real() << endl;
+      cout << " bwd: tm_b_mpi:    " << ft_[0][0]->tm_b_mpi.real() << endl;
+      cout << " bwd: tm_b_pack:   " << ft_[0][0]->tm_b_pack.real() << endl;
+      cout << " bwd: tm_b_unpack: " << ft_[0][0]->tm_b_unpack.real() << endl;
+      cout << " bwd: tm_b_zero:   " << ft_[0][0]->tm_b_zero.real() << endl;
+      cout << " bwd: tm_b_map:    " << ft_[0][0]->tm_b_map.real() << endl;
+      cout << " bwd: tm_b_total:  " << ft_[0][0]->tm_b_fft.real() +
+          ft_[0][0]->tm_b_mpi.real() +
+          ft_[0][0]->tm_b_pack.real() +
+          ft_[0][0]->tm_b_unpack.real() +
+          ft_[0][0]->tm_b_zero.real() +
+          ft_[0][0]->tm_b_map.real() << endl;
+   }
+
+   for ( TimerMap::iterator i = tmap.begin(); i != tmap.end(); i++ ) {
+      double time = (*i).second.real();
+      double tmin = time;
+      double tmax = time;
+      ctxt_.dmin(1,1,&tmin,1);
+      ctxt_.dmax(1,1,&tmax,1);
+      //if ( ctxt_.myproc()==0 ) {
+      if ( ctxt_.mype()==0 ) {
+         cout << left << setw(34) << "<timing where=\"charge\""
+              << setw(8) << " name=\""
+              << setw(15) << (*i).first << "\""
+              << " min=\"" << setprecision(3) << setw(9) << tmin << "\""
+              << " max=\"" << setprecision(3) << setw(9) << tmax << "\"/>"
+              << endl;
+      }
+   }
 }
 ////////////////////////////////////////////////////////////////////////////////
 void ChargeDensity::update_density() {
-  assert(rhor.size() == wf_.nspin());
+   assert(rhor.size() == wf_.nspin());
   const double omega = vbasis_->cell().volume();
   assert(omega != 0.0);
   const double omega_inv = 1.0 / omega;
@@ -453,7 +491,7 @@ void ChargeDensity::update_density() {
         const double chgthresh = 1.E-7;
         int chgint = (int) (sum+chgthresh);
         double nonint = abs( sum - (double) chgint);
-        if (nonint > chgthresh) 
+        if (nonint > chgthresh && !tddft_involved_) 
           cout << "<WARNING> Total electronic charge has non-integer value!! </WARNING>" << endl;
       }
     }
@@ -574,7 +612,7 @@ void ChargeDensity::reshape_rhor(const Context& oldvctxt, const Context& newvctx
     rhortmp.resize(vft_->np012());
 
   // send full density to first pe of columns on new context
-  if (wfctxt->onpe0()) {
+  if (wfctxt->oncoutpe()) {
     for ( int i = 1; i < wfctxt->npcol(); i++ ) {
       int fullsize = vft_->np012();
       wfctxt->isend(1,1,&fullsize,1,0,i);

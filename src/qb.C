@@ -24,7 +24,6 @@ using namespace std;
 #include "isodate.h"
 #include "release.h"
 #include "qbox_xmlns.h"
-
 #include "Context.h"
 #include "UserInterface.h"
 #include "Sample.h"
@@ -39,13 +38,17 @@ using namespace std;
 #include "PrintCmd.h"
 #include "QuitCmd.h"
 #include "RandomizeWfCmd.h"
+#include "RandomizeRealWfCmd.h"
 #include "RandomizeVelCmd.h"
 #include "RunCmd.h"
+#include "MDSaveCmd.h"
 #include "SaveCmd.h"
 #include "SavesysCmd.h"
 #include "SavedenCmd.h"
 #include "SaveESPCmd.h"
 #include "SetCmd.h"
+#include "ShiftWFCmd.h"
+#include "WFPhaseRealCmd.h"
 #include "SpeciesCmd.h"
 #include "MMSpeciesCmd.h"
 #include "EmpiricalPotentialCmd.h"
@@ -64,6 +67,7 @@ using namespace std;
 #include "TorsionCmd.h"
 #include "ResetVcmCmd.h"
 #include "ListConstraintsCmd.h"
+#include "PlotCmd.h"
 
 #include "AtomsDyn.h"
 #include "Cell.h"
@@ -84,16 +88,19 @@ using namespace std;
 #include "Smearing.h"
 #include "SmearingWidth.h"
 #include "FermiTemp.h"
+#include "Force_Complex_WF.h"
+#include "Non_Selfconsistent_Energy_Output.h"
+#include "TDDt.h"
+#include "NA_overlaps.h"
 #include "Dt.h"
 #include "Nempty.h"
-#include "NetCharge.h"
 #include "Nrowmax.h"
+#include "PrintDensityEvery.h"
 #include "RefCell.h"
 #include "Spin.h"
 #include "Stress.h"
 #include "Thermostat.h"
 #include "ThresholdScf.h"
-#include "ThresholdNonscf.h"
 #include "ThresholdForce.h"
 #include "ThresholdStress.h"
 #include "ThTemp.h"
@@ -102,6 +109,7 @@ using namespace std;
 #include "CenterOfMass.h"
 #include "WfDiag.h"
 #include "WfDyn.h"
+#include "WFPhaseRealVar.h"
 #include "Xc.h"
 #include "Nparallelkpts.h"
 #include "Nkpoints.h"
@@ -116,6 +124,7 @@ using namespace std;
 #include "RunTimer.h"
 #include "HubbardU.h"
 #include "Memory.h"
+#include "MDIter.h"
 #include "profile.h"
 
 #ifdef USE_CTF
@@ -246,7 +255,7 @@ int main(int argc, char **argv, char **envp)
   char buf[MPI_MAX_PROCESSOR_NAME];
   int namelen;
   PMPI_Get_processor_name(processor_name,&namelen);
-  if ( ctxt.onpe0() )
+  if ( ctxt.oncoutpe() )
   {
     cout << "<mpi_processes count=\"" << ctxt.size() << "\">" << endl;
     cout << "<process id=\"" << ctxt.mype() << "\"> " << processor_name 
@@ -255,7 +264,7 @@ int main(int argc, char **argv, char **envp)
   for ( int ip = 1; ip < ctxt.size(); ip++ )
   {
     MPI_Barrier(ctxt.comm());
-    if ( ctxt.onpe0() )
+    if ( ctxt.oncoutpe() )
     {
       MPI_Status status;
       MPI_Recv(&buf[0],MPI_MAX_PROCESSOR_NAME,MPI_CHAR,
@@ -267,11 +276,11 @@ int main(int argc, char **argv, char **envp)
       MPI_Send(&processor_name[0],MPI_MAX_PROCESSOR_NAME,
         MPI_CHAR,0,ctxt.mype(),ctxt.comm());
     }
-  if ( ctxt.onpe0() )
+  if ( ctxt.oncoutpe() )
     cout << "<process id=\"" << ip << "\"> " << buf 
          << " </process>" << endl;
   }
-  if ( ctxt.onpe0() )
+  if ( ctxt.oncoutpe() )
     cout << "</mpi_processes>" << endl;
 #endif // BGLDEBUG
 #endif // USE_MPI
@@ -281,6 +290,7 @@ int main(int argc, char **argv, char **envp)
   //store timing for run_timer
   s->ctrl.time_init = MPI_Wtime();
   s->ctrl.timer_hit = false;
+  s->ctrl.timer_mdsavecmd = false;
   s->ctrl.timer_savecmd = false;
   s->ctrl.timer_savesyscmd = false;
   
@@ -295,8 +305,10 @@ int main(int argc, char **argv, char **envp)
   ui->addCmd(new PrintCmd(s));
   ui->addCmd(new QuitCmd(s));
   ui->addCmd(new RandomizeWfCmd(s));
+  ui->addCmd(new RandomizeRealWfCmd(s));
   ui->addCmd(new RandomizeVelCmd(s));
   ui->addCmd(new RunCmd(s));
+  ui->addCmd(new MDSaveCmd(s));
   ui->addCmd(new SaveCmd(s));
   ui->addCmd(new SavesysCmd(s));
   ui->addCmd(new SavedenCmd(s));
@@ -313,6 +325,9 @@ int main(int argc, char **argv, char **envp)
   ui->addCmd(new UnlockCmd(s));
   ui->addCmd(new ComputeMLWFCmd(s));
   ui->addCmd(new ConstraintCmd(s));
+  ui->addCmd(new ShiftWFCmd(s));
+  ui->addCmd(new WFPhaseRealCmd(s));
+  ui->addCmd(new PlotCmd(s));
   
   ui->addVar(new AtomsDyn(s));
   ui->addVar(new Cell(s));
@@ -341,7 +356,6 @@ int main(int argc, char **argv, char **envp)
   ui->addVar(new Stress(s));
   ui->addVar(new Thermostat(s));
   ui->addVar(new ThresholdScf(s));
-  ui->addVar(new ThresholdNonscf(s));
   ui->addVar(new ThresholdForce(s));
   ui->addVar(new ThresholdStress(s));
   ui->addVar(new ThTemp(s));
@@ -364,7 +378,13 @@ int main(int argc, char **argv, char **envp)
   ui->addVar(new RunTimer(s));
   ui->addVar(new HubbardU(s));
   ui->addVar(new Memory(s));
-  ui->addVar(new NetCharge(s));
+  ui->addVar(new MDIter(s));
+  ui->addVar(new Force_Complex_WF(s));
+  ui->addVar(new Non_Selfconsistent_Energy_Output(s));
+  ui->addVar(new TDDt(s));
+  ui->addVar(new NA_overlaps(s));
+  ui->addVar(new Print_Density_Every(s));
+  ui->addVar(new WF_Phase_RealVar(s));
 
 #ifdef USE_JAGGEMM
   setup_grid();

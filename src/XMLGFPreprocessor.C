@@ -46,7 +46,7 @@ void XMLGFPreprocessor::process(const char* const filename,
   // define a global single row context for segment manipulations
   Context rctxt;
 #if DEBUG
-  if ( rctxt.onpe0() )
+  if ( rctxt.oncoutpe() )
   {
     cout << "gfdata.context(): " << ctxt;
     cout << "rctxt: " << rctxt;
@@ -118,7 +118,7 @@ void XMLGFPreprocessor::process(const char* const filename,
 
   tm.stop();
 
-  if ( ctxt.onpe0() )
+  if ( ctxt.oncoutpe() )
   {
     cout << " XMLGFPreprocessor: read time: " << tm.real() << endl;
     cout << " XMLGFPreprocessor: local read rate: "
@@ -212,7 +212,7 @@ void XMLGFPreprocessor::process(const char* const filename,
   }
 
   tm.stop();
-  if ( ctxt.onpe0() )
+  if ( ctxt.oncoutpe() )
     cout << " XMLGFPreprocessor: tag fixing time: " << tm.real() << endl;
   tm.reset();
   tm.start();
@@ -233,7 +233,7 @@ void XMLGFPreprocessor::process(const char* const filename,
   // Determine if this task starts and/or ends within a grid_function element
   ////////////////////////////////////////////////////////////////////////////
   int start_within,end_within=0;
-  if ( ctxt.onpe0() )
+  if ( ctxt.oncoutpe() )
   {
     start_within = 0; // task 0 starts at the beginning of the XML file
   }
@@ -374,7 +374,7 @@ void XMLGFPreprocessor::process(const char* const filename,
   //      << " igfmax=" << igfmax << endl;
 
   tm.stop();
-  if ( ctxt.onpe0() )
+  if ( ctxt.oncoutpe() )
     cout << " XMLGFPreprocessor: segment definition time: " << tm.real() << endl;
 
   ////////////////////////////////////////////////////////////////////////////
@@ -389,7 +389,7 @@ void XMLGFPreprocessor::process(const char* const filename,
   // to right neighbour
 
   string left_encoding = "none";
-  if ( start_within && !rctxt.onpe0() )
+  if ( start_within && !rctxt.oncoutpe() )
   {
     rctxt.string_recv(left_encoding,0,rctxt.mype()-1);
   }
@@ -480,7 +480,7 @@ void XMLGFPreprocessor::process(const char* const filename,
     {
       // send string up to first separator to left
       // next line: cannot have left_encoding = text on task 0
-      assert(!rctxt.onpe0());
+      assert(!rctxt.oncoutpe());
 
       string::size_type pos = buf.find_first_of(" \n<",0);
       to_left = buf.substr(0,pos);
@@ -529,7 +529,7 @@ void XMLGFPreprocessor::process(const char* const filename,
     {
       // each node except node 0 posts a receive of the number of missing
       // valid chars from its left neighbour
-      if ( !rctxt.onpe0() )
+      if ( !rctxt.oncoutpe() )
         rctxt.irecv(1,1,&missing_on_left,1,0,rctxt.mype()-1);
 
       // search for missing_on_left valid characters in buf[0]
@@ -606,7 +606,7 @@ void XMLGFPreprocessor::process(const char* const filename,
     if ( left_encoding == "base64" )
     {
       // each node except node 0 sends string "send_left" to left node
-      if ( !rctxt.onpe0() )
+      if ( !rctxt.oncoutpe() )
       {
         rctxt.string_send(send_left,0,rctxt.mype()-1);
 #if DEBUG
@@ -630,7 +630,7 @@ void XMLGFPreprocessor::process(const char* const filename,
 #endif
 
   tm.stop();
-  if ( ctxt.onpe0() )
+  if ( ctxt.oncoutpe() )
     cout << " XMLGFPreprocessor: boundary adjustment time: "
          << tm.real() << endl;
   tm.reset();
@@ -690,7 +690,7 @@ void XMLGFPreprocessor::process(const char* const filename,
   }
 
   tm.stop();
-  if ( ctxt.onpe0() )
+  if ( ctxt.oncoutpe() )
     cout << " XMLGFPreprocessor: transcoding time: " << tm.real() << endl;
   tm.reset();
   tm.start();
@@ -702,7 +702,7 @@ void XMLGFPreprocessor::process(const char* const filename,
     xcdr.byteswap_double(dbuf[iseg].size(),&dbuf[iseg][0]);
 
   tm.stop();
-  if ( ctxt.onpe0() )
+  if ( ctxt.oncoutpe() )
     cout << " XMLGFPreprocessor: byte swapping time: " << tm.real() << endl;
   tm.reset();
   tm.start();
@@ -1010,7 +1010,7 @@ void XMLGFPreprocessor::process(const char* const filename,
   }
 
   tm.stop();
-  if ( ctxt.onpe0() )
+  if ( ctxt.oncoutpe() )
     cout << " XMLGFPreprocessor: data redistribution time: "
          << tm.real() << endl;
   tm.reset();
@@ -1056,7 +1056,7 @@ void XMLGFPreprocessor::process(const char* const filename,
     &rcounts[0],&rdispl[0],MPI_CHAR,rctxt.comm());
 
   tm.stop();
-  if ( ctxt.onpe0() )
+  if ( ctxt.oncoutpe() )
     cout << " XMLGFPreprocessor: XML compacting time: " << tm.real() << endl;
   tm.reset();
   tm.start();
@@ -1081,7 +1081,7 @@ void XMLGFPreprocessor::process(const char* const filename,
 
   ctxt.barrier();
   ttm.stop();
-  if ( ctxt.onpe0() )
+  if ( ctxt.oncoutpe() )
   {
     cout << " XMLGFPreprocessor: total time: " << ttm.real() << endl;
   }

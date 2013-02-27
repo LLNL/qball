@@ -74,7 +74,7 @@ void SampleReader::readSample (Sample& s, const string uri, bool serial)
 
   // XMLPlatformUtils initialization on task 0 only
   int ierr = 0;
-  if ( ctxt_.onpe0() )
+  if ( ctxt_.oncoutpe() )
   {
     try
     {
@@ -109,7 +109,7 @@ void SampleReader::readSample (Sample& s, const string uri, bool serial)
   if ( read_from_file )
   {
     const char* const filename = uri.c_str();
-    if ( ctxt_.onpe0() )
+    if ( ctxt_.oncoutpe() )
       cout << " SampleReader: reading from file "
            << filename << " size: "
            << statbuf.st_size << endl;
@@ -118,7 +118,7 @@ void SampleReader::readSample (Sample& s, const string uri, bool serial)
 
     xmlgfp.process(filename,gfdata,xmlcontent);
 
-    if ( ctxt_.onpe0() )
+    if ( ctxt_.oncoutpe() )
     {
       cout << " xmlcontent.size(): " << xmlcontent.size()
            << endl;
@@ -140,7 +140,7 @@ void SampleReader::readSample (Sample& s, const string uri, bool serial)
   //ewds.wf.del_kpoint(D3vector(0.0,0.0,0.0));
   //ewdwfvtmp->del_kpoint(D3vector(0.0,0.0,0.0));
 
-  if ( ctxt_.onpe0() )
+  if ( ctxt_.oncoutpe() )
   {
     parser = XMLReaderFactory::createXMLReader();
     if (valScheme == SAX2XMLReader::Val_Auto)
@@ -221,7 +221,7 @@ void SampleReader::readSample (Sample& s, const string uri, bool serial)
     // parsing of sample is complete, send end of sample tag to tasks > 0
     event_type event = end;
     ctxt_.ibcast_send(1,1,(int*)&event,1);
-  } // onpe0
+  } // oncoutpe
   else
   {
     // tasks > 0
@@ -441,7 +441,7 @@ void SampleReader::readSample (Sample& s, const string uri, bool serial)
         }
       }
     } // while !done receiving events from node 0
-  } // if-else onpe0
+  } // if-else oncoutpe
 
   // This part is now executing on all tasks
   if ( read_from_file )
@@ -645,13 +645,13 @@ void SampleReader::readSample (Sample& s, const string uri, bool serial)
   }
 #else
   // USE_XERCES was not defined
-  if ( ctxt_.onpe0() )
+  if ( ctxt_.oncoutpe() )
   {
     cout << "  SampleReader: could not read (parser not defined)"
          << endl;
   }
 #endif
   tm.stop();
-  if ( ctxt_.onpe0() )
+  if ( ctxt_.oncoutpe() )
     cout << " SampleReader: read time: " << tm.real() << " s" << endl;
 }

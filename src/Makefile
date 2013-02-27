@@ -31,7 +31,9 @@ QBSRC=AtomSet.C Atom.C SymmetrySet.C Symmetry.C Species.C Wavefunction.C SlaterD
       isodate.C ComputeMLWFCmd.C BasisMapping.C MLWFTransform.C jade.C ConstraintSet.C \
       Constraint.C DistanceConstraint.C PositionConstraint.C AngleConstraint.C TorsionConstraint.C \
       SaveESPCmd.C AndersonMixer.C SDAIonicStepper.C CGIonicStepper.C jacobi.C HubbardPotential.C \
-      SphericalIntegration.C PrintMem.C
+      SphericalIntegration.C PrintMem.C PlotCmd.C SOTDWavefunctionStepper.C \
+      SORKTDWavefunctionStepper.C FORKTDWavefunctionStepper.C TDEULERWavefunctionStepper.C \
+	   EhrenSampleStepper.C MDSaveCmd.C
 KPTSRC=SymOpSet.C SymOp.C
 
 SIMDSRC = clooper.c
@@ -130,7 +132,9 @@ testGram: $(OBJDIR)/testGram.o $(OBJDIR)/Matrix.o $(OBJDIR)/Context.o
 	$(LD) $(DFLAGS) -o $@-$(ARCH) $^ $(LDFLAGS)
 testPgemm: $(OBJDIR)/testPgemm.o $(OBJDIR)/Matrix.o $(OBJDIR)/Context.o
 	$(LD) $(DFLAGS) -o $@-$(ARCH) $^ $(LDFLAGS)
-testEigenSolvers: $(OBJDIR)/testEigenSolvers.o $(OBJDIR)/Matrix.o $(OBJDIR)/Context.o
+testPzheev: $(OBJDIR)/testPzheev.o $(OBJDIR)/Matrix.o $(OBJDIR)/Context.o
+	$(LD) $(DFLAGS) -o $@-$(ARCH) $^ $(LDFLAGS)
+testEigenSolvers: $(OBJDIR)/testEigenSolvers.o $(OBJDIR)/Matrix.o $(OBJDIR)/Context.o $(OBJDIR)/jacobi.o
 	$(LD) $(DFLAGS) -o $@-$(ARCH) $^ $(LDFLAGS)
 xmlSpecies: xmlSpecies.o qbox_xmlns.o
 	$(LD) $(DFLAGS) -o $@ $^ $(LDFLAGS)

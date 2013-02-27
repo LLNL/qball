@@ -48,6 +48,8 @@ class EnergyFunctional
   vector<vector<NonLocalPotential*> > nlp;
   vector<vector<ConfinementPotential*> > cfp; // cfp[ispin][ikp]
   HubbardPotential* hubp_;
+  ChargeDensity *hamil_cd_;   // AS: specifies the density used for setting up the Hamiltonian
+  vector<complex<double> > hamil_rhoelg, hamil_rhogt;   // AS: specifies the density used for setting up the Hamiltonian
   
   vector<vector<double> > vps, dvps, rhops;
   vector<complex<double> > tmp_r, vion_local_g, dvion_local_g, vlocal_g,
@@ -60,7 +62,9 @@ class EnergyFunctional
   int namax_;
   int nsp_;
   double ekin_, econf_, eps_, enl_, ehub_, ehart_, 
-         ecoul_, exc_, esr_, eself_, ets_, epv_, etotal_;
+      ecoul_, exc_, esr_, eself_, ets_, epv_, eexf_, etotal_;
+  double eharris_;  // terms for Harris-Foulkes estimate for convergence detection
+  
   valarray<double> sigma_ekin,sigma_econf,sigma_eps,sigma_ehart,sigma_exc,
     sigma_enl, sigma_esr, sigma;
 
@@ -74,9 +78,11 @@ class EnergyFunctional
   vector<vector<complex<double> > > veff_g;
   mutable TimerMap tmap;
   
+  ChargeDensity *hamil_cd() { return hamil_cd_; } ;   // AS: specifies the density used for setting up the Hamiltonian
+
   double energy(bool compute_hpsi, Wavefunction& dwf,
     bool compute_forces, vector<vector<double> >& fion,
-    bool compute_stress, valarray<double>& sigma);
+                bool compute_stress, valarray<double>& sigma);
   
   double etotal(void) const { return etotal_; }
   double ekin(void) const { return ekin_; }
@@ -90,11 +96,20 @@ class EnergyFunctional
   double eself(void) const { return eself_; }
   double ets(void) const { return ets_; }
   double epv(void) const { return epv_; }
+  double eexf(void) const { return eexf_; }
   double ehub(void) const { return ehub_; }
-  
+  double eharris(void) const { return eharris_; }
+  double etotal_harris(void) const { return (ekin_ + econf_ + enl_ + ets_ + epv_ + ehub_ + eharris_ + esr_ - eself_); };  
   const ConfinementPotential *confpot(int ispin, int ikp) const { return cfp[ispin][ikp]; }
   
   void update_vhxc(void);
+  void update_harris(void);
+
+  // AS: modified version of EnergyFunctional::update_vhxc(void) which leaves the potential untouched and only
+  // AS: recalculates the energy terms
+  void update_exc_ehart_eps(void);
+  // AS: update the Hamiltonian in the case of TDDFT (i.e. selfconsistent) time propagation
+  void update_hamiltonian(void);
   
   void atoms_moved(void);
   void cell_moved(void);

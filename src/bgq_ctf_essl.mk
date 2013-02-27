@@ -12,10 +12,6 @@
  OMPHACK = 1
 
  LIBHOME = $(HOME)/software
-# LIBHOME = /nfs/tmp2/asde/qball_bgq/lib
-
- FFTWDIR=$(LIBHOME)/fftw/fftw-bgq/fftw-2.1.3/fftw
- FFTWLIB=$(FFTWDIR)/libfftw.a
  BLASDIR=$(LIBHOME)/blas/blas-bgq-xlc
  LAPACKDIR=$(LIBHOME)/lapack/lapack-bgq-xlc
  SCALAPACK_DIR = $(LIBHOME)/scalapack-2.0/scalapack-bgq-xlc-jaggemm
@@ -40,8 +36,8 @@
  CXXFLAGS= -g -O3 -qarch=qp -DUSE_MPI -DSCALAPACK -D$(PLT) $(INCLUDE) $(DFLAGS)
  CFLAGS= -qhot=novector -qsimd=auto -g -O3 -DUSE_MPI -DSCALAPACK -D$(PLT) $(INCLUDE) $(DFLAGS)
 
- LIBPATH = -L$(FFTWDIR) -L$(LAPACKDIR) -L$(BLASDIR) -L$(ESSLDIR)/lib -L/opt/ibmcmp/xlsmp/bg/3.1/bglib64 -L/opt/ibmcmp/xlf/bg/14.1/bglib64
- LIBS =  $(CTFLIB) $(SCALAPACKLIB) $(JAGGEMMLIB) -lfftw -lesslsmpbg -lblas -llapack -lxlf90_r -lxlsmp -lxlfmath $(HPMLIBS)
+ LIBPATH = -L$(LAPACKDIR) -L$(BLASDIR) -L$(ESSLDIR)/lib -L/opt/ibmcmp/xlsmp/bg/3.1/bglib64 -L/opt/ibmcmp/xlf/bg/14.1/bglib64
+ LIBS =  $(CTFLIB) $(SCALAPACKLIB) $(JAGGEMMLIB) -lesslsmpbg -lblas -llapack -lxlf90_r -lxlsmp -lxlfmath $(HPMLIBS)
  LDFLAGS = $(LIBPATH) $(LIBS) -qarch=qp -lc -lnss_files -lnss_dns -lresolv
 
 #TAUROOTDIR = $(LIBHOME)/tau/tau-2.21.2

@@ -164,7 +164,7 @@ void HubbardPotential::update_phiylm(void) {
 
         // compute phiylm
         for ( int is = 0; is < nsp; is++ ) {
-           Species *s = atoms_.species_list[is];
+          Species *s = atoms_.species_list[is];
 
           if ( hub_l_[is] == 0 ) {
             // fill phiylm with phi_g*Y_lm at basis set vectors

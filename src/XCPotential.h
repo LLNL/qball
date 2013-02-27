@@ -28,6 +28,7 @@ class XCPotential
   
   const Context& ctxt_;  
   ChargeDensity& cd_;
+  ChargeDensity& cd_ecalc_;
   XCFunctional* xcf_;
   
   vector<vector<double> > vxctmp;          // vxctmp[ispin][ir]
@@ -38,16 +39,21 @@ class XCPotential
   int nspin_;
   int ngloc_;
   int np012loc_;
+  bool tddft_involved_;
   
   FourierTransform& vft_;
   Basis& vbasis_;
 
+  void initialize(string functional_name);
+  
   public:
 
   const XCFunctional* xcf() { return xcf_; }
   XCPotential(ChargeDensity& cd, const string functional_name);
+  XCPotential(ChargeDensity& cd, const string functional_name, ChargeDensity& cd_ecalc);
   ~XCPotential();
   void update(vector<vector<double> >& vr);
+  void update_exc(vector<vector<double> >& vr);
   void compute_stress(valarray<double>& sigma_exc);
   double exc(void) { return exc_; }
 };

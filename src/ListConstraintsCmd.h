@@ -1,17 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (c) 2008 The Regents of the University of California
-//
-// This file is part of Qbox
-//
-// Qbox is distributed under the terms of the GNU General Public License
-// as published by the Free Software Foundation, either version 2 of
-// the License, or (at your option) any later version.
-// See the file COPYING in the root directory of this distribution
-// or <http://www.gnu.org/licenses/>.
-//
-////////////////////////////////////////////////////////////////////////////////
-//
 // ListConstraintsCmd.h:
 //
 ////////////////////////////////////////////////////////////////////////////////
@@ -46,7 +34,7 @@ class ListConstraintsCmd : public Cmd
 
   int action(int argc, char **argv)
   {
-    if ( s->ctxt_.onpe0() ) s->constraints.list_constraints(cout);
+    if ( s->ctxt_.oncoutpe() ) s->constraints.list_constraints(cout);
     return 0;
   }
 };

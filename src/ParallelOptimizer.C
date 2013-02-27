@@ -234,7 +234,7 @@ void ParallelOptimizer::optimize(int niter, int nitscf, int nite) {
 ////////////////////////////////////////////////////////////////////////////////
 double ParallelOptimizer::runtime(int nrowmax, int npark, int nspin, bool reshape, bool print_timing) {
 
-   if (s_.ctxt_.onpe0())
+   if (s_.ctxt_.oncoutpe())
       cout << "<!--ParallelOptimizer::runtime called w. nparallelkpts = " << npark << ", nrowmax = " << nrowmax << ", nspin = " << nspin << ", reshape = " << reshape << "-->" << endl;
 
    const int nempty = s_.wf.nempty();

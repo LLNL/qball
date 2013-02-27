@@ -1,21 +1,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (c) 2008 The Regents of the University of California
-//
-// This file is part of Qbox
-//
-// Qbox is distributed under the terms of the GNU General Public License
-// as published by the Free Software Foundation, either version 2 of
-// the License, or (at your option) any later version.
-// See the file COPYING in the root directory of this distribution
-// or <http://www.gnu.org/licenses/>.
-//
-////////////////////////////////////////////////////////////////////////////////
-//
 // ConstraintSet.C
 //
 ////////////////////////////////////////////////////////////////////////////////
-// $Id: ConstraintSet.C,v 1.3 2010/01/16 01:26:35 draeger1 Exp $
+// $Id: ConstraintSet.C,v 1.11 2010-02-20 23:13:02 fgygi Exp $
 
 #include "ConstraintSet.h"
 #include "PositionConstraint.h"
@@ -48,7 +36,7 @@ bool ConstraintSet::define_constraint(AtomSet &atoms, int argc, char **argv)
   const double position_tolerance = 1.0e-7;
   const double distance_tolerance = 1.0e-7;
   const double angle_tolerance = 1.0e-4;
-  const bool onpe0 = ctxt_.onpe0();
+  const bool oncoutpe = ctxt_.oncoutpe();
 
   // argv[0] == "constraint"
   // argv[1] == "define"
@@ -60,7 +48,7 @@ bool ConstraintSet::define_constraint(AtomSet &atoms, int argc, char **argv)
 
   if ( argc < 2 )
   {
-    if ( onpe0 )
+    if ( oncoutpe )
     {
       cout << " Use: constraint define position constraint_name atom_name"
            << endl;
@@ -96,7 +84,7 @@ bool ConstraintSet::define_constraint(AtomSet &atoms, int argc, char **argv)
   }
   else
   {
-    if ( onpe0 )
+    if ( oncoutpe )
       cout << " Incorrect constraint type " << constraint_type << endl;
     return false;
   }
@@ -107,7 +95,7 @@ bool ConstraintSet::define_constraint(AtomSet &atoms, int argc, char **argv)
 
     if ( argc != 5 )
     {
-      if ( onpe0 )
+      if ( oncoutpe )
         cout << " Incorrect number of arguments for position constraint"
              << endl;
       return false;
@@ -119,7 +107,7 @@ bool ConstraintSet::define_constraint(AtomSet &atoms, int argc, char **argv)
 
     if ( a1 == 0 )
     {
-      if ( onpe0 )
+      if ( oncoutpe )
       {
         cout << " ConstraintSet: could not find atom " << name1 << endl;
         cout << " ConstraintSet: could not define constraint" << endl;
@@ -141,7 +129,7 @@ bool ConstraintSet::define_constraint(AtomSet &atoms, int argc, char **argv)
 
     if ( found )
     {
-      if ( onpe0 )
+      if ( oncoutpe )
         cout << " ConstraintSet: constraint is already defined:\n"
              << " cannot define constraint" << endl;
       return false;
@@ -160,7 +148,7 @@ bool ConstraintSet::define_constraint(AtomSet &atoms, int argc, char **argv)
 
     if ( argc < 7 || argc > 8 )
     {
-      if ( onpe0 )
+      if ( oncoutpe )
         cout << " Incorrect number of arguments for distance constraint"
              << endl;
       return false;
@@ -175,7 +163,7 @@ bool ConstraintSet::define_constraint(AtomSet &atoms, int argc, char **argv)
 
     if ( a1 == 0 || a2 == 0 )
     {
-      if ( onpe0 )
+      if ( oncoutpe )
       {
         if ( a1 == 0 )
           cout << " ConstraintSet: could not find atom " << name1 << endl;
@@ -187,7 +175,7 @@ bool ConstraintSet::define_constraint(AtomSet &atoms, int argc, char **argv)
     }
     if ( name1 == name2 )
     {
-      if ( onpe0 )
+      if ( oncoutpe )
         cout << " ConstraintSet: cannot define distance constraint between "
              << name1 << " and " << name2 << endl;
       return false;
@@ -201,7 +189,7 @@ bool ConstraintSet::define_constraint(AtomSet &atoms, int argc, char **argv)
 
     if ( distance <= 0.0 )
     {
-      if ( onpe0 )
+      if ( oncoutpe )
         cout << " ConstraintSet: distance must be positive" << endl
              << " ConstraintSet: could not define constraint" << endl;
       return false;
@@ -223,7 +211,7 @@ bool ConstraintSet::define_constraint(AtomSet &atoms, int argc, char **argv)
 
     if ( found )
     {
-      if ( onpe0 )
+      if ( oncoutpe )
         cout << " ConstraintSet: constraint is already defined:\n"
              << " cannot define constraint" << endl;
       return false;
@@ -244,7 +232,7 @@ bool ConstraintSet::define_constraint(AtomSet &atoms, int argc, char **argv)
 
     if ( argc < 8  || argc > 9 )
     {
-      if ( onpe0 )
+      if ( oncoutpe )
         cout << " Incorrect number of arguments for angle constraint"
              << endl;
       return false;
@@ -260,7 +248,7 @@ bool ConstraintSet::define_constraint(AtomSet &atoms, int argc, char **argv)
 
     if ( a1 == 0 || a2 == 0 || a3 == 0 )
     {
-      if ( onpe0 )
+      if ( oncoutpe )
       {
         if ( a1 == 0 )
           cout << " ConstraintSet: could not find atom " << name1 << endl;
@@ -275,7 +263,7 @@ bool ConstraintSet::define_constraint(AtomSet &atoms, int argc, char **argv)
 
     if ( name1 == name2 || name1 == name3 || name2 == name3)
     {
-      if ( onpe0 )
+      if ( oncoutpe )
         cout << " ConstraintSet: cannot define angle constraint between "
              << name1 << " " << name2 << " and " << name3 << endl;
       return false;
@@ -290,7 +278,7 @@ bool ConstraintSet::define_constraint(AtomSet &atoms, int argc, char **argv)
 
     if ( angle < 0.0 || angle > 180.0 )
     {
-      if ( onpe0 )
+      if ( oncoutpe )
         cout << " ConstraintSet: angle must be in [0,180]" << endl
              << " ConstraintSet: could not define constraint" << endl;
       return false;
@@ -317,7 +305,7 @@ bool ConstraintSet::define_constraint(AtomSet &atoms, int argc, char **argv)
 
     if ( found )
     {
-      if ( onpe0 )
+      if ( oncoutpe )
         cout << " ConstraintSet:set_constraint: an angle constraint "
              << name1 << " " << name2 << " " << name3
              << " was found" << endl
@@ -339,7 +327,7 @@ bool ConstraintSet::define_constraint(AtomSet &atoms, int argc, char **argv)
 
     if ( argc < 9  || argc > 10 )
     {
-      if ( onpe0 )
+      if ( oncoutpe )
         cout << " Incorrect number of arguments for torsion constraint"
              << endl;
       return false;
@@ -357,7 +345,7 @@ bool ConstraintSet::define_constraint(AtomSet &atoms, int argc, char **argv)
 
     if ( a1 == 0 || a2 == 0 || a3 == 0 || a4 == 0 )
     {
-      if ( onpe0 )
+      if ( oncoutpe )
       {
         if ( a1 == 0 )
           cout << " ConstraintSet: could not find atom " << name1 << endl;
@@ -374,7 +362,7 @@ bool ConstraintSet::define_constraint(AtomSet &atoms, int argc, char **argv)
     if ( name1 == name2 || name1 == name3 || name1 == name4 ||
          name2 == name3 || name2 == name4 || name3 == name4 )
     {
-      if ( onpe0 )
+      if ( oncoutpe )
         cout << " ConstraintSet: cannot define torsion constraint using "
              << name1 << " " << name2 << " " << name3 << " " << name4
              << endl;
@@ -416,7 +404,7 @@ bool ConstraintSet::define_constraint(AtomSet &atoms, int argc, char **argv)
 
     if ( found )
     {
-      if ( onpe0 )
+      if ( oncoutpe )
         cout << " ConstraintSet: a torsion constraint "
              << name1 << " " << name2 << " " << name3 << " " << name4
              << " is already defined" << endl
@@ -433,7 +421,7 @@ bool ConstraintSet::define_constraint(AtomSet &atoms, int argc, char **argv)
   }
   else
   {
-    if ( onpe0 )
+    if ( oncoutpe )
       cout << " ConstraintSet::set_constraint: internal error" << endl;
     return false;
   }
@@ -447,7 +435,7 @@ bool ConstraintSet::define_constraint(AtomSet &atoms, int argc, char **argv)
 ////////////////////////////////////////////////////////////////////////////////
 bool ConstraintSet::set_constraint(int argc, char **argv)
 {
-  const bool onpe0 = ctxt_.onpe0();
+  const bool oncoutpe = ctxt_.oncoutpe();
   assert(argc==4||argc==5);
   // argv[0] == "constraint"
   // argv[1] == "set"
@@ -479,7 +467,7 @@ bool ConstraintSet::set_constraint(int argc, char **argv)
 
   if ( !found )
   {
-    if ( onpe0 )
+    if ( oncoutpe )
       cout << " ConstraintSet: no such constraint" << endl;
     return false;
   }
@@ -494,7 +482,7 @@ bool ConstraintSet::delete_constraint(int argc, char **argv)
   // argv[1] == "delete"
   // argv[2] == constraint_name
   string name = argv[2];
-  const bool onpe0 = ctxt_.onpe0();
+  const bool oncoutpe = ctxt_.oncoutpe();
 
   bool found = false;
   // note next loop in reverse: avoid use of invalidated iterators
@@ -529,7 +517,7 @@ bool ConstraintSet::delete_constraint(int argc, char **argv)
 
   if ( !found )
   {
-    if ( onpe0 ) cout << " No such constraint" << endl;
+    if ( oncoutpe ) cout << " No such constraint" << endl;
     return false;
   }
   return true;
@@ -567,7 +555,7 @@ void ConstraintSet::enforce(AtomSet& atoms)
 void ConstraintSet::enforce_r(const vector<vector<double> > &r0,
                               vector<vector<double> > &rp)
 {
-  const bool onpe0 = ctxt_.onpe0();
+  const bool oncoutpe = ctxt_.oncoutpe();
   int iter = 0;
   bool done = false;
   while ( !done && (iter < constraints_maxiter) )
@@ -584,7 +572,7 @@ void ConstraintSet::enforce_r(const vector<vector<double> > &r0,
 
   if ( !done )
   {
-    if ( onpe0 )
+    if ( oncoutpe )
       cout << " ConstraintSet: could not enforce position constraints in "
            << constraints_maxiter << " iterations" << endl;
   }
@@ -594,7 +582,7 @@ void ConstraintSet::enforce_r(const vector<vector<double> > &r0,
 void ConstraintSet::enforce_v(const vector<vector<double> > &r0,
                               vector<vector<double> > &v0)
 {
-  const bool onpe0 = ctxt_.onpe0();
+  const bool oncoutpe = ctxt_.oncoutpe();
   int iter = 0;
   bool done = false;
   while ( !done && (iter < constraints_maxiter) )
@@ -610,7 +598,7 @@ void ConstraintSet::enforce_v(const vector<vector<double> > &r0,
 
   if ( !done )
   {
-    if ( onpe0 )
+    if ( oncoutpe )
       cout << " ConstraintSet: could not enforce velocity constraints in "
            << constraints_maxiter << " iterations" << endl;
   }
@@ -642,4 +630,13 @@ void ConstraintSet::setup(AtomSet& atoms)
   {
     constraint_list[i]->setup(atoms);
   }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+void ConstraintSet::reset(void)
+{
+  for ( int i = 0; i < constraint_list.size(); i++ )
+    delete constraint_list[i];
+  ndofs_ = 0;
+  constraint_list.resize(0);
 }

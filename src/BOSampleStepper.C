@@ -187,9 +187,9 @@ void BOSampleStepper::step(int niter)
     s_.ctrl.debug.find("ASP_EXTRAPOLATION") != string::npos;
 
   //ewd check for case where PSDA used (incorrectly) with nite = 1 and empty states
-  if (wf_dyn == "PSDA" && nite_ == 1 && compute_eigvec) {
+  if (wf_dyn == "PSDA" && nite_ == 0 && compute_eigvec) {
     if ( onpe0 ) {
-      cout << "<ERROR> BOSampleStepper:  PSDA unstable with empty states and nite = 1. </ERROR>" << endl;
+      cout << "<ERROR> BOSampleStepper:  PSDA unstable with empty states and nite = 0. </ERROR>" << endl;
       cout << "<ERROR> BOSampleStepper:  Increase nite or use wf_dyn = PSD. </ERROR>" << endl;
     }
     return;
@@ -1094,7 +1094,8 @@ void BOSampleStepper::step(int niter)
 
         SimpleConvergenceDetector conv_scf(s_.ctrl.threshold_scf_nsteps, s_.ctrl.threshold_scf);
         bool convflag = false;
-
+        double etot_harris;
+        
 #ifdef HPM  
   HPM_Start("scfloop");
 #endif
@@ -1135,18 +1136,22 @@ void BOSampleStepper::step(int niter)
           if (conv_scf.isConverged()) {
             if ( s_.ctxt_.oncoutpe() ) {
               cout.setf(ios::scientific,ios::floatfield);
-              cout << "  <!-- BOSampleStepper: scf convergence at itscf = " << itscf << ", energy varied by less than " << setprecision(2) 
+              cout << "  <!-- BOSampleStepper: scf convergence at itscf = " << itscf << ", Harris-Foulkes energy varied by less than " << setprecision(2) 
                    << conv_scf.threshold() << " a.u. over " << conv_scf.nsteps() 
                    << " scf steps. -->" << endl;
+              cout.flush();
             }
             itscf = nitscf_;
             convflag = true;
           }          
           // continue itscf loop
           else {
-            if (itscf > 0)
-              conv_scf.addValue(ef_.etotal());
-            
+            if (itscf > 0) {
+               if (ultrasoft)
+                  conv_scf.addValue(ef_.etotal()); // Harris-Foulkes estimate not implemented for ultrasoft yet (need enl_)
+               else
+                  conv_scf.addValue(etot_harris);
+            }            
             if ( nite_ > 1 && onpe0 )
               cout << "  <!-- BOSampleStepper: start scf iteration -->" << endl;
 
@@ -1161,7 +1166,9 @@ void BOSampleStepper::step(int niter)
               cd_.update_density();
             tmap["charge"].stop();
 
-            if ( charge_mixing != "off" && nite_ > 1) {
+            ef_.update_harris();
+
+            if ( charge_mixing != "off" && nite_ > 0) {
               if ( itscf == 0) {
                 //ewd:  read rhog_in from checkpoint if possible
                 for ( int ispin = 0; ispin < nspin; ispin++ ) {
@@ -1221,116 +1228,101 @@ void BOSampleStepper::step(int niter)
                 cd_.update_rhor();
               }              
             }
+            
             ef_.update_vhxc();
-          
-            // reset stepper only if multiple non-selfconsistent steps
-            if ( nite_ > 1 ) wf_stepper->preprocess();
-            double lastnonscfetot;
-            const double nonscfthresh = s_.ctrl.threshold_nonscf;
-            for ( int ite = 0; ite < nite_; ite++ )
-            {
-              double energy = ef_.energy(true,dwf,false,fion,false,sigma_eks);
-              double delta_etotnonscf = abs(energy-lastnonscfetot);
-              if (ite > 0 && delta_etotnonscf < nonscfthresh) {
-                if ( s_.ctxt_.oncoutpe() ) {
-                  cout.setf(ios::fixed,ios::floatfield);
-                  cout.setf(ios::right,ios::adjustfield);
-                  cout << "  <etotal_int> " << setw(15) << setprecision(8)
-                       << energy << " </etotal_int>\n";
-                  if ( compute_stress ) {
-                    const double pext = (sigma_ext[0]+sigma_ext[1]+sigma_ext[2])/3.0;
-                    const double enthalpy = energy + pext * cell.volume();
-                    cout << "  <enthalpy_int> " << setw(15) 
-                         << enthalpy << " </enthalpy_int>\n"
-                         << flush;
-                  }
-                  cout.setf(ios::scientific,ios::floatfield);
-                  cout << "  <!-- BOSampleStepper: non-scf threshold " << setprecision(2) << nonscfthresh << " reached. -->" << endl;
-                }
-                ite = nite_;
-              }
-              else {
-                lastnonscfetot = energy;
-                // compute the sum of eigenvalues (with fixed weight)
-                // to measure convergence of the subspace update
-                // compute trace of the Hamiltonian matrix Y^T H Y
-                // scalar product of Y and (HY): tr Y^T (HY) = sum_ij Y_ij (HY)_ij
-                // Note: since the hamiltonian is hermitian and dwf=H*wf
-                // the dot product in the following line is real
 
-                if (ultrasoft) { 
+            // reset stepper only if multiple non-selfconsistent steps
+            if ( nite_ > 0 ) wf_stepper->preprocess();
+            int nitemin_ = ( nite_ > 0 ? nite_ : 1);
+            for ( int ite = 0; ite < nitemin_; ite++ )
+            {
+               double energy = ef_.energy(true,dwf,false,fion,false,sigma_eks);
+               // compute the sum of eigenvalues (with fixed weight)
+               // to measure convergence of the subspace update
+               // compute trace of the Hamiltonian matrix Y^T H Y
+               // scalar product of Y and (HY): tr Y^T (HY) = sum_ij Y_ij (HY)_ij
+               // Note: since the hamiltonian is hermitian and dwf=H*wf
+               // the dot product in the following line is real
+
+               if (ultrasoft) { 
                   const double us_eigenvalue_sum = s_.wf.sdot(dwf);
                   if ( onpe0 )
-                    cout  << "  <eigenvalue_sum> "
-                          << us_eigenvalue_sum << " </eigenvalue_sum>" << endl;
-                }
-                else {
+                     cout  << "  <eigenvalue_sum> "
+                           << us_eigenvalue_sum << " </eigenvalue_sum>" << endl;
+               }
+               else {
                   const double eigenvalue_sum = s_.wf.dot(dwf);
                   if ( onpe0 )
-                    cout << "  <eigenvalue_sum> "
-                         << eigenvalue_sum << " </eigenvalue_sum>" << endl;
-                }
+                     cout << "  <eigenvalue_sum> "
+                          << eigenvalue_sum << " </eigenvalue_sum>" << endl;
+               }
+               
+               wf_stepper->update(dwf);
+               if (ultrasoft)
+                  wf.update_usfns();
 
-                wf_stepper->update(dwf);
-                if (ultrasoft)
-                   wf.update_usfns();
-                
-                // update ultrasoft functions if needed, call gram
-                for ( int ispin = 0; ispin < s_.wf.nspin(); ispin++ ) {
+               // update ultrasoft functions if needed, call gram
+               for ( int ispin = 0; ispin < s_.wf.nspin(); ispin++ ) {
                   if (s_.wf.spinactive(ispin)) {
-                    for ( int ikp = 0; ikp < s_.wf.nkp(); ikp++ ) {
-                      if (s_.wf.kptactive(ikp)) {
-                        assert(s_.wf.sd(ispin,ikp) != 0);
-                        //if (ultrasoft) { 
-                        //  tmap["usfns"].start();
-                        //  s_.wf.sd(ispin,ikp)->update_usfns(); // calculate betapsi, spsi
-                        //  tmap["usfns"].stop();
-                        //}
-                        tmap["gram"].start();
-                        s_.wf.sd(ispin,ikp)->gram();
-                        tmap["gram"].stop();
-
-                        //if (ultrasoft) { 
-                        //  tmap["usfns"].start();
-                        //  s_.wf.sd(ispin,ikp)->calc_betapsi(); // calculate betapsi
-                        //  tmap["usfns"].stop();
-                        //}
-                      }
-                    }
+                     for ( int ikp = 0; ikp < s_.wf.nkp(); ikp++ ) {
+                        if (s_.wf.kptactive(ikp)) {
+                           assert(s_.wf.sd(ispin,ikp) != 0);
+                           //if (ultrasoft) { 
+                           //  tmap["usfns"].start();
+                           //  s_.wf.sd(ispin,ikp)->update_usfns(); // calculate betapsi, spsi
+                           //  tmap["usfns"].stop();
+                           //}
+                           tmap["gram"].start();
+                           s_.wf.sd(ispin,ikp)->gram();
+                           tmap["gram"].stop();
+                           
+                           //if (ultrasoft) { 
+                           //  tmap["usfns"].start();
+                           //  s_.wf.sd(ispin,ikp)->calc_betapsi(); // calculate betapsi
+                           //  tmap["usfns"].stop();
+                           //}
+                        }
+                     }
                   }
-                }
-                
-                if ( onpe0 )
-                {
+               }
+               
+               if ( onpe0 )
+               {
                   cout.setf(ios::fixed,ios::floatfield);
                   cout.setf(ios::right,ios::adjustfield);
                   cout << "  <etotal_int> " << setw(15) << setprecision(8)
                        << energy << " </etotal_int>\n";
                   if ( compute_stress )
                   {
-                    const double pext = (sigma_ext[0]+sigma_ext[1]+sigma_ext[2])/3.0;
-                    const double enthalpy = energy + pext * cell.volume();
-                    cout << "  <enthalpy_int> " << setw(15)
-                         << enthalpy << " </enthalpy_int>\n"
-                         << flush;
+                     const double pext = (sigma_ext[0]+sigma_ext[1]+sigma_ext[2])/3.0;
+                     const double enthalpy = energy + pext * cell.volume();
+                     cout << "  <enthalpy_int> " << setw(15)
+                          << enthalpy << " </enthalpy_int>\n"
+                          << flush;
                   }
-                }
-              }
+               }
+               if (ite == 0)
+               {
+                  etot_harris = ef_.etotal_harris();
+                  if (onpe0)
+                     cout << "  <eharris> " << setw(15) << setprecision(8) << etot_harris << " </eharris>\n";
+               }
             } // for ite
+
             // subspace diagonalization
             if ( compute_eigvec || s_.ctrl.wf_diag == "EIGVAL" || usdiag)
             {
-              ef_.energy(true,dwf,false,fion,false,sigma_eks);
-              tmap["diag"].start();
-              s_.wf.diag(dwf,compute_eigvec);
-              tmap["diag"].stop();
+               ef_.energy(true,dwf,false,fion,false,sigma_eks);
+               tmap["diag"].start();
+               s_.wf.diag(dwf,compute_eigvec);
+               tmap["diag"].stop();
 
-              // update ultrasoft functions w. new eigenvectors
-              if (compute_eigvec && ultrasoft)
-                 s_.wf.update_usfns();
+               // update ultrasoft functions w. new eigenvectors
+               if (compute_eigvec && ultrasoft)
+                  s_.wf.update_usfns();
 
-              if (itscf%s_.ctrl.iprint == 0)
-                s_.wf.printeig();
+               if (itscf%s_.ctrl.iprint == 0)
+                  s_.wf.printeig();
             }
 
             // update occupation numbers if fractionally occupied states
@@ -1417,7 +1409,7 @@ void BOSampleStepper::step(int niter)
 
           // need eigenvalues to compute forces w. ultrasoft
           if (ultrasoft) { 
-            ef_.energy(true,dwf,false,fion,false,sigma_eks);
+             ef_.energy(true,dwf,false,fion,false,sigma_eks);
             tmap["diag"].start();
             s_.wf.diag(dwf,compute_eigvec);
             //s_.wf.diag(dwf,true);  // ewd:  why true?  Why did I do this??
@@ -1591,7 +1583,7 @@ void BOSampleStepper::step(int niter)
 
     // need eigenvalues to compute forces w. ultrasoft
     if (ultrasoft) { 
-      ef_.energy(true,dwf,false,fion,false,sigma_eks);
+       ef_.energy(true,dwf,false,fion,false,sigma_eks);
       tmap["diag"].start();
       //s_.wf.diag(dwf,compute_eigvec);
       s_.wf.diag(dwf,true);
@@ -1608,7 +1600,7 @@ void BOSampleStepper::step(int niter)
     ef_.update_vhxc();
     const bool compute_forces = true;
     double energy =
-      ef_.energy(false,dwf,compute_forces,fion,compute_stress,sigma_eks);
+        ef_.energy(false,dwf,compute_forces,fion,compute_stress,sigma_eks);
 
     // average forces over symmetric atoms
     if ( compute_forces && s_.symmetries.nsym() > 0) {
@@ -1722,7 +1714,7 @@ void BOSampleStepper::step(int niter)
     ef_.update_vhxc();
     const bool compute_forces = true;
     double energy =
-      ef_.energy(false,dwf,compute_forces,fion,compute_stress,sigma_eks);
+        ef_.energy(false,dwf,compute_forces,fion,compute_stress,sigma_eks);
 
     // average forces over symmetric atoms
     if ( compute_forces && s_.symmetries.nsym() > 0) {

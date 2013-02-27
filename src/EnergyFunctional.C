@@ -86,8 +86,25 @@ EnergyFunctional::EnergyFunctional(const Sample& s, const Wavefunction& wf, Char
     rhops[is].resize(ngloc);
     if ( atoms.na(is) > namax_ ) namax_ = atoms.na(is);
   }
-  
-  xcp = new XCPotential(cd_,s_.ctrl.xc);
+
+  // AS: compute total electronic density used for setting up the Hamiltonian
+  if (s_.ctrl.tddft_involved)
+  {
+     hamil_cd_ = new ChargeDensity(s_,*s_.hamil_wf);
+     hamil_rhoelg.resize(ngloc);
+     hamil_rhogt.resize(ngloc);
+     
+     (*hamil_cd_).update_density();
+     update_hamiltonian();
+
+     // AS: the charge density based on hamil_wf has to be used
+     xcp = new XCPotential((*hamil_cd_),s_.ctrl.xc,cd_);
+  }
+  else
+  {
+     xcp = new XCPotential(cd_,s_.ctrl.xc);
+  }
+
   nlp.resize(wf_.nspin());
   for ( int ispin = 0; ispin < wf_.nspin(); ispin++ )
     nlp[ispin].resize(wf_.nkptloc());
@@ -195,6 +212,8 @@ EnergyFunctional::EnergyFunctional(const Sample& s, const Wavefunction& wf, Char
   if (s_.ctrl.enthalpy_pressure != 0.0) 
     epvf = new EnthalpyFunctional(cd_,s_.ctrl.enthalpy_pressure,s_.ctrl.enthalpy_threshold);
 
+  eharris_ = 0.0;
+  
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -212,6 +231,34 @@ EnergyFunctional::~EnergyFunctional(void) {
   
   if (epvf != 0)
     delete epvf;
+
+  if (s_.ctrl.tddft_involved)
+     delete hamil_cd_;
+  hamil_cd_ = 0;
+}
+////////////////////////////////////////////////////////////////////////////////
+void EnergyFunctional::update_hamiltonian(void)
+{
+   const Wavefunction& wf = s_.wf;
+   const int ngloc = vbasis_->localsize();
+   const UnitCell& cell = wf.cell();
+   const double omega = cell.volume();
+   const double omega_inv = 1.0 / omega;
+
+   if ( wf.nspin() == 1 )
+   {
+      for ( int ig = 0; ig < ngloc; ig++ )
+      {
+         hamil_rhoelg[ig] = omega_inv * (*hamil_cd_).rhog[0][ig];
+      }
+   }
+   else
+   {
+      for ( int ig = 0; ig < ngloc; ig++ )
+      {
+         hamil_rhoelg[ig] = omega_inv * ( (*hamil_cd_).rhog[0][ig] + (*hamil_cd_).rhog[1][ig] );
+      }
+   }
 }
 ////////////////////////////////////////////////////////////////////////////////
 void EnergyFunctional::print_timing() {
@@ -355,11 +402,30 @@ void EnergyFunctional::update_vhxc(void) {
   // Hartree energy
   ehart_ = 0.0;
   double ehsum = 0.0;
-  for ( int ig = 0; ig < ngloc; ig++ ) {
-    const complex<double> tmp = rhoelg[ig] + rhopst[ig];
-    ehsum += norm(tmp) * g2i[ig];
-    rhogt[ig] = tmp;
+  if (s_.ctrl.tddft_involved)
+  {
+     // AS: the individual terms of the sum are complex in general
+     complex<double> ehsum_cplx = complex<double>(0.0,0.0);
+     for ( int ig = 0; ig < ngloc; ig++ )
+     {
+        const complex<double> tmp = rhoelg[ig] + rhopst[ig];
+        const complex<double> hamil_tmp = hamil_rhoelg[ig] + rhopst[ig];
+        ehsum_cplx += tmp * conj(hamil_tmp) * complex<double>(g2i[ig],0.0);
+        // AS: the next line is needed for correct stress and/or forces
+        rhogt[ig] = tmp;
+        hamil_rhogt[ig] = hamil_tmp;
+     }
+     ehsum = real(ehsum_cplx);     
   }
+  else
+  {
+     for ( int ig = 0; ig < ngloc; ig++ ) {
+        const complex<double> tmp = rhoelg[ig] + rhopst[ig];
+        ehsum += norm(tmp) * g2i[ig];
+        rhogt[ig] = tmp;
+     }
+  }
+  
   // factor 1/2 from definition of Ehart cancels with half sum over G
   // Note: rhogt[ig] includes a factor 1/Omega
   // Factor omega in next line yields prefactor 4 pi / omega in
@@ -381,10 +447,13 @@ void EnergyFunctional::update_vhxc(void) {
   //pwscf_ewald_ = tsum[0];
   
   // compute vlocal_g = vion_local_g + vhart_g
-  // where vhart_g = 4 * pi * (rhoelg + rhopst) * g2i
-  for ( int ig = 0; ig < ngloc; ig++ ) {
-    vlocal_g[ig] = vion_local_g[ig] + fpi * rhogt[ig] * g2i[ig];
-  }
+  // where vhart_g = 4 * pi * (rhoelg + rhopst) * g2i  
+  if (s_.ctrl.tddft_involved)  // AS: the charge density based on hamil_wf has to be used
+     for ( int ig = 0; ig < ngloc; ig++ )
+        vlocal_g[ig] = vion_local_g[ig] + fpi * hamil_rhogt[ig] * g2i[ig];
+  else
+     for ( int ig = 0; ig < ngloc; ig++ )
+        vlocal_g[ig] = vion_local_g[ig] + fpi * rhogt[ig] * g2i[ig];
 
   // v_eff = vxc_g + vion_local_g + vhart_g
 
@@ -415,9 +484,150 @@ void EnergyFunctional::update_vhxc(void) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+void EnergyFunctional::update_harris(void) {
+   // update terms needed to compute Harris-Foulkes estimate of the energy
+   // called when the charge density is calculated, before mixing
+   //
+   // NOTE: this routine fills v_r, rhoelg with unmixed values.  Call update_vhxc after mixing.
+   
+   tmap["harris"].start();
+
+   const UnitCell& cell = wf_.cell();
+   const double omega = cell.volume();
+   const double omega_inv = 1.0 / omega;
+   const double *const g2i = vbasis_->g2i_ptr();
+   const double fpi = 4.0 * M_PI;
+   const int ngloc = vbasis_->localsize();
+   double tsum[2];
+   
+   // compute total electronic density: rhoelg = rho_up + rho_dn
+   if ( wf_.nspin() == 1 ) {
+      for ( int ig = 0; ig < ngloc; ig++ ) {
+         rhoelg[ig] = omega_inv * cd_.rhog[0][ig];
+      }
+   }
+   else {
+      for ( int ig = 0; ig < ngloc; ig++ ) {
+         rhoelg[ig] = omega_inv * ( cd_.rhog[0][ig] + cd_.rhog[1][ig] );
+      }
+   }
+  
+   // update XC energy and potential
+  xcp->update(v_r);
+  eharris_ = xcp->exc();
+
+  // compute local potential energy: 
+  // integral of el. charge times ionic local pot.
+  int len=2*ngloc,inc1=1;
+  if (vbasis_->real()) { 
+    tsum[0] = 2.0 * ddot(&len,(double*)&rhoelg[0],&inc1,
+                         (double*)&vion_local_g[0],&inc1);
+    // remove double counting for G=0
+    if ( vbasis_->context().myrow() == 0 ) {
+      tsum[0] -= real(conj(rhoelg[0])*vion_local_g[0]);
+    }
+  }
+  else {
+    tsum[0] = ddot(&len,(double*)&rhoelg[0],&inc1,
+                         (double*)&vion_local_g[0],&inc1);
+  }
+  tsum[0] *= omega;
+  
+  // Hartree energy
+  ehart_ = 0.0;
+  double ehsum = 0.0;
+  for ( int ig = 0; ig < ngloc; ig++ ) {
+    const complex<double> tmp = rhoelg[ig] + rhopst[ig];
+    ehsum += norm(tmp) * g2i[ig];
+  }
+  double vfact = vbasis_->real() ? 1.0 : 0.5;
+  tsum[1] = vfact * omega * fpi * ehsum;
+  
+  vbasis_->context().dsum(2,1,&tsum[0],2);
+  eharris_ += tsum[0] + tsum[1];
+
+  tmap["harris"].stop();
+
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// AS: modified version of EnergyFunctional::update_vhxc(void) which leaves the potential
+// untouched and only recalculates the energy terms
+void EnergyFunctional::update_exc_ehart_eps(void)
+{
+  const Wavefunction& wf = s_.wf;
+  const UnitCell& cell = wf.cell();
+  const double omega = cell.volume();
+  const double omega_inv = 1.0 / omega;
+  const double *const g2i = vbasis_->g2i_ptr();
+  const double fpi = 4.0 * M_PI;
+  const int ngloc = vbasis_->localsize();
+  double tsum[2];
+
+  // compute total electronic density: rhoelg = rho_up + rho_dn
+  if ( wf.nspin() == 1 )
+  {
+    for ( int ig = 0; ig < ngloc; ig++ )
+    {
+      rhoelg[ig] = omega_inv * cd_.rhog[0][ig];
+    }
+  }
+  else
+  {
+    for ( int ig = 0; ig < ngloc; ig++ )
+    {
+      rhoelg[ig] = omega_inv * ( cd_.rhog[0][ig] + cd_.rhog[1][ig] );
+    }
+  }
+
+  // update XC energy and potential
+  tmap["exc"].start();
+  xcp->update_exc(v_r);
+  exc_ = xcp->exc();
+  tmap["exc"].stop();
+
+  // compute local potential energy:
+  // integral of el. charge times ionic local pot.
+  // AS: the current charge density has to be used
+  int len=2*ngloc,inc1=1;
+  tsum[0] = 2.0 * ddot(&len,(double*)&rhoelg[0],&inc1,
+         (double*)&vion_local_g[0],&inc1);
+  // remove double counting for G=0
+  if ( vbasis_->context().myrow() == 0 )
+  {
+    tsum[0] -= real(conj(rhoelg[0])*vion_local_g[0]);
+  }
+  tsum[0] *= omega; // tsum[0] contains eps
+
+  // Hartree energy
+  // AS: both charge densities have to be used
+  ehart_ = 0.0;
+  double ehsum = 0.0;
+  complex<double> ehsum_cplx = complex<double>(0.0,0.0);
+  for ( int ig = 0; ig < ngloc; ig++ )
+  {
+    const complex<double> tmp = rhoelg[ig] + rhopst[ig];
+    const complex<double> hamil_tmp = hamil_rhoelg[ig] + rhopst[ig];
+    ehsum_cplx += tmp * conj(hamil_tmp) * g2i[ig];
+  }
+  ehsum = real(ehsum_cplx);
+
+  // factor 1/2 from definition of Ehart cancels with half sum over G
+  // Note: rhogt[ig] includes a factor 1/Omega
+  // Factor omega in next line yields prefactor 4 pi / omega in
+  tsum[1] = omega * fpi * ehsum;
+  // tsum[1] contains ehart
+
+  // AS: I assume the BLACS call below just gathers the information from the different processes
+  vbasis_->context().dsum(2,1,&tsum[0],2);
+  eps_   = tsum[0];
+  ehart_ = tsum[1];
+}
+
+////////////////////////////////////////////////////////////////////////////////
 double EnergyFunctional::energy(bool compute_hpsi, Wavefunction& dwf,
               bool compute_forces, vector<vector<double> >& fion,
-              bool compute_stress, valarray<double>& sigma) {
+                                bool compute_stress, valarray<double>& sigma) {
   const bool debug_stress = compute_stress && 
     s_.ctrl.debug.find("STRESS") != string::npos;
   const double fpi = 4.0 * M_PI;
@@ -485,6 +695,13 @@ double EnergyFunctional::energy(bool compute_hpsi, Wavefunction& dwf,
           // nn = global n index
           const int nnbase = sdctxt.mycol() * c.nb();
           const double * const occ = sd.occ_ptr(nnbase);
+          const double *const kpg2  = wfbasis.kpg2_ptr();
+          const double *const kpg_x = wfbasis.kpgx_ptr(0);
+          const double *const kpg_y = wfbasis.kpgx_ptr(1);
+          const double *const kpg_z = wfbasis.kpgx_ptr(2);
+          tsum = 0.0;
+
+#pragma omp parallel for
           for ( int ig = 0; ig < ngwloc; ig++ ) {
             double tmpsum = 0.0;
             for ( int n = 0; n < nloc; n++ ) {
@@ -492,17 +709,8 @@ double EnergyFunctional::energy(bool compute_hpsi, Wavefunction& dwf,
               tmpsum += fac * occ[n] * psi2;
             }
             psi2sum[ig] = tmpsum;
-          }
         
-          // accumulate contributions to ekin,econf,sigma_ekin,sigma_econf in tsum
-          // Note: next lines to be changed to kpg_ptr for nkp>1
-          const double *const kpg2  = wfbasis.kpg2_ptr();
-          const double *const kpg_x = wfbasis.kpgx_ptr(0);
-          const double *const kpg_y = wfbasis.kpgx_ptr(1);
-          const double *const kpg_z = wfbasis.kpgx_ptr(2);
-          tsum = 0.0;
-          
-          for ( int ig = 0; ig < ngwloc; ig++ ) {
+            // accumulate contributions to ekin,econf,sigma_ekin,sigma_econf in tsum
             const double psi2s = psi2sum[ig];
             // tsum[0]: ekin partial sum
             tsum[0] += psi2s * kpg2[ig];
@@ -550,7 +758,7 @@ double EnergyFunctional::energy(bool compute_hpsi, Wavefunction& dwf,
               // tsum[7-13] contains the contributions to
               // econf,sigma_econf from vector ig
             } // ig
-          }            
+          }
           sum += weight * tsum;
         }
       }
@@ -888,6 +1096,22 @@ double EnergyFunctional::energy(bool compute_hpsi, Wavefunction& dwf,
   pwscf_ewald_ += esr_ - eself_;
   cout << "DEBUG:  PWSCF ewald_tot = " << pwscf_ewald_ << endl;
   */
+
+  // AS: write the different terms to the total energy to the output
+  // AS: helpful especially for testing
+  if ( (s_.ctxt_.oncoutpe()) && (s_.ctrl.non_selfc_energy) )
+  {
+     cout << " AS: EKIN_ " << ekin_ << endl;
+     cout << " AS: ECONF_ " << econf_ << endl;
+     cout << " AS: EPS_ " << eps_ << endl;
+     cout << " AS: ENL_ " << enl_ << endl;
+     cout << " AS: EHART_ " << ehart_ << endl;
+     cout << " AS: ESR_ " << esr_ << endl;
+     cout << " AS: ESELF_ " << eself_ << endl;
+     cout << " AS: EXC_ " << exc_ << endl;
+     cout << " AS: ETS_ " << ets_ << endl;
+     cout << " AS: EEXF_ " << eexf_ << endl;
+  }
   
   if ( compute_hpsi ) {
     tmap["hpsi"].start();
@@ -920,9 +1144,23 @@ double EnergyFunctional::energy(bool compute_hpsi, Wavefunction& dwf,
             }
             else {
                //ewd:  OMP HERE?
+               // AS: e_n are currently only hard-coded and renormalization is disabled by default
+               // double as_renorm[4] = {-28.70987,-28.70987,-28.70987,-3.13510};
+#pragma omp parallel for
                for ( int n = 0; n < sd.nstloc(); n++ ) {
                 for ( int ig = 0; ig < ngwloc; ig++ ) {
                   cp[ig+mloc*n] += 0.5 * kpg2[ig] * c[ig+mloc*n];
+
+                  // AS: energy_renorm allows applying a "shifted Hamiltonian" (H-e_n), e_n being the shift
+                  // AS: for each individual state n, to the wave function during the time propgation
+                  // AS: by subtracting the phase: cp -= 1.0 * as_renorm[n] / 27.2116 * c[ig+mloc*n];
+                  // AS: this should prevent the time propagation from blowing up
+                  // if (energy_renorm) {
+                  // AS: renormalize each state individually
+                  // cp[ig+mloc*n] -= 1.0 * as_renorm[n] / 27.2116 * c[ig+mloc*n];
+                  // AS: renormalize all states with the same value
+                  // cp[ig+mloc*n] -= 1.0 * (-0.8204477) * c[ig+mloc*n];   
+
                 }
               }
             }
@@ -941,6 +1179,7 @@ double EnergyFunctional::energy(bool compute_hpsi, Wavefunction& dwf,
     const double* gx2 = vbasis_->gx_ptr(2);
     vector<complex<double> > trhog;
     for ( int is = 0; is < nsp_; is++ ) {
+#pragma omp parallel for
        for ( int ig = 0; ig < ngloc; ig++ ) {
           double tmp = fpi * rhops[is][ig] * g2i[ig];
           vtemp[ig] =  tmp * conj(rhogt[ig]) + vps[is][ig] * conj(rhoelg[ig]);
@@ -965,6 +1204,7 @@ double EnergyFunctional::energy(bool compute_hpsi, Wavefunction& dwf,
           double *s0 = sf.sin0_ptr(is,ia);
           double *s1 = sf.sin1_ptr(is,ia);
           double *s2 = sf.sin2_ptr(is,ia);
+#pragma omp parallel for
           for ( int ig = 0; ig < ngloc; ig++ ) {
              // compute Exp[igr] in 3D as a product of 1D contributions
              // complex<double> teigr = ei0[kv[3*ig+0]] *
@@ -1105,6 +1345,7 @@ void EnergyFunctional::atoms_moved(void)
   for ( int is = 0; is < atoms.nsp(); is++ )
   {
     complex<double> *s = &sf.sfac[is][0];
+#pragma omp parallel for
     for ( int ig = 0; ig < ngloc; ig++ )
     {
       const complex<double> sg = s[ig];
@@ -1216,6 +1457,7 @@ void EnergyFunctional::cell_moved(void) {
     Species *s = atoms.species_list[is];
     const double * const g = vbasis_->g_ptr();
     double v,dv;  
+#pragma omp parallel for
     for ( int ig = 0; ig < ngloc; ig++ ) {
       rhops[is][ig] = s->rhopsg(g[ig]) * omega_inv;
       s->dvlocg(g[ig],v,dv);

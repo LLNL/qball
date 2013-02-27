@@ -1,21 +1,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (c) 2008 The Regents of the University of California
-//
-// This file is part of Qbox
-//
-// Qbox is distributed under the terms of the GNU General Public License
-// as published by the Free Software Foundation, either version 2 of
-// the License, or (at your option) any later version.
-// See the file COPYING in the root directory of this distribution
-// or <http://www.gnu.org/licenses/>.
-//
-////////////////////////////////////////////////////////////////////////////////
-//
 // ConstraintSet.h
 //
 ////////////////////////////////////////////////////////////////////////////////
-// $Id: ConstraintSet.h,v 1.3 2010/01/16 01:26:35 draeger1 Exp $
+// $Id: ConstraintSet.h,v 1.10 2010-02-20 23:13:02 fgygi Exp $
 
 #ifndef CONSTRAINTSET_H
 #define CONSTRAINTSET_H
@@ -56,5 +44,6 @@ class ConstraintSet
                       const std::vector<std::vector<double> > &f);
   void update_constraints(double dt);
   void setup(AtomSet& atoms);
+  void reset(void);
 };
 #endif

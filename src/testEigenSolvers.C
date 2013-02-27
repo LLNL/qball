@@ -17,21 +17,28 @@
 using namespace std;
 
 #include "Timer.h"
-
+#ifdef TAU
+#include "profile.h"
+#endif
 #ifdef USE_MPI
 #include <mpi.h>
+#endif
+#ifdef HPM
+#include <bgpm/include/bgpm.h>
+extern "C" void HPM_Start(char *);
+extern "C" void HPM_Stop(char *);
 #endif
 
 #include "Context.h"
 #include "Matrix.h"
 #include "jacobi.h"
 
-bool runsyevd = true;
-bool runjacobi = true;
+bool runsyevd = false;
+bool runjacobi = false;
 
 bool runheevr = false;
 bool runheevx = false;
-bool runheevd = false;
+bool runheevd = true;
 bool runheev = false;
 
 const double nrandinv = 1./(1.0*RAND_MAX + 1.0);
@@ -57,6 +64,15 @@ int main(int argc, char **argv)
   mype=0;
 #endif
 
+#ifdef TAU
+  TAU_PROFILE_TIMER(timer, "main", "int (int, char**)", TAU_USER);
+  TAU_PROFILE_START(timer);
+  TAU_PROFILE_INIT(argc, argv);
+  TAU_PROFILE_SET_NODE(mype);
+  TAU_PROFILE_SET_CONTEXT(0);
+#endif
+
+  
   {
 
     int nprow, npcol, n;
@@ -241,6 +257,9 @@ int main(int argc, char **argv)
 
     if (runheevd)
     {
+#ifdef HPM  
+        HPM_Start("heevd");
+#endif
        if (mype == 0) 
           cout << "Calculating eigenvalues and eigenvectors with heevd..." << endl;
     
@@ -260,6 +279,9 @@ int main(int argc, char **argv)
           }
           cout << endl;
        }
+#ifdef HPM  
+        HPM_Stop("heevd");
+#endif
     }
 
     if (runheev)
@@ -307,6 +329,9 @@ int main(int argc, char **argv)
     }
   }
 
+#ifdef TAU
+  TAU_PROFILE_STOP(timer);
+#endif
   
 #ifdef USE_MPI
   MPI_Finalize();

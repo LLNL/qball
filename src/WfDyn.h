@@ -35,12 +35,28 @@ class WfDyn : public Var
     }
     
     string v = argv[1];
-    if ( !( v == "LOCKED" || v == "SD" || v == "PSD" || 
-            v == "PSDA" || v == "JD" || v == "MD" ) )
+    // AS: TDEULER enables first-order wave-function propagation according to |psi(t+tddt)> = |psi(t)> - i*tddt*|H psi(t)>
+    // AS: SOTD enables second-order wave-function propagation according to |psi(t+tddt)> = |psi(t-tddt)> - 2*i*tddt*|H psi(t)>
+    if ( !( v == "LOCKED" || v == "SD" || v == "PSD" ||
+            v == "PSDA" || v == "JD" || v == "MD" || 
+            v == "TDEULER" || v == "SOTD" || v == "SORKTD" ||
+            v == "FORKTD" ) )
     {
-      if ( ui->oncoutpe() )
-        cout << " <ERROR> wf_dyn must be in [LOCKED,SD,PSD,PSDA,JD,MD] </ERROR>" << endl;
-      return 1;
+       if ( ui->oncoutpe() )
+          cout << " wf_dyn must be in [LOCKED,SD,PSD,PSDA,JD,MD,TDEULER,SOTD,SORKTD,FORKTD]" << endl;
+       return 1;
+    }
+
+    if (v == "TDEULER" || v == "SOTD" || v == "SORKTD" || v == "FORKTD") {
+       s->ctrl.tddft_involved = true;
+       if (!( s->wf.force_complex_set() )) {
+          cout << "WfDyn::wave functions must be complex to propagate them in time" << endl
+               << "WfDyn::wf_dyn will NOT be set to " << v << " and remains " << s->ctrl.wf_dyn << " instead!" << endl;
+       }
+       // AS: delete wavefunction velocities if present, since SOTD uses wfv to store |psi(t-tddt)>
+       if ( s->wfv != 0 )
+          delete s->wfv;
+       s->wfv = 0;
     }
 
     s->ctrl.wf_dyn = v;
@@ -72,6 +88,6 @@ class WfDyn : public Var
      return st.str();
   }
 
-  WfDyn(Sample *sample) : s(sample) { s->ctrl.wf_dyn = "SD"; };
+  WfDyn(Sample *sample) : s(sample) { s->ctrl.wf_dyn = "SD"; s->ctrl.tddft_involved = false;};
 };
 #endif

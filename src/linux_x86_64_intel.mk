@@ -20,7 +20,7 @@
  CC=/usr/local/bin/mpiicc
  LD=$(CXX)
 
- DFLAGS += -DPRINTALL -DUSE_FFTW -DUSE_CSTDIO_LFS -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DXML -DUSE_XERCES
+ DFLAGS += -DUSE_FFTW -DUSE_CSTDIO_LFS -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DXML -DUSE_XERCES
 # DFLAGS += -DPRINTALL -DUSE_FFTW -DUSE_CSTDIO_LFS -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DXML -DUSE_XERCES
  
  INCLUDE = -I$(FFTWDIR) -I$(XERCESCDIR)/include
@@ -29,7 +29,7 @@
  CFLAGS= -g -O3 -xW -DUSE_MPI -DSCALAPACK -DADD_ -D$(PLT) $(INCLUDE) $(DFLAGS)
 
  LIBPATH = -L$(FFTWDIR) -L$(BLASDIR) -L$(XERCESCLIBDIR)
- LIBS =  $(SCALAPACKLIB) -lfftw -openmp -lmkl_core -lmkl_intel_thread -lmkl_intel_lp64 -lifcore -lxerces-c
+ LIBS =  $(SCALAPACKLIB) -lfftw -openmp -lmkl_core -lmkl_intel_thread -lmkl_intel_lp64 -lifcore -lxerces-c -luuid
 
  LDFLAGS = $(LIBPATH) $(LIBS) -Wl,-rpath,/usr/local/tools/mkl-10.3.1/lib
 

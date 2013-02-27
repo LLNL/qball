@@ -51,13 +51,14 @@ class SlaterDet {
   double fermi(double e, double mu, double fermitemp);
   double methfessel(double e, double mu, double width, int ngauss);
   bool ultrasoft_;
+  bool force_complex_;
   bool highmem_;
   
   public:
   
   mutable TimerMap tmap;
 
-  SlaterDet(Context& ctxt, const Context& my_col_ctxt, D3vector kpoint, bool ultrasoft);
+  SlaterDet(Context& ctxt, const Context& my_col_ctxt, D3vector kpoint, bool ultrasoft, bool force_complex);
   SlaterDet(const SlaterDet& rhs);
   ~SlaterDet();
   Context& context(void) const { return ctxt_; }
@@ -85,8 +86,13 @@ class SlaterDet {
   void compute_density(FourierTransform& ft, double weight, double* rho) const;
   void rs_mul_add(FourierTransform& ft, const double* v, SlaterDet& sdp) const;
   void randomize(double amplitude);
+  void randomize_real(double amplitude);
   void randomize_us(double amplitude, AtomSet& as);
   void rescale(double factor);
+  // AS: shift state n_state by the vector (shift_x, shift_y, shift_z)
+  void shift_wf(double shift_x,double shift_y,double shift_z,int n_state);
+  // AS: change phase of the wave function to make it real for Gamma only
+  void phase_wf_real(void);
   void cleanup(void);
   void reset(void);
   void gram();
@@ -100,6 +106,7 @@ class SlaterDet {
   double total_charge(void);
   void update_occ(int nel, int nspin);
   void update_occ(int nspin, double mu, double temp, int ngauss);
+  void update_index_of_minus_g(void) { basis_->update_index_of_minus_g(); }
   double eig(int i) const { return eig_[i]; };
   const double* eig_ptr(void) const { return &eig_[0]; }
   const double* eig_ptr(int i) const { return &eig_[i]; }

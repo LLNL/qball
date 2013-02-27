@@ -312,7 +312,6 @@ void PSDAWavefunctionStepper::update(Wavefunction& dwf) {
                 const int nglobal = wf_.sd(ispin,ikp)->c().j(0,n);
                 const vector<double>& occ = wf_.sd(ispin,ikp)->occ();
                 const double occn = occ[nglobal];
-                //const double occn = 1.0;
                 for ( int i = 0; i < 2*mloc; i++ ) {
                   const double f = dc[i +2*mloc*n];
                   const double delta_f = f - dc_last[i + 2*mloc*n];

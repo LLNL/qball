@@ -1,17 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (c) 2008 The Regents of the University of California
-//
-// This file is part of Qbox
-//
-// Qbox is distributed under the terms of the GNU General Public License
-// as published by the Free Software Foundation, either version 2 of
-// the License, or (at your option) any later version.
-// See the file COPYING in the root directory of this distribution
-// or <http://www.gnu.org/licenses/>.
-//
-////////////////////////////////////////////////////////////////////////////////
-//
 //  Basis.h
 //
 ////////////////////////////////////////////////////////////////////////////////
@@ -42,6 +30,7 @@ class Basis
   int idxmax_[3];          // maximum index in each direction
   int size_;              // basis size
   int nrods_;             // total number of rods
+  int zero_index_;              // AS: index of the g_x = g_y = g_z = 0 element 
   std::vector<int> localsize_; // localsize_[ipe]
   int maxlocalsize_, minlocalsize_;
   std::vector<int> nrod_loc_;
@@ -53,6 +42,7 @@ class Basis
 
   std::vector<int>    idx_;   // 3-d index of vectors idx[i*3+j]
   std::vector<double> g_;     // norm of g vectors g[localsize]
+  std::vector<int> index_of_minus_g_;     // AS: array[localsize] to store the index of -g for each g 
   std::vector<double> kpg_;   // norm of g vectors g[localsize]
   std::vector<double> gi_;    // inverse norm of g vectors gi[localsize]
   std::vector<double> kpgi_;  // inverse norm of k+g vectors kpgi[localsize]
@@ -125,7 +115,10 @@ class Basis
   double kpgx(int i) const;  // k+g vectors kpgx[i+localsize*j],j=0,1,2
 
   int isort(int i) const;    // index of vectors locally sorted by norm
-
+  int zero_index();    // AS: return index of the g_x = g_y = g_z = 0 element
+  int index_of_minus_g(int i);    // AS: array[localsize] to store the index of -g for each g
+  void update_index_of_minus_g(void);
+  
   const int*    idx_ptr(void) const;
   const double* g_ptr(void) const;
   const double* kpg_ptr(void) const;

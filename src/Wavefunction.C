@@ -43,6 +43,8 @@ Wavefunction::Wavefunction(const Context& ctxt) : ctxt_(ctxt),nel_(0),nempty_(0)
   hasdata_ = false;
   //ewdallocate();
   ultrasoft_ = false;
+  force_complex_wf_ = false;
+  wf_phase_real_ = false;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -53,7 +55,8 @@ nparallelkpts_(wf.nparallelkpts_), kpt_added_(wf.kpt_added_),
 nkptloc_(wf.nkptloc_), spinloc_(wf.spinloc_),
 cell_(wf.cell_), refcell_(wf.refcell_), 
 ecut_(wf.ecut_), weightsum_(wf.weightsum_), reshape_context_(wf.reshape_context_),
-ultrasoft_(wf.ultrasoft_)
+ultrasoft_(wf.ultrasoft_), force_complex_wf_(wf.force_complex_wf_),
+wf_phase_real_(wf.wf_phase_real_)
 {
   // Create a Wavefunction using the dimensions of the argument
   compute_nst();
@@ -122,7 +125,7 @@ ultrasoft_(wf.ultrasoft_)
             for ( int kloc=0; kloc<wf.nkptloc(); kloc++) {
               int kp = wf.kptloc(kloc);         // global index of local kpoint
               if ( wf.sd(ispin,kp) != 0 ) {
-                sd_[ispin][kp] = new SlaterDet(*sdcontext_[ispin][ikp],*my_col_ctxt,kpoint_[kp],ultrasoft_);
+                 sd_[ispin][kp] = new SlaterDet(*sdcontext_[ispin][ikp],*my_col_ctxt,kpoint_[kp],ultrasoft_,force_complex_wf_);
                 mysdctxt_[kp] = ikp;
                 if (reshape_context_)
                   sd_[ispin][kp]->set_gram_reshape(reshape_context_);
@@ -257,7 +260,7 @@ void Wavefunction::allocate(void) {
             delete col_ctxt;
         }
 
-        sd_[ispin][0] = new SlaterDet(*sdcontext_[ispin][0],*my_col_ctxt,kpoint_[0],ultrasoft_);
+        sd_[ispin][0] = new SlaterDet(*sdcontext_[ispin][0],*my_col_ctxt,kpoint_[0],ultrasoft_,force_complex_wf_);
         if (reshape_context_)
           sd_[ispin][0]->set_gram_reshape(reshape_context_);
         mysdctxt_[0] = 0;
@@ -303,7 +306,7 @@ void Wavefunction::allocate(void) {
               if (sdcontext_[ispin][k]->oncoutpe())
                 cout << "<!-- creating SlaterDet for kp = " << kp << " -->" << endl;
 
-              sd_[ispin][kp] = new SlaterDet(*sdcontext_[ispin][k],*my_col_ctxt,kpoint_[kp],ultrasoft_);
+              sd_[ispin][kp] = new SlaterDet(*sdcontext_[ispin][k],*my_col_ctxt,kpoint_[kp],ultrasoft_,force_complex_wf_);
               mysdctxt_[kp] = k;
 
               kptloc_[localcnt++] = kp;
@@ -356,9 +359,11 @@ void Wavefunction::allocate(void) {
   reset();
 
   //ewd DEBUG:  do we need this?
-  update_occ(0.0,0);
-  if ( ctxt_.oncoutpe() )
+    update_occ(0.0,0);
+    if ( ctxt_.oncoutpe() )
     cout << "<!-- Updated occupation of wf -->" << endl;
+  //if ( ctxt_.oncoutpe() )
+    //cout << "<!-- Occupation NOT updated during wf allocate, testing... -->" << endl;
 
 }
 ////////////////////////////////////////////////////////////////////////////////
@@ -830,7 +835,7 @@ void Wavefunction::reshape(void) {
             else
               delete col_ctxt;
           }
-          tmpsd = new SlaterDet(*newctxt,*my_col_ctxt,kpoint_[0],ultrasoft_);
+          tmpsd = new SlaterDet(*newctxt,*my_col_ctxt,kpoint_[0],ultrasoft_,force_complex_wf_);
           tmpsd->resize(cell_,refcell_,ecut_,nst_[ispin]);
           if (reshape_context_)
             tmpsd->set_gram_reshape(reshape_context_);
@@ -869,7 +874,7 @@ void Wavefunction::reshape(void) {
                     delete col_ctxt; 
                 }
 
-                tmpsd = new SlaterDet(*subctxt_,*my_col_ctxt,kpoint_[ikp],ultrasoft_);
+                tmpsd = new SlaterDet(*subctxt_,*my_col_ctxt,kpoint_[ikp],ultrasoft_,force_complex_wf_);
                 if (reshape_context_)
                   tmpsd->set_gram_reshape(reshape_context_);
               }
@@ -1002,6 +1007,48 @@ void Wavefunction::randomize_us(double amplitude, AtomSet& as, bool highmem) {
           sd_[ispin][ikp]->randomize_us(amplitude,as);
         }
       }
+    }
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+void Wavefunction::randomize_real(double amplitude)
+{
+  for ( int ispin = 0; ispin < nspin_; ispin++ )
+  {
+    for ( int ikp = 0; ikp < kpoint_.size(); ikp++ )
+    {
+      sd_[ispin][ikp]->randomize_real(amplitude);
+    }
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// AS: shift state n_state by the vector (shift_x, shift_y, shift_z)
+void Wavefunction::shift_wf(double shift_x,double shift_y,double shift_z, int n_state)
+{
+  for ( int ispin = 0; ispin < nspin_; ispin++ )
+  {
+    for ( int ikp = 0; ikp < kpoint_.size(); ikp++ )
+    {
+      sd_[ispin][ikp]->shift_wf(shift_x,shift_y,shift_z,n_state);
+    }
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// AS: change phase of the wave function to make it real for Gamma only
+void Wavefunction::phase_wf_real(void)
+{
+  // AS: DEBUG
+  cout << " AS: changing phase of WF to make it real" << endl;
+
+  for ( int ispin = 0; ispin < nspin_; ispin++ )
+  {
+    for ( int ikp = 0; ikp < kpoint_.size(); ikp++ )
+    {
+      sd_[ispin][ikp]->phase_wf_real();
+      sd_[ispin][ikp]->gram();
     }
   }
 }
@@ -1456,6 +1503,7 @@ void Wavefunction::diag(Wavefunction& dwf, bool eigvec) {
                   else {   // no context reshaping
                     if ( eigvec ) {
                       ComplexMatrix z(c.context(),c.n(),c.n(),c.nb(),c.nb());
+                      //h.heevx('l',w,z);
                       h.heevd('l',w,z);
                       //h.heev('l',w,z);
                         
@@ -2003,11 +2051,14 @@ void Wavefunction::write_dump(string filebase) {
   bool ifempty = (nempty_ > 0);
 
   os.open(mypefile.c_str(),ofstream::binary);
-
-  // hack to make checkpointing work with BlueGene compilers
+  //fopenFILE* PEFILE = fopen(mypefile.c_str(),"wb");
+  
+  // hack to make checkpointing work w. BlueGene compilers
 #ifdef BGQ
   os.write(mypefile.c_str(),sizeof(char)*mypefile.length());
+  os.flush();
 #endif
+  
   int wkploc = nkptloc_;
   int kp0 = kptloc_[0];         // global index of local kpoint
   int wnst = sd(0,kp0)->nst();
@@ -2024,8 +2075,16 @@ void Wavefunction::write_dump(string filebase) {
           int nloc = sd_[ispin][ikp]->c().nloc();
           int ngwloc = sd_[ispin][ikp]->basis().localsize();
           const complex<double>* p = sd_[ispin][ikp]->c().cvalptr();
-          for ( int n = 0; n < nloc; n++ )
-            os.write((char*)&p[n*mloc],sizeof(complex<double>)*ngwloc);
+
+          // implement single large write for less I/O node contention on BG/Q
+          //for ( int n = 0; n < nloc; n++ )
+          //   os.write((char*)&p[n*mloc],sizeof(complex<double>)*ngwloc);
+
+          os.write((char*)&p[0],sizeof(complex<double>)*nloc*mloc);
+          os.flush();
+          
+          //fopen for ( int n = 0; n < nloc; n++ )
+          //fopen    fwrite(&p[n*mloc],sizeof(complex<double>),ngwloc,PEFILE);
           
           // if there are empty states, save occupation and eigenvalues
           if (ifempty) {
@@ -2034,14 +2093,127 @@ void Wavefunction::write_dump(string filebase) {
             const double* pocc = sd_[ispin][ikp]->occ_ptr();
             os.write((char*)&peig[0],sizeof(double)*nst);
             os.write((char*)&pocc[0],sizeof(double)*nst);
+            os.flush();
+            //fopen fwrite(&peig[0],sizeof(double),nst,PEFILE);
+            //fopen fwrite(&pocc[0],sizeof(double),nst,PEFILE);
           }
         }
       }
     }
   }  
   os.close();
+  //fopen fclose(PEFILE);
 
+}
 
+////////////////////////////////////////////////////////////////////////////////
+void Wavefunction::write_fast(string filebase) {
+
+   // write_fast uses C fwrite calls to dump checkpoint data to a subset of
+   // files (ideal for machines like BG/Q where the number of I/O nodes is << npes)
+
+   int mype, npes;
+#if USE_MPI
+  MPI_Comm_rank(MPI_COMM_WORLD,&mype);
+  MPI_Comm_size(MPI_COMM_WORLD,&npes);
+#else
+  mype = 0;
+  npes = 1;
+#endif
+
+  int nFiles = npes;
+  int filenum = mype;
+  int writerTask = mype;
+  int nTasksPerFile = 1;
+#ifdef BGQ
+  nTasksPerFile = 32;
+  nFiles = npes/nTasksPerFile;
+#endif
+
+  if (mype == 0)
+     cout << "Wavefunction::write_fast:  writing data from " << npes << " tasks to " << nFiles << " files." << endl;
+
+  // if nFiles != npes, need to calculate which tasks write to which file
+  if (nFiles != npes)
+  {
+     nTasksPerFile = ( npes%nFiles == 0 ? npes/nFiles : npes/nFiles + 1);
+     assert(nTasksPerFile > 1);
+     filenum = mype/nTasksPerFile;
+     writerTask = filenum*nTasksPerFile;
+  }
+  
+  // all tasks send their data to their writer task, who writes it to file
+
+  ostringstream oss;
+  oss.width(6);  oss.fill('0');  oss << filenum;
+  string mypefile = filebase + oss.str(); 
+  ofstream os;
+  bool ifempty = (nempty_ > 0);
+
+  if (mype == writerTask)  // open file
+     os.open(mypefile.c_str(),ofstream::binary);
+     //fopenFILE* PEFILE = fopen(mypefile.c_str(),"wb");
+    
+  // write out wave function
+  for ( int ispin = 0; ispin < nspin_; ispin++ ) {
+    if (spinactive(ispin)) {
+      for ( int ikp=0; ikp<nkp(); ikp++) {
+        if (kptactive(ikp)) {
+          assert(sd_[ispin][ikp] != 0);
+
+          if (mype == writerTask)  // write local data
+          {
+          int mloc = sd_[ispin][ikp]->c().mloc();
+          int nloc = sd_[ispin][ikp]->c().nloc();
+          const complex<double>* p = sd_[ispin][ikp]->c().cvalptr();
+
+          os.write((char*)&p[0],sizeof(complex<double>)*nloc*mloc);
+          os.flush();
+          //fopen for ( int n = 0; n < nloc; n++ )
+          //fopen    fwrite(&p[n*mloc],sizeof(complex<double>),ngwloc,PEFILE);
+          }
+          
+          for (int jj=1; jj<nTasksPerFile; jj++)
+          {
+             int dataTask = jj + writerTask;
+             if (mype == dataTask)
+             {
+                int mloc = sd_[ispin][ikp]->c().mloc();
+                int nloc = sd_[ispin][ikp]->c().nloc();
+                int nComplex = mloc*nloc;
+                MPI_Send(&nComplex,1,MPI_INT,writerTask,dataTask,MPI_COMM_WORLD);
+                complex<double>* p = sd_[ispin][ikp]->c().valptr();
+                MPI_Send(&p[0],nComplex,MPI_DOUBLE_COMPLEX,writerTask,dataTask,MPI_COMM_WORLD);
+             }
+             if (mype == writerTask)
+             {
+                int nComplex;
+                MPI_Recv(&nComplex,1,MPI_INT,dataTask,dataTask,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+                vector<complex<double> > data;
+                data.resize(nComplex);
+                MPI_Recv(&data[0],nComplex,MPI_DOUBLE_COMPLEX,dataTask,dataTask,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+                os.write((char*)&data[0],sizeof(complex<double>)*nComplex);
+                os.flush();                
+             }
+          }
+          
+          // if there are empty states, save occupation and eigenvalues
+          if (ifempty && mype == writerTask) {
+             int nst = sd_[ispin][ikp]->nst();
+             const double* peig = sd_[ispin][ikp]->eig_ptr();
+             const double* pocc = sd_[ispin][ikp]->occ_ptr();
+             os.write((char*)&peig[0],sizeof(double)*nst);
+             os.write((char*)&pocc[0],sizeof(double)*nst);
+             os.flush();
+          }
+        }
+      }
+    }
+  }  
+  
+  if (mype == writerTask)  // close file
+     os.close();
+  //fopen fclose(PEFILE);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -2078,12 +2250,11 @@ void Wavefunction::read_dump(string filebase) {
      char* tmpfilename = new char[256];
      is.read(tmpfilename,sizeof(char)*mypefile.length());
 #endif
-     
-     int wkploc = nkptloc_;
-     int kp0 = kptloc_[0];         // global index of local kpoint
-     int wnst = sd(0,kp0)->nst();
-     //is.read((char*)&wkploc,sizeof(int));
-     //is.read((char*)&wnst,sizeof(int));
+    int wkploc = nkptloc_;
+    int kp0 = kptloc_[0];         // global index of local kpoint
+    int wnst = sd(0,kp0)->nst();
+    //is.read((char*)&wkploc,sizeof(int));
+    //is.read((char*)&wnst,sizeof(int));
 
     // read in wave function
     for ( int ispin = 0; ispin < nspin_; ispin++ ) {
@@ -2112,14 +2283,142 @@ void Wavefunction::read_dump(string filebase) {
     }  
   }
   else {
-    if ( ctxt_.oncoutpe())
-      cout << "<!-- LoadCmd:  checkpoint files not found, skipping load. -->" << endl;
+     if ( ctxt_.oncoutpe())
+        cout << "<!-- LoadCmd: " << filebase << " checkpoint files not found, skipping load. -->" << endl;
   }
   is.close();
+  
+}
+////////////////////////////////////////////////////////////////////////////////
+void Wavefunction::read_fast(string filebase) {
 
+  if (!hasdata_) {
+    hasdata_ = true;
+    allocate();
+  }
+   // read_fast reads checkpoint data written using write_fast, distributes
+
+   int mype, npes;
+#if USE_MPI
+  MPI_Comm_rank(MPI_COMM_WORLD,&mype);
+  MPI_Comm_size(MPI_COMM_WORLD,&npes);
+#else
+  mype = 0;
+  npes = 1;
+#endif
+
+  int nFiles = npes;
+  int filenum = mype;
+  int readerTask = mype;
+  int nTasksPerFile = 1;
+#ifdef BGQ
+  nTasksPerFile = 32;
+  nFiles = npes/nTasksPerFile;
+#endif
+
+  if (mype == 0)
+     cout << "Wavefunction::read_fast:  reading data for " << npes << " tasks from " << nFiles << " files." << endl;
+
+  // if nFiles != npes, need to calculate which tasks wrote to which file
+  if (nFiles != npes)
+  {
+     nTasksPerFile = ( npes%nFiles == 0 ? npes/nFiles : npes/nFiles + 1);
+     assert(nTasksPerFile > 1);
+     filenum = mype/nTasksPerFile;
+     readerTask = filenum*nTasksPerFile;
+  }
+  
+  ostringstream oss;
+  oss.width(6);  oss.fill('0');  oss << filenum;
+  string mypefile = filebase + oss.str(); 
+  ifstream is;
+  bool ifempty = (nempty_ > 0);
+
+  if (mype == readerTask)
+     is.open(mypefile.c_str(),ofstream::binary);
+
+  // read in wave function
+  for ( int ispin = 0; ispin < nspin_; ispin++ ) {
+     if (spinactive(ispin)) {
+        for ( int ikp=0; ikp<nkp(); ikp++) {
+           if (kptactive(ikp)) {
+              assert(sd_[ispin][ikp] != 0);
+
+              if (mype == readerTask)  // read local data
+              {
+                 int mloc = sd_[ispin][ikp]->c().mloc();
+                 int nloc = sd_[ispin][ikp]->c().nloc();
+                 const complex<double>* p = sd_[ispin][ikp]->c().cvalptr();
+                 if (is.is_open())
+                    is.read((char*)&p[0],sizeof(complex<double>)*nloc*mloc);
+                 else
+                    if ( ctxt_.oncoutpe())
+                       cout << "<!-- LoadCmd: " << filebase << " checkpoint files not found, skipping load. -->" << endl;
+              }                       
+               
+              for (int jj=1; jj<nTasksPerFile; jj++)
+              {
+                 int dataTask = jj + readerTask;
+                 if (mype == dataTask)
+                 {
+                    int mloc = sd_[ispin][ikp]->c().mloc();
+                    int nloc = sd_[ispin][ikp]->c().nloc();
+                    int nComplex = mloc*nloc;
+                    MPI_Send(&nComplex,1,MPI_INT,readerTask,dataTask,MPI_COMM_WORLD);
+                    complex<double>* p = sd_[ispin][ikp]->c().valptr();
+                    MPI_Recv(&p[0],nComplex,MPI_DOUBLE_COMPLEX,readerTask,dataTask,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+                 }
+                 if (mype == readerTask)
+                 {
+                    int nComplex;
+                    MPI_Recv(&nComplex,1,MPI_INT,dataTask,dataTask,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+                    vector<complex<double> > data;
+                    data.resize(nComplex);
+                    if (is.is_open())
+                       is.read((char*)&data[0],sizeof(complex<double>)*nComplex);
+                    MPI_Send(&data[0],nComplex,MPI_DOUBLE_COMPLEX,dataTask,dataTask,MPI_COMM_WORLD);
+                 }
+              }
+
+              // if there are empty states, load occupation and eigenvalues
+              if (ifempty)
+              {
+                 int nst = sd_[ispin][ikp]->nst();
+                 double* peig = (double*)sd_[ispin][ikp]->eig_ptr();
+                 double* pocc = (double*)sd_[ispin][ikp]->occ_ptr();
+                 if (mype == readerTask) {
+                    is.read((char*)&peig[0],sizeof(double)*nst);
+                    is.read((char*)&pocc[0],sizeof(double)*nst);
+                    for (int jj=1; jj<nTasksPerFile; jj++)
+                    {
+                       int dataTask = jj + readerTask;
+                       MPI_Send(&peig[0],nst,MPI_DOUBLE,dataTask,dataTask,MPI_COMM_WORLD);
+                       MPI_Send(&pocc[0],nst,MPI_DOUBLE,dataTask,dataTask,MPI_COMM_WORLD);
+                    }
+                 }
+                 else
+                 {
+                    MPI_Recv(&peig[0],nst,MPI_DOUBLE,readerTask,mype,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+                    MPI_Recv(&pocc[0],nst,MPI_DOUBLE,readerTask,mype,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+                 }
+              }
+           }
+        }
+     }  
+  }
+  
+  if (mype == readerTask)
+     is.close();
+  
 }
 ////////////////////////////////////////////////////////////////////////////////
 void Wavefunction::write_states(string filebase, string format) {
+  int mype;
+#if USE_MPI
+  MPI_Comm_rank(MPI_COMM_WORLD,&mype);
+#else
+  mype = 0;
+#endif
   for ( int ispin = 0; ispin < nspin_; ispin++ ) {
     if (spinactive(ispin)) {
       for ( int ikp = 0; ikp < sdcontext_[ispin].size(); ikp++ ) {
@@ -2169,10 +2468,12 @@ void Wavefunction::write_states(string filebase, string format) {
 
                     // hack to make checkpointing work w. BlueGene compilers
 #ifdef BGQ
-                    if (format == "binary") 
-                      os.write(statefile.c_str(),sizeof(char)*statefile.length());
+                    if (format == "binary") {
+                       os.write(statefile.c_str(),sizeof(char)*statefile.length());
+                       os.flush();
+                    }
 #endif
-                    
+
                     // headers for visualization formats
                     if (format == "molmol" || format == "text") {
                       D3vector a0 = cell_.a(0);
@@ -2229,8 +2530,11 @@ void Wavefunction::write_states(string filebase, string format) {
                       int size = 0;
                       tctxt->irecv(1,1,&size,1,i,pcol);
                       tctxt->drecv(size,1,&wftmpr[0],1,i,pcol);
-                      if (format == "binary") 
+                      if (format == "binary")
+                      {
                         os.write((char*)&wftmpr[0],sizeof(double)*size);
+                        os.flush();
+                      }
                       else if (format == "molmol" || format == "gopenmol")
                       {
                         // write out |wf|^2 on grid, with x varying fastest
@@ -2241,6 +2545,7 @@ void Wavefunction::write_states(string filebase, string format) {
                           oss << wftmpr[j]*wftmpr[j]+wftmpr[j+1]*wftmpr[j+1] << endl;
                         string tos = oss.str();
                         os.write(tos.c_str(),tos.length());
+                        os.flush();
                       }
                       else if (format == "text")
                       {
@@ -2252,6 +2557,7 @@ void Wavefunction::write_states(string filebase, string format) {
                           os << wftmpr[j] << "  " << wftmpr[j+1] << "  " << wftmpr[j]*wftmpr[j]+wftmpr[j+1]*wftmpr[j+1] << endl;
                         string tos = oss.str();
                         os.write(tos.c_str(),tos.length());
+                        os.flush();
                       }
                     }
                     os.close();
@@ -2280,9 +2586,10 @@ void Wavefunction::write_states(string filebase, string format) {
                     // hack to make checkpointing work w. BlueGene compilers
 #ifdef BGQ
                     os.write(statefile.c_str(),sizeof(char)*statefile.length());
-#endif                    
+#endif
                     os.write((char*)&peig[0],sizeof(double)*nst);
                     os.write((char*)&pocc[0],sizeof(double)*nst);
+                    os.flush();
                     os.close();
                   }
                 }
@@ -2293,7 +2600,6 @@ void Wavefunction::write_states(string filebase, string format) {
       }
     }
   }
-
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -2344,11 +2650,11 @@ void Wavefunction::read_states(string filebase) {
                     is.open(statefile.c_str(),ofstream::binary);
                     if (is.is_open()) {
 
-                       // hack to make checkpointing work w. BlueGene compilers
+                      // hack to make checkpointing work with BlueGene compilers
 #ifdef BGQ
-                       int len = statefile.length();
-                       char* tmpfilename = new char[256];
-                       is.read(tmpfilename,sizeof(char)*statefile.length());
+                      int len = statefile.length();
+                      char* tmpfilename = new char[256];
+                      is.read(tmpfilename,sizeof(char)*statefile.length());
 #endif
                        
                       // open files and reads data
@@ -2362,7 +2668,7 @@ void Wavefunction::read_states(string filebase) {
                     }
                     else { // file not found
                       if ( ctxt_.oncoutpe() && n == 0 && ikp == 0 && kloc == 0)
-                        cout << "<!-- LoadCmd:  checkpoint files not found, skipping load. -->" << endl;
+                         cout << "<!-- LoadCmd: " << filebase << " checkpoint files not found, skipping load. -->" << endl;
 
                       for ( int i = 0; i < tctxt->nprow(); i++ ) {
                         int size = -1;
@@ -2425,13 +2731,13 @@ void Wavefunction::read_states(string filebase) {
                     is.open(statefile.c_str(),ofstream::binary);
 
                     if (is.is_open()) {
-                       // hack to make checkpointing work w. BlueGene compilers
+                      // hack to make checkpointing work with BlueGene compilers
 #ifdef BGQ
                       int len = statefile.length();
                       char* tmpfilename = new char[256];
                       is.read(tmpfilename,sizeof(char)*statefile.length());
 #endif
-                      
+
                       is.read((char*)&eigtmp[0],sizeof(double)*nst);
                       is.read((char*)&occtmp[0],sizeof(double)*nst);
                       is.close();
@@ -2474,9 +2780,59 @@ void Wavefunction::read_states(string filebase) {
       }
     }
   }
-  
 }
 
+////////////////////////////////////////////////////////////////////////////////
+void Wavefunction::write_mditer(string filebase, int mditer) {
+  int mype;
+#if USE_MPI
+  MPI_Comm_rank(MPI_COMM_WORLD,&mype);
+#else
+  mype = 0;
+#endif
+
+  // write out mditer
+  if (mype == 0)
+  {
+     string mditerfile = filebase + ".mditer";
+     cout << "<!-- Wavefunction::write_states, writing mditer " << mditer << " to file " << mditerfile << " -->" << endl;
+     ofstream osmd;
+     osmd.open(mditerfile.c_str());
+     osmd << mditer << endl;
+     osmd.flush();
+     osmd.close();
+  }
+}
+////////////////////////////////////////////////////////////////////////////////
+void Wavefunction::read_mditer(string filebase, int& mditer) {
+  int mype;
+#if USE_MPI
+  MPI_Comm_rank(MPI_COMM_WORLD,&mype);
+#else
+  mype = 0;
+#endif
+
+  // check for mditer file
+  int mdtmp = -1;
+  if (mype == 0)
+  {
+     string mditerfile = filebase + ".mditer";
+     ifstream ismd;
+     ismd.open(mditerfile.c_str());
+     if (ismd.is_open()) {
+        //ismd.read((char*)&mdtmp,sizeof(int));
+        ismd >> mdtmp;
+        ismd.close();
+     }
+  }
+#if USE_MPI
+  MPI_Bcast(&mdtmp, 1, MPI_INT, 0, MPI_COMM_WORLD);     
+#endif
+  
+  if (mdtmp > 0 && mdtmp < 999999999)
+     mditer = mdtmp;
+}
+  
 ////////////////////////////////////////////////////////////////////////////////
 void Wavefunction::info(ostream& os, string tag)
 {
@@ -2541,7 +2897,7 @@ void Wavefunction::print_casino(ostream& os) const {
 // pes not involved in basis print need to wait before sending data to pe0
   wfcontext_->barrier();  
 
-  if ( spincontext_[0]->onpe0() ) {
+  if ( spincontext_[0]->oncoutpe() ) {
     os << "WAVE FUNCTION" << endl;
     os << "-------------" << endl;
     os << "Number of k-points" << endl;
@@ -2593,7 +2949,7 @@ void Wavefunction::print_casino(ostream& os) const {
         }
       }
 
-      if ( wfcontext_->onpe0() ) {
+      if ( wfcontext_->oncoutpe() ) {
         for ( int ispin = 0; ispin < nspin_; ispin++ ) {
           if (spinactive(ispin)) {
             //for ( int ikp=0; ikp<nkp(); ikp++) {
@@ -2838,6 +3194,41 @@ void Wavefunction::print_vmd(string filebase, const AtomSet& as) const {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+// AS: is true when wave function has to be forced to complex also for kpoint == (0,0,0)
+bool Wavefunction::force_complex_set(void) const { return force_complex_wf_; }
+
+////////////////////////////////////////////////////////////////////////////////
+// AS: enable or disable forcing of complex wave functions
+void Wavefunction::force_complex(bool new_force_complex_wf)
+{
+   //ewd
+   //deallocate();
+
+  force_complex_wf_ = new_force_complex_wf;
+
+  /* ewd
+  kpoint_.resize(1);
+  kpoint_[0] = D3vector(0,0,0);
+  weight_.resize(1);
+  weight_[0] = 1.0;
+  compute_nst();
+  //create_contexts();
+  allocate();
+  */  
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// AS: is true when the wave function is made real for Gamma only
+bool Wavefunction::phase_real_set(void) const { return wf_phase_real_; }
+
+////////////////////////////////////////////////////////////////////////////////
+// AS: change phase of the wave function to make it real for Gamma only
+void Wavefunction::phase_real(bool new_wf_phase_real)
+{
+  wf_phase_real_ = new_wf_phase_real;
+}
+
+////////////////////////////////////////////////////////////////////////////////
 ostream& operator<<(ostream& os, Wavefunction& wf)
 {
   wf.print(os,"text","wavefunction");
@@ -2862,6 +3253,8 @@ Wavefunction& Wavefunction::operator=(const Wavefunction& wf)
   weight_ = wf.weight_;
   kpoint_ = wf.kpoint_;
   ultrasoft_ = wf.ultrasoft_;
+  force_complex_wf_ = wf.force_complex_wf_;
+  wf_phase_real_ = wf.wf_phase_real_;
   
   nkptloc_ = wf.nkptloc_;
   kptloc_ = wf.kptloc_;

@@ -42,6 +42,9 @@ class Wavefunction {
   vector<vector<int> > nkplocproc0_; // number of local kpoints for spin i, sdcontext j
   int spinloc_;        // index of local spin
   bool ultrasoft_;     // use overlap matrix S for diagonalization, orthogonalization
+  bool force_complex_wf_; // AS: force complex basis [even if kpoint == (0,0,0)]
+                          // AS: necessary for time propagation of wave functions
+  bool wf_phase_real_; // AS: change phase of the wave function to make it real for Gamma only
   
   UnitCell cell_ ;    // unit cell
   UnitCell refcell_ ; // reference cell
@@ -138,6 +141,11 @@ class Wavefunction {
   
   void randomize(double amplitude, bool highmem);
   void randomize_us(double amplitude, AtomSet& as, bool highmem);
+  void randomize_real(double amplitude);
+  // AS: shift state n_state by the vector (shift_x, shift_y, shift_z)
+  void shift_wf(double shift_x,double shift_y,double shift_z,int n_state);
+  // AS: change phase of the wave function to make it real for Gamma only
+  void phase_wf_real(void);
 
   void rescale(double factor);
   
@@ -159,10 +167,22 @@ class Wavefunction {
   void printocc(void);
   void write(SharedFilePtr& fh, string encoding, string tag) const;
   void write_dump(string filebase);
+  void write_fast(string filebase);
   void write_states(string filebase, string format);
+  void write_mditer(string filebase, int mditer);
   void read_dump(string filebase);
+  void read_fast(string filebase);
   void read_states(string filebase);
+  void read_mditer(string filebase, int& mditer);
   void info(ostream& os, string tag);
+  // AS: is true when wave function has to be forced to complex also for kpoint == (0,0,0)
+  bool force_complex_set(void) const;
+  // AS: enable or disable forcing of complex wave functions
+  void force_complex(bool new_force_complex_wf);
+  // AS: is true when the wave function is made real for Gamma only
+  bool phase_real_set(void) const;
+  // AS: change phase of the wave function to make it real for Gamma only
+  void phase_real(bool new_wf_phase_real);
 };
 ostream& operator << ( ostream& os, Wavefunction& wf );
 #endif

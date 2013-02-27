@@ -65,29 +65,35 @@ class AtomCmd : public Cmd
     }
   
     Atom *a = new Atom(name,species,position,velocity);
-    
+
+    const int atoms_nel_before = s->atoms.nel();
     if ( !(s->atoms.addAtom( a ) ) )
     {
-      if ( ui->oncoutpe() )
-        cout << "<ERROR> AtomCmd: could not add atom " << name << " </ERROR>" << endl;
-      delete a;
-      return 1;
+       if ( ui->oncoutpe() )
+          cout << " AtomCmd: could not add atom " << name << endl;
+       delete a;
+       return 1;
     }
-    
-#if DEBUG
-cout << " dbg check "<< __FILE__ <<" "<< __LINE__ <<" mype="<< mype << endl;
-#endif
- 
-    s->wf.set_nel(s->atoms.nel());
-    if ( s->wfv != 0 )
+    const int atoms_nel_after = s->atoms.nel();
+    const int delta_nel = (name[0] != '+' ? (atoms_nel_after - atoms_nel_before) : 0);
+    const int wf_nel = s->wf.nel();
+
+    if (delta_nel != 0)
     {
-      s->wfv->set_nel(s->atoms.nel());
-      s->wfv->clear();
+       s->wf.set_nel(wf_nel+delta_nel);
+       //ewd s->wf.update_occ(0.0,0);
+       if ( s->wfv != 0 )
+       {
+          s->wfv->set_nel(wf_nel+delta_nel);
+          s->wfv->clear();
+       }
     }
-    
-#if DEBUG
-cout << " dbg check "<< __FILE__ <<" "<< __LINE__ <<" mype="<< mype << endl;
-#endif
+    else
+    {
+       if ( ui->oncoutpe() )
+          cout << " AtomCmd: added ion but no electrons " << endl;
+    }
+
     return 0;
   }
 };

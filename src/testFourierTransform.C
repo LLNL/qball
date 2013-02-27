@@ -85,7 +85,7 @@ int main(int argc, char **argv)
   double flops = 2*basis.nrod_loc() *      fft_flops(ft2.np2()) +
                  ft2.np1()/2 * ft2.np2() * fft_flops(ft2.np0()) +
                  ft2.np0()   * ft2.np2() * fft_flops(ft2.np1());
-  if ( ctxt.onpe0() )
+  if ( ctxt.oncoutpe() )
   {
     cout << " wfbasis.size() = " << basis.size() << endl;
     cout << " wfbasis.np() = " << basis.np(0) << " " << basis.np(1)
@@ -115,65 +115,59 @@ int main(int argc, char **argv)
   }
 #endif
 
+  /*EWD DEBUG
   tm.reset();
   ft2.reset_timers();
   tm.start();
   ft2.forward(&f2[0],&x[0]);
   tm.stop();
-  if ( ctxt.onpe0() )
-  {
-     cout << " fwd1: tm_f_fft:    " << ft2.tm_f_fft.real() << endl;
-     cout << " fwd1: tm_f_mpi:    " << ft2.tm_f_mpi.real() << endl;
-     cout << " fwd1: tm_f_pack:   " << ft2.tm_f_pack.real() << endl;
-     cout << " fwd1: tm_f_unpack: " << ft2.tm_f_unpack.real() << endl;
-     cout << " fwd1: tm_f_zero:   " << ft2.tm_f_zero.real() << endl;
-     cout << " fwd1: tm_f_map:    " << ft2.tm_f_map.real() << endl;
-     cout << " fwd1: tm_f_total:  " << ft2.tm_f_fft.real() +
+  cout << " fwd1: tm_f_fft:    " << ft2.tm_f_fft.real() << endl;
+  cout << " fwd1: tm_f_mpi:    " << ft2.tm_f_mpi.real() << endl;
+  cout << " fwd1: tm_f_pack:   " << ft2.tm_f_pack.real() << endl;
+  cout << " fwd1: tm_f_unpack: " << ft2.tm_f_unpack.real() << endl;
+  cout << " fwd1: tm_f_zero:   " << ft2.tm_f_zero.real() << endl;
+  cout << " fwd1: tm_f_map:    " << ft2.tm_f_map.real() << endl;
+  cout << " fwd1: tm_f_total:  " << ft2.tm_f_fft.real() +
                                     ft2.tm_f_mpi.real() +
                                     ft2.tm_f_pack.real() +
                                     ft2.tm_f_unpack.real() +
                                     ft2.tm_f_zero.real() +
                                     ft2.tm_f_map.real() << endl;
-     cout << " fwd1 time: " << tm.cpu() << " / " << tm.real()
-          << "    " << 1.e-6*flops/tm.real() << " MFlops" << endl;
-  }
+  cout << " fwd1 time: " << tm.cpu() << " / " << tm.real()
+  << "    " << 1.e-6*flops/tm.real() << " MFlops" << endl;
+
   tm.reset();
   ft2.reset_timers();
   tm.start();
   ft2.backward(&x[0],&f2[0]);
   tm.stop();
-  if ( ctxt.onpe0() )
-  {
-     cout << " bwd1: tm_b_fft:    " << ft2.tm_b_fft.real() << endl;
-     cout << " bwd1: tm_b_mpi:    " << ft2.tm_b_mpi.real() << endl;
-     cout << " bwd1: tm_b_pack:   " << ft2.tm_b_pack.real() << endl;
-     cout << " bwd1: tm_b_unpack: " << ft2.tm_b_unpack.real() << endl;
-     cout << " bwd1: tm_b_zero:   " << ft2.tm_b_zero.real() << endl;
-     cout << " bwd1: tm_b_map:    " << ft2.tm_b_map.real() << endl;
-     cout << " bwd1: tm_b_total:  " << ft2.tm_b_fft.real() +
+  cout << " bwd1: tm_b_fft:    " << ft2.tm_b_fft.real() << endl;
+  cout << " bwd1: tm_b_mpi:    " << ft2.tm_b_mpi.real() << endl;
+  cout << " bwd1: tm_b_pack:   " << ft2.tm_b_pack.real() << endl;
+  cout << " bwd1: tm_b_unpack: " << ft2.tm_b_unpack.real() << endl;
+  cout << " bwd1: tm_b_zero:   " << ft2.tm_b_zero.real() << endl;
+  cout << " bwd1: tm_b_map:    " << ft2.tm_b_map.real() << endl;
+  cout << " bwd1: tm_b_total:  " << ft2.tm_b_fft.real() +
                                     ft2.tm_b_mpi.real() +
                                     ft2.tm_b_pack.real() +
                                     ft2.tm_b_unpack.real() +
                                     ft2.tm_b_zero.real() +
                                     ft2.tm_b_map.real() << endl;
-     cout << " bwd1 time: " << tm.cpu() << " / " << tm.real()
-          << "    " << 1.e-6*flops/tm.real() << " MFlops" << endl;
-  }
-
+  cout << " bwd1 time: " << tm.cpu() << " / " << tm.real()
+  << "    " << 1.e-6*flops/tm.real() << " MFlops" << endl;
+  
   tm.reset();
   ft2.reset_timers();
   tm.start();
   ft2.forward(&f2[0],&x[0]);
   tm.stop();
-  if ( ctxt.onpe0() )
-  {
-     cout << " fwd2: tm_f_fft:    " << ft2.tm_f_fft.real() << endl;
-     cout << " fwd2: tm_f_mpi:    " << ft2.tm_f_mpi.real() << endl;
-     cout << " fwd2: tm_f_pack:   " << ft2.tm_f_pack.real() << endl;
-     cout << " fwd2: tm_f_unpack: " << ft2.tm_f_unpack.real() << endl;
-     cout << " fwd2: tm_f_zero:   " << ft2.tm_f_zero.real() << endl;
-     cout << " fwd2: tm_f_map:    " << ft2.tm_f_map.real() << endl;
-     cout << " fwd2: tm_f_total:  " << ft2.tm_f_fft.real() +
+  cout << " fwd2: tm_f_fft:    " << ft2.tm_f_fft.real() << endl;
+  cout << " fwd2: tm_f_mpi:    " << ft2.tm_f_mpi.real() << endl;
+  cout << " fwd2: tm_f_pack:   " << ft2.tm_f_pack.real() << endl;
+  cout << " fwd2: tm_f_unpack: " << ft2.tm_f_unpack.real() << endl;
+  cout << " fwd2: tm_f_zero:   " << ft2.tm_f_zero.real() << endl;
+  cout << " fwd2: tm_f_map:    " << ft2.tm_f_map.real() << endl;
+  cout << " fwd2: tm_f_total:  " << ft2.tm_f_fft.real() +
                                     ft2.tm_f_mpi.real() +
                                     ft2.tm_f_pack.real() +
                                     ft2.tm_f_unpack.real() +
@@ -182,35 +176,31 @@ int main(int argc, char **argv)
 
   //cout << " " << 2*basis.np(0) << " " << 2*basis.np(1)
   //     << " " << 2*basis.np(2) << " ";
-     cout << " fwd2 time: " << tm.cpu() << " / " << tm.real()
-          << "    " << 1.e-6*flops/tm.real() << " MFlops" << endl;
-  }
-  
+  cout << " fwd2 time: " << tm.cpu() << " / " << tm.real()
+  << "    " << 1.e-6*flops/tm.real() << " MFlops" << endl;
+
   tm.reset();
   ft2.reset_timers();
   tm.start();
   ft2.backward(&x[0],&f2[0]);
   tm.stop();
-  if ( ctxt.onpe0() )
-  {
-     cout << " bwd2: tm_b_fft:    " << ft2.tm_b_fft.real() << endl;
-     cout << " bwd2: tm_b_mpi:    " << ft2.tm_b_mpi.real() << endl;
-     cout << " bwd2: tm_b_pack:   " << ft2.tm_b_pack.real() << endl;
-     cout << " bwd2: tm_b_unpack: " << ft2.tm_b_unpack.real() << endl;
-     cout << " bwd2: tm_b_zero:   " << ft2.tm_b_zero.real() << endl;
-     cout << " bwd2: tm_b_map:    " << ft2.tm_b_map.real() << endl;
-     cout << " bwd2: tm_b_total:  " << ft2.tm_b_fft.real() +
-         ft2.tm_b_mpi.real() +
-         ft2.tm_b_pack.real() +
-         ft2.tm_b_unpack.real() +
-         ft2.tm_b_zero.real() +
-         ft2.tm_b_map.real() << endl;
+  cout << " bwd2: tm_b_fft:    " << ft2.tm_b_fft.real() << endl;
+  cout << " bwd2: tm_b_mpi:    " << ft2.tm_b_mpi.real() << endl;
+  cout << " bwd2: tm_b_pack:   " << ft2.tm_b_pack.real() << endl;
+  cout << " bwd2: tm_b_unpack: " << ft2.tm_b_unpack.real() << endl;
+  cout << " bwd2: tm_b_zero:   " << ft2.tm_b_zero.real() << endl;
+  cout << " bwd2: tm_b_map:    " << ft2.tm_b_map.real() << endl;
+  cout << " bwd2: tm_b_total:  " << ft2.tm_b_fft.real() +
+                                    ft2.tm_b_mpi.real() +
+                                    ft2.tm_b_pack.real() +
+                                    ft2.tm_b_unpack.real() +
+                                    ft2.tm_b_zero.real() +
+                                    ft2.tm_b_map.real() << endl;
 
   //cout << " " << 2*basis.np(0) << " " << 2*basis.np(1)
   //     << " " << 2*basis.np(2) << " ";
-     cout << " bwd2 time: " << tm.cpu() << " / " << tm.real()
-          << "    " << 1.e-6*flops/tm.real() << " MFlops" << endl;
-  }
+  cout << " bwd2 time: " << tm.cpu() << " / " << tm.real()
+  << "    " << 1.e-6*flops/tm.real() << " MFlops" << endl;
   
   // double transform
   tm.reset();
@@ -218,7 +208,7 @@ int main(int argc, char **argv)
   tm.start();
   ft2.forward(&f2[0],&x1[0],&x2[0]);
   tm.stop();
-  if ( ctxt.onpe0() ) {
+  if ( ctxt.oncoutpe() ) {
      cout << " fwd3: tm_f_fft:    " << ft2.tm_f_fft.real() << endl;
      cout << " fwd3: tm_f_mpi:    " << ft2.tm_f_mpi.real() << endl;
      cout << " fwd3: tm_f_pack:   " << ft2.tm_f_pack.real() << endl;
@@ -239,7 +229,7 @@ int main(int argc, char **argv)
   tm.start();
   ft2.backward(&x1[0],&x2[0],&f2[0]);
   tm.stop();
-  if ( ctxt.onpe0() ) {
+  if ( ctxt.oncoutpe() ) {
      cout << " bwd3: tm_b_fft:    " << ft2.tm_b_fft.real() << endl;
      cout << " bwd3: tm_b_mpi:    " << ft2.tm_b_mpi.real() << endl;
      cout << " bwd3: tm_b_pack:   " << ft2.tm_b_pack.real() << endl;
@@ -286,7 +276,7 @@ int main(int argc, char **argv)
     tsum += norm(f2[i]);
   MPI_Allreduce(&tsum,&sum,1,MPI_DOUBLE,MPI_SUM,ctxt.comm());
   
-  if ( ctxt.onpe0() )
+  if ( ctxt.oncoutpe() )
      cout << " sum pw^2: " << sum / ft2.np012() << endl;
   
   //////////////////////////////////////////////////////////////////////////////
@@ -303,10 +293,10 @@ int main(int argc, char **argv)
   double gnorm = 0.0;
   for ( int i = 0; i < basis.localsize(); i++ )
     gnorm += 2.0 * norm(x[i]);
-  if ( ctxt.onpe0() )
+  if ( ctxt.oncoutpe() )
     gnorm -= norm(x[0]);
   ctxt.dsum(1,1,&gnorm,1);
-  if ( ctxt.onpe0() )
+  if ( ctxt.oncoutpe() )
      cout << " gaussian gnorm: " << gnorm << endl;
   
   ft2.backward(&x[0],&f2[0]);
@@ -327,17 +317,19 @@ int main(int argc, char **argv)
     tsum += norm(f2[i]);
   MPI_Allreduce(&tsum,&sum,1,MPI_DOUBLE,MPI_SUM,ctxt.comm());
   
-  if ( ctxt.onpe0() )
+  if ( ctxt.oncoutpe() )
      cout << " gaussian rnorm: " << sum / ft2.np012() << endl;
 #endif
+  EWD DEBUG  */
   
   // Define ft from vbasis
   Basis vbasis(ctxt,kpoint);
   vbasis.resize(cell,cell,4.0*ecut);
-  if ( ctxt.onpe0() )
+  if ( ctxt.oncoutpe() )
      cout << " vbasis.np() = " << vbasis.np(0) << " " << vbasis.np(1)
           << " " << vbasis.np(2) << endl;
 
+  /* EWD DEBUG
   FourierTransform vft(basis,vbasis.np(0),vbasis.np(1),vbasis.np(2));
   vector<complex<double> > vf(vft.np012loc());
   vft.backward(&x[0],&vf[0]);
@@ -347,8 +339,9 @@ int main(int argc, char **argv)
     tsum += norm(vf[i]);
   MPI_Allreduce(&tsum,&sum,1,MPI_DOUBLE,MPI_SUM,ctxt.comm());
   
-  if ( ctxt.onpe0() )
+  if ( ctxt.oncoutpe() )
      cout << " gaussian rnorm: " << sum / vft.np012() << endl;
+  EWD DEBUG  */
 
   } // Context scope
 #if USE_MPI
