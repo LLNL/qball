@@ -7,5 +7,5 @@
 
 #include "release.h"
 std::string release(void) {
-  return std::string("2.1.0beta-tddft-qb@LL");
+  return std::string("2.2.0-qb@LL");
 }

@@ -2283,14 +2283,6 @@ void Wavefunction::write_states(string filebase, string format) {
                       os << setprecision(8);
                     }
 
-                    // hack to make checkpointing work w. BlueGene compilers
-#ifdef BGQ
-                    if (format == "binary") {
-                       os.write(statefile.c_str(),sizeof(char)*statefile.length());
-                       os.flush();
-                    }
-#endif
-
                     // headers for visualization formats
                     if (format == "molmol" || format == "text") {
                       D3vector a0 = cell_.a(0);
@@ -2376,10 +2368,6 @@ void Wavefunction::write_states(string filebase, string format) {
                    int nst = sd_[ispin][kp]->nst();
                    const double* peig = sd_[ispin][kp]->eig_ptr();
                    const double* pocc = sd_[ispin][kp]->occ_ptr();
-                   // hack to make checkpointing work w. BlueGene compilers
-#ifdef BGQ
-                   os.write(statefile.c_str(),sizeof(char)*statefile.length());
-#endif
                    os.write((char*)&peig[0],sizeof(double)*nst);
                    os.write((char*)&pocc[0],sizeof(double)*nst);
                    os.flush();
@@ -2654,13 +2642,6 @@ void Wavefunction::read_states(string filebase) {
                                  statefile = filebase + "s" + oss3.str() + "k" + oss2.str() + "n" + oss1.str(); 
                               is.open(statefile.c_str(),ofstream::binary);
                               if (is.is_open()) {
-                                 
-                                 // hack to make checkpointing work with BlueGene compilers
-#ifdef BGQ
-                                 int len = statefile.length();
-                                 char* tmpfilename = new char[256];
-                                 is.read(tmpfilename,sizeof(char)*statefile.length());
-#endif
                                  // read local data
                                  int size = ft.np012loc();
                                  is.read((char*)&wftmp[0],sizeof(complex<double>)*size);
