@@ -169,10 +169,12 @@ class Wavefunction {
   void write_dump(string filebase);
   void write_fast(string filebase);
   void write_states(string filebase, string format);
+  void write_states_old(string filebase, string format);
   void write_mditer(string filebase, int mditer);
   void read_dump(string filebase);
   void read_fast(string filebase);
   void read_states(string filebase);
+  void read_states_old(string filebase);
   void read_mditer(string filebase, int& mditer);
   void info(ostream& os, string tag);
   // AS: is true when wave function has to be forced to complex also for kpoint == (0,0,0)

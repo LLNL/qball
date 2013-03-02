@@ -2217,6 +2217,184 @@ void Wavefunction::write_fast(string filebase) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+void Wavefunction::write_states(string filebase, string format) {
+
+   int mype, npes;
+#if USE_MPI
+  MPI_Comm_rank(MPI_COMM_WORLD,&mype);
+  MPI_Comm_size(MPI_COMM_WORLD,&npes);
+#else
+  mype = 0;
+  npes = 1;
+#endif
+
+  bool ifempty = (nempty_ > 0);
+  for ( int ispin = 0; ispin < nspin_; ispin++ ) {
+    if (spinactive(ispin)) {
+      for ( int ikp = 0; ikp < sdcontext_[ispin].size(); ikp++ ) {
+        if (sdcontext_[ispin][ikp] != 0 ) {
+          if (sdcontext_[ispin][ikp]->active() ) {
+            Context* tctxt = sdcontext_[ispin][ikp];
+            int nprow = tctxt->nprow();
+            int npcol = tctxt->npcol();
+            int prow = tctxt->myrow();
+            int pcol = tctxt->mycol();
+            int writerTask = mype - (mype%nprow);
+            assert(writerTask >= 0);
+            if (mype == writerTask)
+               assert(prow == 0);
+            
+            for ( int kloc=0; kloc<nkptloc_; kloc++) {
+              int kp = kptloc_[kloc];         // global index of local kpoint
+              if ( sd_[ispin][kp] != 0 ) {
+                int nstloc = sd_[ispin][kp]->nstloc();
+                int nb = sd_[ispin][kp]->c().nb();
+
+                const Basis& basis = sd_[ispin][kp]->basis();
+                FourierTransform ft(basis,basis.np(0),basis.np(1),basis.np(2));
+
+                for ( int n = 0; n < nstloc; n++ ) {
+                  // global n index
+                  const int nn = pcol*nb + n;
+
+                  ofstream os;
+                  if (mype == writerTask) {
+                    // write out wavefunction for this state and k-point
+                    ostringstream oss1,oss2,oss3;
+                    oss1.width(5);  oss1.fill('0');  oss1 << nn;
+                    oss2.width(4);  oss2.fill('0');  oss2 << kp;
+                    oss3.width(1);  oss3.fill('0');  oss3 << ispin;
+                    string statefile;
+                    if (nspin_ == 1) 
+                      statefile = filebase + "k" + oss2.str() + "n" + oss1.str(); 
+                    else
+                      statefile = filebase + "s" + oss3.str() + "k" + oss2.str() + "n" + oss1.str(); 
+                    
+                    if (format == "molmol" || format == "text") 
+                      statefile = statefile + ".iso";
+                    else if (format == "gopenmol") 
+                      statefile = statefile + ".plt";
+
+                    if (format == "binary") 
+                      os.open(statefile.c_str(),ofstream::binary);
+                    else {
+                      os.open(statefile.c_str(),ofstream::out);
+                      os.setf(ios::scientific,ios::floatfield);
+                      os << setprecision(8);
+                    }
+
+                    // hack to make checkpointing work w. BlueGene compilers
+#ifdef BGQ
+                    if (format == "binary") {
+                       os.write(statefile.c_str(),sizeof(char)*statefile.length());
+                       os.flush();
+                    }
+#endif
+
+                    // headers for visualization formats
+                    if (format == "molmol" || format == "text") {
+                      D3vector a0 = cell_.a(0);
+                      D3vector a1 = cell_.a(1);
+                      D3vector a2 = cell_.a(2);
+                      if( a0.y != 0.0 || a0.z != 0.0 || a1.x != 0.0 || a1.z != 0.0 ||
+                          a2.x != 0.0 || a2.y != 0.0 )
+                        os << "Error writing header:  Molmol isosurface requires rectangular box!" << endl;
+                      double dx = a0.x/(double)ft.np0();
+                      double dy = a1.y/(double)ft.np1();
+                      double dz = a2.z/(double)ft.np2();
+                      //    origin    npoints       grid spacing
+                      os << "0.0 " << ft.np0() << " " << dx << endl;
+                      os << "0.0 " << ft.np1() << " " << dy << endl;
+                      os << "0.0 " << ft.np2() << " " << dz << endl;
+                    }
+                    else if (format == "gopenmol") {
+                      D3vector a0 = cell_.a(0);
+                      D3vector a1 = cell_.a(1);
+                      D3vector a2 = cell_.a(2);
+                      if( a0.y != 0.0 || a0.z != 0.0 || a1.x != 0.0 || a1.z != 0.0 ||
+                          a2.x != 0.0 || a2.y != 0.0 )
+                        os << "Error writing header:  gOpenMol isosurface requires rectangular box!" << endl;
+                      os << "3 200" << endl;  //ewd copying this from another utility, not sure what it means
+                      os << ft.np0() << " " << ft.np1() << " " << ft.np2() << endl;
+                      os << "0.0 " << a2.z << endl;
+                      os << "0.0 " << a1.y << endl;
+                      os << "0.0 " << a0.x << endl;
+                    }
+                  }     
+                  int mloc = sd_[ispin][kp]->c().mloc();
+                  vector<complex<double> > wftmp(ft.np012loc());
+                  
+                  ComplexMatrix& c = sd_[ispin][kp]->c();
+                  ft.backward(c.cvalptr(mloc*n),&wftmp[0]);
+
+                  // write out wave function
+                  if (mype == writerTask)  // write local data
+                  {
+                     int size = ft.np012loc();
+                     os.write((char*)&wftmp[0],sizeof(complex<double>)*size);
+                     os.flush();
+                  }
+          
+                  for (int jj=1; jj<nprow; jj++)
+                  {
+                     int dataTask = jj + writerTask;
+                     if (mype == writerTask)
+                     {
+                        int nComplex;
+                        MPI_Recv(&nComplex,1,MPI_INT,dataTask,dataTask,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+                        vector<complex<double> > data;
+                        data.resize(nComplex);
+                        MPI_Recv(&data[0],nComplex,MPI_DOUBLE_COMPLEX,dataTask,dataTask,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+                        os.write((char*)&data[0],sizeof(complex<double>)*nComplex);
+                        os.flush();                
+                     }
+                     if (mype == dataTask)
+                     {
+                        int size = ft.np012loc();
+                        MPI_Send(&size,1,MPI_INT,writerTask,dataTask,MPI_COMM_WORLD);
+                        MPI_Send(&wftmp[0],size,MPI_DOUBLE_COMPLEX,writerTask,dataTask,MPI_COMM_WORLD);
+                     }
+                  }
+                  if (mype == writerTask)  // close file
+                     os.close();
+                }
+
+                // if there are empty states, save occupation and eigenvalues
+                if (ifempty && prow == 0 && pcol == 0 && format == "binary") {
+                   // write out occupation for this state and k-point
+                   ofstream os;
+                   ostringstream oss2,oss3;
+                   oss2.width(4);  oss2.fill('0');  oss2 << kp;
+                   oss3.width(1);  oss3.fill('0');  oss3 << ispin;
+                   string statefile;
+                   if (nspin_ == 1) 
+                      statefile = filebase + "k" + oss2.str() + ".occ"; 
+                   else
+                      statefile = filebase + "s" + oss3.str() + "k" + oss2.str() + ".occ";
+                   os.open(statefile.c_str(),ofstream::binary);
+                   
+                   int nst = sd_[ispin][kp]->nst();
+                   const double* peig = sd_[ispin][kp]->eig_ptr();
+                   const double* pocc = sd_[ispin][kp]->occ_ptr();
+                   // hack to make checkpointing work w. BlueGene compilers
+#ifdef BGQ
+                   os.write(statefile.c_str(),sizeof(char)*statefile.length());
+#endif
+                   os.write((char*)&peig[0],sizeof(double)*nst);
+                   os.write((char*)&pocc[0],sizeof(double)*nst);
+                   os.flush();
+                   os.close();
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
 void Wavefunction::read_dump(string filebase) {
 
   if (!hasdata_) {
@@ -2343,7 +2521,7 @@ void Wavefunction::read_fast(string filebase) {
         for ( int ikp=0; ikp<nkp(); ikp++) {
            if (kptactive(ikp)) {
               assert(sd_[ispin][ikp] != 0);
-
+              
               if (mype == readerTask)  // read local data
               {
                  int mloc = sd_[ispin][ikp]->c().mloc();
@@ -2412,7 +2590,168 @@ void Wavefunction::read_fast(string filebase) {
   
 }
 ////////////////////////////////////////////////////////////////////////////////
-void Wavefunction::write_states(string filebase, string format) {
+void Wavefunction::read_states(string filebase) {
+   
+   if (!hasdata_) {
+      hasdata_ = true;
+      allocate();
+   }
+   int mype, npes;
+#if USE_MPI
+   MPI_Comm_rank(MPI_COMM_WORLD,&mype);
+   MPI_Comm_size(MPI_COMM_WORLD,&npes);
+#else
+   mype = 0;
+   npes = 1;
+#endif
+   
+   bool ifempty = (nempty_ > 0);
+   if (!hasdata_) {
+      hasdata_ = true;
+      allocate();
+   }
+
+   for ( int ispin = 0; ispin < nspin_; ispin++ ) {
+      if (spinactive(ispin)) {
+         for ( int ikp = 0; ikp < sdcontext_[ispin].size(); ikp++ ) {
+            if (sdcontext_[ispin][ikp] != 0 ) {
+               if (sdcontext_[ispin][ikp]->active() ) {
+                  Context* tctxt = sdcontext_[ispin][ikp];
+                  int nprow = tctxt->nprow();
+                  int npcol = tctxt->npcol();
+                  int prow = tctxt->myrow();
+                  int pcol = tctxt->mycol();
+                  int readerTask = mype - (mype%nprow);
+                  assert(readerTask >= 0);
+                  if (mype == readerTask)
+                     assert(prow == 0);
+
+                  for ( int kloc=0; kloc<nkptloc_; kloc++) {
+                     int kp = kptloc_[kloc];         // global index of local kpoint
+                     if ( sd_[ispin][kp] != 0 ) {
+                        int nstloc = sd_[ispin][kp]->nstloc();
+                        int nb = sd_[ispin][kp]->c().nb();
+
+                        const Basis& basis = sd_[ispin][kp]->basis();
+                        FourierTransform ft(basis,basis.np(0),basis.np(1),basis.np(2));
+                        
+                        for ( int n = 0; n < nstloc; n++ ) {
+                           // global n index
+                           const int nn = pcol*nb + n;
+                           vector<complex<double> > wftmp(ft.np012loc());
+
+                           ifstream is;
+                           if (mype == readerTask) {
+                              // read in wavefunction for this state and k-point
+                              ostringstream oss1,oss2,oss3;
+                              oss1.width(5);  oss1.fill('0');  oss1 << nn;
+                              oss2.width(4);  oss2.fill('0');  oss2 << kp;
+                              oss3.width(1);  oss3.fill('0');  oss3 << ispin;
+                              string statefile;
+                              if (nspin_ == 1) 
+                                 statefile = filebase + "k" + oss2.str() + "n" + oss1.str(); 
+                              else
+                                 statefile = filebase + "s" + oss3.str() + "k" + oss2.str() + "n" + oss1.str(); 
+                              is.open(statefile.c_str(),ofstream::binary);
+                              if (is.is_open()) {
+                                 
+                                 // hack to make checkpointing work with BlueGene compilers
+#ifdef BGQ
+                                 int len = statefile.length();
+                                 char* tmpfilename = new char[256];
+                                 is.read(tmpfilename,sizeof(char)*statefile.length());
+#endif
+                                 // read local data
+                                 int size = ft.np012loc();
+                                 is.read((char*)&wftmp[0],sizeof(complex<double>)*size);
+                              }
+                              else
+                                 if ( ctxt_.oncoutpe())
+                                    cout << "<!-- LoadCmd: " << filebase << " checkpoint files not found, skipping load. -->" << endl;
+                           }
+
+                           for (int jj=1; jj<nprow; jj++)
+                           {
+                              int dataTask = jj + readerTask;
+                              if (mype == readerTask)
+                              {
+                                 int nComplex;
+                                 MPI_Recv(&nComplex,1,MPI_INT,dataTask,dataTask,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+                                 vector<complex<double> > data;
+                                 data.resize(nComplex);
+                                 is.read((char*)&data[0],sizeof(complex<double>)*nComplex);
+                                 MPI_Send(&data[0],nComplex,MPI_DOUBLE_COMPLEX,dataTask,dataTask,MPI_COMM_WORLD);
+                              }
+                              if (mype == dataTask)
+                              {
+                                 int size = ft.np012loc();
+                                 MPI_Send(&size,1,MPI_INT,readerTask,dataTask,MPI_COMM_WORLD);
+                                 MPI_Recv(&wftmp[0],size,MPI_DOUBLE_COMPLEX,readerTask,dataTask,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+                              }
+                           }
+                           
+                           if (mype == readerTask)
+                              is.close();
+                  
+                           //ewd when k=0, force complex part to zero
+                           //if (basis.real()) 
+                           //   for ( int i = 0; i < ft.np012loc(); i++ )
+                           //      wftmp[i] = complex<double>(real(wftmp[i]),0.0);
+                           
+                           ComplexMatrix& c = sd_[ispin][kp]->c();
+                           int mloc = sd_[ispin][kp]->c().mloc();
+                           ft.forward(&wftmp[0],c.valptr(mloc*n));
+                        } // for n < nstloc
+              
+                        // if there are empty states, load occupation and eigenvalues
+                        if (ifempty)
+                        {
+                           ifstream is;
+                           int nProcs = nprow*npcol;
+                           int procZero = mype - pcol*nprow - prow; // want the first task in this spin, kpoint context
+                           if (mype == procZero) {
+                              // get occupation for this state and k-point
+                              ostringstream oss2,oss3;
+                              oss2.width(4);  oss2.fill('0');  oss2 << kp;
+                              oss3.width(1);  oss3.fill('0');  oss3 << ispin;
+                              string statefile;
+                              if (nspin_ == 1) 
+                                 statefile = filebase + "k" + oss2.str() + ".occ"; 
+                              else
+                                 statefile = filebase + "s" + oss3.str() + "k" + oss2.str() + ".occ";
+                              is.open(statefile.c_str(),ofstream::binary);
+                           }
+                           
+                           int nst = sd_[ispin][ikp]->nst();
+                           double* peig = (double*)sd_[ispin][ikp]->eig_ptr();
+                           double* pocc = (double*)sd_[ispin][ikp]->occ_ptr();
+                           if (mype == procZero) {
+                              is.read((char*)&peig[0],sizeof(double)*nst);
+                              is.read((char*)&pocc[0],sizeof(double)*nst);
+                              is.close();
+                              for (int jj=1; jj<nProcs; jj++)
+                              {
+                                 int dataTask = jj + readerTask;
+                                 MPI_Send(&peig[0],nst,MPI_DOUBLE,dataTask,dataTask,MPI_COMM_WORLD);
+                                 MPI_Send(&pocc[0],nst,MPI_DOUBLE,dataTask,dataTask,MPI_COMM_WORLD);
+                              }
+                           }
+                           else
+                           {
+                              MPI_Recv(&peig[0],nst,MPI_DOUBLE,readerTask,mype,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+                              MPI_Recv(&pocc[0],nst,MPI_DOUBLE,readerTask,mype,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+                           }
+                        }
+                     }
+                  }
+               }
+            }
+         }
+      }
+   }
+}
+////////////////////////////////////////////////////////////////////////////////
+void Wavefunction::write_states_old(string filebase, string format) {
   int mype;
 #if USE_MPI
   MPI_Comm_rank(MPI_COMM_WORLD,&mype);
@@ -2603,7 +2942,7 @@ void Wavefunction::write_states(string filebase, string format) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-void Wavefunction::read_states(string filebase) {
+void Wavefunction::read_states_old(string filebase) {
 
   if (!hasdata_) {
     hasdata_ = true;
