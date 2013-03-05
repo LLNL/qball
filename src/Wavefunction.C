@@ -2712,15 +2712,15 @@ void Wavefunction::read_states(string filebase) {
                               is.close();
                               for (int jj=1; jj<nProcs; jj++)
                               {
-                                 int dataTask = jj + readerTask;
+                                 int dataTask = jj + procZero;
                                  MPI_Send(&peig[0],nst,MPI_DOUBLE,dataTask,dataTask,MPI_COMM_WORLD);
                                  MPI_Send(&pocc[0],nst,MPI_DOUBLE,dataTask,dataTask,MPI_COMM_WORLD);
                               }
                            }
                            else
                            {
-                              MPI_Recv(&peig[0],nst,MPI_DOUBLE,readerTask,mype,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-                              MPI_Recv(&pocc[0],nst,MPI_DOUBLE,readerTask,mype,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+                              MPI_Recv(&peig[0],nst,MPI_DOUBLE,procZero,mype,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+                              MPI_Recv(&pocc[0],nst,MPI_DOUBLE,procZero,mype,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
                            }
                         }
                      }

@@ -1163,7 +1163,9 @@ void BOSampleStepper::step(int niter)
                 assert(false);  // ewd DEBUG: need to implement this for ultrasoft
             }
             else
-              cd_.update_density();
+               // QB_Pstart("charge");
+               cd_.update_density();
+               // QB_Pstop("charge");
             tmap["charge"].stop();
 
             ef_.update_harris();
@@ -1228,15 +1230,19 @@ void BOSampleStepper::step(int niter)
                 cd_.update_rhor();
               }              
             }
-            
+            //QB_Pstart(update_vhxc);
             ef_.update_vhxc();
+            //QB_Pstop(update_vhxc);
 
             // reset stepper only if multiple non-selfconsistent steps
             if ( nite_ > 0 ) wf_stepper->preprocess();
             int nitemin_ = ( nite_ > 0 ? nite_ : 1);
             for ( int ite = 0; ite < nitemin_; ite++ )
             {
+               //QB_Pstart(energy+hamiltonian_update);
                double energy = ef_.energy(true,dwf,false,fion,false,sigma_eks);
+               //QB_Pstop(energy+hamiltonian_update);
+
                // compute the sum of eigenvalues (with fixed weight)
                // to measure convergence of the subspace update
                // compute trace of the Hamiltonian matrix Y^T H Y
@@ -1256,9 +1262,11 @@ void BOSampleStepper::step(int niter)
                      cout << "  <eigenvalue_sum> "
                           << eigenvalue_sum << " </eigenvalue_sum>" << endl;
                }
+               //QB_Pstart(pzgemm used to update wf)               
+               wf_stepper->update(dwf); 
+               //QB_Pstop(pzgemm used to update wf)
                
-               wf_stepper->update(dwf);
-               if (ultrasoft)
+              if (ultrasoft)
                   wf.update_usfns();
 
                // update ultrasoft functions if needed, call gram
