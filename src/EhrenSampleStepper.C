@@ -864,10 +864,15 @@ void EhrenSampleStepper::step(int niter)
     // }    
                 
     wf_stepper->update(dwf);
+
+
+
+    // update ultrasoft functions if needed, call gram
+    //ewd:  take this out?
+    /*
     if (ultrasoft)
        wf.update_usfns();
                 
-    // update ultrasoft functions if needed, call gram
     for ( int ispin = 0; ispin < s_.wf.nspin(); ispin++ ) {
        if (s_.wf.spinactive(ispin)) {
           for ( int ikp = 0; ikp < s_.wf.nkp(); ikp++ ) {
@@ -881,7 +886,7 @@ void EhrenSampleStepper::step(int niter)
                 tmap["gram"].start();
                 s_.wf.sd(ispin,ikp)->gram();
                 tmap["gram"].stop();
-                            
+                
                 //if (ultrasoft) { 
                 //  tmap["usfns"].start();
                 //  s_.wf.sd(ispin,ikp)->calc_betapsi(); // calculate betapsi
@@ -891,7 +896,9 @@ void EhrenSampleStepper::step(int niter)
           }
        }
     }
-
+    */
+    
+    
     // AS: change the phase of the wave function if the respective variable is set
     if ( s_.wf.phase_real_set() )
     {
