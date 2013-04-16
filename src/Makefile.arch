@@ -9,6 +9,9 @@ ifeq ($(HOSTNAME),seqlac)
 #  ARCHGUESS = bgq
   ARCHGUESS = bgq_ctf_essl
 endif
+ifeq ($(HOSTNAME),vulcanlac)  
+  ARCHGUESS = bgq_ctf_essl
+endif
 ifeq ($(HOSTNAME),rzuseqlac)  
   ARCHGUESS = bgq_ctf_essl
 endif

@@ -19,6 +19,10 @@
 #include <cstdio>
 #endif
 #include "fstream"
+#ifdef BGQ
+#include <spi/include/kernel/process.h>
+#include <spi/include/kernel/location.h>
+#endif
 using namespace std;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -670,11 +674,49 @@ void Wavefunction::set_deltaspin(int deltaspin) {
 void Wavefunction::set_nrowmax(int n) {
   assert(n>0);
   if ( n > ctxt_.size() ) {
-    cout << "<WARNING> Wavefunction::set_nrowmax: nrowmax > ctxt_.size() </WARNING>" << endl;
-    return;
+    cout << "<WARNING> Wavefunction::set_nrowmax: nrowmax > ctxt_.size(). </WARNING>" << endl;
+    n = ctxt_.size();
   }
+
+  // set nrowmax to be compatible with torus dimensions on BG/Q
+#ifdef USE_CTF
+#ifdef BGQ
+  Personality_t pers;
+  Kernel_GetPersonality(&pers, sizeof(pers));
+  const int nTDim = 5;
+  vector<int> torusdim(nTDim);
+  torusdim[0] = pers.Network_Config.Anodes;
+  torusdim[1] = pers.Network_Config.Bnodes;
+  torusdim[2] = pers.Network_Config.Cnodes;
+  torusdim[3] = pers.Network_Config.Dnodes;
+  torusdim[4] = pers.Network_Config.Enodes;
+
+  bool torusMult = false;
+  int ncol = ctxt_.size() / n;
+  for (int ii=0; ii<nTDim; ii++)
+     if (ncol == torusdim[ii])
+        torusMult = true;
+  for (int ii=0; ii<nTDim; ii++)
+     for (int jj=ii+1; jj<nTDim; jj++)
+        if (ncol == torusdim[ii]*torusdim[jj])
+           torusMult = true;
+
+  if ( ctxt_.oncoutpe() )
+  {
+     if (torusMult)
+        cout << "Wavefunction::set_nrowmax:  nrowmax = " << n << " is compatible with BG/Q torus " <<
+            torusdim[0] << " x " << torusdim[1] << " x " << torusdim[2] << " x " << torusdim[3] << " x " <<
+            torusdim[4] << endl;
+     else
+        cout << "<WARNING> Wavefunction::set_nrowmax:  nrowmax = " << n << " is NOT compatible with BG/Q torus! " <<
+            torusdim[0] << " x " << torusdim[1] << " x " << torusdim[2] << " x " << torusdim[3] << " x " <<
+            torusdim[4] << " </WARNING> " << endl;
+  }        
+#endif
+#endif
+  
   if (nrowmax_ != n) {
-    nrowmax_ = n;
+     nrowmax_ = n;
     if (hasdata_)
       reshape();
   }

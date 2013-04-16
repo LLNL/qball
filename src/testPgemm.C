@@ -17,6 +17,9 @@
 #ifdef USE_MPI
 #include <mpi.h>
 #endif
+#ifdef USE_CTF
+#include "cyclopstf.h"
+#endif
 using namespace std;
 
 int main(int argc, char **argv)
@@ -34,6 +37,18 @@ int main(int argc, char **argv)
 #else
   npes=1;
   mype=0;
+#endi
+
+#ifdef USE_CTF
+  {
+    int myRank,numPes;
+    MPI_Comm_rank(MPI_COMM_WORLD, &myRank);
+    MPI_Comm_size(MPI_COMM_WORLD, &numPes);
+    CTF_init(MPI_COMM_WORLD, MACHINE_BGQ, myRank, numPes); 
+    CTF_init_complex(MPI_COMM_WORLD, MACHINE_BGQ, myRank, numPes); 
+    //CTF_init(MPI_COMM_WORLD, myRank, numPes); 
+    //CTF_init_complex(MPI_COMM_WORLD, myRank, numPes); 
+  }    
 #endif
 
   {
@@ -114,7 +129,9 @@ int main(int argc, char **argv)
     }
   }
 
-  
+#ifdef USE_CTF
+  CTF_exit();
+#endif  
 #ifdef USE_MPI
   MPI_Finalize();
 #endif

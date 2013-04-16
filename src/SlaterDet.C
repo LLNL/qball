@@ -855,6 +855,10 @@ void SlaterDet::rs_mul_add(FourierTransform& ft,
 ////////////////////////////////////////////////////////////////////////////////
 void SlaterDet::gram() {
 
+   //ewd DEBUG:  disable gram reshaping for now
+   gram_reshape_ = false;
+
+   
    //if (ultrasoft_)
    //   update_usfns();   // calculate betapsi, spsi
 
