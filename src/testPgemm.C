@@ -20,6 +20,10 @@
 #ifdef USE_CTF
 #include "cyclopstf.h"
 #endif
+#ifdef BGQ
+#include <spi/include/kernel/process.h>
+#include <spi/include/kernel/location.h>
+#endif
 using namespace std;
 
 int main(int argc, char **argv)
@@ -37,7 +41,7 @@ int main(int argc, char **argv)
 #else
   npes=1;
   mype=0;
-#endi
+#endif
 
 #ifdef USE_CTF
   {
@@ -60,14 +64,53 @@ int main(int argc, char **argv)
         n = atoi(argv[4]);
      }
      else {
-        cerr << "Usage:  testEigenSolvers nprow npcol m n" << endl;
+        cerr << "Usage:  testPgemm nprow npcol m n" << endl;
 #if USE_MPI
         MPI_Abort(MPI_COMM_WORLD,2);
 #else
         exit(2);
 #endif
      }
-    
+
+#ifdef BGQ
+     Personality_t pers;
+     Kernel_GetPersonality(&pers, sizeof(pers));
+     const int nTDim = 5;
+     vector<int> torusdim(nTDim);
+     torusdim[0] = pers.Network_Config.Anodes;
+     torusdim[1] = pers.Network_Config.Bnodes;
+     torusdim[2] = pers.Network_Config.Cnodes;
+     torusdim[3] = pers.Network_Config.Dnodes;
+     torusdim[4] = pers.Network_Config.Enodes;
+     int nNodes = torusdim[0]*torusdim[1]*torusdim[2]*torusdim[3]*torusdim[4];
+     int tasksPerNode = npes / nNodes;
+     
+     bool torusMult = false;
+     int ncol = npes / nprow;
+     for (int ii=0; ii<nTDim; ii++)
+        if (ncol == torusdim[ii]*tasksPerNode)
+           torusMult = true;
+     for (int ii=0; ii<nTDim; ii++)
+        for (int jj=ii+1; jj<nTDim; jj++)
+           if (ncol == torusdim[ii]*torusdim[jj]*tasksPerNode)
+              torusMult = true;
+
+     if ( mype == 0 )
+     {
+        if (torusMult)
+           cout << "Wavefunction::set_nrowmax:  nrowmax = " << nprow << " is compatible with BG/Q torus " <<
+               torusdim[0] << " x " << torusdim[1] << " x " << torusdim[2] << " x " << torusdim[3] << " x " <<
+               torusdim[4] << ", tasksPerNode = " << tasksPerNode << endl;
+        else
+           cout << "<WARNING> Wavefunction::set_nrowmax:  nrowmax = " << nprow << " is NOT compatible with BG/Q torus! " <<
+               torusdim[0] << " x " << torusdim[1] << " x " << torusdim[2] << " x " << torusdim[3] << " x " <<
+               torusdim[4] << ", tasksPerNode = " << tasksPerNode << " </WARNING> " << endl;
+     }        
+#endif
+
+
+
+     
      tmap["total"].start();
      tmap["init"].start();
      Context ctxt(nprow,npcol);
@@ -82,15 +125,20 @@ int main(int argc, char **argv)
     
      ComplexMatrix c1(ctxt,m,n,mb,nb);
      ComplexMatrix c2(ctxt,m,n,mb,nb);
-     ComplexMatrix s(ctxt,n,n,nb,nb);
+     ComplexMatrix s1(ctxt,n,n,nb,nb);
+     ComplexMatrix s2(ctxt,n,n,nb,nb);
 
-     // randomize initial values
+     // randomize initial values:  ewd, this is core dumping on some sizes, make sure local ranges are right
+     
      {
+        int mloc = c1.mloc();
+        int nloc = c1.nloc();
+
         srand48(ctxt.myproc());
-        for ( int in = 0; in < nb; in++ ) {
-           complex<double>* p1 = c1.valptr(mb*in);
-           complex<double>* p2 = c2.valptr(mb*in);
-           for ( int im = 0; im < mb; im++ ) {
+        for ( int in = 0; in < nloc; in++ ) {
+           complex<double>* p1 = c1.valptr(mloc*in);
+           complex<double>* p2 = c2.valptr(mloc*in);
+           for ( int im = 0; im < mloc; im++ ) {
               double dre1 = drand48();
               double dim1 = drand48();
               p1[im] = 0.02 * complex<double>(dre1,dim1);
@@ -102,9 +150,13 @@ int main(int argc, char **argv)
      }
      tmap["init"].stop();
 
-     tmap["pzgemm"].start();
-     s.gemm('c','n',1.0,c1,c2,0.0);
-     tmap["pzgemm"].stop();
+     tmap["pzgemm1"].start();
+     s1.gemm('c','n',1.0,c1,c2,0.0);
+     tmap["pzgemm1"].stop();
+
+     tmap["pzgemm2"].start();
+     s2.gemm('c','n',1.0,c2,c1,0.0);
+     tmap["pzgemm2"].stop();
     
     if (mype == 0) 
       cout << "Done." << endl;

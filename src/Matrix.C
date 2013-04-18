@@ -23,6 +23,7 @@ using namespace std;
 #include "profile.h"
 #ifdef USE_CTF
 #include "cyclopstf.h"
+//#include "ctf.hpp"
 #endif
 
 #ifdef ADD_
