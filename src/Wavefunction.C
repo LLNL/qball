@@ -1104,7 +1104,8 @@ void Wavefunction::shift_wf(double shift_x,double shift_y,double shift_z, int n_
 void Wavefunction::phase_wf_real(void)
 {
   // AS: DEBUG
-  cout << " AS: changing phase of WF to make it real" << endl;
+   if ( ctxt_.oncoutpe() )
+      cout << " AS: changing phase of WF to make it real" << endl;
 
   for ( int ispin = 0; ispin < nspin_; ispin++ )
   {
@@ -1226,11 +1227,6 @@ void Wavefunction::update_occ(double temp, int ngauss) {
             dir[ispin] = down;
           }
 
-          // ewd DEBUG
-          if (ctxt_.mype() == 0 && niter > 99997)
-             cout << "WF.OCC, iter " << niter << ": mu = " << mu[0] << ", dmu = " << dmu[0] << ", rhosum = " << rhosum[0] << endl;
-
-          
           rhosum[ispin] = 0.0;
           rhonorm[ispin] = 0.0;
       
@@ -2573,16 +2569,23 @@ void Wavefunction::read_fast(string filebase) {
            if (kptactive(ikp)) {
               assert(sd_[ispin][ikp] != 0);
               
+              int fileFound = -1;
               if (mype == readerTask)  // read local data
               {
                  int mloc = sd_[ispin][ikp]->c().mloc();
                  int nloc = sd_[ispin][ikp]->c().nloc();
                  const complex<double>* p = sd_[ispin][ikp]->c().cvalptr();
                  if (is.is_open())
+                 {
+                    fileFound = 1;
                     is.read((char*)&p[0],sizeof(complex<double>)*nloc*mloc);
+                 }
                  else
+                 {
+                    fileFound = 0;
                     if ( ctxt_.oncoutpe())
                        cout << "<!-- LoadCmd: " << filebase << " checkpoint files not found, skipping load. -->" << endl;
+                 }                       
               }                       
                
               for (int jj=1; jj<nTasksPerFile; jj++)
@@ -2590,25 +2593,35 @@ void Wavefunction::read_fast(string filebase) {
                  int dataTask = jj + readerTask;
                  if (mype == dataTask)
                  {
-                    int mloc = sd_[ispin][ikp]->c().mloc();
-                    int nloc = sd_[ispin][ikp]->c().nloc();
-                    int nComplex = mloc*nloc;
-                    MPI_Send(&nComplex,1,MPI_INT,readerTask,dataTask,MPI_COMM_WORLD);
-                    complex<double>* p = sd_[ispin][ikp]->c().valptr();
-                    MPI_Recv(&p[0],nComplex,MPI_DOUBLE_COMPLEX,readerTask,dataTask,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+                    MPI_Recv(&fileFound,1,MPI_INT,readerTask,dataTask,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+                    if (fileFound == 1)
+                    {
+                       int mloc = sd_[ispin][ikp]->c().mloc();
+                       int nloc = sd_[ispin][ikp]->c().nloc();
+                       int nComplex = mloc*nloc;
+                       MPI_Send(&nComplex,1,MPI_INT,readerTask,dataTask,MPI_COMM_WORLD);
+                       complex<double>* p = sd_[ispin][ikp]->c().valptr();
+                       MPI_Recv(&p[0],nComplex,MPI_DOUBLE_COMPLEX,readerTask,dataTask,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+                    }
                  }
                  if (mype == readerTask)
                  {
-                    int nComplex;
-                    MPI_Recv(&nComplex,1,MPI_INT,dataTask,dataTask,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-                    vector<complex<double> > data;
-                    data.resize(nComplex);
-                    if (is.is_open())
-                       is.read((char*)&data[0],sizeof(complex<double>)*nComplex);
-                    MPI_Send(&data[0],nComplex,MPI_DOUBLE_COMPLEX,dataTask,dataTask,MPI_COMM_WORLD);
+                    MPI_Send(&fileFound,1,MPI_INT,dataTask,dataTask,MPI_COMM_WORLD);
+                    if (fileFound == 1)
+                    {
+                       int nComplex;
+                       MPI_Recv(&nComplex,1,MPI_INT,dataTask,dataTask,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+                       vector<complex<double> > data;
+                       data.resize(nComplex);
+                       if (is.is_open())
+                          is.read((char*)&data[0],sizeof(complex<double>)*nComplex);
+                       MPI_Send(&data[0],nComplex,MPI_DOUBLE_COMPLEX,dataTask,dataTask,MPI_COMM_WORLD);
+                    }
                  }
               }
-
+              if (fileFound == 0)
+                 return;
+              
               // if there are empty states, load occupation and eigenvalues
               if (ifempty)
               {
@@ -2692,6 +2705,7 @@ void Wavefunction::read_states(string filebase) {
                            vector<complex<double> > wftmp(ft.np012loc());
 
                            ifstream is;
+                           int fileFound = -1;
                            if (mype == readerTask) {
                               // read in wavefunction for this state and k-point
                               ostringstream oss1,oss2,oss3;
@@ -2708,10 +2722,13 @@ void Wavefunction::read_states(string filebase) {
                                  // read local data
                                  int size = ft.np012loc();
                                  is.read((char*)&wftmp[0],sizeof(complex<double>)*size);
+                                 fileFound = 1;
                               }
-                              else
+                              else {
+                                 fileFound = 0;
                                  if ( ctxt_.oncoutpe())
                                     cout << "<!-- LoadCmd: " << filebase << " checkpoint files not found, skipping load. -->" << endl;
+                              }
                            }
 
                            for (int jj=1; jj<nprow; jj++)
@@ -2719,20 +2736,31 @@ void Wavefunction::read_states(string filebase) {
                               int dataTask = jj + readerTask;
                               if (mype == readerTask)
                               {
-                                 int nComplex;
-                                 MPI_Recv(&nComplex,1,MPI_INT,dataTask,dataTask,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-                                 vector<complex<double> > data;
-                                 data.resize(nComplex);
-                                 is.read((char*)&data[0],sizeof(complex<double>)*nComplex);
-                                 MPI_Send(&data[0],nComplex,MPI_DOUBLE_COMPLEX,dataTask,dataTask,MPI_COMM_WORLD);
+                                 MPI_Send(&fileFound,1,MPI_INT,dataTask,dataTask,MPI_COMM_WORLD);
+                                 if (fileFound == 1)
+                                 {
+                                    int nComplex;
+                                    MPI_Recv(&nComplex,1,MPI_INT,dataTask,dataTask,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+                                    vector<complex<double> > data;
+                                    data.resize(nComplex);
+                                    is.read((char*)&data[0],sizeof(complex<double>)*nComplex);
+                                    MPI_Send(&data[0],nComplex,MPI_DOUBLE_COMPLEX,dataTask,dataTask,MPI_COMM_WORLD);
+                                 }
                               }
                               if (mype == dataTask)
                               {
-                                 int size = ft.np012loc();
-                                 MPI_Send(&size,1,MPI_INT,readerTask,dataTask,MPI_COMM_WORLD);
-                                 MPI_Recv(&wftmp[0],size,MPI_DOUBLE_COMPLEX,readerTask,dataTask,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+                                 MPI_Recv(&fileFound,1,MPI_INT,readerTask,dataTask,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+                                 if (fileFound == 1)
+                                 {
+                                    int size = ft.np012loc();
+                                    MPI_Send(&size,1,MPI_INT,readerTask,dataTask,MPI_COMM_WORLD);
+                                    MPI_Recv(&wftmp[0],size,MPI_DOUBLE_COMPLEX,readerTask,dataTask,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+                                 }
                               }
                            }
+
+                           if (fileFound == 0)
+                              return;
                            
                            if (mype == readerTask)
                               is.close();
@@ -3642,7 +3670,6 @@ Wavefunction& Wavefunction::operator=(const Wavefunction& wf)
   nkptloc_ = wf.nkptloc_;
   kptloc_ = wf.kptloc_;
   mysdctxt_ = wf.mysdctxt_;
-  
   for ( int ispin = 0; ispin < nspin_; ispin++ ) {
     if (spinactive(ispin)) {
       for ( int ikp = 0; ikp < sdcontext_[ispin].size(); ikp++ ) {
