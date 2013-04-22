@@ -65,7 +65,7 @@ int MDSaveCmd::action(int argc, char **argv) {
   
   // set default encoding and format
   string format = "binary";
-  string encoding = "dump";
+  string encoding = "states";
   //string encoding = "fast";
   string dirbase = "md.";
   char* filename = "mdchk";
@@ -293,7 +293,7 @@ int MDSaveCmd::action(int argc, char **argv) {
   else if (encoding == "states" ) {
      if ( ui->oncoutpe() )
         cout << "<!-- MDSaveCmd:  writing wf to " << filestr << "... -->" << endl;
-     s->wf.write_states(filename,format);
+     s->wf.write_states(filestr,format);
      s->wf.write_mditer(filestr,s->ctrl.mditer);
      
      if (s->ctrl.tddft_involved)

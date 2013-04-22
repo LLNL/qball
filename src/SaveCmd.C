@@ -364,7 +364,7 @@ int SaveCmd::action(int argc, char **argv) {
   else if (encoding == "states" ) {
      if ( ui->oncoutpe() )
         cout << "<!-- SaveCmd:  writing wf " << filestr << "... -->" << endl;
-     s->wf.write_states(filename,format);
+     s->wf.write_states(filestr,format);
      s->wf.write_mditer(filestr,s->ctrl.mditer);
 
     if (s->ctrl.tddft_involved)
