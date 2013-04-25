@@ -169,7 +169,8 @@ class Wavefunction {
   void phase_wf_real(void);
 
   void rescale(double factor);
-  
+
+  void promote_occ(double occ_change, int origin_level, int destination_level);
   void update_occ(double smearingwidth, int ngauss);
   double entropy(void) const; // dimensionless entropy
   void gram(void);

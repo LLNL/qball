@@ -59,6 +59,7 @@ using namespace std;
 #include "ListSpeciesCmd.h"
 #include "LoadCmd.h"
 #include "PrintCmd.h"
+#include "PromoteOccCmd.h"
 #include "QuitCmd.h"
 #include "RandomizeWfCmd.h"
 #include "RandomizeVelCmd.h"
@@ -304,6 +305,7 @@ void qbLink::init(void) {
   ui->addCmd(new ListSpeciesCmd(s));
   ui->addCmd(new LoadCmd(s));
   ui->addCmd(new PrintCmd(s));
+  ui->addCmd(new PromoteOccCmd(s));
   ui->addCmd(new QuitCmd(s));
   ui->addCmd(new RandomizeWfCmd(s));
   ui->addCmd(new RandomizeVelCmd(s));

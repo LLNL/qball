@@ -1137,6 +1137,18 @@ void Wavefunction::rescale(double factor) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+void Wavefunction::promote_occ(double occ_change, int origin_level, int destination_level)
+{
+   assert(nspin_ == 1);
+   {
+      for ( int ikp = 0; ikp < nkp(); ikp++ )
+      {
+         sd_[0][ikp]->promote_occ(occ_change, origin_level, destination_level);
+      }
+   }
+}
+
+////////////////////////////////////////////////////////////////////////////////
 void Wavefunction::update_occ(double temp, int ngauss) {
   // update occupation numbers using eigenvalues in SlaterDet
   vector<double> totalcharge(nspin_);

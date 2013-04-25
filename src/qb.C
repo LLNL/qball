@@ -57,6 +57,7 @@ using namespace std;
 #include "ListSpeciesCmd.h"
 #include "LoadCmd.h"
 #include "PrintCmd.h"
+#include "PromoteOccCmd.h"
 #include "QuitCmd.h"
 #include "RandomizeWfCmd.h"
 #include "RandomizeRealWfCmd.h"
@@ -324,6 +325,7 @@ int main(int argc, char **argv, char **envp)
   ui->addCmd(new ListSpeciesCmd(s));
   ui->addCmd(new LoadCmd(s));
   ui->addCmd(new PrintCmd(s));
+  ui->addCmd(new PromoteOccCmd(s));
   ui->addCmd(new QuitCmd(s));
   ui->addCmd(new RandomizeWfCmd(s));
   ui->addCmd(new RandomizeRealWfCmd(s));

@@ -143,6 +143,8 @@ class SlaterDet {
       for ( int i = 0; i < eig.size(); i++ )
         eig_[i] = eig[i];
     }
+  void promote_occ(double occ_change, int origin_level, int destination_level);
+  
   bool ultrasoft(void) { return ultrasoft_; }
   bool highmem(void) { return highmem_; }
   void set_highmem(void) { highmem_ = true; }

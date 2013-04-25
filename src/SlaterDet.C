@@ -1706,6 +1706,19 @@ void SlaterDet::update_occ(int nspin, double mu, double temp, int ngauss) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+void SlaterDet::promote_occ(double occ_change, int origin_level, int destination_level)
+{
+   assert (occ_.size() == c_.n());
+   assert (eig_.size() == c_.n());
+
+   occ_[origin_level] -= occ_change;
+   occ_[destination_level] += occ_change;
+
+   assert ( (occ_[origin_level]>=0.0) && (occ_[origin_level]<=2.0) );
+   assert ( (occ_[destination_level]>=0.0) && (occ_[destination_level]<=2.0) );
+}
+
+////////////////////////////////////////////////////////////////////////////////
 double SlaterDet::fermi(double e, double mu, double fermitemp) {
   // e, mu in Hartree, fermitemp in Rydbergs
 
