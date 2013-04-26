@@ -69,8 +69,13 @@ void StructuredDocumentHandler::startElement(const XMLCh* const uri,
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+#if XERCESC_3
+void StructuredDocumentHandler::characters(const XMLCh* const chars,
+                                           const XMLSize_t length)
+#else
 void StructuredDocumentHandler::characters(const XMLCh* const chars,
   const unsigned int length)
+#endif
 {
 #if TIMING
   Timer tm;

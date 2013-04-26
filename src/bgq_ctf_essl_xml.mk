@@ -21,7 +21,9 @@
  JAGGEMMLIB = $(LIBHOME)/jaggemm_opt/libjaggemm.a
  CTFDIR = $(LIBHOME)/ctf-latest/cyclopstf
  CTFLIB = -L$(LIBHOME)/lib -lcyclopstf.jag
-
+ XERCESCDIR=$(HOME)/software/xml/xerces-c-3.1.1-bgq/src
+ XERCESCLIBDIR=$(XERCESCDIR)/.libs
+ XERCESLIB=$(XERCESCLIBDIR)/libxerces-c.a
 
  BGQ_SDK_PATH = /bgsys/drivers/ppcfloor
  CXX=$(BGQ_SDK_PATH)/comm/xl/bin/mpixlcxx_r
@@ -29,15 +31,17 @@
 
  LD=$(CXX)
 
- DFLAGS += -DPRINTALL -DUSE_CTF -DUSE_JAGGEMM -DUSE_ESSL -DALIGN32 -DUSE_CSTDIO_LFS -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DHPM
+ DFLAGS += -DPRINTALL -DUSE_CTF -DUSE_JAGGEMM -DUSE_ESSL -DALIGN32 -DUSE_CSTDIO_LFS \
+	-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DHPM -DUSE_XERCES -DXERCESC_3
  
- INCLUDE = -I$(ESSLDIR)/include -I$(CTFDIR)/include
+ INCLUDE = -I$(ESSLDIR)/include -I$(CTFDIR)/include -I$(XERCESCDIR)
  
  CXXFLAGS= -g -O3 -qarch=qp -DUSE_MPI -DSCALAPACK -D$(PLT) $(INCLUDE) $(DFLAGS)
  CFLAGS= -qhot=novector -qsimd=auto -g -O3 -DUSE_MPI -DSCALAPACK -D$(PLT) $(INCLUDE) $(DFLAGS)
 
- LIBPATH = -L$(LAPACKDIR) -L$(BLASDIR) -L$(ESSLDIR)/lib -L/opt/ibmcmp/xlsmp/bg/3.1/bglib64 -L/opt/ibmcmp/xlf/bg/14.1/bglib64
- LIBS =  $(CTFLIB) $(SCALAPACKLIB) $(JAGGEMMLIB) -lesslsmpbg -lblas -llapack -lxlf90_r -lxlsmp -lxlfmath $(HPMLIBS)
+ LIBPATH = -L$(LAPACKDIR) -L$(BLASDIR) -L$(ESSLDIR)/lib -L/opt/ibmcmp/xlsmp/bg/3.1/bglib64 \
+	-L/opt/ibmcmp/xlf/bg/14.1/bglib64 -L$(XERCESCLIBDIR)
+ LIBS =  $(CTFLIB) $(SCALAPACKLIB) $(JAGGEMMLIB) -lesslsmpbg -lblas -llapack -lxlf90_r -lxlsmp -lxlfmath $(HPMLIBS) -lxerces-c
  LDFLAGS = $(LIBPATH) $(LIBS) -qarch=qp -lc -lnss_files -lnss_dns -lresolv
 
 #TAUROOTDIR = $(LIBHOME)/tau/tau-2.21.2

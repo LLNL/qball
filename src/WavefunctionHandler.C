@@ -427,7 +427,13 @@ void WavefunctionHandler::endElement(const XMLCh* const uri,
       else if ( current_gf_encoding == "base64" ) {
         // base64 encoding
         unsigned int length;
+
+#ifdef XERCESC_3
+        XMLByte* b = Base64::decode((XMLByte*)content.c_str(),
+                                    (XMLSize_t*) &length);
+#else
         XMLByte* b = Base64::decode((XMLByte*)content.c_str(), &length);
+#endif        
         assert(b!=0);
         // use data in b
         assert(length/sizeof(double)==wftmpr_size);

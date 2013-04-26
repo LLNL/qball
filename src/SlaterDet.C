@@ -197,11 +197,11 @@ void SlaterDet::resize(const UnitCell& cell, const UnitCell& refcell,
     eig_.resize(nst);
 
     int mb = basis_->maxlocalsize();
-    const int m = ctxt_.nprow() * mb;
     int nb = nst/ctxt_.npcol() + (nst%ctxt_.npcol() > 0 ? 1 : 0);
-
+    int m = ctxt_.nprow() * mb;
+    int n = nst;
     //ewd:  hacky, but works for now
-#ifdef BGQ 
+#ifdef ALIGN32
     if (basis_->real())
     {
        while (mb%8 != 0)
@@ -216,6 +216,8 @@ void SlaterDet::resize(const UnitCell& cell, const UnitCell& refcell,
        while (nb%8 != 0)
           nb++;
     }
+    //m = mb*ctxt_.nprow();  // this won't work with square matrices!
+    //n = nb*ctxt_.npcol();
 #endif
 
     // Determine if plane wave coefficients must be reset after the resize
@@ -304,7 +306,7 @@ void SlaterDet::reshape(const Context& newctxt, const Context& new_col_ctxt, boo
     int nb = ctmp.n()/newctxt.npcol() + (ctmp.n()%newctxt.npcol() > 0 ? 1 : 0);
 
     //ewd:  hacky, but works for now
-#ifdef BGQ 
+#ifdef BGQTMP 
     if (basis_->real())
     {
        while (mb%8 != 0)
