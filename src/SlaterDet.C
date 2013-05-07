@@ -211,21 +211,55 @@ void SlaterDet::resize(const UnitCell& cell, const UnitCell& refcell,
     }
     else
     {
-       while (mb%4 != 0)
+       //while (mb%4 != 0)
+       while (mb%8 != 0)
           mb++;
        while (nb%8 != 0)
           nb++;
     }
-    //m = mb*ctxt_.nprow();  // this won't work with square matrices!
-    //n = nb*ctxt_.npcol();
+    //ewd:  TODO:  if we resize m and n, we need to zero out the extra values
+    /*
+    m = mb*ctxt_.nprow();
+    n = nb*ctxt_.npcol();
+    occ_.resize(n);
+    eig_.resize(n);
+    */
+    if (ctxt_.oncoutpe())
+       cout << "SlaterDet.resize:  new c dimensions = " << m << "x" << n
+       << "   (" << mb << "x" << nb << " blocks)" << " -->" << endl;
+#endif
+#ifdef ALIGN2
+    if (basis_->real())
+    {
+       while (mb%8 != 0)
+          mb++;
+       while (nb%2 != 0)
+          nb++;
+    }
+    else
+    {
+       while (mb%4 != 0)
+          mb++;
+       while (nb%2 != 0)
+          nb++;
+    }
+    m = mb*ctxt_.nprow();
+    n = nb*ctxt_.npcol();
+    occ_.resize(n);
+    eig_.resize(n);
+    if (ctxt_.oncoutpe())
+       cout << "SlaterDet.resize:  new c dimensions = " << m << "x" << n
+       << "   (" << mb << "x" << nb << " blocks)" << " -->" << endl;
 #endif
 
     // Determine if plane wave coefficients must be reset after the resize
     // This is needed if the dimensions of the matrix c_ must be changed
+    //const bool needs_reset =
+    //  m!=c_.m() || nst!=c_.n() || mb!=c_.mb() || nb!=c_.nb();
+    //c_.resize(m,nst,mb,nb);
     const bool needs_reset =
-      m!=c_.m() || nst!=c_.n() || mb!=c_.mb() || nb!=c_.nb();
-
-    c_.resize(m,nst,mb,nb);
+      m!=c_.m() || n!=c_.n() || mb!=c_.mb() || nb!=c_.nb();
+    c_.resize(m,n,mb,nb);
 
     if ( needs_reset )
       reset();
@@ -922,15 +956,8 @@ void SlaterDet::gram() {
     if (ultrasoft_)  // orthogonalize psi and S*psi
       s.gemm('c','n',1.0,c_,spsi_,0.0);
     else
-    {
-       // gemm may actually be faster on BG/Q, try it 
-#ifdef BGQ
        s.herk('l','c',1.0,c_,0.0);
-       //s.gemm('c','n',1.0,c_,c_,0.0);
-#else       
-       s.herk('l','c',1.0,c_,0.0);
-#endif
-    }
+    
     if (gram_reshape_) {
       int mbsq = c_.n()/ctxtsq_.nprow() + (c_.n()%ctxtsq_.nprow() == 0 ? 0 : 1);
       int nbsq = c_.n()/ctxtsq_.npcol() + (c_.n()%ctxtsq_.npcol() == 0 ? 0 : 1);

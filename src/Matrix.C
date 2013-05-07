@@ -451,12 +451,15 @@ void DoubleMatrix::init_size(int m, int n, int mb, int nb)
 
   //ewd:  force local data sizes to be 32-byte aligned
 #ifdef ALIGN32
-  while (mb_%8 != 0)
-     mb_++;
-  while (nb_%8 != 0)
-     nb_++;
-  //m_ = mb_*nprow_; // this won't work for square matrices!
-  //n_ = nb_*npcol_; 
+  if (m > 0 && n > 0)
+  {
+     while (mb_%8 != 0)
+        mb_++;
+     while (nb_%8 != 0)
+        nb_++;
+     //m_ = mb_*nprow_; // this won't work for square matrices!
+     //n_ = nb_*npcol_; 
+  }
 #endif
 
   int isrcproc=0;
@@ -534,19 +537,20 @@ void ComplexMatrix::init_size(int m, int n, int mb, int nb)
 #ifdef ALIGN32
   if (m > 0 && n > 0)
   {
-     while (mb_%4 != 0)
+     //while (mb_%4 != 0)
+     while (mb_%8 != 0)
         mb_++;
      while (nb_%8 != 0)
         nb_++;
-     m_ = mb_*nprow_;
-     n_ = nb_*npcol_;
+     //m_ = mb_*nprow_;  // this won't work for square matrices!
+     //n_ = nb_*npcol_;
 
      //ewd DEBUG
-     if (ctxt_.oncoutpe())
-     {
-        cout << "INIT_SIZE:  old matrix = " << m << " x " << n << ", mb = " << mb << ", nb = " << nb << endl;
-        cout << "INIT_SIZE:  new matrix = " << m_ << " x " << n_ << ", mb = " << mb_ << ", nb = " << nb_ << endl;
-     }
+     //if (ctxt_.oncoutpe())
+     //{
+     //   cout << "INIT_SIZE:  old matrix = " << m << " x " << n << ", mb = " << mb << ", nb = " << nb << endl;
+     //   cout << "INIT_SIZE:  new matrix = " << m_ << " x " << n_ << ", mb = " << mb_ << ", nb = " << nb_ << endl;
+     //}
   }
 #endif
   int isrcproc=0;

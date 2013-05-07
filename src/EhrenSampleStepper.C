@@ -163,7 +163,7 @@ void EhrenSampleStepper::step(int niter)
 
   //EWD TDDFT DIFF
   // initialize occupation
-  wf.update_occ(s_.ctrl.smearing_width,s_.ctrl.smearing_ngauss);
+  //wf.update_occ(s_.ctrl.smearing_width,s_.ctrl.smearing_ngauss);
 
   WavefunctionStepper* wf_stepper = 0;
   if ( wf_dyn == "TDEULER" )
@@ -943,7 +943,10 @@ void EhrenSampleStepper::step(int niter)
                << flush;
        }                  
     }
-
+    
+    if (s_.ctrl.iprint > 0 && iter%s_.ctrl.iprint == 0)
+       s_.wf.printocc(); 
+    
     // AS: for the correct output of the energy
     if ( s_.ctrl.non_selfc_energy && (wf_dyn!="SORKTD") && (wf_dyn!="FORKTD") )
     {

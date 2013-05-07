@@ -12,7 +12,8 @@
  OMPHACK = 1
 
  LIBHOME = $(HOME)/software
- BLASDIR=$(LIBHOME)/blas/blas-bgq-xlc
+ #BLASDIR=$(LIBHOME)/blas/blas-bgq-xlc
+ BLASDIR=/usr/local/tools/blas/lib
  LAPACKDIR=$(LIBHOME)/lapack/lapack-bgq-xlc
  SCALAPACK_DIR = $(LIBHOME)/scalapack-2.0/scalapack-bgq-xlc-jaggemm
  SCALAPACKLIB  = $(SCALAPACK_DIR)/libscalapack.a

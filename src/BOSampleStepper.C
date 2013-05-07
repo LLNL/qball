@@ -1157,10 +1157,20 @@ void BOSampleStepper::step(int niter)
           if (conv_scf.isConverged()) {
             if ( s_.ctxt_.oncoutpe() ) {
               cout.setf(ios::scientific,ios::floatfield);
-              cout << "  <!-- BOSampleStepper: scf convergence at itscf = " << itscf << ", Harris-Foulkes energy varied by less than " << setprecision(2) 
+              if (fractional_occ)
+              {
+                 cout << "  <!-- BOSampleStepper: scf convergence at itscf = " << itscf << ", Harris-Foulkes energy varied by less than " << setprecision(2) 
                    << conv_scf.threshold() << " a.u. over " << conv_scf.nsteps() 
                    << " scf steps. -->" << endl;
               cout.flush();
+              }
+              else
+              {
+                 cout << "  <!-- BOSampleStepper: scf convergence at itscf = " << itscf << ", scf energy varied by less than " << setprecision(2) 
+                   << conv_scf.threshold() << " a.u. over " << conv_scf.nsteps() 
+                   << " scf steps. -->" << endl;
+              cout.flush();
+              }
             }
             itscf = nitscf_;
             convflag = true;
@@ -1168,7 +1178,7 @@ void BOSampleStepper::step(int niter)
           // continue itscf loop
           else {
             if (itscf > 0) {
-               if (ultrasoft)
+               if (ultrasoft || !fractional_occ)
                   conv_scf.addValue(ef_.etotal()); // Harris-Foulkes estimate not implemented for ultrasoft yet (need enl_)
                else
                   conv_scf.addValue(etot_harris);
@@ -1189,7 +1199,8 @@ void BOSampleStepper::step(int niter)
                // QB_Pstop("charge");
             tmap["charge"].stop();
 
-            ef_.update_harris();
+            if (fractional_occ)
+               ef_.update_harris();
 
             if ( charge_mixing != "off" && nite_ > 0) {
               if ( itscf == 0) {
@@ -1332,9 +1343,12 @@ void BOSampleStepper::step(int niter)
                }
                if (ite == 0)
                {
-                  etot_harris = ef_.etotal_harris();
-                  if (onpe0)
-                     cout << "  <eharris> " << setw(15) << setprecision(8) << etot_harris << " </eharris>\n";
+                  if (fractional_occ)
+                  {
+                     etot_harris = ef_.etotal_harris();
+                     if (onpe0)
+                        cout << "  <eharris> " << setw(15) << setprecision(8) << etot_harris << " </eharris>\n";
+                  }
                }
             } // for ite
 

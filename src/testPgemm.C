@@ -119,11 +119,11 @@ int main(int argc, char **argv)
      if ( mype == 0 )
      {
         if (torusMult)
-           cout << "Wavefunction::set_nrowmax:  nrowmax = " << nprow << " is compatible with BG/Q torus " <<
+           cout << "nrowmax = " << nprow << ", ncol = " << ncol << " is compatible with BG/Q torus " <<
                torusdim[0] << " x " << torusdim[1] << " x " << torusdim[2] << " x " << torusdim[3] << " x " <<
                torusdim[4] << ", tasksPerNode = " << tasksPerNode << endl;
         else
-           cout << "<WARNING> Wavefunction::set_nrowmax:  nrowmax = " << nprow << " is NOT compatible with BG/Q torus! " <<
+           cout << "<WARNING> nrowmax = " << nprow << ", ncol = " << ncol << " is NOT compatible with BG/Q torus! " <<
                torusdim[0] << " x " << torusdim[1] << " x " << torusdim[2] << " x " << torusdim[3] << " x " <<
                torusdim[4] << ", tasksPerNode = " << tasksPerNode << " </WARNING> " << endl;
      }        
@@ -143,7 +143,29 @@ int main(int argc, char **argv)
     
      int mb = m/nprow + (m%nprow > 0 ? 1 : 0);
      int nb = n/npcol + (n%npcol > 0 ? 1 : 0);
-    
+
+#ifdef ALIGN32
+     //while (mb%4 != 0)
+     while (mb%8 != 0)
+        mb++;
+     while (nb%8 != 0)
+        nb++;
+    m = mb*ctxt.nprow();
+    n = nb*ctxt.npcol();
+#endif
+#ifdef ALIGN2
+     while (mb%4 != 0)
+        mb++;
+     while (nb%2 != 0)
+        nb++;
+    m = mb*ctxt.nprow();
+    n = nb*ctxt.npcol();
+#endif
+     if ( mype == 0 )
+        cout << " c dimensions " << ctxt.ictxt()
+             << ": " << m << " x " << n << " (" << mb << " x " << nb << ")" << endl;
+
+     
      ComplexMatrix c1(ctxt,m,n,mb,nb);
      ComplexMatrix c2(ctxt,m,n,mb,nb);
      ComplexMatrix s1(ctxt,n,n,nb,nb);
