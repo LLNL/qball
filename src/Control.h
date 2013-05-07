@@ -116,6 +116,9 @@ struct Control
   int extra_memory;  // guides use of extra memory to speed computation
 
   int mditer; // store global iteration count to help with checkpointing
+
+  int mbset;  // store user-defined local matrix data size
+  int nbset;
     
 };
 #endif

@@ -66,6 +66,8 @@ Wavefunction::Wavefunction(const Context& ctxt) : ctxt_(ctxt),nel_(0),nempty_(0)
   compute_nst();
   reshape_context_ = false;
   hasdata_ = false;
+  mbset_ = -1;
+  nbset_ = -1;
   //ewdallocate();
   ultrasoft_ = false;
   force_complex_wf_ = false;
@@ -81,7 +83,7 @@ nkptloc_(wf.nkptloc_), spinloc_(wf.spinloc_),
 cell_(wf.cell_), refcell_(wf.refcell_), 
 ecut_(wf.ecut_), weightsum_(wf.weightsum_), reshape_context_(wf.reshape_context_),
 ultrasoft_(wf.ultrasoft_), force_complex_wf_(wf.force_complex_wf_),
-wf_phase_real_(wf.wf_phase_real_)
+wf_phase_real_(wf.wf_phase_real_),mbset_(wf.mbset_),nbset_(wf.nbset_)
 {
   // Create a Wavefunction using the dimensions of the argument
   compute_nst();
@@ -182,6 +184,8 @@ wf_phase_real_(wf.wf_phase_real_)
   if (reshape_context_)
     set_reshape_context(reshape_context_);
 
+  set_local_block(mbset_,nbset_);
+  
   hasdata_ = true;   // wf has been allocated
 
 }
@@ -346,6 +350,7 @@ void Wavefunction::allocate(void) {
       }
     }
   }
+
   if (reshape_context_)
     set_reshape_context(reshape_context_);
 
@@ -479,6 +484,20 @@ void Wavefunction::set_reshape_context(bool reshape) {
 void Wavefunction::set_ultrasoft(bool us) {
   ultrasoft_ = us;
 }
+
+////////////////////////////////////////////////////////////////////////////////
+void Wavefunction::set_local_block(int mb, int nb) {
+   mbset_ = mb;
+   nbset_ = nb;
+   for ( int ispin = 0; ispin < nspin_; ispin++ ) {
+      for ( int ikp=0; ikp<nkp(); ikp++) {
+         if (kptactive(ikp)) {
+            assert(sd_[ispin][ikp] != 0);
+            sd_[ispin][ikp]->set_local_block(mbset_,nbset_);
+         }
+      }
+   }
+}
 ////////////////////////////////////////////////////////////////////////////////
 int Wavefunction::nkp(void) const { return kpoint_.size(); } 
 
@@ -549,7 +568,10 @@ double Wavefunction::entropy(void) const {
 ////////////////////////////////////////////////////////////////////////////////
 void Wavefunction::resize(const UnitCell& cell, const UnitCell& refcell, 
   double ecut) {
-  try {
+
+   set_local_block(mbset_,nbset_);
+   
+   try {
     // resize all SlaterDets using cell, refcell, ecut and nst_[ispin]
     for ( int ispin = 0; ispin < nspin_; ispin++ ) {
       if (spinactive(ispin)) {
@@ -2324,102 +2346,108 @@ void Wavefunction::write_states(string filebase, string format) {
                 const Basis& basis = sd_[ispin][kp]->basis();
                 FourierTransform ft(basis,basis.np(0),basis.np(1),basis.np(2));
 
-                for ( int n = 0; n < nstloc; n++ ) {
-                  // global n index
-                  const int nn = pcol*nb + n;
+                for ( int lj=0; lj < sd_[ispin][kp]->c().nblocks(); lj++ )
+                {
+                   for ( int jj=0; jj < sd_[ispin][kp]->c().nbs(lj); jj++ )
+                   {
+                      // global state index
+                      const int nglobal = sd_[ispin][kp]->c().j(lj,jj);
+                      const int norig = lj*sd_[ispin][kp]->c().nb()+jj;
 
-                  ofstream os;
-                  if (mype == writerTask) {
-                    // write out wavefunction for this state and k-point
-                    ostringstream oss1,oss2,oss3;
-                    oss1.width(5);  oss1.fill('0');  oss1 << nn;
-                    oss2.width(4);  oss2.fill('0');  oss2 << kp;
-                    oss3.width(1);  oss3.fill('0');  oss3 << ispin;
-                    string statefile;
-                    if (nspin_ == 1) 
-                      statefile = filebase + "k" + oss2.str() + "n" + oss1.str(); 
-                    else
-                      statefile = filebase + "s" + oss3.str() + "k" + oss2.str() + "n" + oss1.str(); 
-                    
-                    if (format == "molmol" || format == "text") 
-                      statefile = statefile + ".iso";
-                    else if (format == "gopenmol") 
-                      statefile = statefile + ".plt";
+                      ofstream os;
+                      if (mype == writerTask) {
+                         // write out wavefunction for this state and k-point
+                         ostringstream oss1,oss2,oss3;
+                         oss1.width(5);  oss1.fill('0');  oss1 << nglobal;
+                         oss2.width(4);  oss2.fill('0');  oss2 << kp;
+                         oss3.width(1);  oss3.fill('0');  oss3 << ispin;
+                         string statefile;
+                         if (nspin_ == 1) 
+                            statefile = filebase + "k" + oss2.str() + "n" + oss1.str(); 
+                         else
+                            statefile = filebase + "s" + oss3.str() + "k" + oss2.str() + "n" + oss1.str(); 
+                         
+                         if (format == "molmol" || format == "text") 
+                            statefile = statefile + ".iso";
+                         else if (format == "gopenmol") 
+                            statefile = statefile + ".plt";
+                         
+                         if (format == "binary") 
+                            os.open(statefile.c_str(),ofstream::binary);
+                         else {
+                            os.open(statefile.c_str(),ofstream::out);
+                            os.setf(ios::scientific,ios::floatfield);
+                            os << setprecision(8);
+                         }
 
-                    if (format == "binary") 
-                      os.open(statefile.c_str(),ofstream::binary);
-                    else {
-                      os.open(statefile.c_str(),ofstream::out);
-                      os.setf(ios::scientific,ios::floatfield);
-                      os << setprecision(8);
-                    }
-
-                    // headers for visualization formats
-                    if (format == "molmol" || format == "text") {
-                      D3vector a0 = cell_.a(0);
-                      D3vector a1 = cell_.a(1);
-                      D3vector a2 = cell_.a(2);
-                      if( a0.y != 0.0 || a0.z != 0.0 || a1.x != 0.0 || a1.z != 0.0 ||
-                          a2.x != 0.0 || a2.y != 0.0 )
-                        os << "Error writing header:  Molmol isosurface requires rectangular box!" << endl;
-                      double dx = a0.x/(double)ft.np0();
-                      double dy = a1.y/(double)ft.np1();
-                      double dz = a2.z/(double)ft.np2();
-                      //    origin    npoints       grid spacing
-                      os << "0.0 " << ft.np0() << " " << dx << endl;
-                      os << "0.0 " << ft.np1() << " " << dy << endl;
-                      os << "0.0 " << ft.np2() << " " << dz << endl;
-                    }
-                    else if (format == "gopenmol") {
-                      D3vector a0 = cell_.a(0);
-                      D3vector a1 = cell_.a(1);
-                      D3vector a2 = cell_.a(2);
-                      if( a0.y != 0.0 || a0.z != 0.0 || a1.x != 0.0 || a1.z != 0.0 ||
-                          a2.x != 0.0 || a2.y != 0.0 )
-                        os << "Error writing header:  gOpenMol isosurface requires rectangular box!" << endl;
-                      os << "3 200" << endl;  //ewd copying this from another utility, not sure what it means
-                      os << ft.np0() << " " << ft.np1() << " " << ft.np2() << endl;
-                      os << "0.0 " << a2.z << endl;
-                      os << "0.0 " << a1.y << endl;
-                      os << "0.0 " << a0.x << endl;
-                    }
-                  }     
-                  int mloc = sd_[ispin][kp]->c().mloc();
-                  vector<complex<double> > wftmp(ft.np012loc());
+                         // headers for visualization formats
+                         if (format == "molmol" || format == "text") {
+                            D3vector a0 = cell_.a(0);
+                            D3vector a1 = cell_.a(1);
+                            D3vector a2 = cell_.a(2);
+                            if( a0.y != 0.0 || a0.z != 0.0 || a1.x != 0.0 || a1.z != 0.0 ||
+                                a2.x != 0.0 || a2.y != 0.0 )
+                               os << "Error writing header:  Molmol isosurface requires rectangular box!" << endl;
+                            double dx = a0.x/(double)ft.np0();
+                            double dy = a1.y/(double)ft.np1();
+                            double dz = a2.z/(double)ft.np2();
+                            //    origin    npoints       grid spacing
+                            os << "0.0 " << ft.np0() << " " << dx << endl;
+                            os << "0.0 " << ft.np1() << " " << dy << endl;
+                            os << "0.0 " << ft.np2() << " " << dz << endl;
+                         }
+                         else if (format == "gopenmol") {
+                            D3vector a0 = cell_.a(0);
+                            D3vector a1 = cell_.a(1);
+                            D3vector a2 = cell_.a(2);
+                            if( a0.y != 0.0 || a0.z != 0.0 || a1.x != 0.0 || a1.z != 0.0 ||
+                                a2.x != 0.0 || a2.y != 0.0 )
+                               os << "Error writing header:  gOpenMol isosurface requires rectangular box!" << endl;
+                            os << "3 200" << endl;  //ewd copying this from another utility, not sure what it means
+                            os << ft.np0() << " " << ft.np1() << " " << ft.np2() << endl;
+                            os << "0.0 " << a2.z << endl;
+                            os << "0.0 " << a1.y << endl;
+                            os << "0.0 " << a0.x << endl;
+                         }
+                      }
+                   
+                      int mloc = sd_[ispin][kp]->c().mloc();
+                      vector<complex<double> > wftmp(ft.np012loc());
                   
-                  ComplexMatrix& c = sd_[ispin][kp]->c();
-                  ft.backward(c.cvalptr(mloc*n),&wftmp[0]);
+                      ComplexMatrix& c = sd_[ispin][kp]->c();
+                      ft.backward(c.cvalptr(mloc*norig),&wftmp[0]);
 
-                  // write out wave function
-                  if (mype == writerTask)  // write local data
-                  {
-                     int size = ft.np012loc();
-                     os.write((char*)&wftmp[0],sizeof(complex<double>)*size);
-                     os.flush();
-                  }
+                      // write out wave function
+                      if (mype == writerTask)  // write local data
+                      {
+                         int size = ft.np012loc();
+                         os.write((char*)&wftmp[0],sizeof(complex<double>)*size);
+                         os.flush();
+                      }
           
-                  for (int jj=1; jj<nprow; jj++)
-                  {
-                     int dataTask = jj + writerTask;
-                     if (mype == writerTask)
-                     {
-                        int nComplex;
-                        MPI_Recv(&nComplex,1,MPI_INT,dataTask,dataTask,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-                        vector<complex<double> > data;
-                        data.resize(nComplex);
-                        MPI_Recv(&data[0],nComplex,MPI_DOUBLE_COMPLEX,dataTask,dataTask,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-                        os.write((char*)&data[0],sizeof(complex<double>)*nComplex);
-                        os.flush();                
-                     }
-                     if (mype == dataTask)
-                     {
-                        int size = ft.np012loc();
-                        MPI_Send(&size,1,MPI_INT,writerTask,dataTask,MPI_COMM_WORLD);
-                        MPI_Send(&wftmp[0],size,MPI_DOUBLE_COMPLEX,writerTask,dataTask,MPI_COMM_WORLD);
-                     }
-                  }
-                  if (mype == writerTask)  // close file
-                     os.close();
+                      for (int jj=1; jj<nprow; jj++)
+                      {
+                         int dataTask = jj + writerTask;
+                         if (mype == writerTask)
+                         {
+                            int nComplex;
+                            MPI_Recv(&nComplex,1,MPI_INT,dataTask,dataTask,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+                            vector<complex<double> > data;
+                            data.resize(nComplex);
+                            MPI_Recv(&data[0],nComplex,MPI_DOUBLE_COMPLEX,dataTask,dataTask,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+                            os.write((char*)&data[0],sizeof(complex<double>)*nComplex);
+                            os.flush();                
+                         }
+                         if (mype == dataTask)
+                         {
+                            int size = ft.np012loc();
+                            MPI_Send(&size,1,MPI_INT,writerTask,dataTask,MPI_COMM_WORLD);
+                            MPI_Send(&wftmp[0],size,MPI_DOUBLE_COMPLEX,writerTask,dataTask,MPI_COMM_WORLD);
+                         }
+                      }
+                      if (mype == writerTask)  // close file
+                         os.close();
+                   }
                 }
 
                 // if there are empty states, save occupation and eigenvalues

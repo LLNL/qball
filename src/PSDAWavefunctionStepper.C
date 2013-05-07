@@ -132,25 +132,31 @@ void PSDAWavefunctionStepper::update(Wavefunction& dwf) {
               double a = 0.0, b = 0.0;
 
               //ewd OMP HERE?
-              for ( int n = 0; n < nloc; n++ ) {
-                const int nglobal = wf_.sd(ispin,ikp)->c().j(0,n);
-                const vector<double>& occ = wf_.sd(ispin,ikp)->occ();
-                const double occn = occ[nglobal];
+              for ( int lj=0; lj < wf_.sd(ispin,ikp)->c().nblocks(); lj++ )
+              {
+                 for ( int jj=0; jj < wf_.sd(ispin,ikp)->c().nbs(lj); jj++ )
+                 {
+                    // global state index
+                    const int nglobal = wf_.sd(ispin,ikp)->c().j(lj,jj);
+                    const int norig = lj*wf_.sd(ispin,ikp)->c().nb()+jj;
+                    const vector<double>& occ = wf_.sd(ispin,ikp)->occ();
+                    const double occn = occ[nglobal];
 
-                //ewd DEBUG
-                //const double occn = 1.0;
+                    //ewd DEBUG
+                    //const double occn = 1.0;
 
-                for ( int i = 0; i < 2*mloc; i++ ) {
-                  const double f = dc[i +2*mloc*n];
-                  const double delta_f = f - dc_last[i + 2*mloc*n];
+                    for ( int i = 0; i < 2*mloc; i++ ) {
+                       const double f = dc[i +2*mloc*norig];
+                       const double delta_f = f - dc_last[i + 2*mloc*norig];
  
-                  // accumulate partial sums of a and b
-                  // a = delta_F * F
+                       // accumulate partial sums of a and b
+                       // a = delta_F * F
                   
-                  //ewd:  weight sums by occupation to improve convergence in metallic systems
-                  a += occn * f * delta_f;
-                  b += occn * delta_f * delta_f;
-                }
+                       //ewd:  weight sums by occupation to improve convergence in metallic systems
+                       a += occn * f * delta_f;
+                       b += occn * delta_f * delta_f;
+                    }
+                 }
               }
               // correct for double counting of asum and bsum on first row
               // factor 2.0: G and -G
@@ -159,25 +165,29 @@ void PSDAWavefunctionStepper::update(Wavefunction& dwf) {
               int kpc = wf_.mysdctxt(ikp);
               assert(kpc >= 0);
               if ( wf_.sdcontext(ispin,kpc)->myrow() == 0 ) {
-              //ewd:  switching away from local kpoint loops
-              //ewdif ( wf_.sd(ispin,ikp)->context().myrow() == 0 ) {
-                for ( int n = 0; n < nloc; n++ ) {
-                  const int nglobal = wf_.sd(ispin,ikp)->c().j(0,n);
-                  const vector<double>& occ = wf_.sd(ispin,ikp)->occ();
-                  const double occn = occ[nglobal];
-                  //ewd DEBUG
-                  //const double occn = 1.0;
-                  
-                  const int i = 2*mloc*n;
-                  const double f0 = dc[i];
-                  const double f1 = dc[i+1];
-                  const double delta_f0 = f0 - dc_last[i];
-                  const double delta_f1 = f1 - dc_last[i+1];
-                  a -= occn * (f0 * delta_f0 + f1 * delta_f1);
-                  b -= occn * (delta_f0 * delta_f0 + delta_f1 * delta_f1);
-                }
+                 //ewd:  switching away from local kpoint loops
+                 //ewdif ( wf_.sd(ispin,ikp)->context().myrow() == 0 ) {
+                 for ( int lj=0; lj < wf_.sd(ispin,ikp)->c().nblocks(); lj++ )
+                 {
+                    for ( int jj=0; jj < wf_.sd(ispin,ikp)->c().nbs(lj); jj++ )
+                    {
+                       // global state index
+                       const int nglobal = wf_.sd(ispin,ikp)->c().j(lj,jj);
+                       const int norig = lj*wf_.sd(ispin,ikp)->c().nb()+jj;
+                       const vector<double>& occ = wf_.sd(ispin,ikp)->occ();
+                       const double occn = occ[nglobal];
+                       
+                       const int i = 2*mloc*norig;
+                       const double f0 = dc[i];
+                       const double f1 = dc[i+1];
+                       const double delta_f0 = f0 - dc_last[i];
+                       const double delta_f1 = f1 - dc_last[i+1];
+                       a -= occn * (f0 * delta_f0 + f1 * delta_f1);
+                       b -= occn * (delta_f0 * delta_f0 + delta_f1 * delta_f1);
+                    }
+                 }
               }
-                  
+              
               // a and b contain the partial sums of a and b
               double tmpvec[2] = { a, b };
               wf_.sdcontext(ispin,kpc)->dsum(2,1,&tmpvec[0],1);
@@ -329,21 +339,41 @@ void PSDAWavefunctionStepper::update(Wavefunction& dwf) {
             if ( extrapolate_[ispin][ikp] ) {
               double theta = 0.0;
               double a = 0.0, b = 0.0;
-              for ( int n = 0; n < nloc; n++ ) {
-                const int nglobal = wf_.sd(ispin,ikp)->c().j(0,n);
-                const vector<double>& occ = wf_.sd(ispin,ikp)->occ();
-                const double occn = occ[nglobal];
-                for ( int i = 0; i < 2*mloc; i++ ) {
-                  const double f = dc[i +2*mloc*n];
-                  const double delta_f = f - dc_last[i + 2*mloc*n];
- 
-                  // accumulate partial sums of a and b
-                  // a = delta_F * F
+
+              //ewd OMP HERE?
+              for ( int lj=0; lj < wf_.sd(ispin,ikp)->c().nblocks(); lj++ )
+              {
+                 for ( int jj=0; jj < wf_.sd(ispin,ikp)->c().nbs(lj); jj++ )
+                 {
+                    // global state index
+                    const int nglobal = wf_.sd(ispin,ikp)->c().j(lj,jj);
+                    const int norig = lj*wf_.sd(ispin,ikp)->c().nb()+jj;
+                    const vector<double>& occ = wf_.sd(ispin,ikp)->occ();
+                    const double occn = occ[nglobal];
+
+
+                    //ewd DEBUG
+                    //if (wf_.sd(ispin,ikp)->context().myrow() == 0 )
+                    //{
+                    //   int mype = wf_.sd(ispin,ikp)->context().mype();
+                    //   cout << "PSDA, mype = " << mype << ", lj = " << lj << ", jj = " << jj << ", nglobal = " << nglobal << ", occ = " << occ[nglobal] << endl;
+                    //}
+                    //ewd DEBUG
+
                     
-                  //ewd:  weight sums by occupation to improve convergence in metallic systems
-                  a += occn * f * delta_f;
-                  b += occn * delta_f * delta_f;
-                }
+
+                    //ewd DEBUG
+                    //const double occn = 1.0;
+
+                    for ( int i = 0; i < 2*mloc; i++ ) {
+                       const double f = dc[i +2*mloc*norig];
+                       const double delta_f = f - dc_last[i + 2*mloc*norig];
+
+                       //ewd:  weight sums by occupation to improve convergence in metallic systems
+                       a += occn * f * delta_f;
+                       b += occn * delta_f * delta_f;
+                    }
+                 }
               }
               // a and b contain the partial sums of a and b
               double tmpvec[2] = { a, b };

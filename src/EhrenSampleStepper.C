@@ -113,8 +113,11 @@ void EhrenSampleStepper::step(int niter)
   else if (oncoutpe)
        cout << "<!-- EhrenSampleStepper:  fractional occupation not detected. -->" << endl;
    
-    if (s_.ctrl.reshape_context)
-    s_.wf.set_reshape_context(s_.ctrl.reshape_context);
+  if (s_.ctrl.reshape_context)
+     s_.wf.set_reshape_context(s_.ctrl.reshape_context);
+
+  if (s_.ctrl.mbset > 0 && s_.ctrl.nbset > 0 )
+     s_.wf.set_local_block(s_.ctrl.mbset,s_.ctrl.nbset);
   
   AtomSet& atoms = s_.atoms;
   Wavefunction& wf = s_.wf;

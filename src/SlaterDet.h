@@ -74,6 +74,7 @@ class SlaterDet {
   bool ultrasoft_;
   bool force_complex_;
   bool highmem_;
+  int mbset_, nbset_;
   
   public:
   
@@ -118,6 +119,7 @@ class SlaterDet {
   void reset(void);
   void gram();
   void set_gram_reshape(bool reshape);
+  void set_local_block(int mb, int nb);
   void riccati(SlaterDet& sd);
   void lowdin();
   void align(const SlaterDet& sd);

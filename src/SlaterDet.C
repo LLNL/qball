@@ -200,58 +200,22 @@ void SlaterDet::resize(const UnitCell& cell, const UnitCell& refcell,
     int nb = nst/ctxt_.npcol() + (nst%ctxt_.npcol() > 0 ? 1 : 0);
     int m = ctxt_.nprow() * mb;
     int n = nst;
-    //ewd:  hacky, but works for now
-#ifdef ALIGN32
-    if (basis_->real())
-    {
-       while (mb%8 != 0)
-          mb++;
-       while (nb%8 != 0)
-          nb++;
-    }
-    else
-    {
-       //while (mb%4 != 0)
-       while (mb%8 != 0)
-          mb++;
-       while (nb%8 != 0)
-          nb++;
-    }
-    //ewd:  TODO:  if we resize m and n, we need to zero out the extra values
-    /*
-    m = mb*ctxt_.nprow();
-    n = nb*ctxt_.npcol();
-    occ_.resize(n);
-    eig_.resize(n);
-    */
-    if (ctxt_.oncoutpe())
-       cout << "SlaterDet.resize:  new c dimensions = " << m << "x" << n
-       << "   (" << mb << "x" << nb << " blocks)" << " -->" << endl;
-#endif
-#ifdef ALIGN2
-    if (basis_->real())
-    {
-       while (mb%8 != 0)
-          mb++;
-       while (nb%2 != 0)
-          nb++;
-    }
-    else
-    {
-       while (mb%4 != 0)
-          mb++;
-       while (nb%2 != 0)
-          nb++;
-    }
-    m = mb*ctxt_.nprow();
-    n = nb*ctxt_.npcol();
-    occ_.resize(n);
-    eig_.resize(n);
-    if (ctxt_.oncoutpe())
-       cout << "SlaterDet.resize:  new c dimensions = " << m << "x" << n
-       << "   (" << mb << "x" << nb << " blocks)" << " -->" << endl;
-#endif
 
+    if (mbset_ > 0 && nbset_ > 0)
+    {
+       mb = mbset_;
+       nb = nbset_;
+    }
+
+    //ewd DEBUG: if maxlocalsize is not a multiple of mb, increase to next highest multiple
+    int maxlocal = basis_->maxlocalsize();
+    if (maxlocal%mb != 0)
+    {
+       int mult = maxlocal/mb + 1;
+       int newmaxlocal = mult*mb;
+       m = newmaxlocal*ctxt_.nprow();
+    }
+    
     // Determine if plane wave coefficients must be reset after the resize
     // This is needed if the dimensions of the matrix c_ must be changed
     //const bool needs_reset =
@@ -261,6 +225,14 @@ void SlaterDet::resize(const UnitCell& cell, const UnitCell& refcell,
       m!=c_.m() || n!=c_.n() || mb!=c_.mb() || nb!=c_.nb();
     c_.resize(m,n,mb,nb);
 
+    if (needs_reset && ctxt_.oncoutpe())
+       cout << "SlaterDet.resize:  new c dimensions = " << m << "x" << n
+            << "   (" << mb << "x" << nb << " blocks, local data size on pe 0 = " << c_.mloc() << "x" << c_.nloc() << ")" << " -->" << endl;
+    if (needs_reset && ctxt_.mype() == 1023)
+       cout << "SlaterDet.resize:  new c dimensions = " << m << "x" << n
+            << "   (" << mb << "x" << nb << " blocks, local data size on pe 1023 = " << c_.mloc() << "x" << c_.nloc() << ")" << " -->" << endl;
+
+    
     if ( needs_reset )
       reset();
     
@@ -303,9 +275,14 @@ void SlaterDet::resize(const UnitCell& cell, const UnitCell& refcell,
         // allocate real-space grid
         valarray<complex<double> > tmpr(ft1.np012loc());
         // transform each state from old basis to grid to new basis
-        for ( int n = 0; n < nstloc(); n++ ) {
-          ft1.backward(ctmp.cvalptr(n*ctmp.mloc()),&tmpr[0]);
-          ft2.forward(&tmpr[0], c_.valptr(n*c_.mloc()));
+        for ( int lj=0; lj < c_.nblocks(); lj++ )
+        {
+           for ( int jj=0; jj < c_.nbs(lj); jj++ )
+           {
+              const int norig = lj*c_.nb()+jj;
+              ft1.backward(ctmp.cvalptr(norig*ctmp.mloc()),&tmpr[0]);
+              ft2.forward(&tmpr[0], c_.valptr(norig*c_.mloc()));
+           }
         }
       }
     }
@@ -772,65 +749,75 @@ void SlaterDet::compute_density(FourierTransform& ft,
   //ewd DEBUG:  transform one state at a time for both cases
   //if ( basis_->real() ) {
   if ( 1==0 && basis_->real() ) {
-    // transform two states at a time
-    for ( int n = 0; n < nstloc()-1; n++, n++ ) {
-      // global n index
-      const int nn = ctxt_.mycol() * c_.nb() + n;
-      const double fac1 = prefac * occ_[nn];
-      const double fac2 = prefac * occ_[nn+1];
+     // transform two states at a time
+     for ( int lj=0; lj < c_.nblocks(); lj++ )
+     {
+        for ( int jj=0; jj < c_.nbs(lj); jj+=2)
+        {
+           // global state index
+           const int nn = c_.j(lj,jj);
+           const int norig = lj*c_.nb()+jj;
+           const double fac1 = prefac * occ_[nn];
+           const double fac2 = prefac * occ_[nn+1];
       
-      if ( fac1 + fac2 > 0.0 ) {
-        //tm_ft.start();
-        ft.backward(c_.cvalptr(n*c_.mloc()),c_.cvalptr((n+1)*c_.mloc()),&tmp[0]);
-        //tm_ft.stop();
-        const double* psi = (double*) &tmp[0];
-        int ii = 0;
-        //tm_rhosum.start();
-        for ( int i = 0; i < np012loc; i++ ) {
-          const double psi1 = psi[ii];
-          const double psi2 = psi[ii+1];
-          rho[i] += fac1 * psi1 * psi1 + fac2 * psi2 * psi2;
-          ii++; ii++;
+           if ( fac1 + fac2 > 0.0 ) {
+              //tm_ft.start();
+              ft.backward(c_.cvalptr(norig*c_.mloc()),c_.cvalptr((norig+1)*c_.mloc()),&tmp[0]);
+              //tm_ft.stop();
+              const double* psi = (double*) &tmp[0];
+              int ii = 0;
+              //tm_rhosum.start();
+              for ( int i = 0; i < np012loc; i++ ) {
+                 const double psi1 = psi[ii];
+                 const double psi2 = psi[ii+1];
+                 rho[i] += fac1 * psi1 * psi1 + fac2 * psi2 * psi2;
+                 ii++; ii++;
+              }
+              //tm_rhosum.start();
+           }
         }
-        //tm_rhosum.start();
-      }
-    }
-    if ( nstloc() % 2 != 0 ) {
-      const int n = nstloc()-1;
-      // global n index
-      const int nn = ctxt_.mycol() * c_.nb() + n;
-      const double fac1 = prefac * occ_[nn];
-      
-      if ( fac1 > 0.0 ) {
-        ft.backward(c_.cvalptr(n*c_.mloc()),&tmp[0]);
-        const double* psi = (double*) &tmp[0];
-        int ii = 0;
-        for ( int i = 0; i < np012loc; i++ ) {
-          const double psi1 = psi[ii];
-          rho[i] += fac1 * psi1 * psi1;
-          ii++; ii++;
+     }
+     if ( nstloc() % 2 != 0 ) {
+        const int n = nstloc()-1;
+        // global n index
+        const int nn = ctxt_.mycol() * c_.nb() + n;
+        const double fac1 = prefac * occ_[nn];
+        
+        if ( fac1 > 0.0 ) {
+           ft.backward(c_.cvalptr(n*c_.mloc()),&tmp[0]);
+           const double* psi = (double*) &tmp[0];
+           int ii = 0;
+           for ( int i = 0; i < np012loc; i++ ) {
+              const double psi1 = psi[ii];
+              rho[i] += fac1 * psi1 * psi1;
+              ii++; ii++;
+           }
         }
-      }
-    }
+     }
   }
   else {
-    // only one transform at a time
-    for ( int n = 0; n < nstloc(); n++ ) {
-      // global n index
-      const int nn = ctxt_.mycol() * c_.nb() + n;
-      const double fac = prefac * occ_[nn];
-      if ( fac > 0.0 ) {
-        ft.backward(c_.cvalptr(n*c_.mloc()),&tmp[0]);
+     // only one transform at a time
+     for ( int lj=0; lj < c_.nblocks(); lj++ )
+     {
+        for ( int jj=0; jj < c_.nbs(lj); jj++ )
+        {
+           // global state index
+           const int nn = c_.j(lj,jj);
+           const double fac = prefac * occ_[nn];
+           const int norig = lj*c_.nb()+jj;
+           if ( fac > 0.0 ) {
+              ft.backward(c_.cvalptr(norig*c_.mloc()),&tmp[0]);
 
-        //ewd DEBUG:  try threading this loop:
-        #pragma omp parallel for
-        for ( int i = 0; i < np012loc; i++ )
-           rho[i] += fac * (real(tmp[i])*real(tmp[i]) + imag(tmp[i])*imag(tmp[i]));
-        //rho[i] += fac * norm(tmp[i]);
-      }
-    }
+              //ewd DEBUG:  try threading this loop:
+#pragma omp parallel for
+              for ( int i = 0; i < np012loc; i++ )
+                 rho[i] += fac * (real(tmp[i])*real(tmp[i]) + imag(tmp[i])*imag(tmp[i]));
+              //rho[i] += fac * norm(tmp[i]);
+           }
+        }
+     }
   }
-
+  
   // cout << "SlaterDet: compute_density: ft_bwd time: " 
   //      << tm_ft.real() << endl;
   // cout << "SlaterDet: compute_density: rhosum time: " 
@@ -1004,6 +991,11 @@ void SlaterDet::set_gram_reshape(bool reshape) {
     
     ctxtsq_ = Context(ctxt_,tmprow,tmpcol);
   }
+}
+////////////////////////////////////////////////////////////////////////////////
+void SlaterDet::set_local_block(int mb, int nb) {
+   mbset_ = mb;
+   nbset_ = nb;
 }
 ////////////////////////////////////////////////////////////////////////////////
 void SlaterDet::riccati(SlaterDet& sd) {
@@ -2427,6 +2419,7 @@ void SlaterDet::randomize(double amplitude) {
   // Note: randomization results depend on the process grid size and shape
 
   srand48(ctxt_.myproc());
+  const complex<double> zzero = complex<double>(0.0,0.0);
   for ( int n = 0; n < c_.nloc(); n++ ) {
     complex<double>* p = c_.valptr(c_.mloc()*n);
     for ( int i = 0; i < basis_->localsize(); i++ ) {
@@ -2435,6 +2428,9 @@ void SlaterDet::randomize(double amplitude) {
       p[i] += amplitude * complex<double>(re,im);
       //p[i] = amplitude * complex<double>(re,im);
     }
+    // ensure that extra padding is set to zero
+    for ( int i = basis_->localsize(); i<c_.mloc(); i++ )
+       p[i] = zzero;
   }
   cleanup();
   gram();
@@ -2543,6 +2539,9 @@ void SlaterDet::shift_wf(double shift_x,double shift_y,double shift_z,int n_stat
 
   // AS: final version: shifts only n_state, works as well
 
+
+  //ewd:  this needs to be fixed when BLOCK is defined
+  
   if ( ctxt_.mycol() != c_.pc(n_state-1) )
     return;
 

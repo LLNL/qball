@@ -82,6 +82,7 @@ class Wavefunction {
   vector<vector<SlaterDet*> > sd_;        // sd[ispin][ikp]
   vector<vector<Context*> > sdcontextsq_;   // sdcontextsq_[ispin][ikp]
   bool reshape_context_;
+  int mbset_, nbset_;    // user defined local data size
   
   bool hasdata_;   // wait to allocate until a load, randomize or run command
   void allocate(); // create contexts and allocate SlaterDet's 
@@ -154,6 +155,7 @@ class Wavefunction {
   void del_kpoint(D3vector kpoint);
   void set_reshape_context(bool reshape);
   void set_ultrasoft(bool us);
+  void set_local_block(int mb, int nb);
   bool ultrasoft(void) { return ultrasoft_; }
   void init_usfns(AtomSet* atoms);
   void update_usfns();

@@ -713,21 +713,26 @@ double EnergyFunctional::energy(bool compute_hpsi, Wavefunction& dwf,
           const complex<double>* p = c.cvalptr();
           const int mloc = c.mloc();
           const int nloc = c.nloc();
-          // nn = global n index
-          const int nnbase = sdctxt.mycol() * c.nb();
-          const double * const occ = sd.occ_ptr(nnbase);
+          const double * const occ = sd.occ_ptr();
           const double *const kpg2  = wfbasis.kpg2_ptr();
           const double *const kpg_x = wfbasis.kpgx_ptr(0);
           const double *const kpg_y = wfbasis.kpgx_ptr(1);
           const double *const kpg_z = wfbasis.kpgx_ptr(2);
           tsum = 0.0;
 
-#pragma omp parallel for
+          #pragma omp parallel for
           for ( int ig = 0; ig < ngwloc; ig++ ) {
             double tmpsum = 0.0;
-            for ( int n = 0; n < nloc; n++ ) {
-              const double psi2 = norm(p[ig+n*mloc]);
-              tmpsum += fac * occ[n] * psi2;
+            for ( int lj=0; lj < c.nblocks(); lj++ )
+            {
+               for ( int jj=0; jj < c.nbs(lj); jj++ )
+               {
+                  // global state index
+                  const int nglobal = c.j(lj,jj);
+                  const int norig = lj*c.nb()+jj;
+                  const double psi2 = norm(p[ig+norig*mloc]);
+                  tmpsum += fac * occ[nglobal] * psi2;
+               }
             }
             psi2sum[ig] = tmpsum;
         
