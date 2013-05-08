@@ -20,9 +20,9 @@
 // GNU General Public License for more details, in the file COPYING in the
 // root directory of this distribution or <http://www.gnu.org/licenses/>.
 //
-// timing for Gram-Schmidt orthogonalization
+// timing for eigensolve
 //
-// usage:  testGramBlock nprow npcol m n mb nb
+// usage:  testEigenBlock nprow npcol m n mb nb
 
 #include <cassert>
 #include <cstdlib>
@@ -86,7 +86,7 @@ int main(int argc, char **argv)
          nb = atoi(argv[6]);
       }
       else {
-         cerr << "Usage:  testGramBlock nprow npcol m n mb nb" << endl;
+         cerr << "Usage:  testEigenBlock nprow npcol m n mb nb" << endl;
 #if USE_MPI
          MPI_Abort(MPI_COMM_WORLD,2);
 #else
@@ -119,54 +119,29 @@ int main(int argc, char **argv)
       ComplexMatrix s(ctxt,c_.n(),c_.n(),c_.nb(),c_.nb());
 
 #ifdef HPM  
-        HPM_Start("gram");
+      HPM_Start("eigen");
 #endif
-      
-      tmap["herk"].start();
-      s.herk('l','c',1.0,c_,0.0);
-      tmap["herk"].stop();
-
-      tmap["potrf"].start();
-      s.potrf('l'); // Cholesky decomposition: S = L * L^T
-      tmap["potrf"].stop();
-
-      // solve triangular system X * L^T = C
-      tmap["trsm"].start();
-      c_.trsm('r','l','c','n',1.0,s);
-      tmap["trsm"].stop();
+      valarray<double> w(s.m());
+      tmap["heevd"].start();
+      c_.heevd('l',w,s);
+      tmap["heevd"].stop();
       
 #ifdef HPM  
-      HPM_Stop("gram");
+      HPM_Stop("eigen");
 #endif
 
       tmap["total"].stop();
 
-      //ewd DEBUG:  check that orthogonalization was successful
-      if (false)
+      //ewd DEBUG:  print eigenvalues
+      if (true)
       {
-         if (mype == 0) 
-            cout << "Checking orthogonality by computing overlap matrix:  s = " << n << " x " << n << ", nb = " << nb << endl;
-         s.gemm('c','n',1.0,c_,c_,0.0);
-         
-         //cout << "OVERLAP, mype = " << mype << ", localsize = " << s.localsize() << endl;
-         
-         if (s.localsize() > 0)
-         {
-            for ( int in = 0; in < nb; in++ ) {
-               complex<double>* sp = s.valptr(nb*in);
-               for ( int im = 0; im < nb; im++ ) {
-                  if (im == in)
-                  {
-                     if (abs(real(sp[im])-1.0) > 1.E-6)
-                        cout << "ORTHOG ERROR, mype = " << mype << ", im = " << im << ", in = " << in << ", s val = " << real(sp[im]) << "  " << imag(sp[im]) << endl;
-                  }
-                  else
-                  {
-                     if (abs(real(sp[im])) > 1.E-6 || abs(imag(sp[im]) > 1.E-6))
-                        cout << "ORTHOG ERROR, mype = " << mype << ", im = " << im << ", in = " << in << ", s val = " << real(sp[im]) << "  " << imag(sp[im]) << endl;
-                  }
-               }
+         if (mype == 0) {
+            cout << "Eigenvalues:  " << endl;
+            for (int i=0; i<s.m(); i++) {
+               cout << "  " << w[i];
+               if (i%8 == 0) cout << endl;
             }
+            cout << endl;
          }
       }
    

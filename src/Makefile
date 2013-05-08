@@ -130,14 +130,18 @@ testBlas: $(OBJDIR)/testBlas.o
 	$(LD) $(DFLAGS) -o $@ $^ $(LDFLAGS)
 testGram: $(OBJDIR)/testGram.o $(OBJDIR)/Matrix.o $(OBJDIR)/Context.o
 	$(LD) $(DFLAGS) -o $@-$(ARCH) $^ $(LDFLAGS)
+testGramBlock: $(OBJDIR)/testGramBlock.o $(OBJDIR)/Matrix.o $(OBJDIR)/Context.o
+	$(LD) $(DFLAGS) -o $@-$(ARCH) $^ $(LDFLAGS)
 testPgemm: $(OBJDIR)/testPgemm.o $(OBJDIR)/Matrix.o $(OBJDIR)/Context.o
+	$(LD) $(DFLAGS) -o $@-$(ARCH) $^ $(LDFLAGS)
+testPgemmBlock: $(OBJDIR)/testPgemmBlock.o $(OBJDIR)/Matrix.o $(OBJDIR)/Context.o
 	$(LD) $(DFLAGS) -o $@-$(ARCH) $^ $(LDFLAGS)
 testPzheev: $(OBJDIR)/testPzheev.o $(OBJDIR)/Matrix.o $(OBJDIR)/Context.o
 	$(LD) $(DFLAGS) -o $@-$(ARCH) $^ $(LDFLAGS)
 testEigenSolvers: $(OBJDIR)/testEigenSolvers.o $(OBJDIR)/Matrix.o $(OBJDIR)/Context.o $(OBJDIR)/jacobi.o
 	$(LD) $(DFLAGS) -o $@-$(ARCH) $^ $(LDFLAGS)
-testGramBlock: $(OBJDIR)/testGramBlock.o $(OBJDIR)/Matrix.o $(OBJDIR)/Context.o
-	$(LD) $(DFLAGS) -o $@ $^ $(LDFLAGS)
+testEigenBlock: $(OBJDIR)/testEigenBlock.o $(OBJDIR)/Matrix.o $(OBJDIR)/Context.o $(OBJDIR)/jacobi.o
+	$(LD) $(DFLAGS) -o $@-$(ARCH) $^ $(LDFLAGS)
 xmlSpecies: xmlSpecies.o qbox_xmlns.o
 	$(LD) $(DFLAGS) -o $@ $^ $(LDFLAGS)
 xmlget: xmlget.o
