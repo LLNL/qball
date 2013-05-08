@@ -215,6 +215,17 @@ void SlaterDet::resize(const UnitCell& cell, const UnitCell& refcell,
        int newmaxlocal = mult*mb;
        m = newmaxlocal*ctxt_.nprow();
     }
+
+    //ewd DEBUG: don't allow values of nb which leave one or more process columns empty (causes
+    //           hangs when printing timing)
+    int nbtest = n/nb;
+    if (nbtest <= (ctxt_.npcol()-1))
+    {
+       int tmpnb = nst/ctxt_.npcol() + (nst%ctxt_.npcol() > 0 ? 1 : 0);       
+       if (ctxt_.oncoutpe())
+          cout << "<WARNING> Block size nb = " << nb << " leaves process columns without data.  Increasing to " << tmpnb << ". </WARNING>" << endl;
+       nb = tmpnb;
+    }
     
     // Determine if plane wave coefficients must be reset after the resize
     // This is needed if the dimensions of the matrix c_ must be changed
