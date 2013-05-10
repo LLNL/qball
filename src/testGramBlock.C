@@ -122,6 +122,8 @@ int main(int argc, char **argv)
         HPM_Start("gram");
 #endif
       
+      tmap["gram"].start();
+      
       tmap["herk"].start();
       s.herk('l','c',1.0,c_,0.0);
       tmap["herk"].stop();
@@ -134,6 +136,8 @@ int main(int argc, char **argv)
       tmap["trsm"].start();
       c_.trsm('r','l','c','n',1.0,s);
       tmap["trsm"].stop();
+
+      tmap["gram"].stop();
       
 #ifdef HPM  
       HPM_Stop("gram");

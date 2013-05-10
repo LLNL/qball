@@ -16,7 +16,7 @@
  SCALAPACK_DIR = $(LIBHOME)/scalapack-2.0/scalapack-bgq-xlc
  SCALAPACKLIB  = $(SCALAPACK_DIR)/libscalapack.a
  ESSLDIR = /usr/local/tools/essl/5.1
- HPMLIBS = -L/usr/local/tools/mpitrace/lib -lmpihpm_smp -L/bgsys/drivers/ppcfloor/bgpm/lib -lbgpm
+# HPMLIBS = -L/usr/local/tools/mpitrace/lib -lmpihpm_smp -L/bgsys/drivers/ppcfloor/bgpm/lib -lbgpm
 
  BGQ_SDK_PATH = /bgsys/drivers/ppcfloor
  CXX=$(BGQ_SDK_PATH)/comm/xl/bin/mpixlcxx_r
@@ -24,7 +24,7 @@
 
  LD=$(CXX)
 
- DFLAGS += -DPRINTALL -DUSE_ESSL -DUSE_CSTDIO_LFS -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DHPM
+ DFLAGS += -DUSE_ESSL -DUSE_CSTDIO_LFS -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64
  
  INCLUDE = -I$(ESSLDIR)/include
  
@@ -32,7 +32,7 @@
  CFLAGS= -qhot=novector -qsimd=auto -g -O3 -DUSE_MPI -DSCALAPACK -D$(PLT) $(INCLUDE) $(DFLAGS)
 
  LIBPATH = -L$(LAPACKDIR) -L$(BLASDIR) -L$(ESSLDIR)/lib -L/opt/ibmcmp/xlsmp/bg/3.1/bglib64 -L/opt/ibmcmp/xlf/bg/14.1/bglib64
- LIBS =  $(SCALAPACKLIB) -lesslsmpbg -lblas -llapack -lxlf90_r -lxlsmp -lxlfmath $(HPMLIBS)
+ LIBS =  $(SCALAPACKLIB) -lesslsmpbg -lblas -llapack -lxlf90_r -lxlsmp -lxlfmath
  LDFLAGS = $(LIBPATH) $(LIBS) -qarch=qp -lc -lnss_files -lnss_dns -lresolv
 
 #TAUROOTDIR = $(LIBHOME)/tau/tau-2.21.2

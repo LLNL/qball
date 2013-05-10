@@ -450,7 +450,8 @@ void DoubleMatrix::init_size(int m, int n, int mb, int nb)
   active_ = myrow_ >= 0;
 
   //ewd:  force local data sizes to be 32-byte aligned
-#ifdef ALIGN32
+#if 0
+  //#ifdef ALIGN32
   if (m > 0 && n > 0)
   {
      while (mb_%8 != 0)
@@ -534,7 +535,8 @@ void ComplexMatrix::init_size(int m, int n, int mb, int nb)
   active_ = myrow_ >= 0;
 
   // force local data sizes to be 32-byte aligned
-#ifdef ALIGN32
+#if 0
+  //#ifdef ALIGN32
   if (m > 0 && n > 0)
   {
      //while (mb_%4 != 0)

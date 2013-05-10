@@ -100,30 +100,30 @@ int main(int argc, char **argv)
       if ( mype == 0 ) {
          cout << " Context " << ctxt.ictxt()
               << ": " << ctxt.nprow() << "x" << ctxt.npcol() << endl;
-         cout << " c dimensions " << ctxt.ictxt()
-              << ": " << m << " x " << n << " (" << mb << " x " << nb << ")" << endl;
+         cout << " h dimensions " << ctxt.ictxt()
+              << ": " << n << " x " << n << " (" << nb << " x " << nb << ")" << endl;
       }
     
-      ComplexMatrix c_(ctxt,m,n,mb,nb);
+      ComplexMatrix h(ctxt,n,n,nb,nb);
 
       srand48(ctxt.myproc());
-      for ( int n = 0; n < c_.nloc(); n++ ) {
-         complex<double>* p = c_.valptr(c_.mloc()*n);
-         for ( int i = 0; i < c_.mloc(); i++ ) {
+      for ( int n = 0; n < h.nloc(); n++ ) {
+         complex<double>* p = h.valptr(h.mloc()*n);
+         for ( int i = 0; i < h.mloc(); i++ ) {
             double re = drand48();
             double im = drand48();
             p[i] = 0.02 * complex<double>(re,im);
          }
       }
       
-      ComplexMatrix s(ctxt,c_.n(),c_.n(),c_.nb(),c_.nb());
+      ComplexMatrix s(ctxt,h.n(),h.n(),h.nb(),h.nb());
 
 #ifdef HPM  
       HPM_Start("eigen");
 #endif
       valarray<double> w(s.m());
       tmap["heevd"].start();
-      c_.heevd('l',w,s);
+      h.heevd('l',w,s);
       tmap["heevd"].stop();
       
 #ifdef HPM  
