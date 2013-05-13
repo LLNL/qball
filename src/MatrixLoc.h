@@ -57,6 +57,7 @@ class MatrixLoc : public Var
     int nb = atoi(argv[2]);
     s->ctrl.mbset = mb;
     s->ctrl.nbset = nb;
+    s->wf.set_local_block(mb,nb);
     return 0;
   }
 

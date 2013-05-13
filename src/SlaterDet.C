@@ -58,11 +58,14 @@ SlaterDet::SlaterDet(Context& ctxt, const Context& my_col_ctxt, D3vector kpoint,
   highmem_ = false;
   // set seed for randomization
   srand48(ctxt_.myproc());
+  mbset_ = -1;
+  nbset_ = -1;
 }
 ////////////////////////////////////////////////////////////////////////////////
 SlaterDet::SlaterDet(const SlaterDet& rhs) : ctxt_(rhs.context()),
   basis_(new Basis(*(rhs.basis_))), c_(rhs.c_), gram_reshape_(rhs.gram_reshape_),
-  spsi_(rhs.spsi_), highmem_(rhs.highmem_), ultrasoft_(rhs.ultrasoft_) {}
+  spsi_(rhs.spsi_), highmem_(rhs.highmem_), ultrasoft_(rhs.ultrasoft_),
+  mbset_(rhs.mbset_),nbset_(rhs.nbset_) {}
 ////////////////////////////////////////////////////////////////////////////////
 SlaterDet::~SlaterDet()  {
   delete basis_;
@@ -201,8 +204,16 @@ void SlaterDet::resize(const UnitCell& cell, const UnitCell& refcell,
     int m = ctxt_.nprow() * mb;
     int n = nst;
 
+    //ewd DEBUG
+    //if (ctxt_.mype() == 1)
+    //   cout << "SD.MBSET, mype = " << ctxt_.mype() << ", mbset_ = " << mbset_ << ", nbset_ = " << nbset_ << endl;
+
     if (mbset_ > 0 && nbset_ > 0)
     {
+
+       //ewd DEBUG
+       //cout << "SD.MBSET, mype = " << ctxt_.mype() << ", mbset_ = " << mbset_ << ", nbset_ = " << nbset_ << endl;
+
        mb = mbset_;
        nb = nbset_;
     }
@@ -219,7 +230,7 @@ void SlaterDet::resize(const UnitCell& cell, const UnitCell& refcell,
     //ewd DEBUG: don't allow values of nb which leave one or more process columns empty (causes
     //           hangs when printing timing)
     int nbtest = n/nb;
-    if (nbtest <= (ctxt_.npcol()-1))
+    if (nbtest < (ctxt_.npcol()-1))
     {
        int tmpnb = nst/ctxt_.npcol() + (nst%ctxt_.npcol() > 0 ? 1 : 0);       
        if (ctxt_.oncoutpe())
@@ -324,26 +335,35 @@ void SlaterDet::reshape(const Context& newctxt, const Context& new_col_ctxt, boo
       basis_->resize(tmpcell,tmprefcell,tmpecut);
     }
     int mb = basis_->maxlocalsize();
-    const int m = newctxt.nprow() * mb;
+    int m = newctxt.nprow() * mb;
     int nb = ctmp.n()/newctxt.npcol() + (ctmp.n()%newctxt.npcol() > 0 ? 1 : 0);
 
-    //ewd:  hacky, but works for now
-#ifdef BGQTMP 
-    if (basis_->real())
+    if (mbset_ > 0 && nbset_ > 0)
     {
-       while (mb%8 != 0)
-          mb++;
-       while (nb%8 != 0)
-          nb++;
+       mb = mbset_;
+       nb = nbset_;
     }
-    else
+
+    //ewd DEBUG: if maxlocalsize is not a multiple of mb, increase to next highest multiple
+    int maxlocal = basis_->maxlocalsize();
+    if (maxlocal%mb != 0)
     {
-       while (mb%4 != 0)
-          mb++;
-       while (nb%8 != 0)
-          nb++;
+       int mult = maxlocal/mb + 1;
+       int newmaxlocal = mult*mb;
+       m = newmaxlocal*ctxt_.nprow();
     }
-#endif
+
+    //ewd DEBUG: don't allow values of nb which leave one or more process columns empty (causes
+    //           hangs when printing timing)
+    int tmpnst = ctmp.n();
+    int nbtest = tmpnst/nb;
+    if (nbtest < (ctxt_.npcol()-1))
+    {
+       int tmpnb = tmpnst/ctxt_.npcol() + (tmpnst%ctxt_.npcol() > 0 ? 1 : 0);       
+       if (ctxt_.oncoutpe())
+          cout << "<WARNING> Block size nb = " << nb << " leaves process columns without data.  Increasing to " << tmpnb << ". </WARNING>" << endl;
+       nb = tmpnb;
+    }
 
     if (setnewctxt)
       ctxt_ = newctxt;

@@ -178,14 +178,14 @@ wf_phase_real_(wf.wf_phase_real_),mbset_(wf.mbset_),nbset_(wf.nbset_)
       nkplocproc0_[ispin][kloc] = wf.nkplocproc0(ispin,kloc);
     }
   }
+
+  //set_local_block(mbset_,nbset_);
   
   resize(cell_,refcell_,ecut_);
   reset();
   if (reshape_context_)
     set_reshape_context(reshape_context_);
 
-  set_local_block(mbset_,nbset_);
-  
   hasdata_ = true;   // wf has been allocated
 
 }
@@ -385,6 +385,8 @@ void Wavefunction::allocate(void) {
   if (!hasdata_)
     hasdata_ = true;
 
+  //set_local_block(mbset_,nbset_);
+
   resize(cell_,refcell_,ecut_);
   reset();
 
@@ -489,6 +491,8 @@ void Wavefunction::set_ultrasoft(bool us) {
 void Wavefunction::set_local_block(int mb, int nb) {
    mbset_ = mb;
    nbset_ = nb;
+
+   /*
    for ( int ispin = 0; ispin < nspin_; ispin++ ) {
       for ( int ikp=0; ikp<nkp(); ikp++) {
          if (kptactive(ikp)) {
@@ -497,6 +501,7 @@ void Wavefunction::set_local_block(int mb, int nb) {
          }
       }
    }
+   */
 }
 ////////////////////////////////////////////////////////////////////////////////
 int Wavefunction::nkp(void) const { return kpoint_.size(); } 
@@ -569,7 +574,7 @@ double Wavefunction::entropy(void) const {
 void Wavefunction::resize(const UnitCell& cell, const UnitCell& refcell, 
   double ecut) {
 
-   set_local_block(mbset_,nbset_);
+   //set_local_block(mbset_,nbset_);
    
    try {
     // resize all SlaterDets using cell, refcell, ecut and nst_[ispin]
@@ -578,6 +583,7 @@ void Wavefunction::resize(const UnitCell& cell, const UnitCell& refcell,
         for ( int ikp=0; ikp<nkp(); ikp++) {
           if (kptactive(ikp)) {
             assert(sd_[ispin][ikp] != 0);
+            sd_[ispin][ikp]->set_local_block(mbset_,nbset_);
             sd_[ispin][ikp]->resize(cell,refcell,ecut,nst_[ispin]);
           }
         }
