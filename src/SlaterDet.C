@@ -65,7 +65,7 @@ SlaterDet::SlaterDet(Context& ctxt, const Context& my_col_ctxt, D3vector kpoint,
 SlaterDet::SlaterDet(const SlaterDet& rhs) : ctxt_(rhs.context()),
   basis_(new Basis(*(rhs.basis_))), c_(rhs.c_), gram_reshape_(rhs.gram_reshape_),
   spsi_(rhs.spsi_), highmem_(rhs.highmem_), ultrasoft_(rhs.ultrasoft_),
-  mbset_(rhs.mbset_),nbset_(rhs.nbset_) {}
+  mbset_(rhs.mbset_),nbset_(rhs.nbset_),mblks_(rhs.mblks_),nblks_(rhs.nblks_) {}
 ////////////////////////////////////////////////////////////////////////////////
 SlaterDet::~SlaterDet()  {
   delete basis_;
@@ -204,21 +204,24 @@ void SlaterDet::resize(const UnitCell& cell, const UnitCell& refcell,
     int m = ctxt_.nprow() * mb;
     int n = nst;
 
-    //ewd DEBUG
-    //if (ctxt_.mype() == 1)
-    //   cout << "SD.MBSET, mype = " << ctxt_.mype() << ", mbset_ = " << mbset_ << ", nbset_ = " << nbset_ << endl;
-
     if (mbset_ > 0 && nbset_ > 0)
     {
-
-       //ewd DEBUG
-       //cout << "SD.MBSET, mype = " << ctxt_.mype() << ", mbset_ = " << mbset_ << ", nbset_ = " << nbset_ << endl;
-
        mb = mbset_;
        nb = nbset_;
     }
-
-    //ewd DEBUG: if maxlocalsize is not a multiple of mb, increase to next highest multiple
+    else if (mblks_ > 1 || nblks_ > 1)
+    {
+       int tmb = mb/mblks_ + (mb%mblks_ > 0 ? 1 : 0);
+       int tnb = nb/nblks_ + (nb%nblks_ > 0 ? 1 : 0);
+#ifdef USE_JAGGEMM
+       while (tmb%16 != 0) tmb++;
+       while (tnb%16 != 0) tnb++;
+#endif
+       mb = tmb;
+       nb = tnb;
+    }
+    
+    //ewd: if maxlocalsize is not a multiple of mb, increase to next highest multiple
     int maxlocal = basis_->maxlocalsize();
     if (maxlocal%mb != 0)
     {
@@ -227,8 +230,8 @@ void SlaterDet::resize(const UnitCell& cell, const UnitCell& refcell,
        m = newmaxlocal*ctxt_.nprow();
     }
 
-    //ewd DEBUG: don't allow values of nb which leave one or more process columns empty (causes
-    //           hangs when printing timing)
+    //ewd: don't allow values of nb which leave one or more process columns empty (causes
+    //     hangs when printing timing)
     int nbtest = n/nb;
     if (nbtest < (ctxt_.npcol()-1))
     {
@@ -250,10 +253,6 @@ void SlaterDet::resize(const UnitCell& cell, const UnitCell& refcell,
     if (needs_reset && ctxt_.oncoutpe())
        cout << "SlaterDet.resize:  new c dimensions = " << m << "x" << n
             << "   (" << mb << "x" << nb << " blocks, local data size on pe 0 = " << c_.mloc() << "x" << c_.nloc() << ")" << " -->" << endl;
-    if (needs_reset && ctxt_.mype() == 1023)
-       cout << "SlaterDet.resize:  new c dimensions = " << m << "x" << n
-            << "   (" << mb << "x" << nb << " blocks, local data size on pe 1023 = " << c_.mloc() << "x" << c_.nloc() << ")" << " -->" << endl;
-
     
     if ( needs_reset )
       reset();
@@ -343,8 +342,19 @@ void SlaterDet::reshape(const Context& newctxt, const Context& new_col_ctxt, boo
        mb = mbset_;
        nb = nbset_;
     }
+    else if (mblks_ > 1 || nblks_ > 1)
+    {
+       int tmb = mb/mblks_ + (mb%mblks_ > 0 ? 1 : 0);
+       int tnb = nb/nblks_ + (nb%nblks_ > 0 ? 1 : 0);
+#ifdef USE_JAGGEMM
+       while (tmb%16 != 0) tmb++;
+       while (tnb%16 != 0) tnb++;
+#endif
+       mb = tmb;
+       nb = tnb;
+    }
 
-    //ewd DEBUG: if maxlocalsize is not a multiple of mb, increase to next highest multiple
+    //ewd: if maxlocalsize is not a multiple of mb, increase to next highest multiple
     int maxlocal = basis_->maxlocalsize();
     if (maxlocal%mb != 0)
     {
@@ -353,8 +363,8 @@ void SlaterDet::reshape(const Context& newctxt, const Context& new_col_ctxt, boo
        m = newmaxlocal*ctxt_.nprow();
     }
 
-    //ewd DEBUG: don't allow values of nb which leave one or more process columns empty (causes
-    //           hangs when printing timing)
+    //ewd: don't allow values of nb which leave one or more process columns empty (causes
+    //     hangs when printing timing)
     int tmpnst = ctmp.n();
     int nbtest = tmpnst/nb;
     if (nbtest < (ctxt_.npcol()-1))
@@ -1027,6 +1037,11 @@ void SlaterDet::set_gram_reshape(bool reshape) {
 void SlaterDet::set_local_block(int mb, int nb) {
    mbset_ = mb;
    nbset_ = nb;
+}
+////////////////////////////////////////////////////////////////////////////////
+void SlaterDet::set_nblocks(int mblks, int nblks) {
+   mblks_ = mblks;
+   nblks_ = nblks;
 }
 ////////////////////////////////////////////////////////////////////////////////
 void SlaterDet::riccati(SlaterDet& sd) {

@@ -83,6 +83,7 @@ class Wavefunction {
   vector<vector<Context*> > sdcontextsq_;   // sdcontextsq_[ispin][ikp]
   bool reshape_context_;
   int mbset_, nbset_;    // user defined local data size
+  int mblks_, nblks_;    // user defined number of blocks in block-cycle distribution
   
   bool hasdata_;   // wait to allocate until a load, randomize or run command
   void allocate(); // create contexts and allocate SlaterDet's 
@@ -156,6 +157,7 @@ class Wavefunction {
   void set_reshape_context(bool reshape);
   void set_ultrasoft(bool us);
   void set_local_block(int mb, int nb);
+  void set_nblocks(int mblks, int nblks);
   bool ultrasoft(void) { return ultrasoft_; }
   void init_usfns(AtomSet* atoms);
   void update_usfns();

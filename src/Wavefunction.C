@@ -68,6 +68,8 @@ Wavefunction::Wavefunction(const Context& ctxt) : ctxt_(ctxt),nel_(0),nempty_(0)
   hasdata_ = false;
   mbset_ = -1;
   nbset_ = -1;
+  mblks_ = 1;
+  nblks_ = 1;
   //ewdallocate();
   ultrasoft_ = false;
   force_complex_wf_ = false;
@@ -83,7 +85,8 @@ nkptloc_(wf.nkptloc_), spinloc_(wf.spinloc_),
 cell_(wf.cell_), refcell_(wf.refcell_), 
 ecut_(wf.ecut_), weightsum_(wf.weightsum_), reshape_context_(wf.reshape_context_),
 ultrasoft_(wf.ultrasoft_), force_complex_wf_(wf.force_complex_wf_),
-wf_phase_real_(wf.wf_phase_real_),mbset_(wf.mbset_),nbset_(wf.nbset_)
+wf_phase_real_(wf.wf_phase_real_),mbset_(wf.mbset_),nbset_(wf.nbset_),
+mblks_(wf.mblks_),nblks_(wf.nblks_)
 {
   // Create a Wavefunction using the dimensions of the argument
   compute_nst();
@@ -178,9 +181,6 @@ wf_phase_real_(wf.wf_phase_real_),mbset_(wf.mbset_),nbset_(wf.nbset_)
       nkplocproc0_[ispin][kloc] = wf.nkplocproc0(ispin,kloc);
     }
   }
-
-  //set_local_block(mbset_,nbset_);
-  
   resize(cell_,refcell_,ecut_);
   reset();
   if (reshape_context_)
@@ -385,8 +385,6 @@ void Wavefunction::allocate(void) {
   if (!hasdata_)
     hasdata_ = true;
 
-  //set_local_block(mbset_,nbset_);
-
   resize(cell_,refcell_,ecut_);
   reset();
 
@@ -491,17 +489,11 @@ void Wavefunction::set_ultrasoft(bool us) {
 void Wavefunction::set_local_block(int mb, int nb) {
    mbset_ = mb;
    nbset_ = nb;
-
-   /*
-   for ( int ispin = 0; ispin < nspin_; ispin++ ) {
-      for ( int ikp=0; ikp<nkp(); ikp++) {
-         if (kptactive(ikp)) {
-            assert(sd_[ispin][ikp] != 0);
-            sd_[ispin][ikp]->set_local_block(mbset_,nbset_);
-         }
-      }
-   }
-   */
+}
+////////////////////////////////////////////////////////////////////////////////
+void Wavefunction::set_nblocks(int mblks, int nblks) {
+   mblks_ = mblks;
+   nblks_ = nblks;
 }
 ////////////////////////////////////////////////////////////////////////////////
 int Wavefunction::nkp(void) const { return kpoint_.size(); } 
@@ -574,8 +566,6 @@ double Wavefunction::entropy(void) const {
 void Wavefunction::resize(const UnitCell& cell, const UnitCell& refcell, 
   double ecut) {
 
-   //set_local_block(mbset_,nbset_);
-   
    try {
     // resize all SlaterDets using cell, refcell, ecut and nst_[ispin]
     for ( int ispin = 0; ispin < nspin_; ispin++ ) {
@@ -584,6 +574,7 @@ void Wavefunction::resize(const UnitCell& cell, const UnitCell& refcell,
           if (kptactive(ikp)) {
             assert(sd_[ispin][ikp] != 0);
             sd_[ispin][ikp]->set_local_block(mbset_,nbset_);
+            sd_[ispin][ikp]->set_nblocks(mblks_,nblks_);
             sd_[ispin][ikp]->resize(cell,refcell,ecut,nst_[ispin]);
           }
         }

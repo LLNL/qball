@@ -22,12 +22,12 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 //
-// MatrixLoc.h
+// Pblock.h
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef MATRIXLOC_H
-#define MATRIXLOC_H
+#ifndef PBLOCK_H
+#define PBLOCK_H
 
 #include<iostream>
 #include<iomanip>
@@ -36,26 +36,26 @@
 
 #include "Sample.h"
 
-class MatrixLoc : public Var
+class Pblock : public Var
 {
   Sample *s;
 
   public:
 
-  char *name ( void ) const { return "matrix_loc"; };
+  char *name ( void ) const { return "pblock"; };
 
   int set ( int argc, char **argv )
   {
     if ( argc != 3 )
     {
       if ( ui->oncoutpe() )
-      cout << " <ERROR> matrix_loc must have two arguments! </ERROR>" << endl;
+      cout << " <ERROR> pblock must have two arguments! </ERROR>" << endl;
       return 1;
     }
     
-    int mb = atoi(argv[1]);
-    int nb = atoi(argv[2]);
-    s->wf.set_local_block(mb,nb);
+    int mblks = atoi(argv[1]);
+    int nblks = atoi(argv[2]);
+    s->wf.set_nblocks(mblks,nblks);
     return 0;
   }
 
@@ -69,6 +69,6 @@ class MatrixLoc : public Var
      return st.str();
   }
 
-  MatrixLoc(Sample *sample) : s(sample) {}
+  Pblock(Sample *sample) : s(sample) {}
 };
 #endif

@@ -117,8 +117,5 @@ struct Control
 
   int mditer; // store global iteration count to help with checkpointing
 
-  int mbset;  // store user-defined local matrix data size
-  int nbset;
-    
 };
 #endif

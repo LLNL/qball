@@ -149,6 +149,7 @@ using namespace std;
 #include "MDIter.h"
 #include "profile.h"
 #include "MatrixLoc.h"
+#include "Pblock.h"
 
 #ifdef USE_CTF
 #include "cyclopstf.h"
@@ -403,6 +404,7 @@ int main(int argc, char **argv, char **envp)
   ui->addVar(new HubbardU(s));
   ui->addVar(new Memory(s));
   ui->addVar(new MatrixLoc(s));
+  ui->addVar(new Pblock(s));
   ui->addVar(new MDIter(s));
   ui->addVar(new Force_Complex_WF(s));
   ui->addVar(new Non_Selfconsistent_Energy_Output(s));
