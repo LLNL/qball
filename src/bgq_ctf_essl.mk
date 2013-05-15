@@ -27,10 +27,11 @@
  BGQ_SDK_PATH = /bgsys/drivers/ppcfloor
  CXX=$(BGQ_SDK_PATH)/comm/xl/bin/mpixlcxx_r
  CC=$(BGQ_SDK_PATH)/comm/xl/bin/mpixlc_r
-
  LD=$(CXX)
+ AR=$(BGQ_SDK_PATH)/gnu-linux/powerpc64-bgq-linux/bin/ar
+ RANLIB=$(BGQ_SDK_PATH)/gnu-linux/powerpc64-bgq-linux/bin/ranlib
 
- DFLAGS += -DPRINTALL -DUSE_CTF -DUSE_JAGGEMM -DUSE_ESSL -DALIGN32 -DUSE_CSTDIO_LFS -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DHPM
+ DFLAGS += -DPRINTALL -DUSE_CTF -DUSE_JAGGEMM -DUSE_ESSL -DUSE_CSTDIO_LFS -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DHPM
  
  INCLUDE = -I$(ESSLDIR)/include -I$(CTFDIR)/include
  

@@ -92,22 +92,14 @@ else
 endif
 
 link: $(OBJDIR)/qbLink.o $(QBOBJS)
-ifeq ($(ARCH),ibm_bgl_xlc)
-	mkdir $(OBJDIR)/qblink.tmp.$$$$ && cd $(OBJDIR)/qblink.tmp.$$$$ && ar -x $(SCALAPACKLIB) && ar -x $(FFTWLIB) && cd ../.. && ar -cr $(OBJDIR)/libqblink-$(ARCH).a $(OBJDIR)/qblink.tmp.$$$$/*.o $^ && rm -rf $(OBJDIR)/qblink.tmp.$$$$
+ifdef XERCESCDIR
+	mkdir $(OBJDIR)/qblink.tmp.$$$$ && cd $(OBJDIR)/qblink.tmp.$$$$ && $(AR) x $(SCALAPACKLIB) && $(AR) x $(FFTWLIB) && $(AR) x $(XERCESLIB) && cd ../.. && $(AR) cr $(OBJDIR)/libqblink-$(ARCH).a $(OBJDIR)/qblink.tmp.$$$$/*.o $^ && rm -rf $(OBJDIR)/qblink.tmp.$$$$
 else
-ifeq ($(ARCH),ibm_bgp_xlc)
-	mkdir $(OBJDIR)/qblink.tmp.$$$$ && cd $(OBJDIR)/qblink.tmp.$$$$ && ar -x $(SCALAPACKLIB) && cd ../.. && ar -cr $(OBJDIR)/libqblink-$(ARCH).a $(OBJDIR)/qblink.tmp.$$$$/*.o $^ && rm -rf $(OBJDIR)/qblink.tmp.$$$$
-else
-ifeq ($(ARCH),ibm_sp5_xlc)
-	mkdir $(OBJDIR)/qblink.tmp.$$$$ && cd $(OBJDIR)/qblink.tmp.$$$$ && ar -x $(SCALAPACKLIB) && cd ../.. && ar -cr $(OBJDIR)/libqblink-$(ARCH).a $(OBJDIR)/qblink.tmp.$$$$/*.o $^ && rm -rf $(OBJDIR)/qblink.tmp.$$$$
-else
-	mkdir $(OBJDIR)/qblink.tmp.$$$$ && cd $(OBJDIR)/qblink.tmp.$$$$ && ar x $(SCALAPACKLIB) && ar x $(FFTWLIB) && ar x $(XERCESLIB) && cd ../.. && ar cr $(OBJDIR)/libqblink-$(ARCH).a $(OBJDIR)/qblink.tmp.$$$$/*.o $^ && rm -rf $(OBJDIR)/qblink.tmp.$$$$
-endif
-endif
+	mkdir $(OBJDIR)/qblink.tmp.$$$$ && cd $(OBJDIR)/qblink.tmp.$$$$ && $(AR) -x $(SCALAPACKLIB) && cd ../.. && $(AR) -cr $(OBJDIR)/libqblink-$(ARCH).a $(OBJDIR)/qblink.tmp.$$$$/*.o $^ && rm -rf $(OBJDIR)/qblink.tmp.$$$$
 endif
 
 lib:   $(OBJDIR)/qb.o $(QBOBJS)
-	ar cr $(OBJDIR)/libqb.a $^
+	$(AR) cr $(OBJDIR)/libqb.a $^
 
 qb-nruns: makedirs $(OBJDIR)/qb-nruns.o link
 	$(LD) -o qb-nruns-$(ARCH) $(OBJDIR)/qb-nruns.o $(OBJDIR)/libqblink-$(ARCH).a $(LDFLAGS)

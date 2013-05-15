@@ -221,7 +221,7 @@ void ChargeDensity::print_timing()
 
    //ewd DEBUG
    // print FourierTransform timers
-   if ( ctxt_.mype()==0 )
+   if ( ctxt_.mype()==0 && false)
    {
       cout << " bwd: tm_b_fft:    " << ft_[0][0]->tm_b_fft.real() << endl;
       cout << " bwd: tm_b_mpi:    " << ft_[0][0]->tm_b_mpi.real() << endl;
