@@ -204,10 +204,16 @@ void SlaterDet::resize(const UnitCell& cell, const UnitCell& refcell,
     int m = ctxt_.nprow() * mb;
     int n = nst;
 
-    if (mbset_ > 0 && nbset_ > 0)
+#ifdef ALIGN4
+    while (mb%4 != 0) mb++;
+#endif    
+    
+    if (mbset_ >= 0 && nbset_ >= 0)  // if set to zero, leave at default value
     {
-       mb = mbset_;
-       nb = nbset_;
+       if (mbset_ > 0)
+          mb = mbset_;
+       if (nbset_ > 0)
+          nb = nbset_;
     }
     else if (mblks_ > 1 || nblks_ > 1)
     {
@@ -337,10 +343,12 @@ void SlaterDet::reshape(const Context& newctxt, const Context& new_col_ctxt, boo
     int m = newctxt.nprow() * mb;
     int nb = ctmp.n()/newctxt.npcol() + (ctmp.n()%newctxt.npcol() > 0 ? 1 : 0);
 
-    if (mbset_ > 0 && nbset_ > 0)
+    if (mbset_ >= 0 && nbset_ >= 0)  // if set to zero, leave at default value
     {
-       mb = mbset_;
-       nb = nbset_;
+       if (mbset_ > 0)
+          mb = mbset_;
+       if (nbset_ > 0)
+          nb = nbset_;
     }
     else if (mblks_ > 1 || nblks_ > 1)
     {

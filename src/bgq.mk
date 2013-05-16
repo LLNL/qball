@@ -1,8 +1,9 @@
 #-------------------------------------------------------------------------------
 #
-#  BlueGene/Q
+#  BlueGene/Q (IBM Q32)
 #
 #-------------------------------------------------------------------------------
+# $Id: linux_x86_64_intel.mk,v 1.1 2010/01/22 00:35:01 draeger1 Exp $
 #
  PLT=BGQ
 #-------------------------------------------------------------------------------
@@ -11,20 +12,26 @@
  OMPHACK = 1
 
  LIBHOME = $(HOME)/software
- BLASDIR=$(LIBHOME)/blas/blas-bgq-xlc
+ #BLASDIR=$(LIBHOME)/blas/blas-bgq-xlc
+ BLASDIR=/usr/local/tools/blas/lib
  LAPACKDIR=$(LIBHOME)/lapack/lapack-bgq-xlc
- SCALAPACK_DIR = $(LIBHOME)/scalapack-2.0/scalapack-bgq-xlc
+ SCALAPACK_DIR = $(LIBHOME)/scalapack-2.0/scalapack-bgq-xlc-jaggemm
  SCALAPACKLIB  = $(SCALAPACK_DIR)/libscalapack.a
  ESSLDIR = /usr/local/tools/essl/5.1
-# HPMLIBS = -L/usr/local/tools/mpitrace/lib -lmpihpm_smp -L/bgsys/drivers/ppcfloor/bgpm/lib -lbgpm
+ #HPMLIBS = -L/usr/local/tools/mpitrace/lib -lmpihpm_smp -L/bgsys/drivers/ppcfloor/bgpm/lib -lbgpm
+ JAGGEMMLIB = $(LIBHOME)/jaggemm_opt/libjaggemm.a
+ #CTFDIR = $(LIBHOME)/ctf-latest/cyclopstf
+ #CTFLIB = -L$(LIBHOME)/lib -lcyclopstf.jag
+
 
  BGQ_SDK_PATH = /bgsys/drivers/ppcfloor
  CXX=$(BGQ_SDK_PATH)/comm/xl/bin/mpixlcxx_r
  CC=$(BGQ_SDK_PATH)/comm/xl/bin/mpixlc_r
-
  LD=$(CXX)
+ AR=$(BGQ_SDK_PATH)/gnu-linux/powerpc64-bgq-linux/bin/ar
+ RANLIB=$(BGQ_SDK_PATH)/gnu-linux/powerpc64-bgq-linux/bin/ranlib
 
- DFLAGS += -DUSE_ESSL -DUSE_CSTDIO_LFS -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64
+ DFLAGS += -DPRINTALL -DALIGN4 -DUSE_JAGGEMM -DUSE_ESSL -DUSE_CSTDIO_LFS -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64
  
  INCLUDE = -I$(ESSLDIR)/include
  
@@ -32,7 +39,9 @@
  CFLAGS= -qhot=novector -qsimd=auto -g -O3 -DUSE_MPI -DSCALAPACK -D$(PLT) $(INCLUDE) $(DFLAGS)
 
  LIBPATH = -L$(LAPACKDIR) -L$(BLASDIR) -L$(ESSLDIR)/lib -L/opt/ibmcmp/xlsmp/bg/3.1/bglib64 -L/opt/ibmcmp/xlf/bg/14.1/bglib64
- LIBS =  $(SCALAPACKLIB) -lesslsmpbg -lblas -llapack -lxlf90_r -lxlsmp -lxlfmath
+ LIBS =  $(SCALAPACKLIB) $(JAGGEMMLIB) -lesslsmpbg -lblas -llapack -lxlf90_r -lxlsmp -lxlfmath 
+# LIBPATH = -L$(BLASDIR) -L$(ESSLDIR)/lib -L/opt/ibmcmp/xlsmp/bg/3.1/bglib64 -L/opt/ibmcmp/xlf/bg/14.1/bglib64
+# LIBS =  $(SCALAPACKLIB) $(JAGGEMMLIB) -lesslsmpbg -lblas /opt/ibmcmp/xlmass/bg/7.3/bglib64/libmass.a -lxlf90_r -lxlsmp -lxlfmath $(HPMLIBS)
  LDFLAGS = $(LIBPATH) $(LIBS) -qarch=qp -lc -lnss_files -lnss_dns -lresolv
 
 #TAUROOTDIR = $(LIBHOME)/tau/tau-2.21.2
