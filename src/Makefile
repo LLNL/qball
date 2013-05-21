@@ -79,14 +79,18 @@ install: $(EXENAME) qb-nruns
 ifdef VERSION
 	cp $(EXENAME) $(INSTALLDIR)/$(EXEINSTALL)
 	chmod a+rx $(INSTALLDIR)/$(EXEINSTALL)
+	ln -sf $(INSTALLDIR)/$(EXEINSTALL) $(INSTALLDIR)/qb@ll
 	cp qb-nruns-$(ARCH) $(INSTALLDIR)/$(NRUNSINSTALL)
 	chmod a+rx $(INSTALLDIR)/$(NRUNSINSTALL)
+	ln -sf $(INSTALLDIR)/$(NRUNSINSTALL) $(INSTALLDIR)/qb@ll-nruns
 	cp ChangeLog $(INSTALLDIR)
 	chmod a+r $(INSTALLDIR)/ChangeLog
 	cp qbLink.h $(INSTALLDIR)/qblink/qbLink-$(VERSION).h
 	chmod a+r $(INSTALLDIR)/qblink/qbLink-$(VERSION).h
+	ln -sf $(INSTALLDIR)/qblink/qbLink-$(VERSION).h $(INSTALLDIR)/qblink/qbLink.h
 	cp $(OBJDIR)/libqblink-$(ARCH).a $(INSTALLDIR)/qblink/libqblink-$(VERSION).a
 	chmod a+r $(INSTALLDIR)/qblink/libqblink-$(VERSION).a
+	ln -sf $(INSTALLDIR)/qblink/libqblink-$(VERSION).a $(INSTALLDIR)/qblink/libqblink.a 
 else
 	@echo "Need to define VERSION variable to make install, e.g. VERSION=1.59.2-zeus"
 endif
