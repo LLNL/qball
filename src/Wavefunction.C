@@ -3397,69 +3397,69 @@ void Wavefunction::print_casino(ostream& os) const {
         }
       }
 
-      if ( wfcontext_->oncoutpe() ) {
-        for ( int ispin = 0; ispin < nspin_; ispin++ ) {
-          if (spinactive(ispin)) {
-            //for ( int ikp=0; ikp<nkp(); ikp++) {
-            if (nn == 0) {
-              os << "k-point # ; # of bands (up spin/down spin) ; k-point coords (au)" << endl;
-              os << " " << kk+1 << " " << nst_[0] << " 0 " << kpoint_[kk] << endl;
-            }
-            bool kk_real = ( kpoint_[kk] == D3vector(0.0,0.0,0.0) );
-            //for (int n=0; n < nst_[0]; n++) {
-            // what context column is this state on?
-            const int npcol = sdcontext_[ispin][0]->npcol();
-            const int nb = nst_[0]/npcol + (nst_[0]%npcol > 0 ? 1 : 0);
-            int nkppar = nparallelkpts_;
-            if (nparallelkpts_ == 0 || nkppar > nkp()) nkppar = nkp(); 
-            while (spincontext_[ispin]->npcol()%nkppar != 0) nkppar--;
-            assert(nkppar > 0 && nkppar <= nkp());
-            // need to know number of k-points in each local sdcontext, i.e. nkp/nkppar
-            int nkploc = nkp()/nkppar;
-            int npck = spincontext_[ispin]->npcol()/nkppar;
-            const int col_recv = nn/nb + (kk/nkploc)*npck;
-            double eig_recv;
-            spincontext_[ispin]->drecv(1,1,&eig_recv,1,0,col_recv);
-            os << "Band, spin, eigenvalue (au)" << endl;
-            os << "   " << nn+1 << "   1   " << eig_recv << endl;
-            os << "Eigenvector coefficients" << endl;
-            
-            for ( int i = 0; i < spincontext_[ispin]->nprow(); i++ ) {
-              int size = 0;
-              spincontext_[ispin]->irecv(1,1,&size,1,i,col_recv);
-              int size_recv = 2*size;
-              vector<double> readtmp(size_recv);
-              spincontext_[ispin]->drecv(size_recv,1,&readtmp[0],1,i,col_recv);
+      for ( int ispin = 0; ispin < nspin_; ispin++ ) {
+         if (spinactive(ispin)) {
+            if ( wfcontext_->oncoutpe() ) {
+               //for ( int ikp=0; ikp<nkp(); ikp++) {
+               if (nn == 0) {
+                  os << "k-point # ; # of bands (up spin/down spin) ; k-point coords (au)" << endl;
+                  os << " " << kk+1 << " " << nst_[0] << " 0 " << kpoint_[kk] << endl;
+               }
+               bool kk_real = ( kpoint_[kk] == D3vector(0.0,0.0,0.0) );
+               //for (int n=0; n < nst_[0]; n++) {
+               // what context column is this state on?
+               const int npcol = sdcontext_[ispin][0]->npcol();
+               const int nb = nst_[0]/npcol + (nst_[0]%npcol > 0 ? 1 : 0);
+               int nkppar = nparallelkpts_;
+               if (nparallelkpts_ == 0 || nkppar > nkp()) nkppar = nkp(); 
+               while (spincontext_[ispin]->npcol()%nkppar != 0) nkppar--;
+               assert(nkppar > 0 && nkppar <= nkp());
+               // need to know number of k-points in each local sdcontext, i.e. nkp/nkppar
+               int nkploc = nkp()/nkppar;
+               int npck = spincontext_[ispin]->npcol()/nkppar;
+               const int col_recv = nn/nb + (kk/nkploc)*npck;
+               double eig_recv;
+               spincontext_[ispin]->drecv(1,1,&eig_recv,1,0,col_recv);
+               os << "Band, spin, eigenvalue (au)" << endl;
+               os << "   " << nn+1 << "   1   " << eig_recv << endl;
+               os << "Eigenvector coefficients" << endl;
+               
+               for ( int i = 0; i < spincontext_[ispin]->nprow(); i++ ) {
+                  int size = 0;
+                  spincontext_[ispin]->irecv(1,1,&size,1,i,col_recv);
+                  int size_recv = 2*size;
+                  vector<double> readtmp(size_recv);
+                  spincontext_[ispin]->drecv(size_recv,1,&readtmp[0],1,i,col_recv);
 
-              int ngwread = size;
-              vector<complex<double> > ctmp(ngwread);
-              for (int j=0; j<ngwread; j++) 
-                ctmp[j] = complex<double>(readtmp[2*j],readtmp[2*j+1]);
-              if (kk_real) {
-                // print out G-vectors for full complex basis
-                if (i == 0) {
-                  os << ctmp[0] << endl;
-                  for (int j=1; j<ngwread; j++) {
-                    os << ctmp[j] << endl;
-                    os << conj(ctmp[j]) << endl;
+                  int ngwread = size;
+                  vector<complex<double> > ctmp(ngwread);
+                  for (int j=0; j<ngwread; j++) 
+                     ctmp[j] = complex<double>(readtmp[2*j],readtmp[2*j+1]);
+                  if (kk_real) {
+                     // print out G-vectors for full complex basis
+                     if (i == 0) {
+                        os << ctmp[0] << endl;
+                        for (int j=1; j<ngwread; j++) {
+                           os << ctmp[j] << endl;
+                           os << conj(ctmp[j]) << endl;
+                        }
+                     }
+                     else {
+                        for (int j=0; j<ngwread; j++) {
+                           os << ctmp[j] << endl;
+                           os << conj(ctmp[j]) << endl;
+                        }
+                     }
                   }
-                }
-                else {
-                  for (int j=0; j<ngwread; j++) {
-                    os << ctmp[j] << endl;
-                    os << conj(ctmp[j]) << endl;
+                  else {
+                     for (int j=0; j<ngwread; j++) {
+                        os << ctmp[j] << endl;
+                     }
                   }
-                }
-              }
-              else {
-                for (int j=0; j<ngwread; j++) {
-                  os << ctmp[j] << endl;
-                }
-              }
+               }
             }
-          }
-          spincontext_[ispin]->barrier();
-        }
+            spincontext_[ispin]->barrier();
+         }
       }
     }
   }
