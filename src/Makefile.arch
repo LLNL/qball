@@ -7,13 +7,13 @@ ifeq ($(HOSTNAME),bgqfen)
 endif
 ifeq ($(HOSTNAME),seqlac)  
 #  ARCHGUESS = bgq
-  ARCHGUESS = bgq_ctf_essl
+  ARCHGUESS = bgq_noctf_essl
 endif
 ifeq ($(HOSTNAME),vulcanlac)  
-  ARCHGUESS = bgq_ctf_essl
+  ARCHGUESS = bgq_noctf_essl
 endif
 ifeq ($(HOSTNAME),rzuseqlac)  
-  ARCHGUESS = bgq_ctf_essl
+  ARCHGUESS = bgq_noctf_essl
 endif
 ifeq ($(HOSTNAME),dawn)  
   ARCHGUESS = ibm_bgp_xlc

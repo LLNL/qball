@@ -47,7 +47,10 @@
 #include "SimpleConvergenceDetector.h"
 #include "Hugoniostat.h"
 #include "PrintMem.h"
+#include "FourierTransform.h"
 #include "profile.h"
+#include <fstream>
+#include <sys/stat.h>
 #ifdef USE_APC
 #include "apc.h"
 #endif
@@ -1559,8 +1562,199 @@ void BOSampleStepper::step(int niter)
              << endl;
         cout << "</iteration>" << endl;
       }
+
+      // if savedenfreq variable set, save density in VMD Cube format
+      if (s_.ctrl.savedenfreq > 0)
+      {
+         if (s_.ctrl.savedenfreq == 1 || (iter > 0 && iter%s_.ctrl.savedenfreq == 0) )
+         {
+            string filebase = "density.";
+            ostringstream oss;
+            oss.width(7);  oss.fill('0');  oss << s_.ctrl.mditer;
+            string denfilename = filebase + oss.str() + ".cube";
+            string format = "binary";
+
+            const Context* wfctxt = s_.wf.spincontext(0);
+            FourierTransform* ft_ = cd_.vft();
+            if (wfctxt->mycol() == 0) {
+               vector<double> rhortmp(ft_->np012loc());
+               for (int j = 0; j < ft_->np012loc(); j++)
+                  rhortmp[j] = cd_.rhor[0][j];
+    
+               for ( int i = 0; i < wfctxt->nprow(); i++ ) {
+                  if ( i == wfctxt->myrow() ) {
+                     int size = ft_->np012loc();
+                     wfctxt->isend(1,1,&size,1,0,0);
+                     wfctxt->dsend(size,1,&rhortmp[0],1,0,0);
+                  }
+               }
+               if ( wfctxt->oncoutpe() ) {
+                  ofstream os;
+                  os.open(denfilename.c_str(),ofstream::out);    // text output
+                  os.setf(ios::fixed,ios::floatfield);
+                  os << setprecision(8);
+                  vector<double> tmprecv(ft_->np012());
+                  int recvoffset = 0;
+
+                  D3vector a0 = s_.wf.cell().a(0);
+                  D3vector a1 = s_.wf.cell().a(1);
+                  D3vector a2 = s_.wf.cell().a(2);
+                  const int np0 = ft_->np0();
+                  const int np1 = ft_->np1();
+                  const int np2 = ft_->np2();
+                  D3vector dft0 = a0/(double)np0;
+                  D3vector dft1 = a1/(double)np1;
+                  D3vector dft2 = a2/(double)np2;
+                  
+                  for ( int i = 0; i < wfctxt->nprow(); i++ ) {
+                     int size = 0;
+                     wfctxt->irecv(1,1,&size,1,i,0);
+                     wfctxt->drecv(size,1,&tmprecv[recvoffset],1,i,0);
+                     recvoffset += size;
+
+                     if (i==0) {
+                        // write out VMD CUBE format header
+                        os << "Qbox wavefunction in VMD CUBE format" << endl;
+                        os << "  electron density" << endl;
+
+                        // get atom positions
+                        AtomSet& as = s_.atoms;
+                        vector<vector<double> > rion;
+                        rion.resize(as.nsp());
+                        int natoms_total = 0;
+                        for ( int is = 0; is < as.nsp(); is++ ) {
+                           rion[is].resize(3*as.na(is));
+                           natoms_total += as.na(is);
+                        }
+                        as.get_positions(rion,true);
+                        D3vector origin(0.0,0.0,0.0);
+                        os << natoms_total << " " << origin << endl;
+
+                        // print FFT grid info
+                        os << np0 << " " << dft0 << endl;
+                        os << np1 << " " << dft1 << endl;
+                        os << np2 << " " << dft2 << endl;
+
+                        // print atom coordinates
+                        for ( int is = 0; is < as.nsp(); is++ ) {
+                           const int atnum = as.atomic_number(is);
+                           double atnumd = (double)atnum;
+                           for ( int ia = 0; ia < as.na(is); ia++ ) 
+                              os << atnum << " " << atnumd << " " << rion[is][3*ia] << " " << rion[is][3*ia+1] << " " << rion[is][3*ia+2] << endl;
+                        }
+                     }
+                  }
+
+                  // write density data to file
+                  int cnt = 0;
+                  for (int ii = 0; ii < np0; ii++) {
+                     ostringstream oss;
+                     oss.setf(ios::scientific,ios::floatfield);
+                     oss << setprecision(5);
+                     for (int jj = 0; jj < np1; jj++) {
+                        for (int kk = 0; kk < np2; kk++) {
+                           int index = ii + jj*np0 + kk*np0*np1;
+                           oss << tmprecv[index] << " ";
+                           cnt++;
+                           if (cnt >= 6) {
+                              cnt = 0;
+                              oss << endl;
+                           }
+                        }
+                     }
+                     string tos = oss.str();
+                     os.write(tos.c_str(),tos.length());
+                  }
+                  os.close();
+               }
+            }
+         }
+      }
+
+      // if savefreq variable set, checkpoint
+      if (s_.ctrl.savefreq > 0)
+      {
+         if (s_.ctrl.savefreq == 1 || (s_.ctrl.mditer > 0 && s_.ctrl.mditer%s_.ctrl.savefreq == 0) )
+         {
+            // create output directory if it doesn't exist
+            string dirbase = "md.";
+            string filebase = "mdchk";
+            ostringstream oss;
+            oss.width(7);  oss.fill('0');  oss << s_.ctrl.mditer;
+            string dirstr = dirbase + oss.str();
+            string format = "binary";
+            if ( onpe0 )
+            {
+               int mode = 0775;
+               struct stat statbuf;
+               int rc = stat(dirstr.c_str(), &statbuf);
+               if (rc == -1)
+               {
+                  cout << "Creating directory: " << dirstr << endl;
+                  rc = mkdir(dirstr.c_str(), mode);
+                  rc = stat(dirstr.c_str(), &statbuf);
+               }
+               if (rc != 0 || !(statbuf.st_mode))
+               {
+                  cout << "<ERROR> Can't stat directory " << dirstr << " </ERROR> " << endl;
+                  MPI_Abort(MPI_COMM_WORLD,2);
+               }
+            }
+            string filestr = dirstr + "/" + filebase;
+            s_.wf.write_states(filestr,format);
+            s_.wf.write_mditer(filestr,s_.ctrl.mditer);
+
+            // write .sys file
+            if ( onpe0 )
+            {
+               string sysfilename = dirstr + "/" + "mdsave.sys";
+               ofstream os;
+               os.open(sysfilename.c_str(),ofstream::out);
+
+               // cell info
+               string cmd("set cell ");
+               s_.wf.cell().printsys(os,cmd);
+               
+               // ref cell info, if necessary
+               if ( s_.wf.refcell().volume() != 0.0 ) {
+                  string refcmd("set ref_cell ");
+                  s_.wf.refcell().printsys(os,refcmd);
+               }
+
+               // species info
+               const int nspqm_ = s_.atoms.nsp();
+               for (int i=0; i<nspqm_; i++)
+                  s_.atoms.species_list[i]->printsys(os);
+               
+               const int nspmm_ = s_.atoms.nsp_mm();
+               for (int i=0; i<nspmm_; i++)
+                  s_.atoms.mmspecies_list[i]->printsys(os);
+               
+               // atom coordinates and info
+               s_.atoms.printsys(os);
+               os.close();
+            }
+            
+            
+            //ewd DEBUG:  remove this after copied to EhrenStepper
+            if (s_.ctrl.tddft_involved)
+            {
+               // write s_.hamil_wf
+               string hamwffile = filestr + "hamwf";
+               if ( onpe0 )
+                  cout << "<!-- MDSaveCmd:  wf write finished, writing hamil_wf to " << hamwffile << "... -->" << endl;
+               s_.hamil_wf->write_states(hamwffile,format);
+            }
+
+         }
+      }
+
       if ( atoms_move )
         s_.constraints.update_constraints(dt);
+
+      if ( atoms_move )
+         s_.ctrl.mditer++;
+      
     } // else (not converged)
   } // for iter
   // print memory usage of main data objects

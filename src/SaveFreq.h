@@ -22,13 +22,12 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Print_Density_Every.h
+// SaveFreq.h
 //
 ////////////////////////////////////////////////////////////////////////////////
-// $Id: Print_Density_Every.h,v 1.5 2011-05-25 15:56:18 schleife Exp $
 
-#ifndef PRINT_DENSITY_EVERY
-#define PRINT_DENSITY_EVERY
+#ifndef SAVEFREQ_H
+#define SAVEFREQ_H
 
 #include<iostream>
 #include<iomanip>
@@ -37,28 +36,24 @@
 
 #include "Sample.h"
 
-// AS: this class implements a function to print the density every N number of MD steps
-
-class Print_Density_Every : public Var
+class SaveFreq : public Var
 {
   Sample *s;
 
   public:
 
-  char *name ( void ) const { return "print_density_every"; };
+  char *name ( void ) const { return "savefreq"; };
 
   int set ( int argc, char **argv )
   {
     if ( argc != 2 )
     {
       if ( ui->oncoutpe() )
-      cout << " print_density_every takes only one value" << endl;
+      cout << " savefreq takes only one value" << endl;
       return 1;
     }
-
     int v = atoi(argv[1]);
-
-    s->ctrl.print_density_every = v;
+    s->ctrl.savefreq = v;
     return 0;
   }
 
@@ -68,10 +63,10 @@ class Print_Density_Every : public Var
      st.setf(ios::left,ios::adjustfield);
      st << name() << ":  ";
      st.setf(ios::right,ios::adjustfield);
-     st << s->ctrl.print_density_every;
+     st << s->ctrl.savefreq;
      return st.str();
   }
 
-  Print_Density_Every(Sample *sample) : s(sample) { s->ctrl.print_density_every = -1 ; }
+  SaveFreq(Sample *sample) : s(sample) { s->ctrl.savefreq = -1 ; }
 };
 #endif

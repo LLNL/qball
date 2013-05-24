@@ -117,7 +117,6 @@ using namespace std;
 #include "Dt.h"
 #include "Nempty.h"
 #include "Nrowmax.h"
-#include "PrintDensityEvery.h"
 #include "RefCell.h"
 #include "Spin.h"
 #include "Stress.h"
@@ -150,6 +149,8 @@ using namespace std;
 #include "profile.h"
 #include "MatrixLoc.h"
 #include "Pblock.h"
+#include "SaveFreq.h"
+#include "SaveDenFreq.h"
 
 #ifdef USE_CTF
 #include "cyclopstf.h"
@@ -410,8 +411,9 @@ int main(int argc, char **argv, char **envp)
   ui->addVar(new Non_Selfconsistent_Energy_Output(s));
   ui->addVar(new TDDt(s));
   ui->addVar(new NA_overlaps(s));
-  ui->addVar(new Print_Density_Every(s));
   ui->addVar(new WF_Phase_RealVar(s));
+  ui->addVar(new SaveFreq(s));
+  ui->addVar(new SaveDenFreq(s));
 
 #ifdef USE_JAGGEMM
   setup_grid();

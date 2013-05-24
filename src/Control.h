@@ -82,7 +82,6 @@ struct Control
   double tddt; // AS: time step for the wave function propagation
   int na_overlap_min; // AS: minimum band index for the calculation of non-adiabatic overlaps
   int na_overlap_max; // AS: maximum band index for the calculation of non-adiabatic overlaps
-  int print_density_every; // AS: print the density every N number of MD steps
   int iprint;
   int timeout;
   double threshold_scf;      // energy threshold for electronic iteration loops
@@ -112,10 +111,11 @@ struct Control
   bool ultrasoft;
   bool nlcc;         // non-linear core correction
   double ecutden;
-    
-  int extra_memory;  // guides use of extra memory to speed computation
 
+  int extra_memory;  // guides use of extra memory to speed computation
   int mditer; // store global iteration count to help with checkpointing
 
+  int savefreq;     // if > 0, checkpoint within iteration loop
+  int savedenfreq;  // if > 0, checkpoint within iteration loop
 };
 #endif
