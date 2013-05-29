@@ -83,8 +83,8 @@ ifdef VERSION
 	cp qb-nruns-$(ARCH) $(INSTALLDIR)/$(NRUNSINSTALL)
 	chmod a+rx $(INSTALLDIR)/$(NRUNSINSTALL)
 	ln -sf $(INSTALLDIR)/$(NRUNSINSTALL) $(INSTALLDIR)/qb@ll-nruns
-	cp ChangeLog $(INSTALLDIR)
-	chmod a+r $(INSTALLDIR)/ChangeLog
+#	cp ChangeLog $(INSTALLDIR)
+#	chmod a+r $(INSTALLDIR)/ChangeLog
 	cp qbLink.h $(INSTALLDIR)/qblink/qbLink-$(VERSION).h
 	chmod a+r $(INSTALLDIR)/qblink/qbLink-$(VERSION).h
 	ln -sf $(INSTALLDIR)/qblink/qbLink-$(VERSION).h $(INSTALLDIR)/qblink/qbLink.h

@@ -432,10 +432,10 @@ void BOSampleStepper::step(int niter)
 
   // if ultrasoft, calculate position-dependent functions
   if (ultrasoft) {
-     tmap["usfns"].start();
+     tmap["init-usfns"].start();
      cd_.update_usfns();
      wf.update_usfns();
-     tmap["usfns"].stop();
+     tmap["init-usfns"].stop();
   }
   // if non-linear core correction defined, calculate position-dependent density
   if (nlcc)
@@ -852,7 +852,8 @@ void BOSampleStepper::step(int niter)
       // wavefunction extrapolation
       if ( atoms_move && extrapolate_wf )
       {
-        for ( int ispin = 0; ispin < nspin; ispin++ )
+         tmap["extrapolate_wf"].start();
+         for ( int ispin = 0; ispin < nspin; ispin++ )
         {
           if (s_.wf.spinactive(ispin))
           {
@@ -882,13 +883,13 @@ void BOSampleStepper::step(int niter)
                     }
                     //ewd: 10-5-12b, uncomment this
                     if (ultrasoft) {
-                      tmap["usfns"].start();
+                      //tmap["usfns"].start();
                       s_.wf.sd(ispin,ikp)->update_usfns();
-                      tmap["usfns"].stop();
+                      //tmap["usfns"].stop();
                     }
-                    tmap["gram"].start();
+                    //tmap["gram"].start();
                     s_.wf.sd(ispin,ikp)->gram();
-                    tmap["gram"].stop();
+                    //tmap["gram"].stop();
                   }
                   else if ( iter == 1 )
                   {
@@ -903,13 +904,13 @@ void BOSampleStepper::step(int niter)
                     }
                     //ewd: 10-5-12b, uncomment this
                     if (ultrasoft) {
-                      tmap["usfns"].start();
+                      //tmap["usfns"].start();
                       s_.wf.sd(ispin,ikp)->update_usfns();
-                      tmap["usfns"].stop();
+                      //tmap["usfns"].stop();
                     }
-                    tmap["gram"].start();
+                    //tmap["gram"].start();
                     s_.wf.sd(ispin,ikp)->gram();
-                    tmap["gram"].stop();
+                    //tmap["gram"].stop();
                   }
                   else
                   {
@@ -931,13 +932,13 @@ void BOSampleStepper::step(int niter)
                     // orthogonalize the extrapolated value
                     //ewd: 10-5-12b, uncomment this
                     if (ultrasoft) {
-                      tmap["usfns"].start();
+                      //tmap["usfns"].start();
                       s_.wf.sd(ispin,ikp)->update_usfns();
-                      tmap["usfns"].stop();
+                      //tmap["usfns"].stop();
                     }
-                    tmap["gram"].start();
+                    //tmap["gram"].start();
                     s_.wf.sd(ispin,ikp)->gram();
-                    tmap["gram"].stop();
+                    //tmap["gram"].stop();
                     //tmap["lowdin"].start();
                     //s_.wf.sd(ispin,ikp)->lowdin();
                     //tmap["lowdin"].stop();
@@ -971,13 +972,13 @@ void BOSampleStepper::step(int niter)
                     }
                     //ewd: 10-5-12b, uncomment this
                     if (ultrasoft) {
-                      tmap["usfns"].start();
+                      //tmap["usfns"].start();
                       s_.wf.sd(ispin,ikp)->update_usfns();
-                      tmap["usfns"].stop();
+                      //tmap["usfns"].stop();
                     }
-                    tmap["gram"].start();
+                    //tmap["gram"].start();
                     s_.wf.sd(ispin,ikp)->gram();
-                    tmap["gram"].stop();
+                    //tmap["gram"].stop();
                   }
                   else if ( iter == 1 )
                   {
@@ -991,13 +992,13 @@ void BOSampleStepper::step(int niter)
                       cmm[i] = xm;
                     }
                     if (ultrasoft) {
-                      tmap["usfns"].start();
+                      //tmap["usfns"].start();
                       s_.wf.sd(ispin,ikp)->update_usfns();
-                      tmap["usfns"].stop();
+                      //tmap["usfns"].stop();
                     }
-                    tmap["gram"].start();
+                    //tmap["gram"].start();
                     s_.wf.sd(ispin,ikp)->gram();
-                    tmap["gram"].stop();
+                    //tmap["gram"].stop();
                   }
                   else
                   {
@@ -1021,13 +1022,13 @@ void BOSampleStepper::step(int niter)
                     
                     // orthogonalize the extrapolated value
                     if (ultrasoft) {
-                      tmap["usfns"].start();
+                      //tmap["usfns"].start();
                       s_.wf.sd(ispin,ikp)->update_usfns();
-                      tmap["usfns"].stop();
+                      //tmap["usfns"].stop();
                     }
-                    tmap["gram"].start();
+                    //tmap["gram"].start();
                     s_.wf.sd(ispin,ikp)->gram();
-                    tmap["gram"].stop();
+                    //tmap["gram"].stop();
                     //tmap["lowdin"].start();
                     //s_.wf.sd(ispin,ikp)->lowdin();
                     //tmap["lowdin"].stop();
@@ -1057,19 +1058,19 @@ void BOSampleStepper::step(int niter)
                     //s_.wf.sd(ispin,ikp)->lowdin();
                     //tmap["lowdin"].stop();
                     if (ultrasoft) {
-                      tmap["usfns"].start();
+                      //tmap["usfns"].start();
                       s_.wf.sd(ispin,ikp)->update_usfns();
-                      tmap["usfns"].stop();
+                      //tmap["usfns"].stop();
                     }
-                    tmap["gram"].start();
+                    //tmap["gram"].start();
                     s_.wf.sd(ispin,ikp)->gram();
-                    tmap["gram"].stop();
+                    //tmap["gram"].stop();
                   }
                   else
                   {
-                    tmap["align"].start();
+                    //tmap["align"].start();
                     s_.wfv->align(s_.wf);
-                    tmap["align"].stop();
+                    //tmap["align"].stop();
                   
                     // linear extrapolation
                     for ( int i = 0; i < len; i++ )
@@ -1088,23 +1089,24 @@ void BOSampleStepper::step(int niter)
                     //tmap["riccati"].stop();
                     
                     if (ultrasoft) {
-                      tmap["usfns"].start();
+                      //tmap["usfns"].start();
                       s_.wf.sd(ispin,ikp)->update_usfns();
-                      tmap["usfns"].stop();
+                      //tmap["usfns"].stop();
                     }
                     //ewd: lowdin doesn't yet work correctly with ultrasoft
                     //tmap["lowdin"].start();
                     //s_.wf.sd(ispin,ikp)->lowdin();
                     //tmap["lowdin"].stop();
-                    tmap["gram"].start();
+                    //tmap["gram"].start();
                     s_.wf.sd(ispin,ikp)->gram();
-                    tmap["gram"].stop();
+                    //tmap["gram"].stop();
                   }
                 }
               }
             }
           }
         }
+         tmap["extrapolate_wf"].stop();
       } // atoms_move && extrapolate_wf
 
       // do nitscf self-consistent iterations, each with nite electronic steps
@@ -1127,6 +1129,7 @@ void BOSampleStepper::step(int niter)
   QB_Pstart(14,scfloop);
 #endif
         // SCF LOOP
+        tmap["scfloop"].start();
         for ( int itscf = 0; itscf < nitscf_; itscf++ )
         {
 
@@ -1391,6 +1394,7 @@ void BOSampleStepper::step(int niter)
               cout << "  <!-- BOSampleStepper: end scf iteration -->" << endl;
           }
         } // for itscf
+        tmap["scfloop"].stop();
 
 #ifdef TAU  
   QB_Pstop(scfloop);
@@ -1405,7 +1409,8 @@ void BOSampleStepper::step(int niter)
                       
         if ( compute_mlwf || compute_mlwfc )
         {
-          SlaterDet& sd = *(wf.sd(0,0));
+           tmap["mlwf"].start();
+           SlaterDet& sd = *(wf.sd(0,0));
           mlwft->compute_transform();
 
           if ( compute_mlwf )
@@ -1439,6 +1444,7 @@ void BOSampleStepper::step(int niter)
             cout << " <total_dipole_length> " << length(idipole + edipole)
                  << " </total_dipole_length>" << endl;
           }
+          tmap["mlwf"].stop();
         }
 
 
@@ -1452,28 +1458,28 @@ void BOSampleStepper::step(int niter)
 
         if ( gs_only && !fastend)
         {
-
-          // need eigenvalues to compute forces w. ultrasoft
-          if (ultrasoft) { 
-             ef_.energy(true,dwf,false,fion,false,sigma_eks);
-            tmap["diag"].start();
-            s_.wf.diag(dwf,compute_eigvec);
-            //s_.wf.diag(dwf,true);  // ewd:  why true?  Why did I do this??
-            tmap["diag"].stop();
-
-            // update ultrasoft functions w. new eigenvectors
-            if (compute_eigvec && ultrasoft) { 
-               tmap["usfns"].start();
-               s_.wf.update_usfns();
-               tmap["usfns"].stop();
-            }
-            s_.wf.printeig();
-          }
-
-          tmap["charge"].start();
-          if ( !initial_atomic_density )
-            cd_.update_density();
-          tmap["charge"].stop();
+           tmap["postscf"].start();
+           // need eigenvalues to compute forces w. ultrasoft
+           if (ultrasoft) { 
+              ef_.energy(true,dwf,false,fion,false,sigma_eks);
+              //tmap["diag"].start();
+              s_.wf.diag(dwf,compute_eigvec);
+              //s_.wf.diag(dwf,true);  // ewd:  why true?  Why did I do this??
+              //tmap["diag"].stop();
+              
+              // update ultrasoft functions w. new eigenvectors
+              if (compute_eigvec && ultrasoft) { 
+                 //tmap["usfns"].start();
+                 s_.wf.update_usfns();
+                 //tmap["usfns"].stop();
+              }
+              s_.wf.printeig();
+           }
+           
+           //tmap["charge"].start();
+           if ( !initial_atomic_density )
+              cd_.update_density();
+           //tmap["charge"].stop();
 
           ef_.update_vhxc();
           const bool compute_forces = true;
@@ -1522,6 +1528,7 @@ void BOSampleStepper::step(int niter)
               print_stress();
             }
           }
+          tmap["postscf"].stop();
         }
         else if (gs_only && fastend) {
            if ( onpe0 )
@@ -1531,17 +1538,19 @@ void BOSampleStepper::step(int niter)
       }
       else
       {
-        // wf_stepper == 0, wf_dyn == LOCKED
-        // evaluate and print energy
-        tmap["charge"].start();
-        cd_.update_density();
-        tmap["charge"].stop();
-        ef_.update_vhxc();
-        ef_.energy(true,dwf,false,fion,false,sigma_eks);
-        if ( onpe0 )
-        {
-          cout << ef_;
-        }
+         tmap["postscf"].start();
+         // wf_stepper == 0, wf_dyn == LOCKED
+         // evaluate and print energy
+         //tmap["charge"].start();
+         cd_.update_density();
+         //tmap["charge"].stop();
+         ef_.update_vhxc();
+         ef_.energy(true,dwf,false,fion,false,sigma_eks);
+         if ( onpe0 )
+         {
+            cout << ef_;
+         }
+         tmap["postscf"].stop();
       }
 
 #ifdef USE_APC
