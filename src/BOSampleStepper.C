@@ -1452,9 +1452,6 @@ void BOSampleStepper::step(int niter)
 
 
         bool fastend = false;
-#ifdef BGQ        
-        fastend = true;
-#endif        
 
         if ( gs_only && !fastend)
         {
