@@ -75,6 +75,14 @@ int main(int argc, char **argv)
     
     Context ctxt;
     Sample* s = new Sample(ctxt);
+
+    // need to set default values for any s->ctrl parameters used by test code
+    s->ctrl.ecutden = 0.0;
+    s->ctrl.ultrasoft = false;
+    s->ctrl.nlcc = false;
+    s->ctrl.tddft_involved = false;
+    s->ctrl.extra_memory = 3;
+
     s->wf.set_cell(cell);
     s->wf.set_ecut(ecut);    
     //s->wf.resize(cell,cell,ecut);
