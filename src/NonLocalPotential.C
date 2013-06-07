@@ -34,7 +34,7 @@
 #include <iomanip>
 using namespace std;
 
-#if AIX || BGL
+#if USE_MASSV
 extern "C" void vsincos(double *x, double *y, double *z, int *n);
 #endif
 extern "C" void myzdotc(const int size, complex<double>* v1, complex<double>* v2, complex<double>* vout);
@@ -1837,8 +1837,8 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
               &zero,&kpgr[0],(int*)&ngwl);                                     
 
         int len = ia_block_size * ngwl;                                      
-#if AIX || BGL  
-        vsincos(&skpgr[0],&ckpgr[0],&kpgr[0],&len);                                
+#if USE_MASSV  
+        vsincos(&skpgr[0],&ckpgr[0],&kpgr[0],&len);
 #else
         #pragma omp parallel for
         for ( int i = 0; i < len; i++ ) {
