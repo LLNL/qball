@@ -459,14 +459,6 @@ void EnergyFunctional::update_vhxc(void) {
   eps_   = tsum[0];
   ehart_ = tsum[1];
 
-  //ewd DEBUG:  calculate term directly comparable to PWSCF's Ewald energy
-  //pwscf_ewald_ = 0.0;
-  //for ( int ig = 0; ig < ngloc; ig++ )
-  //  pwscf_ewald_ += norm(rhopst[ig]) * g2i[ig];
-  //tsum[0] = vfact * omega * fpi * pwscf_ewald_;
-  //vbasis_->context().dsum(1,1,&tsum[0],1);
-  //pwscf_ewald_ = tsum[0];
-  
   // compute vlocal_g = vion_local_g + vhart_g
   // where vhart_g = 4 * pi * (rhoelg + rhopst) * g2i  
   if (s_.ctrl.tddft_involved)  // AS: the charge density based on hamil_wf has to be used
@@ -639,7 +631,6 @@ void EnergyFunctional::update_exc_ehart_eps(void)
   tsum[1] = omega * fpi * ehsum;
   // tsum[1] contains ehart
 
-  // AS: I assume the BLACS call below just gathers the information from the different processes
   vbasis_->context().dsum(2,1,&tsum[0],2);
   eps_   = tsum[0];
   ehart_ = tsum[1];
@@ -1513,6 +1504,26 @@ void EnergyFunctional::cell_moved(void) {
     hubp_->update_phiylm();
 }
 
+////////////////////////////////////////////////////////////////////////////////
+double EnergyFunctional::casino_ewald(void)
+{
+   //ewd:  calculate Ewald energy term
+   //ewd:  for debugging and CASINO output
+   const int ngloc = vbasis_->localsize();
+   const double fpi = 4.0 * M_PI;
+   const double vfact = vbasis_->real() ? 1.0 : 0.5;
+   const double omega = wf_.cell().volume();
+   const double *const g2i = vbasis_->g2i_ptr();
+   double tsum;
+   double casino_ewald = 0.0;
+   for ( int ig = 0; ig < ngloc; ig++ )
+      casino_ewald += norm(rhopst[ig]) * g2i[ig];
+   tsum = vfact * omega * fpi * casino_ewald;
+   vbasis_->context().dsum(1,1,&tsum,1);
+   casino_ewald = tsum + esr_ - eself_;
+   
+   return casino_ewald;
+}  
 ////////////////////////////////////////////////////////////////////////////////
 void EnergyFunctional::print(ostream& os) const
 {

@@ -476,7 +476,8 @@ int SaveCmd::action(int argc, char **argv) {
       fion[is].resize(3*s->atoms.na(is));
 
     ef_.energy(false,dwf,false,fion,false,sigma_eks);
-
+    double eewald = ef_.casino_ewald();
+    
     for (int kk = 0; kk<s->wf.nkp(); kk++)
     {
        // write out separate casino file for each k-point
@@ -526,7 +527,8 @@ int SaveCmd::action(int argc, char **argv) {
                 os << "Electron-electron energy (au per primitive cell)" << endl;
                 os << ef_.ehart() << endl;
                 os << "Ion-ion energy (au per primitive cell)" << endl;
-                os << ef_.esr()-ef_.eself() << endl;
+                //os << ef_.esr()-ef_.eself() << endl;
+                os << eewald << endl;
                 os << "Number of electrons per primitive cell" << endl;
                 os << s->wf.nel() << endl;
                 os << endl;

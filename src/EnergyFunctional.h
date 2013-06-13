@@ -89,9 +89,6 @@ class EnergyFunctional
   valarray<double> sigma_ekin,sigma_econf,sigma_eps,sigma_ehart,sigma_exc,
     sigma_enl, sigma_esr, sigma;
 
-  //ewd DEBUG
-  double pwscf_ewald_;
-  
   public:
 
   vector<vector<double> > v_r;
@@ -121,6 +118,7 @@ class EnergyFunctional
   double ehub(void) const { return ehub_; }
   double eharris(void) const { return eharris_; }
   double etotal_harris(void) const { return (ekin_ + econf_ + enl_ + ets_ + epv_ + ehub_ + eharris_ + esr_ - eself_); };  
+  double casino_ewald(void);
   const ConfinementPotential *confpot(int ispin, int ikp) const { return cfp[ispin][ikp]; }
   
   void update_vhxc(void);
