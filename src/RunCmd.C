@@ -112,6 +112,16 @@ int RunCmd::action(int argc, char **argv)
           s->wf.randomize(amp,highmem);
     }
   }
+
+  // check if hamil_wf needs to be constructed
+  if (s->hamil_wf == 0)
+  {
+     if (ui->oncoutpe())
+        cout << "<INFO> s->hamil_wf has not been initialized, calling constructor. </INFO>" << endl;
+     s->hamil_wf = new Wavefunction(s->wf);
+     (*s->hamil_wf) = s->wf;
+     (*s->hamil_wf).update_occ(0.0,0);
+  }
   
   if ( s->ctrl.wf_dyn == "MD" )
     stepper = new CPSampleStepper(*s);

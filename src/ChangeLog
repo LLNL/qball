@@ -1,4 +1,45 @@
 ------------------------------------------------------------------------
+r113 | draeger1 | 2013-06-07 16:19:37 -0700 (Fri, 07 Jun 2013) | 4 lines
+
+
+Updated save -casino command to print separate files for each k-point.
+
+
+------------------------------------------------------------------------
+r112 | draeger1 | 2013-05-30 15:12:44 -0700 (Thu, 30 May 2013) | 4 lines
+
+
+Fixed testChargeDensity (default values for ctrl options not being set, since variables weren't included)
+
+
+------------------------------------------------------------------------
+r111 | draeger1 | 2013-05-30 14:44:06 -0700 (Thu, 30 May 2013) | 4 lines
+
+
+Removed fastend option from BOSampleStepper.C for BG/Q, updated gold benchmark to choose better nrowmax and use run 0 1 5 by default, and added MgO example to examples directory.
+
+
+------------------------------------------------------------------------
+r110 | draeger1 | 2013-05-28 18:23:20 -0700 (Tue, 28 May 2013) | 4 lines
+
+
+Changed how timing is printed out in BOSampleStepper.C.
+
+
+------------------------------------------------------------------------
+r109 | draeger1 | 2013-05-24 14:48:16 -0700 (Fri, 24 May 2013) | 4 lines
+
+
+Use mditer+1 instead of mditer to determine savefreq, savedenfreq.
+
+
+------------------------------------------------------------------------
+r107 | draeger1 | 2013-05-24 13:02:09 -0700 (Fri, 24 May 2013) | 3 lines
+
+Added savefreq and savedenfreq variables to allow saving every x MD iterations within an iteration loop.
+
+
+------------------------------------------------------------------------
 r106 | draeger1 | 2013-05-20 18:10:35 -0700 (Mon, 20 May 2013) | 4 lines
 
 

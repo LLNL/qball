@@ -262,15 +262,6 @@ void EhrenSampleStepper::step(int niter)
     tleft = s_.ctrl.run_timer - (tbase - s_.ctrl.time_init);
   }
 
-  //EWD:  check if hamil_wf needs to be constructed
-  if (s_.hamil_wf == 0)
-  {
-     s_.hamil_wf = new Wavefunction(s_.wf);
-     (*s_.hamil_wf) = s_.wf;
-     (*s_.hamil_wf).update_occ(0.0,0);
-  }
-  
-
 #ifdef HPM  
        HPM_Start("iterloop");
 #endif

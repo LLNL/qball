@@ -259,6 +259,7 @@ EnergyFunctional::~EnergyFunctional(void) {
 }
 ////////////////////////////////////////////////////////////////////////////////
 void EnergyFunctional::update_hamiltonian(void)
+// ewd:  updates hamil_rhoelg from hamil_cd_
 {
    const Wavefunction& wf = s_.wf;
    const int ngloc = vbasis_->localsize();
