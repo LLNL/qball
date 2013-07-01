@@ -859,7 +859,8 @@ void Basis::print_casino(ostream& os) {
   if (real())
     ngtot = 2*size()-1;
 
-  if (context().mype() == 0) {
+  //  if (context().mype() == 0) {
+  if (context().myproc() == 0) {
     os << "G VECTORS" << endl;
     os << "---------" << endl;
     os << "Number of G-vectors" << endl;
@@ -884,7 +885,7 @@ void Basis::print_casino(ostream& os) {
         context().dsend(size,1,&gxtmp[0],1,0,0);
       }
     }
-    if ( context().oncoutpe() ) {
+    if ( context().myproc() == 0 ) {
       for ( int i = ip; i < ipp; i++ ) {
         int locsize = 0;
         context().irecv(1,1,&locsize,1,i,0);

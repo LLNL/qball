@@ -80,51 +80,25 @@ int main(int argc, char **argv)
    mype=0;
 #endif
 
-   char* infilename = argv[1];
-   ifstream infile(infilename);
-   assert(argc == 2);
+   assert(argc == 4);
    Timer tm;
-   int m_a, n_a, mb_a, nb_a;
-   int m_b, n_b, mb_b, nb_b;
-   int m_c, n_c, mb_c, nb_c;
-   char ta, tb;
-   if(mype == 0)
-   {
-      infile >> m_a >> n_a >> mb_a >> nb_a >> ta;
-      cout<<"m_a="<<m_a<<", n_a="<<n_a<<endl;
-      infile >> m_b >> n_b >> mb_b >> nb_b >> tb;
-      cout<<"m_b="<<m_b<<", n_b="<<n_a<<endl;
-      infile >> m_c >> n_c >> mb_c >> nb_c;
-      cout<<"m_c="<<m_c<<", n_c="<<n_c<<endl;
-   }
-#ifdef USE_MPI
-   MPI_Bcast(&m_a, 1, MPI_INT, 0, MPI_COMM_WORLD);    
-   MPI_Bcast(&n_a, 1, MPI_INT, 0, MPI_COMM_WORLD);    
-   MPI_Bcast(&mb_a, 1, MPI_INT, 0, MPI_COMM_WORLD);    
-   MPI_Bcast(&nb_a, 1, MPI_INT, 0, MPI_COMM_WORLD);    
-   MPI_Bcast(&m_b, 1, MPI_INT, 0, MPI_COMM_WORLD);    
-   MPI_Bcast(&n_b, 1, MPI_INT, 0, MPI_COMM_WORLD);    
-   MPI_Bcast(&mb_b, 1, MPI_INT, 0, MPI_COMM_WORLD);    
-   MPI_Bcast(&nb_b, 1, MPI_INT, 0, MPI_COMM_WORLD);    
-   MPI_Bcast(&m_c, 1, MPI_INT, 0, MPI_COMM_WORLD);    
-   MPI_Bcast(&n_c, 1, MPI_INT, 0, MPI_COMM_WORLD);    
-   MPI_Bcast(&mb_c, 1, MPI_INT, 0, MPI_COMM_WORLD);    
-   MPI_Bcast(&nb_c, 1, MPI_INT, 0, MPI_COMM_WORLD);    
-   MPI_Bcast(&ta, 1, MPI_CHAR, 0, MPI_COMM_WORLD);    
-   MPI_Bcast(&tb, 1, MPI_CHAR, 0, MPI_COMM_WORLD);    
-#endif
 
-   if ( ta == 'N' ) ta = 'n';
-   if ( tb == 'N' ) tb = 'n';
+   int mm = atoi(argv[1]);
+   int nn = atoi(argv[2]);
+   int kk = atoi(argv[3]);
+
+
+#ifdef USE_MPI
+   //MPI_Bcast(&mm, 1, MPI_INT, 0, MPI_COMM_WORLD);    
+   //MPI_Bcast(&nn, 1, MPI_INT, 0, MPI_COMM_WORLD);    
+   //MPI_Bcast(&kk, 1, MPI_INT, 0, MPI_COMM_WORLD);    
+#endif
 
    complex<double> zzero = complex<double>(0.0,0.0);
    complex<double> zone = complex<double>(1.0,0.0);
    char cc='c';
    char cn='n';
 
-   int kk = m_a;
-   int mm = m_c;
-   int nn = n_c;
    vector<complex<double> > avec(mm*kk);
    vector<complex<double> > bvec(nn*kk);
    vector<complex<double> > cvec(mm*nn);
@@ -143,16 +117,18 @@ int main(int argc, char **argv)
       double drand2 =  rand()*nrandinv*maxrand;
       cvec[ii] = complex<double>(drand1,drand2);
    }
-               
+
+   const int niter = 100;
    tm.start();
    HPM_Start("zgemm1");
-   zgemm(&cc,&cn,&mm,&nn,&kk,&zone,&avec[0],&kk,&bvec[0],&kk,&zzero,&cvec[0],&mm);
+   for (int iter=0; iter<niter; iter++)
+      zgemm(&cc,&cn,&mm,&nn,&kk,&zone,&avec[0],&kk,&bvec[0],&kk,&zzero,&cvec[0],&mm);
    HPM_Stop("zgemm1");
    tm.stop();
 
    int nthreads = omp_get_max_threads();
    if (mype == 0)
-      cout << "M = " << m_c << " N = " << n_c << " K = " << m_a << " zgemm time = " << setprecision(5) << setw(8) << tm.real()<< " sec, GFlops = " << (8.0e-9*m_c*n_c*m_a) / tm.real() << " on " << npes << " pes, " << nthreads << " threads" << endl;
+      cout << "M = " << mm << " N = " << nn << " K = " << kk << " zgemm time = " << setprecision(5) << setw(8) << tm.real()<< " sec, GFlops = " << niter*(8.0e-9*mm*nn*kk) / tm.real() << " on " << npes << " pes, " << nthreads << " threads, niter = " << niter << endl;
  
 #ifdef USE_MPI
    MPI_Finalize();

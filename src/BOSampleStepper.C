@@ -1354,6 +1354,14 @@ void BOSampleStepper::step(int niter)
                      etot_harris = ef_.etotal_harris();
                      if (onpe0)
                         cout << "  <eharris> " << setw(15) << setprecision(8) << etot_harris << " </eharris>\n";
+
+                     //ewd DEBUG
+                     if (false && onpe0)
+                     {
+                        cout << "EHARRIS.DEBUG:  " << ef_.ekin() << "  " << ef_.econf() << "  " << ef_.enl() << "  " << ef_.ets() << "  " << ef_.epv() << "  " << ef_.ehub() << "  " << ef_.eharris() << "  " << ef_.esr() << "  " << ef_.eself() << endl;
+                     }
+                     //ewd DEBUG
+
                   }
                }
             } // for ite

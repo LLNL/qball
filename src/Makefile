@@ -73,6 +73,7 @@ ifdef OMPHACK
 	$(CXX) -qsmp=omp $(CXXFLAGS) -o $(OBJDIR)/ChargeDensity.o -c ChargeDensity.C
 	$(CXX) -qsmp=omp $(CXXFLAGS) -o $(OBJDIR)/SlaterDet.o -c SlaterDet.C
 	$(CXX) -qsmp=omp $(CXXFLAGS) -o $(OBJDIR)/NonLocalPotential.o -c NonLocalPotential.C
+	$(CXX) -qsmp=omp $(CXXFLAGS) -o $(OBJDIR)/EnergyFunctional.o -c EnergyFunctional.C
 endif
 
 install: $(EXENAME) qb-nruns
@@ -117,6 +118,9 @@ makedirs:
 
 testMatrix: $(OBJDIR)/testMatrix.o $(OBJDIR)/Matrix.o $(OBJDIR)/Context.o
 	$(LD) $(DFLAGS) -o $@-$(ARCH) $^ $(LDFLAGS)
+testMatrix-omp: $(OBJDIR)/Matrix.o $(OBJDIR)/Context.o
+	$(CXX) -qsmp=omp $(CXXFLAGS) -o $(OBJDIR)/testMatrix.o -c testMatrix.C
+	$(LD) $(DFLAGS) -o testMatrix-$(ARCH) $(OBJDIR)/testMatrix.o $^ $(LDFLAGS)
 testBasis: $(OBJDIR)/testBasis.o $(OBJDIR)/Basis.o $(OBJDIR)/UnitCell.o $(OBJDIR)/Context.o
 	$(LD) $(DFLAGS) -o $@ $^ $(LDFLAGS)
 testFourierTransform: $(OBJDIR)/testFourierTransform.o $(OBJDIR)/FourierTransform.o $(OBJDIR)/Basis.o \

@@ -1933,7 +1933,8 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
           tmap["fnl_gemm"].start();
 
           //ewd DEBUG
-          //cout << "NLP.ZGEMM1, mype = " << ctxt_.mype() << ", c dims = " << sd_.c().m() << " " << sd_.c().n() << " " << sd_.c().mb() << " " << sd_.c().nb() << " " << sd_.c().mloc() << " " << sd_.c().nloc() << ", anl_loc.size = " << anl_loc.size() << ", fnl_loc.size = " << fnl_loc.size() << ", nstloc = " << nstloc << ", ngwl = " << ngwl << endl;
+          //if (ctxt_.mype() == 0)
+          //   cout << "NLP.ZGEMM1, mype = " << ctxt_.mype() << ", c dims = " << sd_.c().m() << " " << sd_.c().n() << " " << sd_.c().mb() << " " << sd_.c().nb() << " " << sd_.c().mloc() << " " << sd_.c().nloc() << ", anl_loc.size = " << anl_loc.size() << ", fnl_loc.size = " << fnl_loc.size() << ", nstloc = " << nstloc << ", ngwl = " << ngwl << endl;
           //if (c_lda < ngwl)
           //   cout << "NLP.ZGEMM3, mype = " << ctxt_.mype() << ", c dims = " << sd_.c().m() << " " << sd_.c().n() << " " << sd_.c().mb() << " " << sd_.c().nb() << " " << sd_.c().mloc() << " " << sd_.c().nloc() << ", anl_loc.size = " << anl_loc.size() << ", fnl_loc.size = " << fnl_loc.size() << ", nstloc = " << nstloc << ", ngwl = " << ngwl << endl;
              

@@ -321,7 +321,9 @@ void EnergyFunctional::update_vhxc(void) {
   const double fpi = 4.0 * M_PI;
   const int ngloc = vbasis_->localsize();
   double tsum[2];
-
+  tsum[0] = 0.0;
+  tsum[1] = 0.0;
+  
   // compute total electronic density: rhoelg = rho_up + rho_dn
   if ( wf_.nspin() == 1 ) {
     for ( int ig = 0; ig < ngloc; ig++ ) {
@@ -513,6 +515,8 @@ void EnergyFunctional::update_harris(void) {
    const double fpi = 4.0 * M_PI;
    const int ngloc = vbasis_->localsize();
    double tsum[2];
+  tsum[0] = 0.0;
+  tsum[1] = 0.0;
    
    // compute total electronic density: rhoelg = rho_up + rho_dn
    if ( wf_.nspin() == 1 ) {
@@ -558,8 +562,14 @@ void EnergyFunctional::update_harris(void) {
   tsum[1] = vfact * omega * fpi * ehsum;
   
   vbasis_->context().dsum(2,1,&tsum[0],2);
-  eharris_ += tsum[0] + tsum[1];
 
+
+  //ewd DEBUG
+  if (false && vbasis_->context().mype() == 0)
+     cout << "EF.UPDATE_HARRIS, exc = " << eharris_ << ", ehsum = " << tsum[1] << ", eps = " << tsum[0] << endl;
+
+  eharris_ += tsum[0] + tsum[1];
+  
   tmap["harris"].stop();
 
 }

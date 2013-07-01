@@ -3349,7 +3349,7 @@ void Wavefunction::print_casino(ostream& os, int kk) const {
             if (sdcontext_[0][kpc]->myproc() == 0 )
                onproc0 = true;
          }
-   
+
    if (sdctxt_active)
       if (sdcontext_[0][kpc]->mycol() == 0)
          sd_[0][kk]->basis().print_casino(os);

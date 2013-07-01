@@ -1,4 +1,18 @@
 ------------------------------------------------------------------------
+r115 | draeger1 | 2013-06-18 12:17:02 -0700 (Tue, 18 Jun 2013) | 4 lines
+
+
+Fixed bug where an uninitialized s->hamil_wf was used in construction of hamil_cd in EnergyFunctional constructor if tddft was run without an explicit load command.
+
+
+------------------------------------------------------------------------
+r114 | draeger1 | 2013-06-13 09:42:55 -0700 (Thu, 13 Jun 2013) | 4 lines
+
+
+Added function to compute ion-ion (Ewald) energy term for CASINO output.
+
+
+------------------------------------------------------------------------
 r113 | draeger1 | 2013-06-07 16:19:37 -0700 (Fri, 07 Jun 2013) | 4 lines
 
 
