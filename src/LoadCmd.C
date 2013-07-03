@@ -663,12 +663,6 @@ int LoadCmd::action(int argc, char **argv) {
   /////  XML CHECKPOINTING  /////
   else {
 
-    //ewd DEBUG:  try reshaping context so loading works for nspin > 1 and/or nkpts > 1
-    const int nrowmax_orig = s->wf.nrowmax();
-    const int npes = s->ctxt_.size();
-
-    s->wf.set_nrowmax(npes);
-
     if ( ui->oncoutpe() )
       cout << " <!-- LoadCmd: loading from " << filename << " -->" << endl;
     
@@ -691,8 +685,6 @@ int LoadCmd::action(int argc, char **argv) {
       cout << " LoadCmd: cannot load Sample" << endl;
     }
     s->ctxt_.barrier();
-    //ewd DEBUG
-    s->wf.set_nrowmax(nrowmax_orig);
 
     // If only <atomset> was read, set nel for the wavefunction
     //cout << " LoadCmd: atoms.nel() = " << s->atoms.nel() << endl;
@@ -706,6 +698,17 @@ int LoadCmd::action(int argc, char **argv) {
 
     if ( ui->oncoutpe() )
       cout << " -->" << endl;
+
+    if (s->ctrl.tddft_involved)
+    {
+       string hamwffile = filestr + "hamwf";
+       if ( s->hamil_wf == 0 ) {
+          s->hamil_wf = new Wavefunction(s->wf);
+          (*s->hamil_wf) = s->wf;
+          (*s->hamil_wf).update_occ(0.0,0);
+       }
+    }
+    
   }
 
   if (s->ctrl.extra_memory >= 3)
