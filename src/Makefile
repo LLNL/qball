@@ -73,7 +73,7 @@ ifdef OMPHACK
 	$(CXX) -qsmp=omp $(CXXFLAGS) -o $(OBJDIR)/ChargeDensity.o -c ChargeDensity.C
 	$(CXX) -qsmp=omp $(CXXFLAGS) -o $(OBJDIR)/SlaterDet.o -c SlaterDet.C
 	$(CXX) -qsmp=omp $(CXXFLAGS) -o $(OBJDIR)/NonLocalPotential.o -c NonLocalPotential.C
-	$(CXX) -qsmp=omp $(CXXFLAGS) -o $(OBJDIR)/EnergyFunctional.o -c EnergyFunctional.C
+#	$(CXX) -qsmp=omp $(CXXFLAGS) -o $(OBJDIR)/EnergyFunctional.o -c EnergyFunctional.C
 endif
 
 install: $(EXENAME) qb-nruns

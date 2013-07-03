@@ -119,6 +119,7 @@ class EnergyFunctional
   double eharris(void) const { return eharris_; }
   double etotal_harris(void) const { return (ekin_ + econf_ + enl_ + ets_ + epv_ + ehub_ + eharris_ + esr_ - eself_); };  
   double casino_ewald(void);
+  double casino_vloc(void);
   const ConfinementPotential *confpot(int ispin, int ikp) const { return cfp[ispin][ikp]; }
   
   void update_vhxc(void);

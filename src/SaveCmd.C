@@ -477,6 +477,7 @@ int SaveCmd::action(int argc, char **argv) {
 
     ef_.energy(false,dwf,false,fion,false,sigma_eks);
     double eewald = ef_.casino_ewald();
+    double evloc = ef_.casino_vloc();
     
     for (int kk = 0; kk<s->wf.nkp(); kk++)
     {
@@ -522,6 +523,7 @@ int SaveCmd::action(int argc, char **argv) {
                 os << ef_.ekin() << endl;
                 os << "Local potential energy (au per primitive cell)" << endl;
                 os << ef_.eps() << endl;
+                os << evloc << endl;
                 os << "Non-local potential energy (au per primitive cell)" << endl;
                 os << ef_.enl() << endl;
                 os << "Electron-electron energy (au per primitive cell)" << endl;

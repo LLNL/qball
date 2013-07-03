@@ -552,7 +552,6 @@ void EnergyFunctional::update_harris(void) {
   tsum[0] *= omega;
   
   // Hartree energy
-  ehart_ = 0.0;
   double ehsum = 0.0;
   for ( int ig = 0; ig < ngloc; ig++ ) {
     const complex<double> tmp = rhoelg[ig] + rhopst[ig];
@@ -722,7 +721,8 @@ double EnergyFunctional::energy(bool compute_hpsi, Wavefunction& dwf,
           const double *const kpg_z = wfbasis.kpgx_ptr(2);
           tsum = 0.0;
 
-          #pragma omp parallel for
+          //ewd:  this pragma causes incorrect results
+          //#pragma omp parallel for
           for ( int ig = 0; ig < ngwloc; ig++ ) {
             double tmpsum = 0.0;
             for ( int lj=0; lj < c.nblocks(); lj++ )
@@ -1174,7 +1174,7 @@ double EnergyFunctional::energy(bool compute_hpsi, Wavefunction& dwf,
                //ewd:  OMP HERE?
                // AS: e_n are currently only hard-coded and renormalization is disabled by default
                // double as_renorm[4] = {-28.70987,-28.70987,-28.70987,-3.13510};
-#pragma omp parallel for
+               //#pragma omp parallel for
                for ( int n = 0; n < sd.nstloc(); n++ ) {
                 for ( int ig = 0; ig < ngwloc; ig++ ) {
                   cp[ig+mloc*n] += 0.5 * kpg2[ig] * c[ig+mloc*n];
@@ -1207,7 +1207,6 @@ double EnergyFunctional::energy(bool compute_hpsi, Wavefunction& dwf,
     const double* gx2 = vbasis_->gx_ptr(2);
     vector<complex<double> > trhog;
     for ( int is = 0; is < nsp_; is++ ) {
-#pragma omp parallel for
        for ( int ig = 0; ig < ngloc; ig++ ) {
           double tmp = fpi * rhops[is][ig] * g2i[ig];
           vtemp[ig] =  tmp * conj(rhogt[ig]) + vps[is][ig] * conj(rhoelg[ig]);
@@ -1232,7 +1231,7 @@ double EnergyFunctional::energy(bool compute_hpsi, Wavefunction& dwf,
           double *s0 = sf.sin0_ptr(is,ia);
           double *s1 = sf.sin1_ptr(is,ia);
           double *s2 = sf.sin2_ptr(is,ia);
-#pragma omp parallel for
+          //#pragma omp parallel for
           for ( int ig = 0; ig < ngloc; ig++ ) {
              // compute Exp[igr] in 3D as a product of 1D contributions
              // complex<double> teigr = ei0[kv[3*ig+0]] *
@@ -1373,7 +1372,6 @@ void EnergyFunctional::atoms_moved(void)
   for ( int is = 0; is < atoms.nsp(); is++ )
   {
     complex<double> *s = &sf.sfac[is][0];
-#pragma omp parallel for
     for ( int ig = 0; ig < ngloc; ig++ )
     {
       const complex<double> sg = s[ig];
@@ -1485,7 +1483,6 @@ void EnergyFunctional::cell_moved(void) {
     Species *s = atoms.species_list[is];
     const double * const g = vbasis_->g_ptr();
     double v,dv;  
-#pragma omp parallel for
     for ( int ig = 0; ig < ngloc; ig++ ) {
       rhops[is][ig] = s->rhopsg(g[ig]) * omega_inv;
       s->dvlocg(g[ig],v,dv);
@@ -1526,14 +1523,43 @@ double EnergyFunctional::casino_ewald(void)
    const double omega = wf_.cell().volume();
    const double *const g2i = vbasis_->g2i_ptr();
    double tsum;
-   double casino_ewald = 0.0;
+   double ewald = 0.0;
    for ( int ig = 0; ig < ngloc; ig++ )
-      casino_ewald += norm(rhopst[ig]) * g2i[ig];
-   tsum = vfact * omega * fpi * casino_ewald;
+      ewald += norm(rhopst[ig]) * g2i[ig];
+   tsum = vfact * omega * fpi * ewald;
    vbasis_->context().dsum(1,1,&tsum,1);
-   casino_ewald = tsum + esr_ - eself_;
+   ewald = tsum + esr_ - eself_;
+
+
+   //ewd DEBUG
+   if ( s_.ctxt_.mype()==0 )
+      cout << "EF.EWALD:  tsum = " << tsum << ", esr = " << esr_ << ", eself = " << eself_ << endl;
    
-   return casino_ewald;
+   return ewald;
+}  
+////////////////////////////////////////////////////////////////////////////////
+double EnergyFunctional::casino_vloc(void)
+{
+   //ewd:  calculate Ewald energy term
+   //ewd:  for debugging and CASINO output
+   const int ngloc = vbasis_->localsize();
+   const double fpi = 4.0 * M_PI;
+   const double vfact = vbasis_->real() ? 1.0 : 0.5;
+   const double omega = wf_.cell().volume();
+   const double *const g2i = vbasis_->g2i_ptr();
+   double tsum;
+   double casino_vloc = 0.0;
+   for ( int ig = 0; ig < ngloc; ig++ )
+      casino_vloc += real(vion_local_g[ig] * conj(rhoelg[ig]));
+   tsum = casino_vloc;
+   vbasis_->context().dsum(1,1,&tsum,1);
+   casino_vloc = tsum;
+
+   //ewd DEBUG
+   if ( s_.ctxt_.mype()==0 )
+      cout << "EF.CASINO_VLOC:  tsum = " << tsum << endl;
+   
+   return casino_vloc;
 }  
 ////////////////////////////////////////////////////////////////////////////////
 void EnergyFunctional::print(ostream& os) const

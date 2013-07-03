@@ -1404,6 +1404,15 @@ void BOSampleStepper::step(int niter)
         } // for itscf
         tmap["scfloop"].stop();
 
+         //ewd DEBUG
+        if (false)
+        {
+            double eewald = ef_.casino_ewald();
+            double evloc = ef_.casino_vloc();
+            double omega = wf.cell().volume();
+            if ( onpe0 )
+               cout << "CASINO.debug, ewald = " << eewald << ", eloc = " << evloc << ", volume = " << wf.cell().volume() << ", ehart = " << ef_.ehart() << endl;
+         }
 #ifdef TAU  
   QB_Pstop(scfloop);
 #endif
@@ -1803,12 +1812,12 @@ void BOSampleStepper::step(int niter)
      s_.ctxt_.dmax(1,1,&tmax,1);
      if ( s_.ctxt_.mype()==0 )
      {
-       cout << left << setw(34) << "<timing where=\"run\""
-           << setw(8) << " name=\""
-           << setw(15) << (*i).first << "\""
-           << " min=\"" << setprecision(3) << setw(9) << tmin << "\""
-           << " max=\"" << setprecision(3) << setw(9) << tmax << "\"/>"
-           << endl;
+        cout << left << setw(34) << "<timing where=\"run\""
+             << setw(8) << " name=\""
+             << setw(15) << (*i).first << "\""
+             << " min=\"" << setprecision(3) << setw(9) << tmin << "\""
+             << " max=\"" << setprecision(3) << setw(9) << tmax << "\"/>"
+             << endl;
      }
   }
 #endif  
