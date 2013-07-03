@@ -84,8 +84,9 @@ ifdef VERSION
 	cp qb-nruns-$(ARCH) $(INSTALLDIR)/$(NRUNSINSTALL)
 	chmod a+rx $(INSTALLDIR)/$(NRUNSINSTALL)
 	ln -sf $(INSTALLDIR)/$(NRUNSINSTALL) $(INSTALLDIR)/qb@ll-nruns
-#	cp ChangeLog $(INSTALLDIR)
-#	chmod a+r $(INSTALLDIR)/ChangeLog
+	svn log >! ChangeLog
+	cp ChangeLog $(INSTALLDIR)
+	chmod a+r $(INSTALLDIR)/ChangeLog
 	cp qbLink.h $(INSTALLDIR)/qblink/qbLink-$(VERSION).h
 	chmod a+r $(INSTALLDIR)/qblink/qbLink-$(VERSION).h
 	ln -sf $(INSTALLDIR)/qblink/qbLink-$(VERSION).h $(INSTALLDIR)/qblink/qbLink.h
@@ -98,7 +99,9 @@ endif
 
 link: $(OBJDIR)/qbLink.o $(QBOBJS)
 ifdef XERCESCDIR
-	mkdir $(OBJDIR)/qblink.tmp.$$$$ && cd $(OBJDIR)/qblink.tmp.$$$$ && $(AR) x $(SCALAPACKLIB) && $(AR) x $(FFTWLIB) && $(AR) x $(XERCESLIB) && cd ../.. && $(AR) cr $(OBJDIR)/libqblink-$(ARCH).a $(OBJDIR)/qblink.tmp.$$$$/*.o $^ && rm -rf $(OBJDIR)/qblink.tmp.$$$$
+# fix this for fftw case
+#	mkdir $(OBJDIR)/qblink.tmp.$$$$ && cd $(OBJDIR)/qblink.tmp.$$$$ && $(AR) -x $(SCALAPACKLIB) && $(AR) -x $(FFTWLIB) && $(AR) -x $(XERCESLIB) && cd ../.. && $(AR) -cr $(OBJDIR)/libqblink-$(ARCH).a $(OBJDIR)/qblink.tmp.$$$$/*.o $^ && rm -rf $(OBJDIR)/qblink.tmp.$$$$
+	mkdir $(OBJDIR)/qblink.tmp.$$$$ && cd $(OBJDIR)/qblink.tmp.$$$$ && $(AR) -x $(SCALAPACKLIB) && $(AR) -x $(XERCESLIB) && cd ../.. && $(AR) -cr $(OBJDIR)/libqblink-$(ARCH).a $(OBJDIR)/qblink.tmp.$$$$/*.o $^ && rm -rf $(OBJDIR)/qblink.tmp.$$$$
 else
 	mkdir $(OBJDIR)/qblink.tmp.$$$$ && cd $(OBJDIR)/qblink.tmp.$$$$ && $(AR) -x $(SCALAPACKLIB) && cd ../.. && $(AR) -cr $(OBJDIR)/libqblink-$(ARCH).a $(OBJDIR)/qblink.tmp.$$$$/*.o $^ && rm -rf $(OBJDIR)/qblink.tmp.$$$$
 endif
