@@ -1,4 +1,31 @@
 ------------------------------------------------------------------------
+r119 | draeger1 | 2013-07-03 13:13:51 -0700 (Wed, 03 Jul 2013) | 4 lines
+
+
+Minor tweak to Makefile.
+
+
+------------------------------------------------------------------------
+r118 | draeger1 | 2013-07-03 12:41:16 -0700 (Wed, 03 Jul 2013) | 4 lines
+
+
+Bug fix:  load -xml was resizing wavefunction with nrowmax=npes to test parallel k-point and spin checkpointing.  Removed this to deal with crashes on BG/Q, though that problem still needs to be solved.  
+
+
+------------------------------------------------------------------------
+r117 | draeger1 | 2013-07-03 10:40:24 -0700 (Wed, 03 Jul 2013) | 3 lines
+
+Removed omp pragmas from EnergyFunctional.C which caused incorrect results in some cases.
+
+
+------------------------------------------------------------------------
+r116 | draeger1 | 2013-07-01 09:41:20 -0700 (Mon, 01 Jul 2013) | 4 lines
+
+
+Fixed bug in save -casino that prevented the Basis from being printed for k-points that weren't on pe 0.
+
+
+------------------------------------------------------------------------
 r115 | draeger1 | 2013-06-18 12:17:02 -0700 (Tue, 18 Jun 2013) | 4 lines
 
 

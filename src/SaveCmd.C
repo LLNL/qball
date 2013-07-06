@@ -523,7 +523,6 @@ int SaveCmd::action(int argc, char **argv) {
                 os << ef_.ekin() << endl;
                 os << "Local potential energy (au per primitive cell)" << endl;
                 os << ef_.eps() << endl;
-                os << evloc << endl;
                 os << "Non-local potential energy (au per primitive cell)" << endl;
                 os << ef_.enl() << endl;
                 os << "Electron-electron energy (au per primitive cell)" << endl;

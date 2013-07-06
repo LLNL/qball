@@ -916,7 +916,7 @@ void Basis::print_casino(ostream& os) {
     }
     context().barrier();
   }
-  if (context().mype() == 0) 
+  if (context().myproc() == 0) 
     os << endl;
 }
 
