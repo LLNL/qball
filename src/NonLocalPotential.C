@@ -1971,8 +1971,8 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
           }
         }
 
+        tmap["fnl_allreduce"].start();                                       
         if (nstloc > 0) {
-          tmap["fnl_allreduce"].start();                                       
           // Allreduce fnl partial sum
           MPI_Comm basis_comm = basis_.context().comm();                       
           int fnl_size = nprnaloc*nstloc;                                   
@@ -1984,8 +1984,8 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
             MPI_Allreduce(&fnl_loc[0],&fnl_buf[0],fnl_size,                      
                           MPI_DOUBLE_COMPLEX,MPI_SUM,basis_comm);                        
           }
-          tmap["fnl_allreduce"].stop();                                        
         }
+        tmap["fnl_allreduce"].stop();                                        
                       
         // factor 2.0 in next line is: counting G, -G                        
         if (basis_.real())
