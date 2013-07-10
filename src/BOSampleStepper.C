@@ -1581,7 +1581,8 @@ void BOSampleStepper::step(int niter)
        cout << left << setw(34) << "<timing where=\"run\""
            << setw(24) << " name=\" iteration\""
              << " min=\"" << setprecision(3) << setw(9) << tmin << "\""
-             << " max=\"" << setprecision(3) << setw(9) << tmax << "\"/>"
+             << " max=\"" << setprecision(3) << setw(9) << tmax << "\""
+             << " count=\"" << setw(9) << 1 << "\"/>"
              << endl;
         cout << "</iteration>" << endl;
       }
@@ -1810,13 +1811,15 @@ void BOSampleStepper::step(int niter)
      double tmax = time;
      s_.ctxt_.dmin(1,1,&tmin,1);
      s_.ctxt_.dmax(1,1,&tmax,1);
+     uint64_t count = (*i).second.counts();
      if ( s_.ctxt_.mype()==0 )
      {
         cout << left << setw(34) << "<timing where=\"run\""
              << setw(8) << " name=\""
              << setw(15) << (*i).first << "\""
              << " min=\"" << setprecision(3) << setw(9) << tmin << "\""
-             << " max=\"" << setprecision(3) << setw(9) << tmax << "\"/>"
+             << " max=\"" << setprecision(3) << setw(9) << tmax << "\""
+             << " count=\"" << setw(9) << count << "\"/>"
              << endl;
      }
   }

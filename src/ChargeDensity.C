@@ -241,6 +241,7 @@ void ChargeDensity::print_timing()
       double time = (*i).second.real();
       double tmin = time;
       double tmax = time;
+      uint64_t count = (*i).second.counts();
       ctxt_.dmin(1,1,&tmin,1);
       ctxt_.dmax(1,1,&tmax,1);
       //if ( ctxt_.myproc()==0 ) {
@@ -249,7 +250,8 @@ void ChargeDensity::print_timing()
               << setw(8) << " name=\""
               << setw(15) << (*i).first << "\""
               << " min=\"" << setprecision(3) << setw(9) << tmin << "\""
-              << " max=\"" << setprecision(3) << setw(9) << tmax << "\"/>"
+              << " max=\"" << setprecision(3) << setw(9) << tmax << "\""
+              << " count=\"" << setw(9) << count << "\"/>"
               << endl;
       }
    }

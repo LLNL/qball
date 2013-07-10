@@ -56,14 +56,16 @@ void NonLocalPotential::print_timing(void) {
     double tmax = time;
     ctxt_.dmin(1,1,&tmin,1);
     ctxt_.dmax(1,1,&tmax,1);
+    uint64_t count = (*i).second.counts();
     //if ( ctxt_.myproc()==0 ) {
     if ( ctxt_.mype()==0 ) {
        cout << left << setw(34) << "<timing where=\"nonlocal\""
-           << setw(8) << " name=\""
-           << setw(15) << (*i).first << "\""
-           << " min=\"" << setprecision(3) << setw(9) << tmin << "\""
-           << " max=\"" << setprecision(3) << setw(9) << tmax << "\"/>"
-           << endl;
+            << setw(8) << " name=\""
+            << setw(15) << (*i).first << "\""
+            << " min=\"" << setprecision(3) << setw(9) << tmin << "\""
+            << " max=\"" << setprecision(3) << setw(9) << tmax << "\""
+            << " count=\"" << setw(9) << count << "\"/>"
+            << endl;
     }
   }
 }

@@ -128,7 +128,7 @@ int main(int argc, char **argv)
 
    int nthreads = omp_get_max_threads();
    if (mype == 0)
-      cout << "M = " << mm << " N = " << nn << " K = " << kk << " zgemm time = " << setprecision(5) << setw(8) << tm.real()<< " sec, GFlops = " << niter*(8.0e-9*mm*nn*kk) / tm.real() << " on " << npes << " pes, " << nthreads << " threads, niter = " << niter << endl;
+      cout << "M = " << mm << " N = " << nn << " K = " << kk << " zgemm time = " << setprecision(5) << setw(8) << tm.real()<< " sec, GFlops = " << npes*niter*(8.0e-9*mm*nn*kk) / tm.real() << " on " << npes << " pes, " << nthreads << " threads, niter = " << niter << endl;
  
 #ifdef USE_MPI
    MPI_Finalize();

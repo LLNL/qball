@@ -31,6 +31,7 @@
 
 #include <time.h>
 #include <sys/time.h>
+#include <stdint.h>
 
 class Timer
 {
@@ -39,10 +40,11 @@ class Timer
   clock_t clk;
   double t,total_cpu,total_real;
   int running_;
-
+  uint64_t nstart_;
+  
   public:
 
-  Timer() : total_cpu(0.0), total_real(0.0), running_(0) {};
+  Timer() : total_cpu(0.0), total_real(0.0), running_(0), nstart_(0) {};
 
   void reset() { total_cpu = 0.0; total_real = 0.0; running_ = 0; };
 
@@ -51,6 +53,7 @@ class Timer
     clk = clock();
     t = gtod();
     running_ = 1;
+    nstart_++;
   };
 
   int running() { return running_; };
@@ -96,5 +99,12 @@ class Timer
     gettimeofday(&tv,&tz);
     return tv.tv_sec + 1.e-6*tv.tv_usec;
   }
+
+  uint64_t counts(void)
+  {
+     return nstart_;
+  }
+
+
 };
 #endif

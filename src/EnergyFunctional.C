@@ -288,15 +288,17 @@ void EnergyFunctional::print_timing() {
     double time = (*i).second.real();
     double tmin = time;
     double tmax = time;
+    uint64_t count = (*i).second.counts();
     s_.ctxt_.dmin(1,1,&tmin,1);
     s_.ctxt_.dmax(1,1,&tmax,1);
     if ( s_.ctxt_.mype()==0 ) {
        cout << left << setw(34) << "<timing where=\"energy_functional\""
-           << setw(8) << " name=\""
-           << setw(15) << (*i).first << "\""
-           << " min=\"" << setprecision(3) << setw(9) << tmin << "\""
-           << " max=\"" << setprecision(3) << setw(9) << tmax << "\"/>"
-           << endl;
+            << setw(8) << " name=\""
+            << setw(15) << (*i).first << "\""
+            << " min=\"" << setprecision(3) << setw(9) << tmin << "\""
+            << " max=\"" << setprecision(3) << setw(9) << tmax << "\""
+            << " count=\"" << setw(9) << count << "\"/>"
+            << endl;
     }
   }
   for ( int ispin = 0; ispin < wf_.nspin(); ispin++ )
