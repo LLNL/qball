@@ -1214,7 +1214,7 @@ void BOSampleStepper::step(int niter)
                 for ( int ispin = 0; ispin < nspin; ispin++ ) {
                   int rhogflag = 1;
 
-                  if (cell_dyn == "LOCKED" && (atoms_dyn == "LOCKED" || dt == 0.0) && s_.rhog_last.size() == rhog_in[ispin].size()) {
+                  if (cell_dyn == "LOCKED" && (atoms_dyn == "LOCKED" || dt == 0.0) && s_.rhog_last[ispin].size() == rhog_in[ispin].size()) {
                      if (s_.rhog_last[ispin].size() == rhog_in[ispin].size()) {
                         rhogflag = 0;
                         for ( int i=0; i < rhog_in[ispin].size(); i++ ) 
@@ -1268,6 +1268,7 @@ void BOSampleStepper::step(int niter)
                 cd_.update_rhor();
               }              
             }
+
             //QB_Pstart(update_vhxc);
             ef_.update_vhxc();
             //QB_Pstop(update_vhxc);

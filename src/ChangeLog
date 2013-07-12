@@ -1,4 +1,25 @@
 ------------------------------------------------------------------------
+r122 | draeger1 | 2013-07-10 11:06:42 -0700 (Wed, 10 Jul 2013) | 4 lines
+
+
+Added counter to Timer.h so total number of calls is printed along with timing.
+
+
+------------------------------------------------------------------------
+r121 | draeger1 | 2013-07-09 20:18:32 -0700 (Tue, 09 Jul 2013) | 4 lines
+
+
+Fixed occasional hang bug when timings are printed, caused by NonLocalPotential having a tmap start/stop call inside an if (nstloc > 0) block for systems where nst/nb < npcol-1.
+
+
+------------------------------------------------------------------------
+r120 | draeger1 | 2013-07-05 18:24:10 -0700 (Fri, 05 Jul 2013) | 4 lines
+
+
+Casino output bug fixes.
+
+
+------------------------------------------------------------------------
 r119 | draeger1 | 2013-07-03 13:13:51 -0700 (Wed, 03 Jul 2013) | 4 lines
 
 

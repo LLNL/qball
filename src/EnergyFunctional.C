@@ -1534,7 +1534,7 @@ double EnergyFunctional::casino_ewald(void)
 
 
    //ewd DEBUG
-   if ( s_.ctxt_.mype()==0 )
+   if ( false && s_.ctxt_.mype()==0 )
       cout << "EF.EWALD:  tsum = " << tsum << ", esr = " << esr_ << ", eself = " << eself_ << endl;
    
    return ewald;
@@ -1558,7 +1558,7 @@ double EnergyFunctional::casino_vloc(void)
    casino_vloc = tsum;
 
    //ewd DEBUG
-   if ( s_.ctxt_.mype()==0 )
+   if ( false && s_.ctxt_.mype()==0 )
       cout << "EF.CASINO_VLOC:  tsum = " << tsum << endl;
    
    return casino_vloc;
