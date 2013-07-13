@@ -41,7 +41,7 @@ class Basis
 {
   private:
 
-  Context ctxt_;
+  const Context& ctxt_;
   int nprow_, myrow_;
 
   UnitCell cell_;         // cell dimensions
