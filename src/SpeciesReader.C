@@ -56,111 +56,6 @@ SpeciesReader::SpeciesReader(const Context& ctxt) : ctxt_(ctxt) {}
 ////////////////////////////////////////////////////////////////////////////////
 void SpeciesReader::readSpecies (Species& sp, const string uri)
 {
-#if 0
-  //#if USE_XERCES
-  if ( ctxt_.oncoutpe() )
-  {
-    const char* encodingName = "UTF-8";
-    //SAX2XMLReader::ValSchemes valScheme = SAX2XMLReader::Val_Auto;
-    //ewd disable validation for now to prevent "sample.xsd not found" errors
-    // when xml checkpointing not used
-    //SAX2XMLReader::ValSchemes valScheme = SAX2XMLReader::Val_Always;
-    SAX2XMLReader::ValSchemes valScheme = SAX2XMLReader::Val_Never;
-    bool expandNamespaces = false;
-    bool doNamespaces = true;
-    bool doSchema = true;
-    bool schemaFullChecking = true;
-    bool namespacePrefixes = false;
-    SAX2XMLReader* parser = 0;
- 
-    int ierr = 0;
-    try
-    {
-      XMLPlatformUtils::Initialize();
-    }
-    catch (const XMLException& toCatch)
-    {
-      cout << "  <!-- Species::readSpecies: Error during XML initialization :\n"
-           << StrX(toCatch.getMessage()) << " -->" << endl;
-      throw;
-    }
-
-    parser = XMLReaderFactory::createXMLReader();
-    if (valScheme == SAX2XMLReader::Val_Auto)
-    {
-        parser->setFeature(XMLUni::fgSAX2CoreValidation, true);
-        parser->setFeature(XMLUni::fgXercesDynamic, true);
-    }
-
-    if (valScheme == SAX2XMLReader::Val_Never)
-    {
-        parser->setFeature(XMLUni::fgSAX2CoreValidation, false);
-    }
-
-    if (valScheme == SAX2XMLReader::Val_Always)
-    {
-        parser->setFeature(XMLUni::fgSAX2CoreValidation, true);
-        parser->setFeature(XMLUni::fgXercesDynamic, false);
-    }
-
-    parser->setFeature(XMLUni::fgSAX2CoreNameSpaces, doNamespaces);
-    parser->setFeature(XMLUni::fgXercesSchema, doSchema);
-    parser->setFeature(XMLUni::fgXercesSchemaFullChecking, schemaFullChecking);
-    parser->setFeature(XMLUni::fgSAX2CoreNameSpacePrefixes, namespacePrefixes);
-
-    int errorCount = 0;
- 
-    int nlink = 0;
-    string current_uri = uri;
- 
-    while ( sp.description() == "undefined" && nlink++ < 5 )
-    {
-      try
-      {
-        SpeciesHandler* sp_handler = new SpeciesHandler(sp);
-        StructuredDocumentHandler handler(sp_handler);
-        parser->setContentHandler(&handler);
-        parser->setErrorHandler(&handler);
-        parser->parse(current_uri.c_str());
-        errorCount = parser->getErrorCount();
-        delete sp_handler;
-      }
-
-      catch (const XMLException& toCatch)
-      {
-          cout << "\nAn error occurred\n  Error: "
-               << StrX(toCatch.getMessage())
-               << "\n" << endl;
-          XMLPlatformUtils::Terminate();
-          delete parser;
-          throw;
-      }
-
-      catch (const SAXParseException& e)
-      {
-          cout << "\na SAXParseException occurred in file "
-               << StrX(e.getSystemId())
-               << ", line " << e.getLineNumber()
-               << ", char " << e.getColumnNumber()
-               << "\n  Message: " << StrX(e.getMessage()) << endl;
-          XMLPlatformUtils::Terminate();
-          delete parser;
-          throw;
-      }
- 
-      if ( sp.description() == "undefined" )
-        current_uri = sp.uri();
-    }
-    sp.uri_ = current_uri;
-
-    delete parser;
-    XMLPlatformUtils::Terminate();
-  }
-  
-#else
-
-  // USE_XERCES is not defined
-
   // Simplified parsing not using Xerces
   // parse file uri
   
@@ -464,24 +359,65 @@ void SpeciesReader::readSpecies (Species& sp, const string uri)
           // if l is not the local potential, there must be a radial function
           assert(start != string::npos );
         }
- 
+
         if ( start != string::npos )
         {
-          start = buf.find(">",start)+1;
-          end = buf.find(end_tag,start);
-          pos = buf.find(">",end)+1;
-          len = end - start;
-          {
-            istringstream stst(buf.substr(start,len));
-            for ( int i = 0; i < size; i++ )
-            {
-              stst >> sp.phi_[l][i];
-              //cout << sp.phi_[l][i] << endl;
-            }
-          }
-          cout << "  <!-- SpeciesReader::readSpecies: read " << tag << " l="
-               << l << " size=" << size << " -->" << endl;
+           start = buf.find(">",start)+1;
+           end = buf.find(end_tag,start);
+           pos = buf.find(">",end)+1;
+           len = end - start;
+           {
+              istringstream stst(buf.substr(start,len));
+              for ( int i = 0; i < size; i++ )
+              {
+                 stst >> sp.phi_[l][i];
+                 //cout << sp.phi_[l][i] << endl;
+              }
+           }
+           cout << "  <!-- SpeciesReader::readSpecies: read " << tag << " l="
+                << l << " size=" << size << " -->" << endl;
         }
+      }
+      
+      // read rho_nlcc
+      tag = "rho_nlcc";
+      start_tag = string("<") + tag;
+      start = buf.find(start_tag,pos);
+      if (start != string::npos ) {
+         pos = buf.find("size=",pos)+6;
+         start = pos;
+         end = buf.find("\"",start);
+         len = end - start;
+         int size;
+         {
+            istringstream stst(buf.substr(start,len));
+            stst >> size;
+         }
+         sp.rhor_nlcc_.resize(size);
+         sp.nlcc_ = true;
+         cout << "  <!-- SpeciesReader::readSpecies: nlcc found. -->" << endl;
+         
+         ostringstream oss;
+         oss << size;
+         start_tag = string("<") + tag + string(" size=\"") + oss.str() + string("\"") + string(">");
+         end_tag = string("</") + tag + string(">");
+         pos -= 128;  // back position index up a line or two
+         start = buf.find(start_tag,pos);
+         if ( start != string::npos )
+         {
+            start = buf.find(">",start)+1;
+            end = buf.find(end_tag,start);
+            pos = buf.find(">",end)+1;
+            len = end - start;
+            {
+               istringstream stst(buf.substr(start,len));
+               for ( int i = 0; i < size; i++ )
+               {
+                  stst >> sp.rhor_nlcc_[i];
+               }
+            }
+            cout << "  <!-- SpeciesReader::readSpecies: read " << tag << " size=" << size << " -->" << endl;
+         }
       }
     }
     else {   // read ultrasoft functions
@@ -850,7 +786,6 @@ void SpeciesReader::readSpecies (Species& sp, const string uri)
     
     sp.uri_ = uri;
   }
-#endif
 }
 
 ////////////////////////////////////////////////////////////////////////////////

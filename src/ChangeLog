@@ -1,4 +1,18 @@
 ------------------------------------------------------------------------
+r124 | draeger1 | 2013-07-12 17:17:11 -0700 (Fri, 12 Jul 2013) | 4 lines
+
+
+Modified Wavefunction(const& Wavefunction) constructor so that new subcommunicators were not being created for single-column contexts each and every time it was called, instead calling the Context(const& Context) constructor.  This should fix the "Out of communicators" error on BG/Q when npcol > 128.
+
+
+------------------------------------------------------------------------
+r123 | draeger1 | 2013-07-12 12:16:07 -0700 (Fri, 12 Jul 2013) | 4 lines
+
+
+Fixed bug where mixed charge density was not loaded from checkpoint or between run statements.
+
+
+------------------------------------------------------------------------
 r122 | draeger1 | 2013-07-10 11:06:42 -0700 (Wed, 10 Jul 2013) | 4 lines
 
 

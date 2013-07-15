@@ -238,8 +238,8 @@ void SlaterDet::resize(const UnitCell& cell, const UnitCell& refcell,
        m = newmaxlocal*ctxt_.nprow();
     }
 
-    //ewd: don't allow values of nb which leave one or more process columns empty (causes
-    //     hangs when printing timing)
+    /*
+    //ewd: don't allow values of nb which leave one or more process columns empty
     int nbtest = n/nb;
     if (nbtest < (ctxt_.npcol()-1))
     {
@@ -248,6 +248,7 @@ void SlaterDet::resize(const UnitCell& cell, const UnitCell& refcell,
           cout << "<WARNING> Block size nb = " << nb << " leaves process columns without data.  Increasing to " << tmpnb << ". </WARNING>" << endl;
        nb = tmpnb;
     }
+    */
     
     // Determine if plane wave coefficients must be reset after the resize
     // This is needed if the dimensions of the matrix c_ must be changed
@@ -373,8 +374,8 @@ void SlaterDet::reshape(const Context& newctxt, const Context& new_col_ctxt, boo
        m = newmaxlocal*ctxt_.nprow();
     }
 
-    //ewd: don't allow values of nb which leave one or more process columns empty (causes
-    //     hangs when printing timing)
+    /*
+    //ewd: don't allow values of nb which leave one or more process columns empty
     int tmpnst = ctmp.n();
     int nbtest = tmpnst/nb;
     if (nbtest < (ctxt_.npcol()-1))
@@ -384,7 +385,8 @@ void SlaterDet::reshape(const Context& newctxt, const Context& new_col_ctxt, boo
           cout << "<WARNING> Block size nb = " << nb << " leaves process columns without data.  Increasing to " << tmpnb << ". </WARNING>" << endl;
        nb = tmpnb;
     }
-
+    */
+    
     if (setnewctxt)
       ctxt_ = newctxt;
     c_.set_context(newctxt);
