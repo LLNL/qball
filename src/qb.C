@@ -80,6 +80,7 @@ using namespace std;
 #include "ParOptCmd.h"
 #include "LockCmd.h"
 #include "UnlockCmd.h"
+#include "SetVelCmd.h"
 #include "ComputeMLWFCmd.h"
 #include "AngleCmd.h"
 #include "ConstraintCmd.h"
@@ -349,6 +350,7 @@ int main(int argc, char **argv, char **envp)
   ui->addCmd(new ParOptCmd(s));
   ui->addCmd(new LockCmd(s));
   ui->addCmd(new UnlockCmd(s));
+  ui->addCmd(new SetVelCmd(s));
   ui->addCmd(new ComputeMLWFCmd(s));
   ui->addCmd(new ConstraintCmd(s));
   ui->addCmd(new ShiftWFCmd(s));
