@@ -715,7 +715,7 @@ void AtomSet::randomize_velocities(double temp) {
    // distribute velocity components w. Maxwell-Boltzmann distribution, i.e.
    // each momentum component should have a normal distribution centered about
    // zero with a variance of m*kT
-   const double boltz = 1.0 / ( 11605.0 * 13.6058 ); // convert from Kelvin to Ry
+   const double boltz = 1.0 / ( 11605.0 * 2.0 * 13.6058 ); // convert from Kelvin to Ha
    D3vector vrand;
    for ( int is = 0; is < atom_list.size(); is++ ) {
       double mass = species_list[is]->mass()*1822.89;
@@ -725,11 +725,16 @@ void AtomSet::randomize_velocities(double temp) {
          {
             double u,v;
             double r = 0.0;
-            while (r == 0.0 || r > 1.0) { // force r within 0 < r <= 1
+            int rcnt = 0;
+            while (rcnt < 100 && (r == 0.0 || r > 1.0)) { // force r within 0 < r <= 1
                u = 2.*drand48()-1.;
                v = 2.*drand48()-1.;
                r = u*u + v*v;
+               rcnt++;
             }
+            if (rcnt >= 100)
+               cout << "<ERROR> AtomSet::randomize_velocities failed on task " << ctxt_.mype() << " </ERROR>" << endl;
+
             double c = sqrt(-2.*log(r)/r);
             vrand[i] = c*u*norm/mass;
          }
@@ -774,7 +779,12 @@ void AtomSet::randomize_velocities(double temp) {
       }
    }
 
-   double scale = sqrt(boltz*temp/ekin_);
+   // compute ndofs = 3*natot ignoring constraints for now
+   int natot = 0;
+   for ( int is = 0; is < atom_list.size(); is++ )
+      natot += atom_list[is].size();
+
+   double scale = sqrt(boltz*temp*3.*natot/(2.*ekin_));
    for ( int is = 0; is < atom_list.size(); is++ ) {
       double mass = species_list[is]->mass()*1822.89;
       for ( int ia = 0; ia < atom_list[is].size(); ia++ ) {
@@ -809,7 +819,7 @@ void AtomSet::randomize_velocities(double temp) {
       }
    }
    if (ctxt_.oncoutpe())
-      cout << "<!-- AtomSet::randomize_velocities:  kinetic energy = " << ekin_/boltz << " K, temp = " << temp << " K -->" << endl;
+      cout << "<!-- AtomSet::randomize_velocities:  average kinetic energy = " << ekin_/boltz/(1.5*natot) << " K, target temp = " << temp << " K -->" << endl;
    //ewd DEBUG
    
 

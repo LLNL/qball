@@ -1,4 +1,11 @@
 ------------------------------------------------------------------------
+r125 | draeger1 | 2013-07-15 09:20:09 -0700 (Mon, 15 Jul 2013) | 4 lines
+
+
+Added parsing for non-linear core corrections with norm-conserving pseudopotentials to SpeciesReader.C.  
+
+
+------------------------------------------------------------------------
 r124 | draeger1 | 2013-07-12 17:17:11 -0700 (Fri, 12 Jul 2013) | 4 lines
 
 
