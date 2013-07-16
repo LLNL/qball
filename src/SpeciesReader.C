@@ -348,35 +348,42 @@ void SpeciesReader::readSpecies (Species& sp, const string uri)
         sp.phi_.resize(sp.phi_.size()+1);
         sp.phi_[l].resize(size);
  
-        // read radial function only if the radial_function tag was found
+        // read radial function only if the radial_function tag was found, for nonlocal potentials
  
-        tag = "radial_function";
-        start_tag = string("<") + tag + string(">");
-        end_tag = string("</") + tag + string(">");
-        start = buf.find(start_tag,pos);
+        if ( l != sp.llocal_ )
+        {
+           tag = "radial_function";
+           start_tag = string("<") + tag + string(">");
+           end_tag = string("</") + tag + string(">");
+           start = buf.find(start_tag,pos);
+
+        /*
         if ( l != sp.llocal_ )
         {
           // if l is not the local potential, there must be a radial function
           assert(start != string::npos );
         }
-
-        if ( start != string::npos )
-        {
-           start = buf.find(">",start)+1;
-           end = buf.find(end_tag,start);
-           pos = buf.find(">",end)+1;
-           len = end - start;
+        */
+        
+           if ( start != string::npos )
            {
-              istringstream stst(buf.substr(start,len));
-              for ( int i = 0; i < size; i++ )
+              start = buf.find(">",start)+1;
+              end = buf.find(end_tag,start);
+              pos = buf.find(">",end)+1;
+              len = end - start;
               {
-                 stst >> sp.phi_[l][i];
-                 //cout << sp.phi_[l][i] << endl;
+                 istringstream stst(buf.substr(start,len));
+                 for ( int i = 0; i < size; i++ )
+                 {
+                    stst >> sp.phi_[l][i];
+                    //cout << sp.phi_[l][i] << endl;
+                 }
               }
+              cout << "  <!-- SpeciesReader::readSpecies: read " << tag << " l="
+                   << l << " size=" << size << " -->" << endl;
            }
-           cout << "  <!-- SpeciesReader::readSpecies: read " << tag << " l="
-                << l << " size=" << size << " -->" << endl;
         }
+        
       }
       
       // read rho_nlcc
@@ -393,6 +400,7 @@ void SpeciesReader::readSpecies (Species& sp, const string uri)
             istringstream stst(buf.substr(start,len));
             stst >> size;
          }
+
          sp.rhor_nlcc_.resize(size);
          sp.nlcc_ = true;
          cout << "  <!-- SpeciesReader::readSpecies: nlcc found. -->" << endl;
