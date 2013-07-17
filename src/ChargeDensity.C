@@ -364,7 +364,9 @@ void ChargeDensity::update_density() {
                   int one = 1;
                   char cn='n';
                   int sumlocsize = nqtot*atoms_.usloc_nat[is]; // want to multiply chunk of summat that matches local qnmg 
-                  int sumind0 = nqtot*atoms_.usloc_atind[is][0];
+                  int sumind0 = 0;
+                  if (atoms_.usloc_atind[is].size() > 0)
+                     sumind0 = nqtot*atoms_.usloc_atind[is][0];
                   if (sumlocsize > 0 && ngwl > 0)
                     zgemm(&cn,&cn,(int*)&ngwl,&one,&sumlocsize,&zone,&qnmg_[is][0],
                           (int*)&ngwl,&summat[sumind0],&sumlocsize,&zone,&rhogus[0],
@@ -375,9 +377,12 @@ void ChargeDensity::update_density() {
                    int naloc = atoms_.usloc_nat[is];
                    vector<complex<double> > tmpmult(naloc*ngwl);
                    vector<complex<double> > summatloc(nqtot*naloc);
-                   int ialoc0 = atoms_.usloc_atind[is][0];
+                   int ialoc0 = -1;
+                   if (atoms_.usloc_atind[is].size() > 0)
+                      ialoc0 = atoms_.usloc_atind[is][0];
                    for (int ibl=0; ibl<naloc; ibl++)
                    {
+                      assert(ialoc0 >= 0);
                       int ia = ialoc0 + ibl;
                       for (int qind=0; qind<nqtot; qind++)
                          summatloc[naloc*qind + ibl] = summat[nqtot*ia+qind];
@@ -779,7 +784,9 @@ void ChargeDensity::update_usfns() {
            const double *const gx = vbasis_->gx_ptr(0);
            const double *const gy = vbasis_->gx_ptr(1);
            const double *const gz = vbasis_->gx_ptr(2);
-           int ialoc0 = atoms_.usloc_atind[is][0];
+           int ialoc0 = -1;
+           if (atoms_.usloc_atind[is].size() > 0)
+              ialoc0 = atoms_.usloc_atind[is][0];
            for (int ig=0; ig<ngwl; ig++) {
               for (int ialoc=0; ialoc<naloc; ialoc++) {
                  int ia = ialoc0 + ialoc;
