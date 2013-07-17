@@ -114,7 +114,7 @@ int RunCmd::action(int argc, char **argv)
   }
 
   // check if hamil_wf needs to be constructed
-  if (s->hamil_wf == 0)
+  if (s->ctrl.tddft_involved && s->hamil_wf == 0)
   {
      if (ui->oncoutpe())
         cout << "<INFO> s->hamil_wf has not been initialized, calling constructor. </INFO>" << endl;

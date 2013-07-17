@@ -1,4 +1,11 @@
 ------------------------------------------------------------------------
+r129 | draeger1 | 2013-07-16 12:29:05 -0700 (Tue, 16 Jul 2013) | 4 lines
+
+
+Fixed bug in SpeciesReader where potentials whose local channel did not have a radial_function defined and where lloc < lmax were trying to skip ahead to the next radial_function and then crashing the loop.  
+
+
+------------------------------------------------------------------------
 r128 | draeger1 | 2013-07-16 10:50:52 -0700 (Tue, 16 Jul 2013) | 4 lines
 
 
