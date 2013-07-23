@@ -1,4 +1,18 @@
 ------------------------------------------------------------------------
+r131 | draeger1 | 2013-07-17 11:42:30 -0700 (Wed, 17 Jul 2013) | 4 lines
+
+
+Fixed bug where ultrasoft runs with a single atom of a given species can crash when nrowmax != npes.
+
+
+------------------------------------------------------------------------
+r130 | draeger1 | 2013-07-17 11:29:25 -0700 (Wed, 17 Jul 2013) | 4 lines
+
+
+Don't initialize hamil_wf unless ctrl.tddft_involved is true, causes crash with ultrasoft.
+
+
+------------------------------------------------------------------------
 r129 | draeger1 | 2013-07-16 12:29:05 -0700 (Tue, 16 Jul 2013) | 4 lines
 
 

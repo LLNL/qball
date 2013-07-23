@@ -46,6 +46,7 @@ struct Control
   double ecutprec;
 
   string wf_diag;
+  string wf_extrap;
   // AS: control the calculation of the total energy during non-selfconsistent electronic steps
   bool non_selfc_energy; 
 

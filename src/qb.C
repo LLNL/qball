@@ -131,6 +131,7 @@ using namespace std;
 #include "CenterOfMass.h"
 #include "WfDiag.h"
 #include "WfDyn.h"
+#include "WfExtrap.h"
 #include "WFPhaseRealVar.h"
 #include "Xc.h"
 #include "Nparallelkpts.h"
@@ -392,6 +393,7 @@ int main(int argc, char **argv, char **envp)
   ui->addVar(new CenterOfMass(s));
   ui->addVar(new WfDiag(s));
   ui->addVar(new WfDyn(s));
+  ui->addVar(new WfExtrap(s));
   ui->addVar(new Xc(s));
   ui->addVar(new Nparallelkpts(s));
   ui->addVar(new Nkpoints(s));

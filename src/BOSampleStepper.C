@@ -203,13 +203,6 @@ void BOSampleStepper::step(int niter)
   const string atoms_dyn = s_.ctrl.atoms_dyn;
   const string cell_dyn = s_.ctrl.cell_dyn;
 
-  const bool extrapolate_wf = atoms_dyn == "MD";
-
-  const bool ntc_extrapolation =
-    s_.ctrl.debug.find("NTC_EXTRAPOLATION") != string::npos;
-  const bool asp_extrapolation =
-    s_.ctrl.debug.find("ASP_EXTRAPOLATION") != string::npos;
-
   //ewd check for case where PSDA used (incorrectly) with nite = 1 and empty states
   if (wf_dyn == "PSDA" && nite_ == 0 && compute_eigvec) {
     if ( onpe0 ) {
@@ -218,10 +211,10 @@ void BOSampleStepper::step(int niter)
     }
     return;
   }
-
   
+  const bool extrapolate_wf = (atoms_dyn == "MD" && s_.ctrl.wf_extrap != "OFF");
   Wavefunction* wfmm;
-  if ( extrapolate_wf && ( ntc_extrapolation || asp_extrapolation ) )
+  if ( extrapolate_wf && ( s_.ctrl.wf_extrap == "NTC" || s_.ctrl.wf_extrap == "NTC" ) ) 
     wfmm = new Wavefunction(wf);
 
   // Next lines: special value of niter = 0: GS calculation only
@@ -862,7 +855,7 @@ void BOSampleStepper::step(int niter)
               if (s_.wf.kptactive(ikp))
               {
                 assert(s_.wf.sd(ispin,ikp) != 0);
-                if ( ntc_extrapolation )
+                if (s_.ctrl.wf_extrap == "NTC")
                 {
                   double* c = (double*) s_.wf.sd(ispin,ikp)->c().cvalptr();
                   double* cv = (double*) s_.wfv->sd(ispin,ikp)->c().cvalptr();
@@ -952,7 +945,7 @@ void BOSampleStepper::step(int niter)
                   }
                   // c[i] is now ready for electronic iterations
                 }
-                else if ( asp_extrapolation )
+                else if (s_.ctrl.wf_extrap == "ASP")
                 {
                   double* c = (double*) s_.wf.sd(ispin,ikp)->c().cvalptr();
                   double* cv = (double*) s_.wfv->sd(ispin,ikp)->c().cvalptr();
@@ -1037,7 +1030,7 @@ void BOSampleStepper::step(int niter)
                   }
                   // c[i] is now ready for electronic iterations
                 }
-                else // normal extrapolation
+                else if (s_.ctrl.wf_extrap == "SIMPLE")
                 {
                   double* c = (double*) s_.wf.sd(ispin,ikp)->c().cvalptr();
                   double* cv = (double*) s_.wfv->sd(ispin,ikp)->c().cvalptr();
@@ -1938,7 +1931,7 @@ void BOSampleStepper::step(int niter)
             double dt_inv;
             if (dt == 0.0) dt_inv = 0.0;
             else dt_inv = 1.0 / dt;
-            if ( ntc_extrapolation )
+            if (s_.ctrl.wf_extrap == "NTC")
             {
               double* cmm = (double*) wfmm->sd(ispin,ikp)->c().cvalptr();
               for ( int i = 0; i < len; i++ )
@@ -1951,7 +1944,7 @@ void BOSampleStepper::step(int niter)
               s_.wf.sd(ispin,ikp)->gram();
               tmap["gram"].stop();
             }
-            else // normal extrapolation or asp_extrapolation
+            else if (s_.ctrl.wf_extrap == "SIMPLE" || s_.ctrl.wf_extrap == "ASP" )
             {
               for ( int i = 0; i < len; i++ )
               {
@@ -2029,7 +2022,8 @@ void BOSampleStepper::step(int niter)
 
   // delete preconditioner
   if ( use_preconditioner ) delete preconditioner;
-  if ( ntc_extrapolation || asp_extrapolation ) delete wfmm;
+  if ( s_.ctrl.wf_extrap == "NTC" || s_.ctrl.wf_extrap == "NTC" ) 
+     delete wfmm;
 
   // delete Hugoniostat
   if (hugstat != 0) delete hugstat;
