@@ -918,6 +918,33 @@ void SpeciesReader::bcastSpecies(Species& sp)
         ctxt_.dbcast_recv(np_phi,1,&sp.phi_[l][0],np_phi,irow,icol);
       }
     }
+
+    // broadcast nlcc density, if any
+    int np_nlcc;
+    if ( ctxt_.oncoutpe() )
+    {
+      np_nlcc = sp.rhor_nlcc_.size();
+      ctxt_.ibcast_send(1,1,&np_nlcc,1);
+      if (np_nlcc > 0)
+         ctxt_.dbcast_send(np_nlcc,1,&sp.rhor_nlcc_[0],np_nlcc);
+    }
+    else
+    {
+      // calculate row and col indices of process oncoutpe
+      int irow = ctxt_.coutpe();
+      while (irow >= ctxt_.nprow())
+        irow -= ctxt_.nprow();
+      int icol = int (ctxt_.coutpe()/ctxt_.nprow());
+      assert(ctxt_.pmap(irow,icol) == ctxt_.coutpe());
+      
+      ctxt_.ibcast_recv(1,1,&np_nlcc,1,irow,icol);
+         
+      if (np_nlcc > 0) {
+         sp.rhor_nlcc_.resize(np_nlcc);
+         ctxt_.dbcast_recv(np_nlcc,1,&sp.rhor_nlcc_[0],np_nlcc,irow,icol);         
+      }
+    }
+
   }
   else {  // ultrasoft
 
@@ -1087,13 +1114,11 @@ void SpeciesReader::bcastSpecies(Species& sp)
       assert(ctxt_.pmap(irow,icol) == ctxt_.coutpe());
       
       ctxt_.ibcast_recv(1,1,&np_nlcc,1,irow,icol);
+         
       if (np_nlcc > 0) {
          sp.rhor_nlcc_.resize(np_nlcc);
-         ctxt_.dbcast_recv(np_nlcc,1,&sp.rhor_nlcc_[0],np_nlcc,irow,icol);
+         ctxt_.dbcast_recv(np_nlcc,1,&sp.rhor_nlcc_[0],np_nlcc,irow,icol);         
       }
     }
-
-
-    
   }
 }
