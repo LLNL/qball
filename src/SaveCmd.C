@@ -225,14 +225,16 @@ int SaveCmd::action(int argc, char **argv) {
                 if ( i == wfctxt->myrow() ) {
                    int size = ft_->np012loc();
                    wfctxt->isend(1,1,&size,1,0,0);
-                   wfctxt->dsend(size,1,&rhortmp[0],1,0,0);
+                   if (size > 0)
+                      wfctxt->dsend(size,1,&rhortmp[0],1,0,0);
                 }
              }
              if ( wfctxt->onpe0() ) {
                 for ( int i = 0; i < wfctxt->nprow(); i++ ) {
                    int size = 0;
                    wfctxt->irecv(1,1,&size,1,i,0);
-                   wfctxt->drecv(size,1,&rhortmp[0],1,i,0);
+                   if (size > 0)
+                      wfctxt->drecv(size,1,&rhortmp[0],1,i,0);
                    os.write((char*)&rhortmp[0],sizeof(double)*size);
                 }
                 os.close();
@@ -322,14 +324,16 @@ int SaveCmd::action(int argc, char **argv) {
                 if ( i == wfctxt->myrow() ) {
                    int size = ft_->np012loc();
                    wfctxt->isend(1,1,&size,1,0,0);
-                   wfctxt->dsend(size,1,&rhortmp[0],1,0,0);
+                   if (size > 0)
+                      wfctxt->dsend(size,1,&rhortmp[0],1,0,0);
                 }
              }
              if ( wfctxt->onpe0() ) {
                 for ( int i = 0; i < wfctxt->nprow(); i++ ) {
                    int size = 0;
                    wfctxt->irecv(1,1,&size,1,i,0);
-                   wfctxt->drecv(size,1,&rhortmp[0],1,i,0);
+                   if (size > 0)
+                      wfctxt->drecv(size,1,&rhortmp[0],1,i,0);
                    os.write((char*)&rhortmp[0],sizeof(double)*size);
                 }
                 os.close();
@@ -419,14 +423,16 @@ int SaveCmd::action(int argc, char **argv) {
                 if ( i == wfctxt->myrow() ) {
                    int size = ft_->np012loc();
                    wfctxt->isend(1,1,&size,1,0,0);
-                   wfctxt->dsend(size,1,&rhortmp[0],1,0,0);
+                   if (size > 0)
+                      wfctxt->dsend(size,1,&rhortmp[0],1,0,0);
                 }
              }
              if ( wfctxt->onpe0() ) {
                 for ( int i = 0; i < wfctxt->nprow(); i++ ) {
                    int size = 0;
                    wfctxt->irecv(1,1,&size,1,i,0);
-                   wfctxt->drecv(size,1,&rhortmp[0],1,i,0);
+                   if (size > 0)
+                      wfctxt->drecv(size,1,&rhortmp[0],1,i,0);
                    os.write((char*)&rhortmp[0],sizeof(double)*size);
                 }
                 os.close();
@@ -582,7 +588,8 @@ int SaveCmd::action(int argc, char **argv) {
         if ( i == wfctxt->myrow() ) {
           int size = ft_->np012loc();
           wfctxt->isend(1,1,&size,1,0,0);
-          wfctxt->dsend(size,1,&rhortmp[0],1,0,0);
+          if (size > 0)
+             wfctxt->dsend(size,1,&rhortmp[0],1,0,0);
         }
       }
       if ( wfctxt->oncoutpe() ) {
@@ -608,7 +615,8 @@ int SaveCmd::action(int argc, char **argv) {
         for ( int i = 0; i < wfctxt->nprow(); i++ ) {
           int size = 0;
           wfctxt->irecv(1,1,&size,1,i,0);
-          wfctxt->drecv(size,1,&tmprecv[recvoffset],1,i,0);
+          if (size > 0)
+             wfctxt->drecv(size,1,&tmprecv[recvoffset],1,i,0);
           recvoffset += size;
 
           if (i==0) {

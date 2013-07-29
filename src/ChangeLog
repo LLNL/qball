@@ -1,4 +1,11 @@
 ------------------------------------------------------------------------
+r133 | draeger1 | 2013-07-24 11:38:03 -0700 (Wed, 24 Jul 2013) | 4 lines
+
+
+Bug fix in r128 didn't actually fix the underlying bug, which was the nlcc density not being broadcast to other tasks by SpeciesReader for norm-conserving pseudopotentials.  Fixed in this revision.
+
+
+------------------------------------------------------------------------
 r132 | draeger1 | 2013-07-23 10:30:13 -0700 (Tue, 23 Jul 2013) | 4 lines
 
 

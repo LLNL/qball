@@ -47,7 +47,7 @@ int SavedenCmd::action(int argc, char **argv) {
   }
 
   char* filename = argv[1];
-  string format = "gopenmol";
+  string format = "vmd";
   for ( int i = 1; i < argc; i++ ) {
     string arg(argv[i]);
     if ( arg == "-text" )
@@ -117,7 +117,8 @@ int SavedenCmd::action(int argc, char **argv) {
         if ( i == wfctxt->myrow() ) {
           int size = ft_->np012loc();
           wfctxt->isend(1,1,&size,1,0,0);
-          wfctxt->dsend(size,1,&rhortmp[0],1,0,0);
+          if (size > 0)
+             wfctxt->dsend(size,1,&rhortmp[0],1,0,0);
         }
       }
       if ( wfctxt->oncoutpe() ) {
@@ -137,7 +138,8 @@ int SavedenCmd::action(int argc, char **argv) {
         for ( int i = 0; i < wfctxt->nprow(); i++ ) {
           int size = 0;
           wfctxt->irecv(1,1,&size,1,i,0);
-          wfctxt->drecv(size,1,&tmprecv[recvoffset],1,i,0);
+          if (size > 0)
+             wfctxt->drecv(size,1,&tmprecv[recvoffset],1,i,0);
           recvoffset += size;
 
           if (i==0) {
@@ -214,7 +216,8 @@ int SavedenCmd::action(int argc, char **argv) {
               //cout << " process " << ctxt_->mype() << " sending block " << i
               //     << " of density to task 0, size = " << size << endl;
               ctxt_->isend(1,1,&size,1,0,0);
-              ctxt_->dsend(size,1,&rhortmp[0],1,0,0);
+              if (size > 0)
+                 ctxt_->dsend(size,1,&rhortmp[0],1,0,0);
            }
         }
         if ( ctxt_->oncoutpe() ) {
@@ -224,7 +227,8 @@ int SavedenCmd::action(int argc, char **argv) {
               //int istart = cd_.vft.np0() * cd_.vft.np1() * cd_.vft.np2_first(i);
               //cout << " process " << ctxt_->mype() << " receiving block " << i
               //     << " of density on task 0, size = " << size << endl;
-              ctxt_->drecv(size,1,&rhortmp[0],1,i,0);
+              if (size > 0)
+                 ctxt_->drecv(size,1,&rhortmp[0],1,i,0);
 
               //ewd DEBUG
               for (int j=0; j<size; j++) 
