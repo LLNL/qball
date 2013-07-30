@@ -152,7 +152,7 @@ int SaveESPCmd::action(int argc, char **argv)
         rhog[ig] = omega_inv * ( cd_.rhog[0][ig] + cd_.rhog[1][ig] ) + rhopst[ig];
 
   // vhart_g = 4 * pi * (rhoel + rhops) * g2i
-  v_g.resize(ft_->np012loc());
+  v_g.resize(ngloc);
   for ( int ig = 0; ig < ngloc; ig++ ) 
      v_g[ig] = fpi * rhog[ig] * g2i[ig];
  

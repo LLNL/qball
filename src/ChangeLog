@@ -1,4 +1,11 @@
 ------------------------------------------------------------------------
+r134 | draeger1 | 2013-07-29 13:15:31 -0700 (Mon, 29 Jul 2013) | 4 lines
+
+
+Updated saveesp command to include VMD, molmol and gopenmol support and added extra if block for all save commands to avoid calling dsend and isend on data from tasks where np012loc == 0.
+
+
+------------------------------------------------------------------------
 r133 | draeger1 | 2013-07-24 11:38:03 -0700 (Wed, 24 Jul 2013) | 4 lines
 
 
