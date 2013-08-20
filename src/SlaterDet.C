@@ -49,11 +49,12 @@ using namespace std;
 ////////////////////////////////////////////////////////////////////////////////
 SlaterDet::SlaterDet(Context& ctxt, const Context& my_col_ctxt, D3vector kpoint,
                      bool ultrasoft, bool force_complex) : ctxt_(ctxt), c_(ctxt),
-                                                           ctxtsq_(ctxt), spsi_(ctxt)
+                                                           ctxtsq_(ctxt), spsi_(ctxt),
+                                                           col_ctxt_(my_col_ctxt)
 {
   ultrasoft_ = ultrasoft;
   force_complex_ = (ultrasoft_ || force_complex);
-  basis_ = new Basis(my_col_ctxt,kpoint,force_complex_);
+  basis_ = new Basis(col_ctxt_,kpoint,force_complex_);
   gram_reshape_ = false;
   highmem_ = false;
   // set seed for randomization
@@ -65,8 +66,8 @@ SlaterDet::SlaterDet(Context& ctxt, const Context& my_col_ctxt, D3vector kpoint,
 SlaterDet::SlaterDet(const SlaterDet& rhs) : ctxt_(rhs.context()),
   basis_(new Basis(*(rhs.basis_))), c_(rhs.c_), gram_reshape_(rhs.gram_reshape_),
   spsi_(rhs.spsi_), highmem_(rhs.highmem_), ultrasoft_(rhs.ultrasoft_),
-  mbset_(rhs.mbset_),nbset_(rhs.nbset_),mblks_(rhs.mblks_),nblks_(rhs.nblks_)
-{}
+  mbset_(rhs.mbset_),nbset_(rhs.nbset_),mblks_(rhs.mblks_),nblks_(rhs.nblks_),
+  col_ctxt_(rhs.col_ctxt_){}
 ////////////////////////////////////////////////////////////////////////////////
 SlaterDet::~SlaterDet()  {
   delete basis_;

@@ -66,7 +66,10 @@ ParallelOptimizer::~ParallelOptimizer() {
 ////////////////////////////////////////////////////////////////////////////////
 void ParallelOptimizer::optimize(int niter, int nitscf, int nite) {
 
-  const int maxnrowmax_ = 1024;
+   if ( s_.ctxt_.oncoutpe() ) 
+      cout << "  <!-- ParallelOptimizer started. -->" << endl;
+   
+   const int maxnrowmax_ = 4096;
 
   niter_ = niter;
   nitscf_ = nitscf;
@@ -78,6 +81,8 @@ void ParallelOptimizer::optimize(int niter, int nitscf, int nite) {
 #else
   npes = 1;
 #endif
+   if ( s_.ctxt_.oncoutpe() ) 
+      cout << "  <!-- ParallelOptimizer called with npes = " << npes << ". -->" << endl;
 
   Timer tm_partot;
   tm_partot.start();
@@ -192,7 +197,8 @@ void ParallelOptimizer::optimize(int niter, int nitscf, int nite) {
         cout << "  <!-- ParallelOptimizer: nparallelkpts = " << nparkp << ", nrowmax = " << testnrow << ", reshape = false, runtime = " << testtime << " -->" << endl;
 
       // try turning on context reshaping, see if time improves
-      if (testnrow > 2*npcol) {
+      //ewd:  disable context reshaping for now
+      if (false && testnrow > 2*npcol) {
         double reshapetime = runtime(testnrow,1,nspin,true,true);
         if ( s_.ctxt_.oncoutpe() ) 
           cout << "  <!-- ParallelOptimizer: nparallelkpts = " << nparkp << ", nrowmax = " << testnrow << ", reshape = true, runtime = " << reshapetime << " -->" << endl;

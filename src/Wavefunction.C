@@ -140,6 +140,9 @@ mblks_(wf.mblks_),nblks_(wf.nblks_)
         if (wf.sdcontext(ispin,ikp) != 0 ) {
           if (wf.sdcontext(ispin,ikp)->active() ) {
             sdcontext_[ispin][ikp] = new Context(*wf.sdcontext(ispin,ikp));
+
+
+            /*
             Context* my_col_ctxt = 0;
             for ( int icol = 0; icol < sdcontext_[ispin][ikp]->npcol(); icol++ ) {
               Context* col_ctxt = new Context(*sdcontext_[ispin][ikp],sdcontext_[ispin][ikp]->nprow(),1,0,icol);
@@ -151,17 +154,22 @@ mblks_(wf.mblks_),nblks_(wf.nblks_)
               else
                 delete col_ctxt;
             }
+            */
 
+
+            //Don't make new column contexts from scratch, construct them from those in previous SlaterDet
             for ( int kloc=0; kloc<wf.nkptloc(); kloc++) {
-              int kp = wf.kptloc(kloc);         // global index of local kpoint
-              if ( wf.sd(ispin,kp) != 0 ) {
-                 sd_[ispin][kp] = new SlaterDet(*sdcontext_[ispin][ikp],*my_col_ctxt,kpoint_[kp],ultrasoft_,force_complex_wf_);
-                mysdctxt_[kp] = ikp;
-                if (reshape_context_)
-                  sd_[ispin][kp]->set_gram_reshape(reshape_context_);
-                if (wf.sd(ispin,kp)->highmem())
-                  sd_[ispin][kp]->set_highmem();
-              }
+               int kp = wf.kptloc(kloc);         // global index of local kpoint
+               if ( wf.sd(ispin,kp) != 0 ) {
+                  Context* col_ctxt = new Context(wf.sd(ispin,kp)->col_ctxt());
+                  sd_[ispin][kp] = new SlaterDet(*sdcontext_[ispin][ikp],*col_ctxt,kpoint_[kp],ultrasoft_,force_complex_wf_);
+                  mysdctxt_[kp] = ikp;
+                  if (reshape_context_)
+                     sd_[ispin][kp]->set_gram_reshape(reshape_context_);
+                  if (wf.sd(ispin,kp)->highmem())
+                     sd_[ispin][kp]->set_highmem();
+
+               }
             }
           }
         }
