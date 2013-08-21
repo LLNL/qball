@@ -312,9 +312,13 @@ double ParallelOptimizer::runtime(int nrowmax, int npark, int nspin, bool reshap
   ChargeDensity cd_(s_);
   EnergyFunctional ef_(s_,wf,cd_);
   Wavefunction dwf(wf);
-  dwf.set_reshape_context(reshape);
   cd_.set_nlcc(nlcc);
 
+  if (ultrasoft)
+     dwf.randomize_us(0.02,atoms,highmem);  // this will force allocate() and resize()
+  else
+     dwf.randomize(0.02,highmem);              // this will force allocate() and resize()
+  
   // use extra memory for SlaterDets if memory variable = normal, large or huge
   if (s_.ctrl.extra_memory >= 3) 
     wf.set_highmem();

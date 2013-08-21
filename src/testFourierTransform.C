@@ -41,8 +41,10 @@ int fft_flops(int n)
 int main(int argc, char **argv)
 {
   Timer tm;
+  int mype;
 #if USE_MPI
   MPI_Init(&argc,&argv);
+  MPI_Comm_rank(MPI_COMM_WORLD, &mype);
 #endif
   // extra scope to ensure that Context objects get destructed before
   // the MPI_Finalize call
@@ -53,7 +55,7 @@ int main(int argc, char **argv)
   PMPI_Get_processor_name(processor_name,&namelen);
 
   Context ctxt_global;
-  int mype = ctxt_global.mype();
+  //int mype = ctxt_global.mype();
   //cout << " Process " << mype << " on " << processor_name << endl;
 
   D3vector a,b,c,kpoint;
@@ -137,47 +139,53 @@ int main(int argc, char **argv)
   }
 #endif
 
-  /*EWD DEBUG
   tm.reset();
   ft2.reset_timers();
   tm.start();
-  ft2.forward(&f2[0],&x[0]);
+  for (int ii=0; ii<100; ii++)
+     ft2.forward(&f2[0],&x[0]);
   tm.stop();
-  cout << " fwd1: tm_f_fft:    " << ft2.tm_f_fft.real() << endl;
-  cout << " fwd1: tm_f_mpi:    " << ft2.tm_f_mpi.real() << endl;
-  cout << " fwd1: tm_f_pack:   " << ft2.tm_f_pack.real() << endl;
-  cout << " fwd1: tm_f_unpack: " << ft2.tm_f_unpack.real() << endl;
-  cout << " fwd1: tm_f_zero:   " << ft2.tm_f_zero.real() << endl;
-  cout << " fwd1: tm_f_map:    " << ft2.tm_f_map.real() << endl;
-  cout << " fwd1: tm_f_total:  " << ft2.tm_f_fft.real() +
+  if ( ctxt.oncoutpe() )
+  {
+     cout << " fwd1: tm_f_fft:    " << ft2.tm_f_fft.real() << endl;
+     cout << " fwd1: tm_f_mpi:    " << ft2.tm_f_mpi.real() << endl;
+     cout << " fwd1: tm_f_pack:   " << ft2.tm_f_pack.real() << endl;
+     cout << " fwd1: tm_f_unpack: " << ft2.tm_f_unpack.real() << endl;
+     cout << " fwd1: tm_f_zero:   " << ft2.tm_f_zero.real() << endl;
+     cout << " fwd1: tm_f_map:    " << ft2.tm_f_map.real() << endl;
+     cout << " fwd1: tm_f_total:  " << ft2.tm_f_fft.real() +
                                     ft2.tm_f_mpi.real() +
                                     ft2.tm_f_pack.real() +
                                     ft2.tm_f_unpack.real() +
                                     ft2.tm_f_zero.real() +
                                     ft2.tm_f_map.real() << endl;
-  cout << " fwd1 time: " << tm.cpu() << " / " << tm.real()
-  << "    " << 1.e-6*flops/tm.real() << " MFlops" << endl;
-
+     cout << " fwd1 time: " << tm.cpu() << " / " << tm.real()
+  << "    " << 1.e-9*flops/tm.real()/100.0 << " GFlops" << endl;
+  }
   tm.reset();
   ft2.reset_timers();
   tm.start();
-  ft2.backward(&x[0],&f2[0]);
+  for (int ii=0; ii<100; ii++)
+     ft2.backward(&x[0],&f2[0]);
   tm.stop();
-  cout << " bwd1: tm_b_fft:    " << ft2.tm_b_fft.real() << endl;
-  cout << " bwd1: tm_b_mpi:    " << ft2.tm_b_mpi.real() << endl;
-  cout << " bwd1: tm_b_pack:   " << ft2.tm_b_pack.real() << endl;
-  cout << " bwd1: tm_b_unpack: " << ft2.tm_b_unpack.real() << endl;
-  cout << " bwd1: tm_b_zero:   " << ft2.tm_b_zero.real() << endl;
-  cout << " bwd1: tm_b_map:    " << ft2.tm_b_map.real() << endl;
-  cout << " bwd1: tm_b_total:  " << ft2.tm_b_fft.real() +
+  if ( ctxt.oncoutpe() )
+  {
+     cout << " bwd1: tm_b_fft:    " << ft2.tm_b_fft.real() << endl;
+     cout << " bwd1: tm_b_mpi:    " << ft2.tm_b_mpi.real() << endl;
+     cout << " bwd1: tm_b_pack:   " << ft2.tm_b_pack.real() << endl;
+     cout << " bwd1: tm_b_unpack: " << ft2.tm_b_unpack.real() << endl;
+     cout << " bwd1: tm_b_zero:   " << ft2.tm_b_zero.real() << endl;
+     cout << " bwd1: tm_b_map:    " << ft2.tm_b_map.real() << endl;
+     cout << " bwd1: tm_b_total:  " << ft2.tm_b_fft.real() +
                                     ft2.tm_b_mpi.real() +
                                     ft2.tm_b_pack.real() +
                                     ft2.tm_b_unpack.real() +
                                     ft2.tm_b_zero.real() +
                                     ft2.tm_b_map.real() << endl;
-  cout << " bwd1 time: " << tm.cpu() << " / " << tm.real()
-  << "    " << 1.e-6*flops/tm.real() << " MFlops" << endl;
-  
+     cout << " bwd1 time: " << tm.cpu() << " / " << tm.real()
+          << "    " << 1.e-9*flops/tm.real()/100.0 << " GFlops" << endl;
+  }
+  /*EWD DEBUG
   tm.reset();
   ft2.reset_timers();
   tm.start();

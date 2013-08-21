@@ -640,7 +640,7 @@ void FourierTransform::bwd(complex<double>* val)
     cout << " FourierTransform: status = " << status << endl;
     ctxt_.abort(2);
   }
-  //ctxt_.barrier();  // needed to prevent buffer overflow on Peloton, 2/2007
+  ctxt_.barrier();  // needed to prevent empty tasks from saturating network w. Alltoallv calls
 #else
   assert(sbuf.size()==rbuf.size());
   rbuf = sbuf;
@@ -1036,7 +1036,7 @@ void FourierTransform::fwd(complex<double>* val)
       MPI_DOUBLE,(double*)&sbuf[0],&scounts[0],&sdispl[0],MPI_DOUBLE,
       ctxt_.comm());
   assert ( status == 0 );
-  //ctxt_.barrier();  // needed to prevent buffer overflow on Peloton, 2/2007
+  ctxt_.barrier();  // needed to prevent empty tasks from saturating network w. Alltoallv calls
 #else
   assert(sbuf.size()==rbuf.size());
   //rbuf = sbuf; //ewd I think this is wrong
