@@ -1,4 +1,18 @@
 ------------------------------------------------------------------------
+r138 | draeger1 | 2013-08-23 12:22:07 -0700 (Fri, 23 Aug 2013) | 4 lines
+
+
+Updated HPC_BENCHMARK readme file to give more explicit details for CORAL and Trinity benchmarks.
+
+
+------------------------------------------------------------------------
+r137 | draeger1 | 2013-08-21 10:15:29 -0700 (Wed, 21 Aug 2013) | 4 lines
+
+
+Added barriers after Alltoallv calls in FourierTransform to prevent them from causing performance bottleneck for some grids and nrowmax values.
+
+
+------------------------------------------------------------------------
 r136 | draeger1 | 2013-08-20 10:11:12 -0700 (Tue, 20 Aug 2013) | 4 lines
 
 

@@ -65,8 +65,8 @@ class Spin : public Var
     s->wf.set_deltaspin(deltaspin);
     s->ctrl.delta_spin = deltaspin;
 
-    int nup = s->wf.nst(0);
-    int ndown = s->wf.nst(1);
+    int nup = s->wf.nst(0) - s->wf.nempty();
+    int ndown = s->wf.nst(1) - s->wf.nempty();
     double testdelta = (double)(nup-ndown)/2.0;
     
     if ( ui->oncoutpe() ) {
@@ -81,7 +81,6 @@ class Spin : public Var
       }
       return 1;
     }
-    
     return 0;
   }
 

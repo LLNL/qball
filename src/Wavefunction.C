@@ -284,8 +284,9 @@ void Wavefunction::allocate(void) {
   for (int ispin=0; ispin<nspin_; ispin++) {
     if (nkpts == 1) {
       if ( spinactive(ispin) ) {
-        if ( ctxt_.oncoutpe() )
-          cout << "<!-- Creating SlaterDet context " << spincontext_[ispin]->nprow() << "x" << spincontext_[ispin]->npcol() << " from spincontext, ispin = " << ispin << " -->" << endl;
+         //if ( ctxt_.oncoutpe() )
+         if ( spincontext_[ispin]->myproc() == 0)
+            cout << "<!-- Creating SlaterDet context " << spincontext_[ispin]->nprow() << "x" << spincontext_[ispin]->npcol() << " from spincontext, ispin = " << ispin << " -->" << endl;
         sdcontext_[ispin][0] = new Context(*spincontext_[ispin],spincontext_[ispin]->nprow(),spincontext_[ispin]->npcol(),0,0);
         Context* my_col_ctxt = 0;
         for ( int icol = 0; icol < sdcontext_[ispin][0]->npcol(); icol++ ) {
@@ -3337,31 +3338,28 @@ void Wavefunction::info(ostream& os, string tag)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-void Wavefunction::print_casino(ostream& os, int kk) const {
+void Wavefunction::print_casino(ostream& os, int ispin, int kk) const {
 
-   //ewd SPIN
-   if (nspin_ > 1)
-      if (ctxt_.oncoutpe())
-         cout << "<ERROR> save -casino does not work for spin > 1 right now </ERROR>" << endl;
-   assert(nspin_ == 1);
-   //ewd SPIN
-
-   int kpc = mysdctxt(kk); // index of sdcontext for this kpoint   
    bool onproc0 = false;
    bool sdctxt_active = false;
-   if (kpc >= 0)
-      if (sdcontext_[0][kpc] != 0 ) 
-         if (sdcontext_[0][kpc]->active() )
-         {
-            sdctxt_active = true;
-            if (sdcontext_[0][kpc]->myproc() == 0 )
-               onproc0 = true;
-         }
+   int kpc = -1;
+   if (spinactive(ispin)) {
 
-   if (sdctxt_active)
-      if (sdcontext_[0][kpc]->mycol() == 0)
-         sd_[0][kk]->basis().print_casino(os);
+      kpc = mysdctxt(kk); // index of sdcontext for this kpoint   
+      if (kpc >= 0)
+         if (sdcontext_[ispin][kpc] != 0 ) 
+            if (sdcontext_[ispin][kpc]->active() )
+            {
+               sdctxt_active = true;
+               if (sdcontext_[ispin][kpc]->myproc() == 0 )
+                  onproc0 = true;
+            }
+
+      if (sdctxt_active)
+         if (sdcontext_[ispin][kpc]->mycol() == 0)
+            sd_[ispin][kk]->basis().print_casino(os);
    
+   }
    // pes not involved in basis print need to wait before sending data to proc 0
    wfcontext_->barrier();  
    
@@ -3373,66 +3371,66 @@ void Wavefunction::print_casino(ostream& os, int kk) const {
    }
 
    // wrapper loop to limit data going to proc 0 and filling up MPI buffers
-   for (int nn=0; nn < nst_[0]; nn++)
+   for (int nn=0; nn < nst_[ispin]; nn++)
    {
       if (sdctxt_active)
       {
-         assert(sd_[0][kk] != 0);
-         const vector<double>& eig = sd(0,kk)->eig();
-         const int nloc = sd(0,kk)->c().nloc();
+         assert(sd_[ispin][kk] != 0);
+         const vector<double>& eig = sd(ispin,kk)->eig();
+         const int nloc = sd(ispin,kk)->c().nloc();
          for (int nl=0; nl < nloc; nl++) {
-            const int nglobal = sd(0,kk)->c().j(0,nl);
+            const int nglobal = sd(ispin,kk)->c().j(0,nl);
             if (nn == nglobal) {
                // send all data to proc 0 for printing
-               if (sdcontext_[0][kpc]->myrow() == 0)
+               if (sdcontext_[ispin][kpc]->myrow() == 0)
                {
                   double eig_send = eig[nn];
-                  sdcontext_[0][kpc]->dsend(1,1,&eig_send,1,0,0);
+                  sdcontext_[ispin][kpc]->dsend(1,1,&eig_send,1,0,0);
                }
-               for ( int i = 0; i < sdcontext_[0][kpc]->nprow(); i++ )
+               for ( int i = 0; i < sdcontext_[ispin][kpc]->nprow(); i++ )
                {
-                  if ( i == sdcontext_[0][kpc]->myrow() )
+                  if ( i == sdcontext_[ispin][kpc]->myrow() )
                   {
-                     int mloc = sd_[0][kk]->c().mloc();
-                     int nloc = sd_[0][kk]->c().nloc();
-                     int ngwloc = sd_[0][kk]->basis().localsize();
-                     double* p = (double*) sd_[0][kk]->c().cvalptr();
+                     int mloc = sd_[ispin][kk]->c().mloc();
+                     int nloc = sd_[ispin][kk]->c().nloc();
+                     int ngwloc = sd_[ispin][kk]->basis().localsize();
+                     double* p = (double*) sd_[ispin][kk]->c().cvalptr();
                      int size = 2*ngwloc;
-                     sdcontext_[0][kpc]->isend(1,1,&ngwloc,1,0,0);
-                     sdcontext_[0][kpc]->dsend(size,1,&p[2*nl*mloc],1,0,0);
+                     sdcontext_[ispin][kpc]->isend(1,1,&ngwloc,1,0,0);
+                     sdcontext_[ispin][kpc]->dsend(size,1,&p[2*nl*mloc],1,0,0);
                   }
                }
             }
          }
       }
-
+         
       if (onproc0)
       {
          if (nn == 0) {
             os << "k-point # ; # of bands (up spin/down spin) ; k-point coords (au)" << endl;
-            os << " " << kk+1 << " " << nst_[0] << " 0 " << kpoint_[kk] << endl;
+            os << " " << kk+1 << " " << nst_[ispin] << " " << ispin << " " << kpoint_[kk] << endl;
          }
          bool kk_real = ( kpoint_[kk] == D3vector(0.0,0.0,0.0) );
-
+            
          // which process column is state nn data coming from?
-         int nb = sd_[0][kk]->c().nb();
-         int npcol = sdcontext_[0][kpc]->npcol();
+         int nb = sd_[ispin][kk]->c().nb();
+         int npcol = sdcontext_[ispin][kpc]->npcol();
          int colind = nn/nb;
          int col_recv = colind%npcol;
-         
+            
          double eig_recv;
-         sdcontext_[0][kpc]->drecv(1,1,&eig_recv,1,0,col_recv);
+         sdcontext_[ispin][kpc]->drecv(1,1,&eig_recv,1,0,col_recv);
          os << "Band, spin, eigenvalue (au)" << endl;
-         os << "   " << nn+1 << "   1   " << eig_recv << endl;
+         os << "   " << nn+1 << " " << ispin+1 << " " << eig_recv << endl;
          os << "Eigenvector coefficients" << endl;
-         
-         for ( int i = 0; i < sdcontext_[0][kpc]->nprow(); i++ ) {
+            
+         for ( int i = 0; i < sdcontext_[ispin][kpc]->nprow(); i++ ) {
             int size = 0;
-            sdcontext_[0][kpc]->irecv(1,1,&size,1,i,col_recv);
+            sdcontext_[ispin][kpc]->irecv(1,1,&size,1,i,col_recv);
             int size_recv = 2*size;
             vector<double> readtmp(size_recv);
-            sdcontext_[0][kpc]->drecv(size_recv,1,&readtmp[0],1,i,col_recv);
-                  
+            sdcontext_[ispin][kpc]->drecv(size_recv,1,&readtmp[0],1,i,col_recv);
+               
             int ngwread = size;
             vector<complex<double> > ctmp(ngwread);
             for (int j=0; j<ngwread; j++) 
@@ -3461,7 +3459,7 @@ void Wavefunction::print_casino(ostream& os, int kk) const {
          }
       }
       if (sdctxt_active)
-         sdcontext_[0][kpc]->barrier();
+         sdcontext_[ispin][kpc]->barrier();
    }
 }
 

@@ -187,7 +187,7 @@ class Wavefunction {
   double sdot(const Wavefunction& wf) const;
   
   void print(ostream& os, string encoding, string tag) const;
-  void print_casino(ostream& os, int kk) const;
+  void print_casino(ostream& os, int ispin, int kk) const;
   void print_vmd(string filebase, const AtomSet& as) const;
   void printeig(void);
   void printocc(void);
