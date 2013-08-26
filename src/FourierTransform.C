@@ -153,7 +153,7 @@ FourierTransform::FourierTransform (const Basis &basis,
   {
     nvec_ = basis_.nrod_loc();
   }
-  
+
   // compute number of transforms along the x,y and z directions
   // ntrans0_ is the number of transforms along x in one of the two blocks
   // of vectors corresponding to positive and negative y indices
@@ -557,8 +557,9 @@ void FourierTransform::bwd(complex<double>* val)
 #if USE_ESSL
   int inc1 = 1, inc2 = np2_, ntrans = nvec_, isign = -1, initflag = 0;
   double scale = 1.0;
-  dcft_(&initflag,&zvec_[0],&inc1,&inc2,&zvec_[0],&inc1,&inc2,&np2_,&ntrans,
-        &isign,&scale,&aux1zb[0],&naux1z,&aux2[0],&naux2);
+  if (ntrans > 0)
+     dcft_(&initflag,&zvec_[0],&inc1,&inc2,&zvec_[0],&inc1,&inc2,&np2_,&ntrans,
+           &isign,&scale,&aux1zb[0],&naux1z,&aux2[0],&naux2);
 
 #elif USE_FFTW
    /* 
@@ -729,16 +730,18 @@ void FourierTransform::bwd(complex<double>* val)
     inc2 = np0_;
     istart = k * np0_ * np1_;
     length = np0_;
-    dcft_(&initflag,&val[istart],&inc1,&inc2,&val[istart],&inc1,&inc2,
-          &length,&ntrans,&isign,&scale,&aux1xb[0],&naux1x,&aux2[0],&naux2);
+    if (ntrans > 0)
+       dcft_(&initflag,&val[istart],&inc1,&inc2,&val[istart],&inc1,&inc2,
+             &length,&ntrans,&isign,&scale,&aux1xb[0],&naux1x,&aux2[0],&naux2);
  
     // Second block: negative y indices: [np1-ntrans0_,np1-1]
     inc1 = 1;
     inc2 = np0_;
     istart = np0_ * ( (np1_-ntrans) + k * np1_ );
     length = np0_;
-    dcft_(&initflag,&val[istart],&inc1,&inc2,&val[istart],&inc1,&inc2,
-          &length,&ntrans,&isign,&scale,&aux1xb[0],&naux1x,&aux2[0],&naux2);
+    if (ntrans > 0)
+       dcft_(&initflag,&val[istart],&inc1,&inc2,&val[istart],&inc1,&inc2,
+             &length,&ntrans,&isign,&scale,&aux1xb[0],&naux1x,&aux2[0],&naux2);
  
     // transform along y for all values of x
     ntrans = np0_;
@@ -746,8 +749,9 @@ void FourierTransform::bwd(complex<double>* val)
     inc2 = 1;
     istart = k * np0_ * np1_;
     length = np1_;
-    dcft_(&initflag,&val[istart],&inc1,&inc2,&val[istart],&inc1,&inc2,
-          &length,&ntrans,&isign,&scale,&aux1yb[0],&naux1y,&aux2[0],&naux2);
+    if (ntrans > 0)
+       dcft_(&initflag,&val[istart],&inc1,&inc2,&val[istart],&inc1,&inc2,
+             &length,&ntrans,&isign,&scale,&aux1yb[0],&naux1y,&aux2[0],&naux2);
 #endif  
 #elif USE_FFTW
     int inc1, inc2, istart;
@@ -886,8 +890,9 @@ void FourierTransform::fwd(complex<double>* val)
     inc2 = 1;
     istart = k * np0_ * np1_;
     length = np1_;
-    dcft_(&initflag,&val[istart],&inc1,&inc2,&val[istart],&inc1,&inc2,
-         &length,&ntrans,&isign,&scale,&aux1yf[0],&naux1y,&aux2[0],&naux2);
+    if (ntrans > 0)
+       dcft_(&initflag,&val[istart],&inc1,&inc2,&val[istart],&inc1,&inc2,
+             &length,&ntrans,&isign,&scale,&aux1yf[0],&naux1y,&aux2[0],&naux2);
  
     // transform only non-zero vectors along x
     ntrans = ntrans0_;
@@ -895,15 +900,17 @@ void FourierTransform::fwd(complex<double>* val)
     inc2 = np0_;
     istart = k * np0_ * np1_;
     length = np0_;
-    dcft_(&initflag,&val[istart],&inc1,&inc2,&val[istart],&inc1,&inc2,
-         &length,&ntrans,&isign,&scale,&aux1xf[0],&naux1x,&aux2[0],&naux2);
+    if (ntrans > 0)
+       dcft_(&initflag,&val[istart],&inc1,&inc2,&val[istart],&inc1,&inc2,
+             &length,&ntrans,&isign,&scale,&aux1xf[0],&naux1x,&aux2[0],&naux2);
  
     inc1 = 1;
     inc2 = np0_;
     istart = np0_ * ( (np1_-ntrans) + k * np1_ );
     length = np0_;
-    dcft_(&initflag,&val[istart],&inc1,&inc2,&val[istart],&inc1,&inc2,
-         &length,&ntrans,&isign,&scale,&aux1xf[0],&naux1x,&aux2[0],&naux2);
+    if (ntrans > 0)
+       dcft_(&initflag,&val[istart],&inc1,&inc2,&val[istart],&inc1,&inc2,
+             &length,&ntrans,&isign,&scale,&aux1xf[0],&naux1x,&aux2[0],&naux2);
 #endif  
 #elif USE_FFTW
     int inc1, inc2, istart;
@@ -1084,8 +1091,9 @@ void FourierTransform::fwd(complex<double>* val)
   int inc1 = 1, inc2 = np2_, ntrans = nvec_, isign = 1, initflag = 0;
   double scale = 1.0 / (np0_ * np1_ * np2_);
   
-  dcft_(&initflag,&zvec_[0],&inc1,&inc2,&zvec_[0],&inc1,&inc2,&np2_,&ntrans,
-        &isign,&scale,&aux1zf[0],&naux1z,&aux2[0],&naux2);
+  if (ntrans > 0)
+     dcft_(&initflag,&zvec_[0],&inc1,&inc2,&zvec_[0],&inc1,&inc2,&np2_,&ntrans,
+           &isign,&scale,&aux1zf[0],&naux1z,&aux2[0],&naux2);
        
 #elif USE_FFTW
  /*
@@ -1207,29 +1215,35 @@ void FourierTransform::init_lib(void)
   // x transforms
   inc1 = 1; inc2 = np0_; ntrans = ntrans0_;
   isign = -1;
-  dcft_(&initflag,p,&inc1,&inc2,p,&inc1,&inc2,&np0_,&ntrans,
-        &isign,&scale,&aux1xb[0],&naux1x,&aux2[0],&naux2);
+  if (ntrans > 0)
+     dcft_(&initflag,p,&inc1,&inc2,p,&inc1,&inc2,&np0_,&ntrans,
+           &isign,&scale,&aux1xb[0],&naux1x,&aux2[0],&naux2);
   isign = 1;
-  dcft_(&initflag,p,&inc1,&inc2,p,&inc1,&inc2,&np0_,&ntrans,
-        &isign,&scale,&aux1xf[0],&naux1x,&aux2[0],&naux2);
+  if (ntrans > 0)
+     dcft_(&initflag,p,&inc1,&inc2,p,&inc1,&inc2,&np0_,&ntrans,
+           &isign,&scale,&aux1xf[0],&naux1x,&aux2[0],&naux2);
   
   // y transforms
   inc1 = np0_; inc2 = 1; ntrans = ntrans1_;
   isign = -1;
-  dcft_(&initflag,p,&inc1,&inc2,p,&inc1,&inc2,&np1_,&ntrans,
-        &isign,&scale,&aux1yb[0],&naux1y,&aux2[0],&naux2);
+  if (ntrans > 0)
+     dcft_(&initflag,p,&inc1,&inc2,p,&inc1,&inc2,&np1_,&ntrans,
+           &isign,&scale,&aux1yb[0],&naux1y,&aux2[0],&naux2);
   isign = 1;
-  dcft_(&initflag,p,&inc1,&inc2,p,&inc1,&inc2,&np1_,&ntrans,
-        &isign,&scale,&aux1yf[0],&naux1y,&aux2[0],&naux2);
+  if (ntrans > 0)
+     dcft_(&initflag,p,&inc1,&inc2,p,&inc1,&inc2,&np1_,&ntrans,
+           &isign,&scale,&aux1yf[0],&naux1y,&aux2[0],&naux2);
        
   // z transforms
   inc1 = 1; inc2 = np2_; ntrans = ntrans2_;
   isign = -1;
-  dcft_(&initflag,p,&inc1,&inc2,p,&inc1,&inc2,&np2_,&ntrans,
-        &isign,&scale,&aux1zb[0],&naux1z,&aux2[0],&naux2);
+  if (ntrans > 0)
+     dcft_(&initflag,p,&inc1,&inc2,p,&inc1,&inc2,&np2_,&ntrans,
+           &isign,&scale,&aux1zb[0],&naux1z,&aux2[0],&naux2);
   isign = 1; scale = 1.0 / ( np0_ * np1_ * np2_ );
-  dcft_(&initflag,p,&inc1,&inc2,p,&inc1,&inc2,&np2_,&ntrans,
-        &isign,&scale,&aux1zf[0],&naux1z,&aux2[0],&naux2);
+  if (ntrans > 0)
+     dcft_(&initflag,p,&inc1,&inc2,p,&inc1,&inc2,&np2_,&ntrans,
+           &isign,&scale,&aux1zf[0],&naux1z,&aux2[0],&naux2);
 
 #endif
 #elif USE_SPIRAL

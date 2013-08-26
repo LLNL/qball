@@ -413,25 +413,26 @@ void Wavefunction::set_hasdata(bool hasd) {
 }
 ////////////////////////////////////////////////////////////////////////////////
 void Wavefunction::deallocate(void) {
-  for ( int ispin = 0; ispin < nspin_; ispin++ ) {
-    if ( spincontext_[ispin] != 0 ) {
-      for ( int ikp = 0; ikp < sdcontext_[ispin].size(); ikp++ ) {
-        if (sdcontext_[ispin][ikp] != 0 ) {
-          if (sdcontext_[ispin][ikp]->active() ) {
-            for ( int kloc=0; kloc<nkptloc_; kloc++) {
-              int kp = kptloc_[kloc];
-              if ( sd_[ispin][kp] != 0 )
-                delete sd_[ispin][kp];
+   hasdata_ = false;
+   for ( int ispin = 0; ispin < nspin_; ispin++ ) {
+      if ( spincontext_[ispin] != 0 ) {
+         for ( int ikp = 0; ikp < sdcontext_[ispin].size(); ikp++ ) {
+            if (sdcontext_[ispin][ikp] != 0 ) {
+               if (sdcontext_[ispin][ikp]->active() ) {
+                  for ( int kloc=0; kloc<nkptloc_; kloc++) {
+                     int kp = kptloc_[kloc];
+                     if ( sd_[ispin][kp] != 0 )
+                        delete sd_[ispin][kp];
+                  }
+               }
+               delete sdcontext_[ispin][ikp];
+               if (reshape_context_) 
+                  delete sdcontextsq_[ispin][ikp];
             }
-          }
-          delete sdcontext_[ispin][ikp];
-          if (reshape_context_) 
-            delete sdcontextsq_[ispin][ikp];
-        }
+         }
+         delete spincontext_[ispin];
       }
-      delete spincontext_[ispin];
-    }
-  }
+   }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -766,8 +767,10 @@ void Wavefunction::set_nrowmax(int n) {
   
   if (nrowmax_ != n) {
      nrowmax_ = n;
+     
     if (hasdata_)
-      reshape();
+       deallocate(); 
+    //reshape();  // single col_ctxt not being reshaped correctly, just deallocate
   }
 }
   
@@ -776,7 +779,8 @@ void Wavefunction::set_nparallelkpts(int n) {
   if (nparallelkpts_ != n) {
     nparallelkpts_ = n;
     if (hasdata_) 
-      reshape();
+       deallocate();  // single col_ctxt not being reshaped correctly, just deallocate
+       //reshape();
   }
 }
 

@@ -69,7 +69,14 @@ void ParallelOptimizer::optimize(int niter, int nitscf, int nite) {
    if ( s_.ctxt_.oncoutpe() ) 
       cout << "  <!-- ParallelOptimizer started. -->" << endl;
    
-   const int maxnrowmax_ = 4096;
+   int maxnrowmax_;
+   if (s_.ctxt_.size() > 8192)
+      maxnrowmax_ = 4096;
+   else if (s_.ctxt_.size() >= 1024)
+      maxnrowmax_ = s_.ctxt_.size()/2;      
+   else
+      maxnrowmax_ = s_.ctxt_.size();
+   
 
   niter_ = niter;
   nitscf_ = nitscf;
@@ -373,6 +380,16 @@ double ParallelOptimizer::runtime(int nrowmax, int npark, int nspin, bool reshap
     s_.ctxt_.dmax(1,1,&time_cd_rhor,1);
   }
   
+  double time_ef_vhxc = 0.0;
+  {
+    Timer tm_ef;
+    tm_ef.start();
+    ef_.update_vhxc();
+    tm_ef.stop();
+    time_ef_vhxc = tm_ef.real();
+    s_.ctxt_.dmax(1,1,&time_ef_vhxc,1);
+  }
+
   double time_ef_nonscf = 0.0;
   {
     Timer tm_ef;
@@ -392,16 +409,6 @@ double ParallelOptimizer::runtime(int nrowmax, int npark, int nspin, bool reshap
     tm_ef.stop();
     time_ef_ionic = tm_ef.real();
     s_.ctxt_.dmax(1,1,&time_ef_ionic,1);
-  }
-
-  double time_ef_vhxc = 0.0;
-  {
-    Timer tm_ef;
-    tm_ef.start();
-    ef_.update_vhxc();
-    tm_ef.stop();
-    time_ef_vhxc = tm_ef.real();
-    s_.ctxt_.dmax(1,1,&time_ef_vhxc,1);
   }
 
   double time_sd_usfns = 0.0;
