@@ -294,7 +294,7 @@ void BOSampleStepper::step(int niter)
     ionic_stepper = new SDAIonicStepper(s_);
   else if ( atoms_dyn == "CG" )
     ionic_stepper = new CGIonicStepper(s_);
-  else if ( atoms_dyn == "MD" )
+  else if ( atoms_dyn == "MD" || atoms_dyn == "IMPULSIVE")
     ionic_stepper = new MDIonicStepper(s_);
   else if ( atoms_dyn == "BMD" )
     ionic_stepper = new BMDIonicStepper(s_);

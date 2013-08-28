@@ -1,4 +1,18 @@
 ------------------------------------------------------------------------
+r140 | draeger1 | 2013-08-26 15:05:04 -0700 (Mon, 26 Aug 2013) | 4 lines
+
+
+Added if statements to avoid hangs/crashes with very large nrowmax values, where the number of G-vectors in the basis is on the order of nrowmax.  Fixed paropt command, tested successfully with mgo480 and 8k-32k MPI tasks on vulcan.
+
+
+------------------------------------------------------------------------
+r139 | draeger1 | 2013-08-23 17:09:49 -0700 (Fri, 23 Aug 2013) | 4 lines
+
+
+Implemented nspin > 1 for save -casino.
+
+
+------------------------------------------------------------------------
 r138 | draeger1 | 2013-08-23 12:22:07 -0700 (Fri, 23 Aug 2013) | 4 lines
 
 
