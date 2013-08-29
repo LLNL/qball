@@ -119,7 +119,7 @@ class EmpiricalPotentialCmd : public Cmd {
     }
     else if (pottype == "File" || pottype == "file" || pottype == "FILE") {
       string filename = argv[4];
-      EmpiricalPotential* ep = new EmpiricalPotential(s->ctxt_,name1,name2,filename);
+      EmpiricalPotential* ep = new EmpiricalPotential(s->ctxt_,filename,name1,name2);
       if (!s->atoms.addEmpiricalPotential(ep)) {
         if ( ui->oncoutpe() )
           cout << "<ERROR> EmpiricalPotentialCmd: could not add " << pottype << 

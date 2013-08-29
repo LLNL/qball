@@ -238,6 +238,7 @@ bool AtomSet::delAtom(string name)
 bool AtomSet::addEmpiricalPotential(EmpiricalPotential* ep) {
   string name1 = ep->spname1();
   string name2 = ep->spname2();
+
   if ( ! (findSpecies(name1) || findMMSpecies(name1)) ) {
     if ( ctxt_.oncoutpe() )
       cout << " AtomSet::addEmpiricalPotential: species " << name1
@@ -264,7 +265,8 @@ bool AtomSet::addEmpiricalPotential(EmpiricalPotential* ep) {
   empirical_list.push_back(ep);
 
   //ewd DEBUG
-  cout << "<!-- AtomSet::addEmpiricalPotential  is1 = " << ep->is1 << ", is2 = " << ep->is2 << ":  " << empirical_list.size() << " potentials defined.  -->" << endl;
+  if ( ctxt_.oncoutpe() )
+     cout << "<!-- AtomSet::addEmpiricalPotential  is1 = " << ep->is1 << ", is2 = " << ep->is2 << ":  " << empirical_list.size() << " potentials defined.  -->" << endl;
 
 
   

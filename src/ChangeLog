@@ -1,4 +1,11 @@
 ------------------------------------------------------------------------
+r141 | draeger1 | 2013-08-28 13:20:52 -0700 (Wed, 28 Aug 2013) | 4 lines
+
+
+Added support for atoms_dyn IMPULSIVE (constant velocities) with BOSampleStepper.
+
+
+------------------------------------------------------------------------
 r140 | draeger1 | 2013-08-26 15:05:04 -0700 (Mon, 26 Aug 2013) | 4 lines
 
 
