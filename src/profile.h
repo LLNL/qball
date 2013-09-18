@@ -40,7 +40,7 @@
 #define TAU_PROFILE_START(ARG)
 #define TAU_FSTART(ARG)
 #define TAU_FSTOP(ARG)
-#ifdef USE_MPIP
+#ifdef USE_MPIPDISABLE // don't do this, mpiP hates having so many pcontrol calls
 #define QB_Pstart(n, ARG) MPI_Pcontrol(n)
 #define QB_Pstop(ARG) MPI_Pcontrol(0)
 #else

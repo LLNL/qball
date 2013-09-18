@@ -1,4 +1,11 @@
 ------------------------------------------------------------------------
+r142 | draeger1 | 2013-08-29 12:06:38 -0700 (Thu, 29 Aug 2013) | 4 lines
+
+
+Fixed bug in EmpiricalPotentialCmd where arguments were being passed to EmpiricalPotential in wrong order.
+
+
+------------------------------------------------------------------------
 r141 | draeger1 | 2013-08-28 13:20:52 -0700 (Wed, 28 Aug 2013) | 4 lines
 
 

@@ -46,14 +46,17 @@ class SaveDenFreq : public Var
 
   int set ( int argc, char **argv )
   {
-    if ( argc != 2 )
+    if ( argc != 2 && argc != 3)
     {
       if ( ui->oncoutpe() )
-      cout << " savedenfreq takes only one value" << endl;
+      cout << " savedenfreq takes only one or two values" << endl;
       return 1;
     }
     int v = atoi(argv[1]);
     s->ctrl.savedenfreq = v;
+    if (argc == 3)
+       s->ctrl.savedenfilebase = argv[2];
+
     return 0;
   }
 
@@ -67,6 +70,9 @@ class SaveDenFreq : public Var
      return st.str();
   }
 
-  SaveDenFreq(Sample *sample) : s(sample) { s->ctrl.savedenfreq = -1 ; }
+  SaveDenFreq(Sample *sample) : s(sample) {
+     s->ctrl.savedenfreq = -1 ;
+     s->ctrl.savedenfilebase = "density";
+  }
 };
 #endif

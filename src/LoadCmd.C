@@ -668,7 +668,7 @@ int LoadCmd::action(int argc, char **argv) {
     
     if (!s->wf.hasdata())
       s->wf.set_hasdata(true);
-
+    
     SampleReader s_reader(s->ctxt_);
   
     if ( ui->oncoutpe() )

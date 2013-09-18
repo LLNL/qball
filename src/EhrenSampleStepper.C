@@ -1123,10 +1123,11 @@ void EhrenSampleStepper::step(int niter)
     {
        if (s_.ctrl.mditer%s_.ctrl.savedenfreq == 0 || s_.ctrl.mditer == 1)
        {
-          string filebase = "density.";
+          //string filebase = "density.";
+          string filebase = s_.ctrl.savedenfilebase;
           ostringstream oss;
           oss.width(7);  oss.fill('0');  oss << s_.ctrl.mditer;
-          string denfilename = filebase + oss.str() + ".cube";
+          string denfilename = filebase + "." + oss.str() + ".cube";
           string format = "binary";
 
           const Context* wfctxt = s_.wf.spincontext(0);
