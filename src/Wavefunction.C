@@ -3469,6 +3469,16 @@ void Wavefunction::print_casino(ostream& os, int ispin, int kk) const {
 
 ////////////////////////////////////////////////////////////////////////////////
 void Wavefunction::print_vmd(string filebase, const AtomSet& as) const {
+   int maxnst = nst_[0];
+   if (nspin_ > 1)
+      if (nst_[1] > maxnst) maxnst = nst_[1];
+   
+   for (int n=0; n<maxnst; n++)
+      print_vmd(filebase, as, n);
+   
+}
+////////////////////////////////////////////////////////////////////////////////
+void Wavefunction::print_vmd(string filebase, const AtomSet& as, const int statenum) const {
   for ( int ispin = 0; ispin < nspin_; ispin++ ) {
     if (spinactive(ispin)) {
       for ( int ikp = 0; ikp < sdcontext_[ispin].size(); ikp++ ) {
@@ -3500,112 +3510,112 @@ void Wavefunction::print_vmd(string filebase, const AtomSet& as) const {
                 for ( int n = 0; n < nstloc; n++ ) {
                   // global n index
                   const int nn = pcol*nb + n;
-                  ofstream os;
-                  os.setf(ios::scientific,ios::floatfield);
-                  os << setprecision(8);
-                  if (tctxt->myrow() == 0) {
-                    // write out wavefunction for this state and k-point
-                    ostringstream oss1,oss2,oss3;
-                    oss1.width(5);  oss1.fill('0');  oss1 << nn;
-                    oss2.width(4);  oss2.fill('0');  oss2 << kp;
-                    oss3.width(1);  oss3.fill('0');  oss3 << ispin;
-                    string statefile;
-                    if (nspin_ == 1) 
-                      statefile = filebase + "k" + oss2.str() + "n" + oss1.str(); 
-                    else
-                      statefile = filebase + "s" + oss3.str() + "k" + oss2.str() + "n" + oss1.str(); 
-                    statefile = statefile + ".cube";
-                    os.open(statefile.c_str(),ofstream::out);
-
-                    // write out VMD CUBE format header
-                    os << "Qbox wavefunction in VMD CUBE format" << endl;
-                    os << "  state " << nn << ", k-point " << kp << " = " << kpoint_[kp] << endl;
-
-                    // get atom positions
-                    vector<vector<double> > rion;
-                    rion.resize(as.nsp());
-                    int natoms_total = 0;
-                    for ( int is = 0; is < as.nsp(); is++ ) {
-                      rion[is].resize(3*as.na(is));
-                      natoms_total += as.na(is);
-                    }
-                    as.get_positions(rion,true);
-                    D3vector origin(0.0,0.0,0.0);
-                    os << natoms_total << " " << origin << endl;
-                    
-                    // print FFT grid info
-                    os << np0 << " " << dft0 << endl;
-                    os << np1 << " " << dft1 << endl;
-                    os << np2 << " " << dft2 << endl;
-
-                    // print atom coordinates
-                    for ( int is = 0; is < as.nsp(); is++ ) {
-                      const int atnum = as.atomic_number(is);
-                      double atnumd = (double)atnum;
-                      for ( int ia = 0; ia < as.na(is); ia++ ) 
-                        os << atnum << " " << atnumd << " " << rion[is][3*ia] << " " << rion[is][3*ia+1] << " " << rion[is][3*ia+2] << endl;
-                    }
-                  }
-                
-                  // print isosurface:  values in six columns with z fast
-                  int mloc = sd_[ispin][kp]->c().mloc();
-                  vector<complex<double> > wftmp(ft.np012loc());
-                  vector<double> wftmpr(2*ft.np012loc());
+                  if (nn == statenum || statenum < 0)  // statenum < 0 means print all states
+                  {
                   
-                  ComplexMatrix& c = sd_[ispin][kp]->c();
-                  ft.backward(c.cvalptr(mloc*n),&wftmp[0]);
-                  
-                  // copy |wf|^2 to double array for communication
-                  double *a = (double*) &wftmp[0];
-                  for ( int i = 0; i < ft.np012loc(); i++ )
-                    wftmpr[i] = a[2*i]*a[2*i] + a[2*i+1]*a[2*i+1];
-                
-                  // send data to first proc in context column
-                  for ( int i = 0; i < tctxt->nprow(); i++ ) {
-                    if ( i == prow ) {
-                      int size = ft.np012loc();
-                      tctxt->isend(1,1,&size,1,0,pcol);
-                      tctxt->dsend(size,1,&wftmpr[0],1,0,pcol);
-                    }
-                  }
-                  // receive data, store for reordering on output
-                  if (tctxt->myrow() == 0) {
-                    vector<double> wftmprecv(ft.np012());
-                    int recvoffset = 0;
-                    for ( int i = 0; i < tctxt->nprow(); i++ ) {
-                      int size = 0;
-                      tctxt->irecv(1,1,&size,1,i,pcol);
-                      tctxt->drecv(size,1,&wftmprecv[recvoffset],1,i,pcol);
-                      recvoffset += size;
-                    }
+                     ofstream os;
+                     os.setf(ios::scientific,ios::floatfield);
+                     os << setprecision(8);
+                     if (tctxt->myrow() == 0) {
+                        // write out wavefunction for this state and k-point
+                        ostringstream oss1,oss2,oss3;
+                        oss1.width(5);  oss1.fill('0');  oss1 << nn;
+                        oss2.width(4);  oss2.fill('0');  oss2 << kp;
+                        oss3.width(1);  oss3.fill('0');  oss3 << ispin;
+                        string statefile;
+                        if (nspin_ == 1) 
+                           statefile = filebase + "k" + oss2.str() + "n" + oss1.str(); 
+                        else
+                           statefile = filebase + "s" + oss3.str() + "k" + oss2.str() + "n" + oss1.str(); 
+                        statefile = statefile + ".cube";
+                        os.open(statefile.c_str(),ofstream::out);
+                        
+                        // write out VMD CUBE format header
+                        os << "Qbox wavefunction in VMD CUBE format" << endl;
+                        os << "  state " << nn << ", k-point " << kp << " = " << kpoint_[kp] << endl;
 
-                    // write wf data to file
-                    int cnt = 0;
-                    for (int ii = 0; ii < np0; ii++) {
-                      ostringstream oss;
-                      oss.setf(ios::scientific,ios::floatfield);
-                      oss << setprecision(5);
-                      for (int jj = 0; jj < np1; jj++) {
-                        for (int kk = 0; kk < np2; kk++) {
-                          int index = ii + jj*np0 + kk*np0*np1;
-                          oss << wftmprecv[index] << " ";
-                          cnt++;
-                          if (cnt >= 6) {
-                            cnt = 0;
-                            oss << endl;
-                          }
+                        // get atom positions
+                        vector<vector<double> > rion;
+                        rion.resize(as.nsp());
+                        int natoms_total = 0;
+                        for ( int is = 0; is < as.nsp(); is++ ) {
+                           rion[is].resize(3*as.na(is));
+                           natoms_total += as.na(is);
                         }
-                      }
-                      string tos = oss.str();
-                      //os << tos.c_str();
-                      os.write(tos.c_str(),tos.length());
-                    }
-                    os.close();
+                        as.get_positions(rion,true);
+                        D3vector origin(0.0,0.0,0.0);
+                        os << natoms_total << " " << origin << endl;
+                        
+                        // print FFT grid info
+                        os << np0 << " " << dft0 << endl;
+                        os << np1 << " " << dft1 << endl;
+                        os << np2 << " " << dft2 << endl;
 
+                        // print atom coordinates
+                        for ( int is = 0; is < as.nsp(); is++ ) {
+                           const int atnum = as.atomic_number(is);
+                           double atnumd = (double)atnum;
+                           for ( int ia = 0; ia < as.na(is); ia++ ) 
+                              os << atnum << " " << atnumd << " " << rion[is][3*ia] << " " << rion[is][3*ia+1] << " " << rion[is][3*ia+2] << endl;
+                        }
+                     }
+                
+                     // print isosurface:  values in six columns with z fast
+                     int mloc = sd_[ispin][kp]->c().mloc();
+                     vector<complex<double> > wftmp(ft.np012loc());
+                     vector<double> wftmpr(2*ft.np012loc());
+                  
+                     ComplexMatrix& c = sd_[ispin][kp]->c();
+                     ft.backward(c.cvalptr(mloc*n),&wftmp[0]);
+                  
+                     // copy |wf|^2 to double array for communication
+                     double *a = (double*) &wftmp[0];
+                     for ( int i = 0; i < ft.np012loc(); i++ )
+                        wftmpr[i] = a[2*i]*a[2*i] + a[2*i+1]*a[2*i+1];
+                
+                     // send data to first proc in context column
+                     for ( int i = 0; i < tctxt->nprow(); i++ ) {
+                        if ( i == prow ) {
+                           int size = ft.np012loc();
+                           tctxt->isend(1,1,&size,1,0,pcol);
+                           tctxt->dsend(size,1,&wftmpr[0],1,0,pcol);
+                        }
+                     }
+                     // receive data, store for reordering on output
+                     if (tctxt->myrow() == 0) {
+                        vector<double> wftmprecv(ft.np012());
+                        int recvoffset = 0;
+                        for ( int i = 0; i < tctxt->nprow(); i++ ) {
+                           int size = 0;
+                           tctxt->irecv(1,1,&size,1,i,pcol);
+                           tctxt->drecv(size,1,&wftmprecv[recvoffset],1,i,pcol);
+                           recvoffset += size;
+                        }
+                        
+                        // write wf data to file
+                        int cnt = 0;
+                        for (int ii = 0; ii < np0; ii++) {
+                           ostringstream oss;
+                           oss.setf(ios::scientific,ios::floatfield);
+                           oss << setprecision(5);
+                           for (int jj = 0; jj < np1; jj++) {
+                              for (int kk = 0; kk < np2; kk++) {
+                                 int index = ii + jj*np0 + kk*np0*np1;
+                                 oss << wftmprecv[index] << " ";
+                                 cnt++;
+                                 if (cnt >= 6) {
+                                    cnt = 0;
+                                    oss << endl;
+                                 }
+                              }
+                           }
+                           string tos = oss.str();
+                           //os << tos.c_str();
+                           os.write(tos.c_str(),tos.length());
+                        }
+                        os.close();
 
-
-
-
+                     }
                   }
                 }                  
               }

@@ -119,5 +119,8 @@ struct Control
   int savefreq;     // if > 0, checkpoint within iteration loop
   int savedenfreq;  // if > 0, checkpoint within iteration loop
   string savedenfilebase; // optional subdirectory and filename base for density snapshots
+  int savewffreq;  // if > 0, checkpoint within iteration loop
+  string savewffilebase; // optional subdirectory and filename base for density snapshots
+  int savewfstate;  // if >= 0, only save this state
 };
 #endif

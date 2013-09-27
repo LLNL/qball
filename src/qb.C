@@ -153,6 +153,7 @@ using namespace std;
 #include "Pblock.h"
 #include "SaveFreq.h"
 #include "SaveDenFreq.h"
+#include "SaveWfFreq.h"
 
 #ifdef USE_CTF
 #include "cyclopstf.h"
@@ -418,6 +419,7 @@ int main(int argc, char **argv, char **envp)
   ui->addVar(new WF_Phase_RealVar(s));
   ui->addVar(new SaveFreq(s));
   ui->addVar(new SaveDenFreq(s));
+  ui->addVar(new SaveWfFreq(s));
 
 #ifdef USE_JAGGEMM
   setup_grid();

@@ -189,6 +189,7 @@ class Wavefunction {
   void print(ostream& os, string encoding, string tag) const;
   void print_casino(ostream& os, int ispin, int kk) const;
   void print_vmd(string filebase, const AtomSet& as) const;
+  void print_vmd(string filebase, const AtomSet& as, const int statenum) const;
   void printeig(void);
   void printocc(void);
   void write(SharedFilePtr& fh, string encoding, string tag) const;

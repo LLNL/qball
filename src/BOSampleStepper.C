@@ -1698,6 +1698,19 @@ void BOSampleStepper::step(int niter)
          }
       }
 
+      // if savewffreq variable set, save |wf|^2 (one or all) in VMD Cube format
+      if (s_.ctrl.savewffreq > 0)
+      {
+         if (s_.ctrl.mditer%s_.ctrl.savewffreq == 0 || s_.ctrl.mditer == 1)
+         {
+            string filebase = s_.ctrl.savewffilebase;
+            ostringstream oss;
+            oss.width(7);  oss.fill('0');  oss << s_.ctrl.mditer;
+            string wffilename = filebase + "." + oss.str() + ".cube";
+            s_.wf.print_vmd(wffilename,atoms,s_.ctrl.savewfstate);            
+         }
+      }
+
       // if savefreq variable set, checkpoint
       if (s_.ctrl.savefreq > 0)
       {

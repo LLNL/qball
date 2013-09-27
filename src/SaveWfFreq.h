@@ -22,11 +22,59 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 //
-// release.C
+// SaveWfFreq.h
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "release.h"
-std::string release(void) {
-  return std::string("qb@LL-r144");
-}
+#ifndef SAVEWFFREQ_H
+#define SAVEWFFREQ_H
+
+#include<iostream>
+#include<iomanip>
+#include<sstream>
+#include<stdlib.h>
+
+#include "Sample.h"
+
+class SaveWfFreq : public Var
+{
+  Sample *s;
+
+  public:
+
+  char *name ( void ) const { return "savewffreq"; };
+
+  int set ( int argc, char **argv )
+  {
+    if ( argc != 3 && argc != 4)
+    {
+      if ( ui->oncoutpe() )
+      cout << " savewffreq takes only two or three values" << endl;
+      return 1;
+    }
+    int v = atoi(argv[1]);
+    s->ctrl.savewffreq = v;
+    s->ctrl.savewffilebase = argv[2];
+    if (argc == 4)
+       s->ctrl.savewfstate = atoi(argv[3]);
+
+    return 0;
+  }
+
+  string print (void) const
+  {
+     ostringstream st;
+     st.setf(ios::left,ios::adjustfield);
+     st << name() << ":  ";
+     st.setf(ios::right,ios::adjustfield);
+     st << s->ctrl.savewffreq;
+     return st.str();
+  }
+
+  SaveWfFreq(Sample *sample) : s(sample) {
+     s->ctrl.savewffreq = -1 ;
+     s->ctrl.savewffilebase = "wf";
+     s->ctrl.savewfstate = -1;
+  }
+};
+#endif
