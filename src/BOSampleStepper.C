@@ -1202,8 +1202,12 @@ void BOSampleStepper::step(int niter)
             tmap["charge"].stop();
 
             if (fractional_occ)
+            {
+               tmap["scf_ef"].start();
                ef_.update_harris();
-
+               tmap["scf_ef"].stop();
+            }
+            
             if ( charge_mixing != "off" && nite_ > 0) {
               if ( itscf == 0) {
                 //ewd:  read rhog_in from checkpoint if possible
@@ -1266,7 +1270,9 @@ void BOSampleStepper::step(int niter)
             }
 
             //QB_Pstart(update_vhxc);
+            tmap["scf_ef"].start();
             ef_.update_vhxc();
+            tmap["scf_ef"].stop();
             //QB_Pstop(update_vhxc);
 
             // reset stepper only if multiple non-selfconsistent steps
@@ -1275,7 +1281,9 @@ void BOSampleStepper::step(int niter)
             for ( int ite = 0; ite < nitemin_; ite++ )
             {
                //QB_Pstart(energy+hamiltonian_update);
+               tmap["scf_ef"].start();
                double energy = ef_.energy(true,dwf,false,fion,false,sigma_eks);
+               tmap["scf_ef"].stop();
                //QB_Pstop(energy+hamiltonian_update);
 
                // compute the sum of eigenvalues (with fixed weight)
@@ -1366,7 +1374,9 @@ void BOSampleStepper::step(int niter)
             // subspace diagonalization
             if ( compute_eigvec || s_.ctrl.wf_diag == "EIGVAL" || usdiag)
             {
+               tmap["scf_ef"].start();
                ef_.energy(true,dwf,false,fion,false,sigma_eks);
+               tmap["scf_ef"].stop();
                tmap["diag"].start();
                s_.wf.diag(dwf,compute_eigvec);
                tmap["diag"].stop();
