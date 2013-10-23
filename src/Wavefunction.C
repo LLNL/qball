@@ -1169,13 +1169,13 @@ void Wavefunction::rescale(double factor) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-void Wavefunction::promote_occ(double occ_change, int origin_level, int destination_level)
+void Wavefunction::promote_occ(double occ_change, int origin_level, int destination_level, int ispin)
 {
-   assert(nspin_ == 1);
+   assert(ispin < nspin_);
    {
       for ( int ikp = 0; ikp < nkp(); ikp++ )
       {
-         sd_[0][ikp]->promote_occ(occ_change, origin_level, destination_level);
+         sd_[ispin][ikp]->promote_occ(occ_change, origin_level, destination_level);
       }
    }
 }

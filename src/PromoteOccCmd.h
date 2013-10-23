@@ -49,7 +49,7 @@ class PromoteOccCmd : public Cmd
     "\n promote_occ\n\n"
     " syntax: promote_occ number_of_electrons origin_orbital destination_orbital\n\n"
     "   The promote_occ command allows you to change the occupation numbers\n"
-    "   of specific orbitals. Only works for nspin=1.\n\n";
+    "   of specific orbitals. Optionally, one can also specify a spin channel (0 or 1).\n\n";
   }
 
   int action(int argc, char **argv)
@@ -58,7 +58,7 @@ class PromoteOccCmd : public Cmd
     {
       if ( ui->oncoutpe() )
       {
-        cout << " use: promote_occ number_of_electrons origin_orbital destination_orbital" << endl;
+        cout << " use: promote_occ number_of_electrons origin_orbital destination_orbital [spin]" << endl;
       }
       return 1;
     }
@@ -67,12 +67,22 @@ class PromoteOccCmd : public Cmd
     int origin_level;
     int destination_level;
 
-    if ( argc == 4 ) {
-      occ_change = atof(argv[1]);
-      origin_level = atoi(argv[2]);
-      destination_level = atoi(argv[3]);
-      s->wf.promote_occ(occ_change, origin_level, destination_level);
-    } else assert(false);
+    occ_change = atof(argv[1]);
+    origin_level = atoi(argv[2]);
+    destination_level = atoi(argv[3]);
+    int ispin = 0;
+    if ( argc == 5 )
+       ispin = atoi(argv[4]);
+    s->wf.promote_occ(occ_change, origin_level, destination_level, ispin);
+
+    if (argc == 4 && s->wf.nspin() > 1)
+    {
+       if ( ui->oncoutpe() )
+          cout << "PromoteOccCmd:  promote_occ used without spin argument, promoting both spin channels..." << endl;
+       ispin = 1;
+       s->wf.promote_occ(occ_change, origin_level, destination_level, ispin);
+    }
+        
     return 0;
   }
 };

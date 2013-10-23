@@ -1,4 +1,11 @@
 ------------------------------------------------------------------------
+r145 | draeger1 | 2013-10-22 16:47:52 -0700 (Tue, 22 Oct 2013) | 4 lines
+
+
+Added scf_ef timer to BOSampleStepper to capture more complete timing profile of work within scfloop.
+
+
+------------------------------------------------------------------------
 r144 | draeger1 | 2013-09-27 11:47:19 -0700 (Fri, 27 Sep 2013) | 4 lines
 
 
