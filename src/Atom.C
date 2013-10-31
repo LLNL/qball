@@ -62,6 +62,8 @@ void Atom::printsys(ostream& os, string atomcmd) const {
      << setw(14) << position_.x << " " << setw(14) << position_.y << " " << setw(14) << position_.z << " " 
      << setw(14) << velocity_.x << " " << setw(14) << velocity_.y << " " << setw(14) << velocity_.z << " " 
      << endl;
+  if (locked_)
+     os << "lock " << name_ << endl;
 }
   
 ostream& operator << ( ostream &os, Atom &a )

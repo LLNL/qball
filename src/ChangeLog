@@ -1,4 +1,11 @@
 ------------------------------------------------------------------------
+r146 | draeger1 | 2013-10-23 11:05:36 -0700 (Wed, 23 Oct 2013) | 4 lines
+
+
+Updated promote_occ command to allow optional argument to set spin channels independently.  If nspin > 1 and no additional spin argument is provided, promote_occ will promote both spin channels.
+
+
+------------------------------------------------------------------------
 r145 | draeger1 | 2013-10-22 16:47:52 -0700 (Tue, 22 Oct 2013) | 4 lines
 
 
