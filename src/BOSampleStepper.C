@@ -214,7 +214,7 @@ void BOSampleStepper::step(int niter)
   
   const bool extrapolate_wf = (atoms_dyn == "MD" && s_.ctrl.wf_extrap != "OFF");
   Wavefunction* wfmm;
-  if ( extrapolate_wf && ( s_.ctrl.wf_extrap == "NTC" || s_.ctrl.wf_extrap == "NTC" ) ) 
+  if ( extrapolate_wf && ( s_.ctrl.wf_extrap == "ASP" || s_.ctrl.wf_extrap == "NTC" ) ) 
     wfmm = new Wavefunction(wf);
 
   // Next lines: special value of niter = 0: GS calculation only
