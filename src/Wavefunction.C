@@ -2751,7 +2751,8 @@ void Wavefunction::read_states(string filebase) {
                         
                         for ( int n = 0; n < nstloc; n++ ) {
                            // global n index
-                           const int nn = pcol*nb + n;
+                           const int nn = sd(ispin,kp)->c().j(0,n);
+                           
                            vector<complex<double> > wftmp(ft.np012loc());
 
                            ifstream is;

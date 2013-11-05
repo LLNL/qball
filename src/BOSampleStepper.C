@@ -847,7 +847,7 @@ void BOSampleStepper::step(int niter)
       {
          tmap["extrapolate_wf"].start();
          for ( int ispin = 0; ispin < nspin; ispin++ )
-        {
+         {
           if (s_.wf.spinactive(ispin))
           {
             for ( int ikp = 0; ikp < s_.wf.nkp(); ikp++ )
@@ -857,6 +857,9 @@ void BOSampleStepper::step(int niter)
                 assert(s_.wf.sd(ispin,ikp) != 0);
                 if (s_.ctrl.wf_extrap == "NTC")
                 {
+                   if ( s_.ctxt_.mype()==0 )
+                      cout << "Extrapolating wavefunction using NTC algorithm." << endl;
+                   
                   double* c = (double*) s_.wf.sd(ispin,ikp)->c().cvalptr();
                   double* cv = (double*) s_.wfv->sd(ispin,ikp)->c().cvalptr();
                   double* cmm = (double*) wfmm->sd(ispin,ikp)->c().cvalptr();
@@ -947,6 +950,9 @@ void BOSampleStepper::step(int niter)
                 }
                 else if (s_.ctrl.wf_extrap == "ASP")
                 {
+                   if ( s_.ctxt_.mype()==0 )
+                      cout << "Extrapolating wavefunction using ASP algorithm." << endl;
+                   
                   double* c = (double*) s_.wf.sd(ispin,ikp)->c().cvalptr();
                   double* cv = (double*) s_.wfv->sd(ispin,ikp)->c().cvalptr();
                   double* cmm = (double*) wfmm->sd(ispin,ikp)->c().cvalptr();
@@ -1032,6 +1038,9 @@ void BOSampleStepper::step(int niter)
                 }
                 else if (s_.ctrl.wf_extrap == "SIMPLE")
                 {
+                   if ( s_.ctxt_.mype()==0 )
+                      cout << "Extrapolating wavefunction using simple algorithm." << endl;
+                   
                   double* c = (double*) s_.wf.sd(ispin,ikp)->c().cvalptr();
                   double* cv = (double*) s_.wfv->sd(ispin,ikp)->c().cvalptr();
                   const int mloc = s_.wf.sd(ispin,ikp)->c().mloc();
