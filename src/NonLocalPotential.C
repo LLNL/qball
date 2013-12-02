@@ -42,10 +42,25 @@ extern "C" void myzdotc(const int size, complex<double>* v1, complex<double>* v2
 
 ////////////////////////////////////////////////////////////////////////////////
 NonLocalPotential::~NonLocalPotential(void) {
-  //for ( int is = 0; is < anl.size(); is++ )
-  //{
-  //  delete anl[is];
-  //}
+
+   if (basis_.real())
+   {
+      for ( int is = 0; is < anl_gam_.size(); is++ )
+         delete anl_gam_[is];
+      for ( int is = 0; is < anl_gam_fion_.size(); is++ )
+         delete anl_gam_fion_[is];
+      for ( int is = 0; is < anl_gam_sigma_.size(); is++ )
+         delete anl_gam_sigma_[is];
+   }
+   else
+   {
+      for ( int is = 0; is < anl_.size(); is++ )
+         delete anl_[is];
+      for ( int is = 0; is < anl_fion_.size(); is++ )
+         delete anl_fion_[is];
+      for ( int is = 0; is < anl_sigma_.size(); is++ )
+         delete anl_sigma_[is];
+   }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -73,6 +88,8 @@ void NonLocalPotential::print_timing(void) {
 ////////////////////////////////////////////////////////////////////////////////
 void NonLocalPotential::init(void) {
 
+   na_block_size_ = 8;
+   
   // max deviation from locality at upper quadrature point rcutloc[is]
   const double epsilon = 1.e-4;
 
@@ -1396,20 +1413,525 @@ void NonLocalPotential::update_twnl(void) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+void NonLocalPotential::atoms_moved(void)
+{
+   const int nstloc = sd_.nstloc();
+   const int ngwl = basis_.localsize();
+   const int m = sd_.c().m();
+   const int mloc = sd_.c().mloc();
+   const int npcol = ctxt_.npcol();  
+   const int mycol = ctxt_.mycol();  
+   vector<vector<double> > tau;
+   atoms_.get_positions(tau,true);
+   anl_nb_.resize(nsp);
+   anl_iastart_.resize(nsp);
+   anl_naloc_.resize(nsp);
+   
+   if (basis_.real())
+   {
+      anl_gam_.resize(nsp);
+      anl_gam_fion_.resize(3*nsp);
+   }
+   else
+   {
+      anl_.resize(nsp);
+      anl_fion_.resize(3*nsp);
+   }
+
+   for ( int is = 0; is < nsp; is++ )
+   {
+      Species *s = atoms_.species_list[is];
+      if (!s->ultrasoft() && npr[is] > 0 ) // species is is non-local, norm-conserving
+      {
+         // distribute atoms over columns
+         int naloc = na_block_size_;
+         if (na[is] > npcol*na_block_size_)
+            naloc = na[is]/npcol;
+         if (na[is]%npcol != 0)
+            naloc++;
+         if (naloc > na[is])
+            naloc = na[is];
+         if (naloc <= 0) naloc = 1;
+         
+         anl_iastart_[is] = mycol*naloc;
+         const int iaend = anl_iastart_[is]+naloc < na[is] ? anl_iastart_[is]+naloc : na[is];
+         const int ia_block_size = iaend > anl_iastart_[is] ? iaend - anl_iastart_[is] : 0;
+
+         anl_nb_[is] = naloc*npr[is];
+         anl_naloc_[is] = ia_block_size;
+         
+         const int mb = sd_.c().mb();
+         if (basis_.real())
+         {
+            if (anl_gam_[is] == 0)
+            {
+               anl_gam_[is] = new DoubleMatrix(ctxt_,2*m,npr[is]*na[is],2*mb,anl_nb_[is]);
+               if (ctxt_.oncoutpe())
+                  cout << "NonLocalPotential::atoms_moved, anl_gam dimensions: " << anl_gam_[is]->m() << "x" << anl_gam_[is]->n() << "  (" << anl_gam_[is]->mb() << "x" << anl_gam_[is]->nb() << ")" << endl;
+            }
+            for ( int j = 0; j < 3; j++ ) {
+               if (anl_gam_fion_[3*is+j] == 0)
+                  anl_gam_fion_[3*is+j] = new DoubleMatrix(ctxt_,2*m,npr[is]*na[is],2*mb,anl_nb_[is]);
+            }
+         }
+         else
+         {
+            if (anl_[is] == 0)
+            {
+               anl_[is] = new ComplexMatrix(ctxt_,m,npr[is]*na[is],mb,anl_nb_[is]);
+               if (ctxt_.oncoutpe())
+                  cout << "NonLocalPotential::atoms_moved, anl dimensions: " << anl_[is]->m() << "x" << anl_[is]->n() << "  (" << anl_[is]->mb() << "x" << anl_[is]->nb() << ")" << endl;
+            }
+            for ( int j = 0; j < 3; j++ ) {
+               if (anl_fion_[3*is+j] == 0)
+                  anl_fion_[3*is+j] = new ComplexMatrix(ctxt_,m,npr[is]*na[is],mb,anl_nb_[is]);
+            }
+         }
+
+         valarray<double> kpgr(anl_naloc_[is]*ngwl); // kpgr[ig+ia*ngwl]
+         valarray<double> ckpgr(anl_naloc_[is]*ngwl); // ckpgr[ig+ia*ngwl]
+         valarray<double> skpgr(anl_naloc_[is]*ngwl); // skpgr[ig+ia*ngwl]
+       
+        // compute ckpgr[is][ia][ig], skpgr[is][ia][ig]                  
+        tmap["comp_eigr"].start();                                   
+        int k = 3;                                                   
+        double mone = -1.0, zero = 0.0;
+        char cn='n';
+
+        // next line: const cast is ok since dgemm_ does not modify argument 
+        double* kpgx = const_cast<double*>(basis_.kpgx_ptr(0));
+        dgemm(&cn,&cn,(int*)&ngwl,(int*)&anl_naloc_[is],&k,&mone,             
+              kpgx,(int*)&ngwl, &tau[is][3*anl_iastart_[is]],&k,                        
+              &zero,&kpgr[0],(int*)&ngwl);                                     
+
+        int len = anl_naloc_[is] * ngwl;                                      
+#if USE_MASSV  
+        vsincos(&skpgr[0],&ckpgr[0],&kpgr[0],&len);
+#else
+#pragma omp parallel for
+        for ( int i = 0; i < len; i++ ) {
+           const double arg = kpgr[i];
+           skpgr[i] = sin(arg);                                                 
+           ckpgr[i] = cos(arg);                                                 
+        }                                                                    
+#endif
+        tmap["comp_eigr"].stop();                                            
+        
+        // compute anl
+        tmap["comp_anl"].start();
+        for ( int ipr = 0; ipr < npr[is]; ipr++ ) {
+           // twnl[is][ig+ngwl*ipr]
+           const double * t = &twnl[is][ngwl*ipr];                            
+           const int l = lproj[is][ipr];                                      
+           for ( int ia = 0; ia < anl_naloc_[is]; ia++ ) {
+              double* a;
+              if (basis_.real())
+                 a = (double*)anl_gam_[is]->valptr(2*(ia+ipr*anl_naloc_[is])*mloc); 
+              else
+                 a = (double*)anl_[is]->valptr((ia+ipr*anl_naloc_[is])*mloc);
+              const double* c = &ckpgr[ia*ngwl];
+              const double* s = &skpgr[ia*ngwl];
+              if ( l == 0 ) {
+#pragma omp parallel for
+                 for ( int ig = 0; ig < ngwl; ig++ ) {
+                    a[2*ig]   = t[ig] * c[ig];                                   
+                    a[2*ig+1] = t[ig] * s[ig];                                   
+                 }
+              }
+              else if ( l == 1 ) {
+                 /* Next line: -i * eigr */                                   
+                 /* -i * (a+i*b) = b - i*a */                                 
+#pragma omp parallel for
+                 for ( int ig = 0; ig < ngwl; ig++ ) {
+                    a[2*ig]   =  t[ig] * s[ig];
+                    a[2*ig+1] = -t[ig] * c[ig];
+                 }
+              }
+              else if ( l == 2 ) {
+                 // Next line: (-) sign for -eigr                             
+                 /* -1 * (a+i*b) = -a - i*b */                                 
+#pragma omp parallel for
+                 for ( int ig = 0; ig < ngwl; ig++ ) {
+                    a[2*ig]   = -t[ig] * c[ig];
+                    a[2*ig+1] = -t[ig] * s[ig];
+                 }
+              }
+              else if ( l == 3 ) {
+                 /* i * (a+i*b) = -b + i*a */ 
+#pragma omp parallel for
+                 for ( int ig = 0; ig < ngwl; ig++ ) {
+                    a[2*ig]   = -t[ig] * s[ig];
+                    a[2*ig+1] = t[ig] * c[ig];
+                 }
+              }
+
+
+
+              //ewd DEBUG
+              //cout << "ANLCALC1, mype = " << ctxt_.mype() << ", ia = " << ia << ", ipr = " << ipr << ", a[2] = " << a[2] << ", s[2] = " << s[2] << ", c[2] = " << c[2] << ", t[2] = " << t[2] << endl;
+              //ewd DEBUG
+
+
+              
+           }
+        } // ipr                                                             
+        tmap["comp_anl"].stop();
+        
+        tmap["comp_anlfion"].start();
+        for ( int j = 0; j < 3; j++ ) {
+           const double *const kpgxj = basis_.kpgx_ptr(j);
+
+           for ( int ipr = 0; ipr < npr[is]; ipr++ ) {
+              // twnl[is][ig+ngwl*ipr]                                       
+              const double * t = &twnl[is][ngwl*ipr];                        
+              const int l = lproj[is][ipr];                                  
+
+              // anl_loc[ig+ipra*ngwl]                                       
+              for ( int ia = 0; ia < anl_naloc_[is]; ia++ ) {
+                 double* a;
+                 if (basis_.real())
+                    a = (double*)anl_gam_fion_[3*is+j]->valptr(2*(ia+ipr*anl_naloc_[is])*mloc); 
+                 else
+                    a = (double*)anl_fion_[3*is+j]->valptr((ia+ipr*anl_naloc_[is])*mloc);
+                 const double* c = &ckpgr[ia*ngwl];                             
+                 const double* s = &skpgr[ia*ngwl];                             
+                 if ( l == 0 ) {
+                    for ( int ig = 0; ig < ngwl; ig++ ) {
+                       const double tt = kpgxj[ig] * t[ig];                       
+                       // Next lines: -i * ( a + ib ) = b - ia                  
+                       a[2*ig]   =  tt * s[ig];                                 
+                       a[2*ig+1] = -tt * c[ig];                                 
+                    }             
+                 }               
+                 else if ( l == 1 ) {
+                    for ( int ig = 0; ig < ngwl; ig++ ) {
+                       // Next lines: (-i)**2 * ( a + ib ) = - a - ib           
+                       const double tt = kpgxj[ig] * t[ig];                     
+                       a[2*ig]   = -tt * c[ig];                                  
+                       a[2*ig+1] = -tt * s[ig];                                  
+                    }             
+                 }               
+                 else if ( l == 2 ) {
+                    for ( int ig = 0; ig < ngwl; ig++ ) {
+                       // Next lines: (-i) * - ( a + ib ) = i*(a+ib) = - b + ia 
+                       const double tt = kpgxj[ig] * t[ig];                       
+                       a[2*ig]   = -tt * s[ig];                                 
+                       a[2*ig+1] =  tt * c[ig];                                 
+                    }             
+                 }               
+                 else if ( l == 3 ) {
+                    for ( int ig = 0; ig < ngwl; ig++ ) {
+                       // Next lines: (-i)**4 * ( a + ib ) = a + ib
+                       const double tt = kpgxj[ig] * t[ig];                       
+                       a[2*ig]   =  tt * c[ig];                                 
+                       a[2*ig+1] =  tt * s[ig];                                 
+                    }             
+                 }               
+              }                 
+           } // ipr            
+        }
+        tmap["comp_anlfion"].stop();
+      }
+   }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+void NonLocalPotential::cell_moved(void)
+{
+   have_anl_sigma_ = true;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+void NonLocalPotential::calc_anl_sigma(void)
+{
+
+   const int nstloc = sd_.nstloc();
+   const int ngwl = basis_.localsize();
+   const int m = sd_.c().m();
+   const int mloc = sd_.c().mloc();
+   const int npcol = ctxt_.npcol();  
+   const int mycol = ctxt_.mycol();  
+   vector<vector<double> > tau;
+   atoms_.get_positions(tau,true);
+
+   if (basis_.real())
+      anl_gam_sigma_.resize(6*nsp);
+   else
+      anl_sigma_.resize(6*nsp);
+
+   for ( int is = 0; is < nsp; is++ )
+   {
+      Species *s = atoms_.species_list[is];
+      if (!s->ultrasoft() && npr[is] > 0 ) // species is is non-local, norm-conserving
+      {
+         const int mb = sd_.c().mb();
+         if (basis_.real())
+            for ( int ij = 0; ij < 6; ij++ )
+               if (anl_gam_sigma_[6*is+ij] == 0)
+                  anl_gam_sigma_[6*is+ij] = new DoubleMatrix(ctxt_,2*m,npr[is]*na[is],2*mb,anl_nb_[is]);
+         else
+            for ( int ij = 0; ij < 6; ij++ ) 
+               if (anl_sigma_[6*is+ij] == 0)
+                  anl_sigma_[6*is+ij] = new ComplexMatrix(ctxt_,m,npr[is]*na[is],mb,anl_nb_[is]);
+
+         valarray<double> kpgr(anl_naloc_[is]*ngwl); // kpgr[ig+ia*ngwl]
+         valarray<double> ckpgr(anl_naloc_[is]*ngwl); // ckpgr[ig+ia*ngwl]
+         valarray<double> skpgr(anl_naloc_[is]*ngwl); // skpgr[ig+ia*ngwl]
+       
+        // compute ckpgr[is][ia][ig], skpgr[is][ia][ig]                  
+        tmap["comp_eigr"].start();                                   
+        int k = 3;                                                   
+        double mone = -1.0, zero = 0.0;
+        char cn='n';
+
+        // next line: const cast is ok since dgemm_ does not modify argument 
+        double* kpgx = const_cast<double*>(basis_.kpgx_ptr(0));
+        dgemm(&cn,&cn,(int*)&ngwl,(int*)&anl_naloc_[is],&k,&mone,             
+              kpgx,(int*)&ngwl, &tau[is][3*anl_iastart_[is]],&k,                        
+              &zero,&kpgr[0],(int*)&ngwl);                                     
+
+        int len = anl_naloc_[is] * ngwl;                                      
+#if USE_MASSV  
+        vsincos(&skpgr[0],&ckpgr[0],&kpgr[0],&len);
+#else
+#pragma omp parallel for
+        for ( int i = 0; i < len; i++ ) {
+           const double arg = kpgr[i];
+           skpgr[i] = sin(arg);                                                 
+           ckpgr[i] = cos(arg);                                                 
+        }                                                                    
+#endif
+        tmap["comp_eigr"].stop();                                            
+
+        for ( int ij = 0; ij < 6; ij++ ) {
+           // compute anl_loc  
+           int ipr = 0;        
+           while ( ipr < npr[is] ) {
+              // twnl[is][ig+ngwl*ipr]                                       
+              const int l = lproj[is][ipr];                                  
+              if ( l == 0 ) {
+                 // dtwnl[is][ipr][ij][ngwl]                                  
+                 // index = ig + ngwl * ( ij + 6 * ipr))                      
+                 // ipr = iquad + nquad[is] * ilm, where ilm = 0              
+                 const double *const dt0 = &dtwnl[is][ngwl*(ij+6*ipr)];       
+                 for ( int ia = 0; ia < anl_naloc_[is]; ia++ ) {
+                    double* a0;
+                    if  (basis_.real()) 
+                       a0 = (double*)anl_gam_sigma_[6*is+ij]->valptr(2*(ia+ipr*anl_naloc_[is])*mloc);
+                    else
+                       a0 = (double*)anl_sigma_[6*is+ij]->valptr((ia+ipr*anl_naloc_[is])*mloc);
+                    const double* c = &ckpgr[ia*ngwl];                           
+                    const double* s = &skpgr[ia*ngwl];                           
+                    for ( int ig = 0; ig < ngwl; ig++ ) {
+                       const double d0 = dt0[ig];                               
+                       // Next lines: (-i)^0 * ( a + ib ) = a + ib                  
+                       a0[2*ig]   =  d0 * c[ig];                                
+                       a0[2*ig+1] =  d0 * s[ig];                                
+                    }             
+                 }               
+              }                 
+              else if ( l == 1 ) {
+                 const int ipr1 = ipr;                                        
+                 const int ipr2 = ipr + 1;                                    
+                 const int ipr3 = ipr + 2;                                    
+                 // dtwnl[is][ipr][ij][ngwl]                                  
+                 // index = ig + ngwl * ( ij + 6 * iprx ))                    
+                 const double *dt1 = &dtwnl[is][ngwl*(ij+6*ipr1)];            
+                 const double *dt2 = &dtwnl[is][ngwl*(ij+6*ipr2)];            
+                 const double *dt3 = &dtwnl[is][ngwl*(ij+6*ipr3)];            
+                 for ( int ia = 0; ia < anl_naloc_[is]; ia++ ) {
+                    double* a1;
+                    double* a2;
+                    double* a3;
+                    if (basis_.real()) {
+                       a1 = (double*)anl_gam_sigma_[6*is+ij]->valptr(2*(ia+ipr1*anl_naloc_[is])*mloc);
+                       a2 = (double*)anl_gam_sigma_[6*is+ij]->valptr(2*(ia+ipr2*anl_naloc_[is])*mloc);
+                       a3 = (double*)anl_gam_sigma_[6*is+ij]->valptr(2*(ia+ipr3*anl_naloc_[is])*mloc);
+                    }
+                    else {
+                       a1 = (double*)anl_sigma_[6*is+ij]->valptr((ia+ipr1*anl_naloc_[is])*mloc);
+                       a2 = (double*)anl_sigma_[6*is+ij]->valptr((ia+ipr2*anl_naloc_[is])*mloc);
+                       a3 = (double*)anl_sigma_[6*is+ij]->valptr((ia+ipr3*anl_naloc_[is])*mloc);
+                    }
+                    const double* c = &ckpgr[ia*ngwl];                           
+                    const double* s = &skpgr[ia*ngwl];                           
+                    for ( int ig = 0; ig < ngwl; ig++ ) {
+                       const double d1 = dt1[ig];                               
+                       const double d2 = dt2[ig];                               
+                       const double d3 = dt3[ig];                               
+                       // Next line: (-i)^l factor is -i                        
+                       // Next line: -i * eigr
+                       // -i * (a+i*b) = b - i*a                                
+                       const double tc = -c[ig]; //  -cosgr[ia][ig]             
+                       const double ts =  s[ig]; //   singr[ia][ig]             
+                       a1[2*ig]   = d1 * ts;                                    
+                       a1[2*ig+1] = d1 * tc;                                    
+                       a2[2*ig]   = d2 * ts;                                    
+                       a2[2*ig+1] = d2 * tc;                                    
+                       a3[2*ig]   = d3 * ts;                                    
+                       a3[2*ig+1] = d3 * tc;                                    
+                    }             
+                 }               
+              }                  
+              else if ( l == 2 ) {
+                 const int ipr4 = ipr;                                         
+                 const int ipr5 = ipr + 1;                                     
+                 const int ipr6 = ipr + 2;                                     
+                 const int ipr7 = ipr + 3;                                     
+                 const int ipr8 = ipr + 4;                                     
+                 // dtwnl[is][ipr][iquad][ij][ngwl]                            
+                 // index = ig + ngwl * ( ij + 6 * ( iquad + nquad[is] * ipr ))
+                 const double *dt4 = &dtwnl[is][ngwl*(ij+6*ipr4)];             
+                 const double *dt5 = &dtwnl[is][ngwl*(ij+6*ipr5)];             
+                 const double *dt6 = &dtwnl[is][ngwl*(ij+6*ipr6)];             
+                 const double *dt7 = &dtwnl[is][ngwl*(ij+6*ipr7)];             
+                 const double *dt8 = &dtwnl[is][ngwl*(ij+6*ipr8)];             
+                 for ( int ia = 0; ia < anl_naloc_[is]; ia++ ) {
+                    double* a4;
+                    double* a5;
+                    double* a6;
+                    double* a7;
+                    double* a8;
+                    if (basis_.real()) {
+                       a4 = (double*)anl_gam_sigma_[6*is+ij]->valptr(2*(ia+ipr4*anl_naloc_[is])*mloc);
+                       a5 = (double*)anl_gam_sigma_[6*is+ij]->valptr(2*(ia+ipr5*anl_naloc_[is])*mloc);
+                       a6 = (double*)anl_gam_sigma_[6*is+ij]->valptr(2*(ia+ipr6*anl_naloc_[is])*mloc);
+                       a7 = (double*)anl_gam_sigma_[6*is+ij]->valptr(2*(ia+ipr7*anl_naloc_[is])*mloc);
+                       a8 = (double*)anl_gam_sigma_[6*is+ij]->valptr(2*(ia+ipr8*anl_naloc_[is])*mloc);
+                    }
+                    else {
+                       a4 = (double*)anl_sigma_[6*is+ij]->valptr((ia+ipr4*anl_naloc_[is])*mloc);
+                       a5 = (double*)anl_sigma_[6*is+ij]->valptr((ia+ipr5*anl_naloc_[is])*mloc);
+                       a6 = (double*)anl_sigma_[6*is+ij]->valptr((ia+ipr6*anl_naloc_[is])*mloc);
+                       a7 = (double*)anl_sigma_[6*is+ij]->valptr((ia+ipr7*anl_naloc_[is])*mloc);
+                       a8 = (double*)anl_sigma_[6*is+ij]->valptr((ia+ipr8*anl_naloc_[is])*mloc);
+                    }
+                    const double* c = &ckpgr[ia*ngwl];                            
+                    const double* s = &skpgr[ia*ngwl];                            
+                       
+                    for ( int ig = 0; ig < ngwl; ig++ ) {
+                       const double d4 = dt4[ig];                                
+                       const double d5 = dt5[ig];                                
+                       const double d6 = dt6[ig];                                
+                       const double d7 = dt7[ig];                                
+                       const double d8 = dt8[ig];                                
+                       // Next lines: (-i)^2 * ( a + ib ) =  - ( a + ib )        
+                       const double tc = -c[ig]; //  -cosgr[ia][ig]              
+                       const double ts = -s[ig]; //  -singr[ia][ig]              
+                       a4[2*ig]   = d4 * tc;                                     
+                       a4[2*ig+1] = d4 * ts;                                     
+                       a5[2*ig]   = d5 * tc;                                     
+                       a5[2*ig+1] = d5 * ts;                                     
+                       a6[2*ig]   = d6 * tc;                                     
+                       a6[2*ig+1] = d6 * ts;                                     
+                       a7[2*ig]   = d7 * tc;                                     
+                       a7[2*ig+1] = d7 * ts;                                     
+                       a8[2*ig]   = d8 * tc;                                     
+                       a8[2*ig+1] = d8 * ts;                                     
+                    }              
+                 }                
+              }                  
+              else if ( l == 3 ) {
+                 const int ipr9 = ipr;                                         
+                 const int ipr10 = ipr + 1;
+                 const int ipr11 = ipr + 2;
+                 const int ipr12 = ipr + 3;
+                 const int ipr13 = ipr + 4;
+                 const int ipr14 = ipr + 5;
+                 const int ipr15 = ipr + 6;
+                    
+                 // dtwnl[is][ipr][iquad][ij][ngwl]                            
+                 // index = ig + ngwl * ( ij + 6 * ( iquad + nquad[is] * ipr ))
+                 const double *dt9 = &dtwnl[is][ngwl*(ij+6*ipr9)];
+                 const double *dt10 = &dtwnl[is][ngwl*(ij+6*ipr10)];
+                 const double *dt11 = &dtwnl[is][ngwl*(ij+6*ipr11)];
+                 const double *dt12 = &dtwnl[is][ngwl*(ij+6*ipr12)];
+                 const double *dt13 = &dtwnl[is][ngwl*(ij+6*ipr13)];
+                 const double *dt14 = &dtwnl[is][ngwl*(ij+6*ipr14)];
+                 const double *dt15 = &dtwnl[is][ngwl*(ij+6*ipr15)];
+                 for ( int ia = 0; ia < anl_naloc_[is]; ia++ ) {
+                    double* a9;
+                    double* a10;
+                    double* a11;
+                    double* a12;
+                    double* a13;
+                    double* a14;
+                    double* a15;
+                    if (basis_.real()) {
+                       a9 = (double*)anl_gam_sigma_[6*is+ij]->valptr(2*(ia+ipr9*anl_naloc_[is])*mloc);
+                       a10 = (double*)anl_gam_sigma_[6*is+ij]->valptr(2*(ia+ipr10*anl_naloc_[is])*mloc);
+                       a11 = (double*)anl_gam_sigma_[6*is+ij]->valptr(2*(ia+ipr11*anl_naloc_[is])*mloc);
+                       a12 = (double*)anl_gam_sigma_[6*is+ij]->valptr(2*(ia+ipr12*anl_naloc_[is])*mloc);
+                       a13 = (double*)anl_gam_sigma_[6*is+ij]->valptr(2*(ia+ipr13*anl_naloc_[is])*mloc);
+                       a14 = (double*)anl_gam_sigma_[6*is+ij]->valptr(2*(ia+ipr14*anl_naloc_[is])*mloc);
+                       a15 = (double*)anl_gam_sigma_[6*is+ij]->valptr(2*(ia+ipr15*anl_naloc_[is])*mloc);
+                    }
+                    else {
+                       a9 = (double*)anl_sigma_[6*is+ij]->valptr((ia+ipr9*anl_naloc_[is])*mloc);
+                       a10 = (double*)anl_sigma_[6*is+ij]->valptr((ia+ipr10*anl_naloc_[is])*mloc);
+                       a11 = (double*)anl_sigma_[6*is+ij]->valptr((ia+ipr11*anl_naloc_[is])*mloc);
+                       a12 = (double*)anl_sigma_[6*is+ij]->valptr((ia+ipr12*anl_naloc_[is])*mloc);
+                       a13 = (double*)anl_sigma_[6*is+ij]->valptr((ia+ipr13*anl_naloc_[is])*mloc);
+                       a14 = (double*)anl_sigma_[6*is+ij]->valptr((ia+ipr14*anl_naloc_[is])*mloc);
+                       a15 = (double*)anl_sigma_[6*is+ij]->valptr((ia+ipr15*anl_naloc_[is])*mloc);
+                    }
+                    const double* c = &ckpgr[ia*ngwl];                            
+                    const double* s = &skpgr[ia*ngwl];                            
+                       
+                    for ( int ig = 0; ig < ngwl; ig++ ) {
+                       const double d9 = dt9[ig];
+                       const double d10 = dt10[ig];
+                       const double d11 = dt11[ig];
+                       const double d12 = dt12[ig];
+                       const double d13 = dt13[ig];
+                       const double d14 = dt14[ig];
+                       const double d15 = dt15[ig];
+                       // Next lines: (-i)^3 * ( a + ib ) =  -b + ia        
+                       const double ts = -s[ig]; //  -singr[ia][ig]              
+                       const double tc = c[ig]; //  cosgr[ia][ig]
+                          
+                       a9[2*ig]   = d9 * ts;
+                       a9[2*ig+1] = d9 * tc;
+                       a10[2*ig]   = d10 * ts;
+                       a10[2*ig+1] = d10 * tc;
+                       a11[2*ig]   = d11 * ts;
+                       a11[2*ig+1] = d11 * tc;
+                       a12[2*ig]   = d12 * ts;
+                       a12[2*ig+1] = d12 * tc;
+                       a13[2*ig]   = d13 * ts;
+                       a13[2*ig+1] = d13 * tc;
+                       a14[2*ig]   = d14 * ts;
+                       a14[2*ig+1] = d14 * tc;
+                       a15[2*ig]   = d15 * ts;
+                       a15[2*ig+1] = d15 * tc;
+                    }              
+                 }                
+              }
+              else {                  
+                 assert(false);   
+              } // l             
+              ipr += 2*l+1;      
+           } // while ipr       
+        }
+      }
+   }
+}
+
+////////////////////////////////////////////////////////////////////////////////
 double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd, 
     bool compute_forces, vector<vector<double> >& fion, 
     bool compute_stress, valarray<double>& sigma_enl,
     vector<complex<double> >& veff) {
-  const vector<double>& occ = sd_.occ();
-  const vector<double>& eig = sd_.eig();
-  const int ngwl = basis_.localsize();
-  //const int mloc = basis_.maxlocalsize();
-  const int mloc = sd_.c().mloc();
-  // define atom block size
-  const int na_block_size = 32;
-  vector<vector<double> > tau;
-  atoms_.get_positions(tau,true);
-
+   const vector<double>& occ = sd_.occ();
+   const vector<double>& eig = sd_.eig();
+   const int ngwl = basis_.localsize();
+   const int mloc = sd_.c().mloc();
+   const int nb = sd_.c().nb();
+   const int nst = sd_.nst();
+   const int nstloc = sd_.nstloc();
+   const int npcol = ctxt_.npcol();  
+   const int mycol = ctxt_.mycol();  
+  
   double enl = 0.0;
   double tsum[6] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
   
@@ -1438,7 +1960,6 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
         const int nqtot = s->nqtot();
         const int nbeta = s->nbeta();
         const int nbetalm = s->nbetalm();
-        const int nstloc = sd_.nstloc();
 
         const ComplexMatrix* betag = sd_.betag(is);
         const ComplexMatrix* betapsi = sd_.betapsi(is);
@@ -1777,774 +2298,344 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
 
   // regular norm-conserving nonlocal potential projection
   for ( int is = 0; is < nsp; is++ ) {  
-    Species *s = atoms_.species_list[is];
-    if (!s->ultrasoft() && npr[is] > 0 ) { // species is is non-local, norm-conserving
+     Species *s = atoms_.species_list[is];
+     if (!s->ultrasoft() && npr[is] > 0 ) { // species is is non-local, norm-conserving
+        valarray<double> tmpfion(3*na[is]);      
+        tmpfion = 0.0;                           
 
-      valarray<double> kpgr(na_block_size*ngwl); // kpgr[ig+ia*ngwl]
-      valarray<double> ckpgr(na_block_size*ngwl); // ckpgr[ig+ia*ngwl]
-      valarray<double> skpgr(na_block_size*ngwl); // skpgr[ig+ia*ngwl]
-
-      valarray<double> tmpfion(3*na[is]);      
-      tmpfion = 0.0;                           
-      // define number of atom blocks                                        
-      const int na_blocks = na[is] / na_block_size +                         
-          ( na[is] % na_block_size == 0 ? 0 : 1 );         
-
-      valarray<double> anl_loc_gamma;
-      valarray<complex<double> > anl_loc;
-      //if (basis_.real())
-      //  anl_loc_gamma.resize(npr[is]*na_block_size*2*ngwl);
-      //else 
-      //  anl_loc.resize(npr[is]*na_block_size*ngwl);
-      //vector<double> anl_loc_gamma;
-      //vector<complex<double> > anl_loc;
-      if (basis_.real())
-         anl_loc_gamma.resize(npr[is]*na_block_size*2*mloc,0.0);
-      else 
-         anl_loc.resize(npr[is]*na_block_size*mloc,complex<double>(0.0,0.0));
-        
-      const int nstloc = sd_.nstloc();
-      // fnl_loc[ipra][n]
-      valarray<double> fnl_loc_gamma;
-      valarray<double> fnl_buf_gamma;
-      valarray<complex<double> > fnl_loc;
-      valarray<complex<double> > fnl_buf;
-      if (basis_.real()) {
-        fnl_loc_gamma.resize(npr[is]*na_block_size*nstloc);
-        fnl_buf_gamma.resize(npr[is]*na_block_size*nstloc);
-      }
-      else {
-        fnl_loc.resize(npr[is]*na_block_size*nstloc);
-        fnl_buf.resize(npr[is]*na_block_size*nstloc);
-      }
-      for ( int ia_block = 0; ia_block < na_blocks; ia_block++ ) {
-        // process projectors of atoms in block ia_block             
-
-        const int iastart = ia_block * na_block_size;                
-        const int iaend = (ia_block+1) * na_block_size < na[is] ?    
-                        (ia_block+1) * na_block_size :               
-                        na[is];                                      
-        const int ia_block_size = iaend - iastart;                   
-                                                                     
-        // compute ckpgr[is][ia][ig], skpgr[is][ia][ig]                  
-        tmap["comp_eigr"].start();                                   
-        int k = 3;                                                   
-        double mone = -1.0, zero = 0.0;
-        char cn='n';
-
-        // next line: const cast is ok since dgemm_ does not modify argument 
-        double* kpgx = const_cast<double*>(basis_.kpgx_ptr(0));
-        dgemm(&cn,&cn,(int*)&ngwl,(int*)&ia_block_size,&k,&mone,             
-              kpgx,(int*)&ngwl, &tau[is][3*iastart],&k,                        
-              &zero,&kpgr[0],(int*)&ngwl);                                     
-
-        int len = ia_block_size * ngwl;                                      
-#if USE_MASSV  
-        vsincos(&skpgr[0],&ckpgr[0],&kpgr[0],&len);
-#else
-        #pragma omp parallel for
-        for ( int i = 0; i < len; i++ ) {
-          const double arg = kpgr[i];
-          skpgr[i] = sin(arg);                                                 
-          ckpgr[i] = cos(arg);                                                 
-        }                                                                    
-#endif
-        tmap["comp_eigr"].stop();                                            
-
-        // compute anl_loc                                                   
-        tmap["comp_anl"].start();
-        for ( int ipr = 0; ipr < npr[is]; ipr++ ) {
-          // twnl[is][ig+ngwl*ipr]
-          const double * t = &twnl[is][ngwl*ipr];                            
-          const int l = lproj[is][ipr];                                      
-
-          // anl_loc[ig+ipra*ngwl]                                           
-          for ( int ia = 0; ia < ia_block_size; ia++ ) {
-            double* a;
-            if (basis_.real())
-              a = &anl_loc_gamma[2*(ia+ipr*ia_block_size)*ngwl];             
-            else
-              a = (double*)&anl_loc[(ia+ipr*ia_block_size)*ngwl];             
-            const double* c = &ckpgr[ia*ngwl];
-            const double* s = &skpgr[ia*ngwl];
-            if ( l == 0 ) {
-#pragma omp parallel for
-              for ( int ig = 0; ig < ngwl; ig++ ) {
-                a[2*ig]   = t[ig] * c[ig];                                   
-                a[2*ig+1] = t[ig] * s[ig];                                   
-              }
-            }
-            else if ( l == 1 ) {
-              /* Next line: -i * eigr */                                   
-              /* -i * (a+i*b) = b - i*a */                                 
-#pragma omp parallel for
-              for ( int ig = 0; ig < ngwl; ig++ ) {
-                a[2*ig]   =  t[ig] * s[ig];
-                a[2*ig+1] = -t[ig] * c[ig];
-              }
-            }
-            else if ( l == 2 ) {
-              // Next line: (-) sign for -eigr                             
-              /* -1 * (a+i*b) = -a - i*b */                                 
-#pragma omp parallel for
-              for ( int ig = 0; ig < ngwl; ig++ ) {
-                a[2*ig]   = -t[ig] * c[ig];
-                a[2*ig+1] = -t[ig] * s[ig];
-              }
-            }
-            else if ( l == 3 ) {
-              /* i * (a+i*b) = -b + i*a */ 
-#pragma omp parallel for
-              for ( int ig = 0; ig < ngwl; ig++ ) {
-                a[2*ig]   = -t[ig] * s[ig];
-                a[2*ig+1] = t[ig] * c[ig];
-              }
-            }
-          }
-        } // ipr                                                             
-        tmap["comp_anl"].stop();                                             
-                                                                             
-        // array anl_loc is complete                                         
-                                                                             
         // compute fnl[npra][nstloc] = anl^T * c                             
-        double one=1.0;                                                      
-        char ct='t';                                                         
-        int twongwl = 2 * ngwl;                                              
-        int twomloc = 2 * mloc;                                              
-        int nprnaloc = ia_block_size * npr[is];                              
-        int c_lda;
-        const complex<double>* c = sd_.c().cvalptr();                        
-
+        DoubleMatrix fnl_gam(ctxt_);
+        ComplexMatrix fnl(ctxt_);
         if (basis_.real()) {
-          c_lda = 2*sd_.c().mloc();                                        
-          tmap["fnl_gemm"].start();                                            
-          dgemm(&ct,&cn,&nprnaloc,(int*)&nstloc,&twongwl,&one,
-                &anl_loc_gamma[0],&twongwl, (double*)c, &c_lda,
-                &zero,&fnl_loc_gamma[0],&nprnaloc);
-          //ewd:  this was uncommented prior to 6/15/12, 2:49pm
-          //dgemm(&ct,&cn,&nprnaloc,(int*)&nstloc,&twomloc,&one,
-          //      &anl_loc_gamma[0],&twomloc, (double*)c, &c_lda,
-          //      &zero,&fnl_loc_gamma[0],&nprnaloc);
-          tmap["fnl_gemm"].stop();
+           fnl_gam.resize(npr[is]*na[is],nst,anl_nb_[is],nb);
         }
         else {
-           c_lda = mloc;
-          complex<double> zzero = complex<double>(0.0,0.0);
-          complex<double> zone = complex<double>(1.0,0.0);
-          char cc='c';
-          tmap["fnl_gemm"].start();
-
-          //ewd DEBUG
-          //if (ctxt_.mype() == 0)
-          //   cout << "NLP.ZGEMM1, mype = " << ctxt_.mype() << ", c dims = " << sd_.c().m() << " " << sd_.c().n() << " " << sd_.c().mb() << " " << sd_.c().nb() << " " << sd_.c().mloc() << " " << sd_.c().nloc() << ", anl_loc.size = " << anl_loc.size() << ", fnl_loc.size = " << fnl_loc.size() << ", nstloc = " << nstloc << ", ngwl = " << ngwl << endl;
-          //if (c_lda < ngwl)
-          //   cout << "NLP.ZGEMM3, mype = " << ctxt_.mype() << ", c dims = " << sd_.c().m() << " " << sd_.c().n() << " " << sd_.c().mb() << " " << sd_.c().nb() << " " << sd_.c().mloc() << " " << sd_.c().nloc() << ", anl_loc.size = " << anl_loc.size() << ", fnl_loc.size = " << fnl_loc.size() << ", nstloc = " << nstloc << ", ngwl = " << ngwl << endl;
-             
-          //ewd DEBUG
-          
-          zgemm(&cc,&cn,&nprnaloc,(int*)&nstloc,(int*)&ngwl,&zone,
-                &anl_loc[0],(int *)&ngwl, (complex<double> *)c, &c_lda,
-                &zzero,&fnl_loc[0],&nprnaloc);
-          //ewd:  this was uncommented prior to 6/15/12, 2:49pm
-          //zgemm(&cc,&cn,&nprnaloc,(int*)&nstloc,(int*)&mloc,&zone,
-          //      &anl_loc[0],(int *)&mloc, (complex<double> *)c, &c_lda,
-          //      &zzero,&fnl_loc[0],&nprnaloc);
-          tmap["fnl_gemm"].stop();
-
-          //ewd DEBUG
-          //MPI_Barrier(MPI_COMM_WORLD);
-          //cout << "NLP.ZGEMM1 done, mype = " << ctxt_.mype() << endl;
-          //ewd DEBUG
-
-
-        }
-          
-        // for k=(0,0,0):  need to correct for double counting of G=0, i.e. if ctxt_.myrow() == 0
-        if (basis_.real()) { 
-          if ( ctxt_.myrow() == 0 ) {
-            // rank-one update                                                 
-            // dger(m,n,alpha,x,incx,y,incy,a,lda);                            
-            // a += alpha * x * transpose(y)                                   
-            // x = first row of anl_loc                                        
-            // y^T = first row of c                                            
-            double alpha = -0.5;                                               
-            dger(&nprnaloc,(int*)&nstloc,&alpha,&anl_loc_gamma[0],&twongwl,
-               (double*)c,&c_lda,&fnl_loc_gamma[0],&nprnaloc);
-          }
+           fnl.resize(npr[is]*na[is],nst,anl_nb_[is],nb);
         }
 
-        tmap["fnl_allreduce"].start();                                       
-        if (nstloc > 0) {
-          // Allreduce fnl partial sum
-          MPI_Comm basis_comm = basis_.context().comm();                       
-          int fnl_size = nprnaloc*nstloc;                                   
-          if (basis_.real()) {
-            MPI_Allreduce(&fnl_loc_gamma[0],&fnl_buf_gamma[0],fnl_size,                      
-                          MPI_DOUBLE,MPI_SUM,basis_comm);                        
-          }
-          else {
-            MPI_Allreduce(&fnl_loc[0],&fnl_buf[0],fnl_size,                      
-                          MPI_DOUBLE_COMPLEX,MPI_SUM,basis_comm);                        
-          }
+
+        //ewd DEBUG
+        /*
+        DoubleMatrix fakec(ctxt_);
+        DoubleMatrix fakeanl(ctxt_);
+        int twom = 2*sd_.c().m();
+        int twomb = 2*sd_.c().mb();
+        fakec.init_size(twom,nst,twomb,nb);
+        fakeanl.init_size(twom,npr[is]*na[is],twomb,npr[is]*naloc);
+
+        fnl_gam.gemm('t','n',2.0,fakeanl,fakec,0.0);
+        MPI_Barrier(MPI_COMM_WORLD);
+        */
+        //ewd DEBUG
+
+
+        //ewd DEBUG
+        /*
+        int twom = 2*sd_.c().m();
+        int twomb = 2*sd_.c().mb();
+        DoubleMatrix fakec(ctxt_,twom,nst,twomb,nb);
+        DoubleMatrix* fakeanl = new DoubleMatrix(ctxt_,twom,npr[is]*na[is],twomb,npr[is]*naloc);
+        DoubleMatrix fakefnl(ctxt_,npr[is]*na[is],nst,npr[is]*naloc,nb);
+        cout << "FAKE1.GEMM DEBUG, mype = " << ctxt_.mype() << ", fakefnl = " << fakefnl.m() << " x " << fakefnl.n() << " (" << fakefnl.mb() << "x" << fakefnl.nb() << "), anl_gam_ = " << fakeanl->m() << " x " << fakeanl->n() << " (" << fakeanl->mb() << "x" << fakeanl->nb() << "), c = " << fakec.m() << " x " << fakec.n() << " (" << fakec.mb() << "x" << fakec.nb() << ")" << endl;
+        cout << "FAKE2.GEMM DEBUG, mype = " << ctxt_.mype() << ", fakefnl = " << fakefnl.m() << " x " << fakefnl.n() << " (" << fakefnl.mloc() << "x" << fakefnl.nloc() << "), anl_gam_ = " << fakeanl->m() << " x " << fakeanl->n() << " (" << fakeanl->mloc() << "x" << fakeanl->nloc() << "), c = " << fakec.m() << " x " << fakec.n() << " (" << fakec.mloc() << "x" << fakec.nloc() << ")" << endl;
+        fakefnl.gemm('t','n',2.0,*fakeanl,fakec,0.0);
+        MPI_Barrier(MPI_COMM_WORLD);
+        */        
+        //ewd DEBUG
+
+
+        
+        tmap["fnl_gemm"].start();
+        if (basis_.real()) {
+           DoubleMatrix c_proxy(sd_.c());
+           fnl_gam.gemm('t','n',2.0,*anl_gam_[is],c_proxy,0.0);
+           fnl_gam.ger(-1.0,*anl_gam_[is],0,c_proxy,0);
         }
-        tmap["fnl_allreduce"].stop();                                        
-                      
-        // factor 2.0 in next line is: counting G, -G                        
-        if (basis_.real())
-          fnl_loc_gamma = 2.0 * fnl_buf_gamma;
         else
-          fnl_loc = fnl_buf;
-                                
+        {
+           ComplexMatrix& c_proxy = sd_.c();
+           fnl.gemm('c','n',1.0,*anl_[is],c_proxy,0.0);
+        }
+        tmap["fnl_gemm"].stop();
+
         // accumulate Enl contribution                                       
         if (basis_.real()) {
-          for ( int ipr = 0; ipr < npr[is]; ipr++ ) { 
-            const double fac = wt[is][ipr] * omega_inv;                        
-            for ( int lj=0; lj < sd_.c().nblocks(); lj++ )
-            {
-               for ( int jj=0; jj < sd_.c().nbs(lj); jj++ )
-               {
-                  // global state index
-                  const int nglobal = sd_.c().j(lj,jj);
-                  const int norig = lj*sd_.c().nb()+jj;
-                  const double facn = fac * occ[nglobal];
-                  for ( int ia = 0; ia < ia_block_size; ia++ ) {
-                     const int i = ia + ipr*ia_block_size + norig * nprnaloc;           
-                     const double tmp = fnl_loc_gamma[i];
-                     enl += facn * tmp * tmp;
-                     fnl_loc_gamma[i] = fac * tmp;
-                  }
-               }
-            }
-          }
+           if (fnl_gam.localsize() > 0)
+           {
+              double* fp = (double*)fnl_gam.valptr();
+              for ( int ipr = 0; ipr < npr[is]; ipr++ ) { 
+                 const double fac = wt[is][ipr] * omega_inv;                        
+                 for ( int lj=0; lj < sd_.c().nblocks(); lj++ )
+                 {
+                    for ( int jj=0; jj < sd_.c().nbs(lj); jj++ )
+                    {
+                       // global state index
+                       const int nglobal = sd_.c().j(lj,jj);
+                       const int norig = lj*sd_.c().nb()+jj;
+                       const double facn = fac * occ[nglobal];
+
+                       //ewd DEBUG
+                       //cout << "STATES, mype = " << ctxt_.mype() << ", lj = " << lj << ", jj = " << jj << ", norig = " << norig << ", nglobal = " << nglobal << endl;
+
+
+                       for ( int ia = 0; ia < anl_naloc_[is]; ia++ ) {
+                          const int i = ia + ipr*anl_naloc_[is] + norig*fnl_gam.mloc();
+                          const double tmp = fp[i];
+                          enl += facn * tmp * tmp;
+
+
+                          //ewd DEBUG
+                          //cout << "FNL1, mype = " << ctxt_.mype() << ", ia = " << ia+iastart << ", ipr = " << ipr << ", nglobal = " << nglobal << ", fnl = " << tmp << ", enl = " << enl << endl;
+
+
+                          fp[i] = fac * tmp;
+                       }
+                    }
+                 }
+              }
+           }
         }
         else {
-          for ( int ipr = 0; ipr < npr[is]; ipr++ ) { 
-            const double fac = wt[is][ipr] * omega_inv;                        
-            for ( int lj=0; lj < sd_.c().nblocks(); lj++ )
-            {
-               for ( int jj=0; jj < sd_.c().nbs(lj); jj++ )
-               {
-                  // global state index
-                  const int nglobal = sd_.c().j(lj,jj);
-                  const int norig = lj*sd_.c().nb()+jj;
-                  const double facn = fac * occ[nglobal];
-                  for ( int ia = 0; ia < ia_block_size; ia++ ) {
-                     const int i = ia + ipr*ia_block_size + norig * nprnaloc;           
-                     const complex<double> tmp = fnl_loc[i];                                 
-                     enl += facn * norm(tmp);
-                     fnl_loc[i] = fac * tmp;
-                  }
-               }
-            }
-          }
+           if (fnl.localsize() > 0)
+           {
+              complex<double>* fp = (complex<double>*)fnl.valptr();
+              for ( int ipr = 0; ipr < npr[is]; ipr++ ) { 
+                 const double fac = wt[is][ipr] * omega_inv;
+                 for ( int lj=0; lj < sd_.c().nblocks(); lj++ )
+                 {
+                    for ( int jj=0; jj < sd_.c().nbs(lj); jj++ )
+                    {
+                       // global state index
+                       const int nglobal = sd_.c().j(lj,jj);
+                       const int norig = lj*sd_.c().nb()+jj;
+                       const double facn = fac * occ[nglobal];
+                       for ( int ia = 0; ia < anl_naloc_[is]; ia++ ) {
+                          const int i = ia + ipr*anl_naloc_[is] + norig*fnl.mloc();
+                          const complex<double> tmp = fp[i];
+                          //enl += facn * norm(tmp);
+                          enl += facn * (real(tmp)*real(tmp) + imag(tmp)*imag(tmp));
+                          fp[i] = fac * tmp;
+                       }
+                    }
+                 }
+              }
+           }
         }
 
+        //ewd DEBUG
+        //cout << "NLP.ENL1, mype = " << ctxt_.mype() << ", enl = " << enl << endl;
+
+        
+        // need to sum enl over columns to get contribution from all atoms
+        ctxt_.dsum('c',1,1,&enl,1);    
+
+        //ewd DEBUG
+        //if (ctxt_.myrow() == 0)
+        //   cout << "NLP.ENL2, mype = " << ctxt_.mype() << ", enl = " << enl << endl;
+
+        
         if ( compute_hpsi ) {
-          tmap["enl_hpsi"].start();                                          
-          // compute cp += anl * fnl                                         
-          complex<double>* cp = dsd.c().valptr();                            
+           tmap["enl_hpsi"].start();                                          
+           tmap["fnl_gemm"].start();
+           // compute cp += anl * fnl                                         
+           if (basis_.real()) {
+              DoubleMatrix cp_proxy(dsd.c());
+              cp_proxy.gemm('n','n',1.0,*anl_gam_[is],fnl_gam,1.0);
+           }
+           else
+           {
+              ComplexMatrix& cp_proxy = dsd.c();
+              cp_proxy.gemm('n','n',complex<double>(1.0,0.0),*anl_[is],fnl,complex<double>(1.0,0.0));
+           }
+           tmap["fnl_gemm"].stop();
+           tmap["enl_hpsi"].stop();
+        }
 
-          int cp_lda;
-          if (basis_.real()) {
-            cp_lda = 2*dsd.c().mloc();
-            dgemm(&cn,&cn,&twongwl,(int*)&nstloc,&nprnaloc,&one,
-                  &anl_loc_gamma[0],&twongwl, &fnl_loc_gamma[0],&nprnaloc,
-                  &one,(double*)cp, &cp_lda);
-            //ewd:  this was uncommented prior to 6/15/12, 2:49pm
-            //dgemm(&cn,&cn,&twomloc,(int*)&nstloc,&nprnaloc,&one,
-            //      &anl_loc_gamma[0],&twomloc, &fnl_loc_gamma[0],&nprnaloc,
-            //      &one,(double*)cp, &cp_lda);
-          }
-          else {
-            int cp_lda = dsd.c().mloc();
-            complex<double> zone = complex<double>(1.0,0.0);
-
-            //ewd DEBUG
-            //cout << "NLP.ZGEMM2, mype = " << ctxt_.mype() << ", c dims = " << dsd.c().m() << " " << dsd.c().n() << " " << dsd.c().mb() << " " << dsd.c().nb() << " " << dsd.c().mloc() << " " << dsd.c().nloc() << ", anl_loc.size = " << anl_loc.size() << ", fnl_loc.size = " << fnl_loc.size() << ", nstloc = " << nstloc << ", ngwl = " << ngwl << endl;
-            //ewd DEBUG
-          
-            zgemm(&cn,&cn,(int*)&ngwl,(int*)&nstloc,&nprnaloc,&zone,
-                    &anl_loc[0],(int*)&ngwl, &fnl_loc[0],&nprnaloc,
-                    &zone,(complex<double>*)cp, &cp_lda);
-            //ewd:  this was uncommented prior to 6/15/12, 2:49pm
-            //zgemm(&cn,&cn,(int*)&mloc,(int*)&nstloc,&nprnaloc,&zone,
-            //      &anl_loc[0],(int*)&mloc, &fnl_loc[0],&nprnaloc,
-            //      &zone,(complex<double>*)cp, &cp_lda);
-          }
-
-          tmap["enl_hpsi"].stop();
-        }                       
-                                
         // ionic forces
-         
         if ( compute_forces ) {
-          tmap["enl_fion"].start();
-          valarray<double> dfnl_loc_gamma;
-          valarray<complex<double> > dfnl_loc;
-          if (basis_.real()) 
-            dfnl_loc_gamma.resize(npr[is]*na_block_size*nstloc);
-          else
-            dfnl_loc.resize(npr[is]*na_block_size*nstloc);
+           tmap["enl_fion"].start();
+           DoubleMatrix dfnl_gam(ctxt_);
+           ComplexMatrix dfnl(ctxt_);
 
-          for ( int j = 0; j < 3; j++ ) {
-            const double *const kpgxj = basis_.kpgx_ptr(j);                      
-                                
-            // compute anl_loc  
-            for ( int ipr = 0; ipr < npr[is]; ipr++ ) {
-              // twnl[is][ig+ngwl*ipr]                                       
-              const double * t = &twnl[is][ngwl*ipr];                        
-              const int l = lproj[is][ipr];                                  
+           if (basis_.real())
+              dfnl_gam.resize(npr[is]*na[is],nst,anl_nb_[is],nb);
+           else
+              dfnl.resize(npr[is]*na[is],nst,anl_nb_[is],nb);
+          
+           for ( int j = 0; j < 3; j++ )
+           {
 
-              // anl_loc[ig+ipra*ngwl]                                       
-              for ( int ia = 0; ia < ia_block_size; ia++ ) {
-                double* a;
-                if (basis_.real())
-                  a = &anl_loc_gamma[2*(ia+ipr*ia_block_size)*ngwl];             
-                else
-                  a = (double*)&anl_loc[(ia+ipr*ia_block_size)*ngwl];             
-                const double* c = &ckpgr[ia*ngwl];                             
-                const double* s = &skpgr[ia*ngwl];                             
-                if ( l == 0 ) {
-                  for ( int ig = 0; ig < ngwl; ig++ ) {
-                    const double tt = kpgxj[ig] * t[ig];                       
-                    // Next lines: -i * ( a + ib ) = b - ia                  
-                    a[2*ig]   =  tt * s[ig];                                 
-                    a[2*ig+1] = -tt * c[ig];                                 
-                  }             
-                }               
-                else if ( l == 1 ) {
-                  for ( int ig = 0; ig < ngwl; ig++ ) {
-                    // Next lines: (-i)**2 * ( a + ib ) = - a - ib           
-                    const double tt = kpgxj[ig] * t[ig];                     
-                    a[2*ig]   = -tt * c[ig];                                  
-                    a[2*ig+1] = -tt * s[ig];                                  
-                  }             
-                }               
-                else if ( l == 2 ) {
-                  for ( int ig = 0; ig < ngwl; ig++ ) {
-                    // Next lines: (-i) * - ( a + ib ) = i*(a+ib) = - b + ia 
-                    const double tt = kpgxj[ig] * t[ig];                       
-                    a[2*ig]   = -tt * s[ig];                                 
-                    a[2*ig+1] =  tt * c[ig];                                 
-                  }             
-                }               
-                else if ( l == 3 ) {
-                  for ( int ig = 0; ig < ngwl; ig++ ) {
-                    // Next lines: (-i)**4 * ( a + ib ) = a + ib
-                    const double tt = kpgxj[ig] * t[ig];                       
-                    a[2*ig]   =  tt * c[ig];                                 
-                    a[2*ig+1] =  tt * s[ig];                                 
-                  }             
-                }               
-              }                 
-            } // ipr            
- 
-            // array anl_loc is complete                                     
-                                
-            // compute dfnl     
-            // dfnl.gemm('t','n',2.0,anl,c_proxy,0.0);                       
-            // compute dfnl[npra][nstloc] = anl^T * c                         
-            const int nprnaloc = ia_block_size * npr[is];                    
-            const complex<double>* c = sd_.c().cvalptr();                    
-            if (basis_.real()) {
-              double one=1.0;
-              char ct='t';        
-              const int twongwl = 2 * ngwl;                                    
-              //ewd:  original code
-              dgemm(&ct,&cn,(int*)&nprnaloc,(int*)&nstloc,(int*)&twongwl,&one, 
-                    &anl_loc_gamma[0],(int*)&twongwl, (double*)c,(int*)&c_lda,       
-                    &zero,&dfnl_loc_gamma[0],(int*)&nprnaloc);
-              //ewd:  this "fix" may actually be a bug, comment it out (10/1/2012)
-              //dgemm(&ct,&cn,(int*)&nprnaloc,(int*)&nstloc,(int*)&twomloc,&one, 
-              //      &anl_loc_gamma[0],(int*)&twomloc, (double*)c,(int*)&c_lda,       
-              //      &zero,&dfnl_loc_gamma[0],(int*)&nprnaloc);
-            }
-            else {
-              complex<double> zzero = complex<double>(0.0,0.0);
-              complex<double> zone = complex<double>(1.0,0.0);
-              char cc='c';
-              //ewd:  original code
-              zgemm(&cc,&cn,(int*)&nprnaloc,(int*)&nstloc,(int*)&ngwl,&zone, 
-                    &anl_loc[0],(int*)&ngwl, (complex<double> *)c,(int*)&c_lda,       
-                    &zzero,&dfnl_loc[0],(int*)&nprnaloc);                       
-              //ewd:  this "fix" may actually be a bug, comment it out (10/1/2012)
-              //zgemm(&cc,&cn,(int*)&nprnaloc,(int*)&nstloc,(int*)&mloc,&zone, 
-              //      &anl_loc[0],(int*)&mloc, (complex<double> *)c,(int*)&c_lda,       
-              //      &zzero,&dfnl_loc[0],(int*)&nprnaloc);                       
-            }
+              tmap["dfnl_gemm"].start();
+              if (basis_.real()) {
+                 // Note: no need to correct for double counting of the            
+                 // G=0 component which is always zero                             
+                 DoubleMatrix c_proxy(sd_.c());
+                 dfnl_gam.gemm('t','n',2.0,*anl_gam_fion_[3*is+j],c_proxy,0.0);
+              }
+              else
+              {
+                 ComplexMatrix &c_proxy = sd_.c();
+                 dfnl.gemm('c','n',1.0,*anl_fion_[3*is+j],c_proxy,0.0);
+              }
+              tmap["dfnl_gemm"].stop();
 
-            // Note: no need to correct for double counting of the           
-            // G=0 component which is always zero                            
-
-            // factor 2.0 in next line is: counting G, -G                    
-            if (basis_.real()) 
-              dfnl_loc_gamma *= 2.0;
-                                
-            // accumulate non-local contributions to forces                  
-            if (basis_.real()) {
-               for ( int ipr = 0; ipr < npr[is]; ipr++ )
-               {
-                  for ( int lj=0; lj < sd_.c().nblocks(); lj++ )
-                  {
-                     for ( int jj=0; jj < sd_.c().nbs(lj); jj++ )
-                     {
-                        // global state index
-                        const int nglobal = sd_.c().j(lj,jj);
-                        const int norig = lj*sd_.c().nb()+jj;
-                        // Factor 2.0 in next line from derivative of |Fnl|^2        
-                        const double facn = 2.0 * occ[nglobal];                    
-                        for ( int ia = 0; ia < ia_block_size; ia++ ) {
-                           const int ia_global = ia + iastart;                        
-                           const int i = ia + ipr*ia_block_size + norig * nprnaloc;       
-                           tmpfion[3*ia_global+j] -= facn *                           
-                               fnl_loc_gamma[i] * dfnl_loc_gamma[i];        
-                        }
-                     }
-                  }
-               }
-            }
-            else {
-               for ( int ipr = 0; ipr < npr[is]; ipr++ )
-               {
-                  for ( int lj=0; lj < sd_.c().nblocks(); lj++ )
-                  {
-                     for ( int jj=0; jj < sd_.c().nbs(lj); jj++ )
-                     {
-                        // global state index
-                        const int nglobal = sd_.c().j(lj,jj);
-                        const int norig = lj*sd_.c().nb()+jj;
-                        // Factor 2.0 in next line from derivative of |Fnl|^2        
-                        const double facn = 2.0 * occ[nglobal];                    
-                        for ( int ia = 0; ia < ia_block_size; ia++ ) {
-                           const int ia_global = ia + iastart;                        
-                           const int i = ia + ipr*ia_block_size + norig * nprnaloc;       
-                           //cout << "fnl_loc[ipr=" << ipr << ",ia=" << ia            
-                           //     << ",n=" << n << "]: " << fnl_loc[i] << endl;       
-                           tmpfion[3*ia_global+j] -= facn *
-                               real(fnl_loc[i] * conj(dfnl_loc[i]));
-                        }
-                     }
-                  }
-               }
-            }
-          } // j                
- 
-          tmap["enl_fion"].stop();                                           
+              // accumulate non-local contributions to forces                  
+              if (basis_.real()) {
+                 if (fnl_gam.localsize() > 0 && dfnl_gam.localsize() > 0)
+                 {
+                    double* fp = (double*)fnl_gam.valptr();
+                    double* dfp = (double*)dfnl_gam.valptr();
+                    for ( int ipr = 0; ipr < npr[is]; ipr++ )
+                    {
+                       for ( int lj=0; lj < sd_.c().nblocks(); lj++ )
+                       {
+                          for ( int jj=0; jj < sd_.c().nbs(lj); jj++ )
+                          {
+                             // global state index
+                             const int nglobal = sd_.c().j(lj,jj);
+                             const int norig = lj*sd_.c().nb()+jj;
+                             // Factor 2.0 in next line from derivative of |Fnl|^2        
+                             const double facn = 2.0 * occ[nglobal];                    
+                             for ( int ia = 0; ia < anl_naloc_[is]; ia++ ) {
+                                const int ia_global = ia + anl_iastart_[is];                        
+                                const int i = ia + ipr*anl_naloc_[is] + norig * fnl_gam.mloc();       
+                                tmpfion[3*ia_global+j] -= facn * fp[i] * dfp[i];
+                             }
+                          }
+                       }
+                    }
+                 }
+              }
+              else {
+                 if (fnl.localsize() > 0 && dfnl.localsize() > 0)
+                 {
+                    complex<double>* fp = (complex<double>*)fnl.valptr();
+                    complex<double>* dfp = (complex<double>*)dfnl.valptr();
+                    for ( int ipr = 0; ipr < npr[is]; ipr++ )
+                    {
+                       for ( int lj=0; lj < sd_.c().nblocks(); lj++ )
+                       {
+                          for ( int jj=0; jj < sd_.c().nbs(lj); jj++ )
+                          {
+                             // global state index
+                             const int nglobal = sd_.c().j(lj,jj);
+                             const int norig = lj*sd_.c().nb()+jj;
+                             // Factor 2.0 in next line from derivative of |Fnl|^2        
+                             const double facn = 2.0 * occ[nglobal];                    
+                             for ( int ia = 0; ia < anl_naloc_[is]; ia++ ) {
+                                const int ia_global = ia + anl_iastart_[is];                        
+                                const int i = ia + ipr*anl_naloc_[is] + norig * fnl.mloc();       
+                                tmpfion[3*ia_global+j] -= facn * real(fp[i] * conj(dfp[i]));
+                             }
+                          }
+                       }
+                    }
+                 }
+              }
+           } // j                
+           tmap["enl_fion"].stop();                                           
         } // compute_forces     
                                 
+
+        //ewd:  rewritten up to here
+
+        
         if ( compute_stress ) {                       
-          tmap["enl_sigma"].start();                                         
-          valarray<double> dfnl_loc_gamma;
-          valarray<complex<double> > dfnl_loc;
-          if (basis_.real()) 
-            dfnl_loc_gamma.resize(npr[is]*na_block_size*nstloc);
-          else
-            dfnl_loc.resize(npr[is]*na_block_size*nstloc);
+           tmap["enl_sigma"].start();                                         
+           DoubleMatrix dfnl_gam(ctxt_);
+           ComplexMatrix dfnl(ctxt_);
 
-          for ( int ij = 0; ij < 6; ij++ ) {
-            // compute anl_loc  
-            int ipr = 0;        
-            while ( ipr < npr[is] ) {
-              // twnl[is][ig+ngwl*ipr]                                       
-              const int l = lproj[is][ipr];                                  
-              if ( l == 0 ) {
-                // dtwnl[is][ipr][ij][ngwl]                                  
-                // index = ig + ngwl * ( ij + 6 * ipr))                      
-                // ipr = iquad + nquad[is] * ilm, where ilm = 0              
-                const double *const dt0 = &dtwnl[is][ngwl*(ij+6*ipr)];       
-                for ( int ia = 0; ia < ia_block_size; ia++ ) {
-                  double* a0;
-                  if  (basis_.real()) 
-                    a0 = &anl_loc_gamma[2*(ia+ipr*ia_block_size)*ngwl];      
-                  else
-                    a0 = (double*)&anl_loc[(ia+ipr*ia_block_size)*ngwl];      
-                  const double* c = &ckpgr[ia*ngwl];                           
-                  const double* s = &skpgr[ia*ngwl];                           
-                  for ( int ig = 0; ig < ngwl; ig++ ) {
-                    const double d0 = dt0[ig];                               
-                    // Next lines: (-i)^0 * ( a + ib ) = a + ib                  
-                    a0[2*ig]   =  d0 * c[ig];                                
-                    a0[2*ig+1] =  d0 * s[ig];                                
-                  }             
-                }               
-              }                 
-              else if ( l == 1 ) {
-                const int ipr1 = ipr;                                        
-                const int ipr2 = ipr + 1;                                    
-                const int ipr3 = ipr + 2;                                    
-                // dtwnl[is][ipr][ij][ngwl]                                  
-                // index = ig + ngwl * ( ij + 6 * iprx ))                    
-                const double *dt1 = &dtwnl[is][ngwl*(ij+6*ipr1)];            
-                const double *dt2 = &dtwnl[is][ngwl*(ij+6*ipr2)];            
-                const double *dt3 = &dtwnl[is][ngwl*(ij+6*ipr3)];            
-                for ( int ia = 0; ia < ia_block_size; ia++ ) {
-                  double* a1;
-                  double* a2;
-                  double* a3;
-                  if (basis_.real()) {
-                    a1 = &anl_loc_gamma[2*(ia+ipr1*ia_block_size)*ngwl];     
-                    a2 = &anl_loc_gamma[2*(ia+ipr2*ia_block_size)*ngwl];     
-                    a3 = &anl_loc_gamma[2*(ia+ipr3*ia_block_size)*ngwl];     
-                  }
-                  else {
-                    a1 = (double*)&anl_loc[(ia+ipr1*ia_block_size)*ngwl];     
-                    a2 = (double*)&anl_loc[(ia+ipr2*ia_block_size)*ngwl];     
-                    a3 = (double*)&anl_loc[(ia+ipr3*ia_block_size)*ngwl];     
-                  }
-                  const double* c = &ckpgr[ia*ngwl];                           
-                  const double* s = &skpgr[ia*ngwl];                           
-                  for ( int ig = 0; ig < ngwl; ig++ ) {
-                    const double d1 = dt1[ig];                               
-                    const double d2 = dt2[ig];                               
-                    const double d3 = dt3[ig];                               
-                    // Next line: (-i)^l factor is -i                        
-                    // Next line: -i * eigr
-                    // -i * (a+i*b) = b - i*a                                
-                    const double tc = -c[ig]; //  -cosgr[ia][ig]             
-                    const double ts =  s[ig]; //   singr[ia][ig]             
-                    a1[2*ig]   = d1 * ts;                                    
-                    a1[2*ig+1] = d1 * tc;                                    
-                    a2[2*ig]   = d2 * ts;                                    
-                    a2[2*ig+1] = d2 * tc;                                    
-                    a3[2*ig]   = d3 * ts;                                    
-                    a3[2*ig+1] = d3 * tc;                                    
-                  }             
-                }               
-              }                  
-              else if ( l == 2 ) {
-                const int ipr4 = ipr;                                         
-                const int ipr5 = ipr + 1;                                     
-                const int ipr6 = ipr + 2;                                     
-                const int ipr7 = ipr + 3;                                     
-                const int ipr8 = ipr + 4;                                     
-                // dtwnl[is][ipr][iquad][ij][ngwl]                            
-                // index = ig + ngwl * ( ij + 6 * ( iquad + nquad[is] * ipr ))
-                const double *dt4 = &dtwnl[is][ngwl*(ij+6*ipr4)];             
-                const double *dt5 = &dtwnl[is][ngwl*(ij+6*ipr5)];             
-                const double *dt6 = &dtwnl[is][ngwl*(ij+6*ipr6)];             
-                const double *dt7 = &dtwnl[is][ngwl*(ij+6*ipr7)];             
-                const double *dt8 = &dtwnl[is][ngwl*(ij+6*ipr8)];             
-                for ( int ia = 0; ia < ia_block_size; ia++ ) {
-                  double* a4;
-                  double* a5;
-                  double* a6;
-                  double* a7;
-                  double* a8;
-                  if (basis_.real()) {
-                    a4 = &anl_loc_gamma[2*(ia+ipr4*ia_block_size)*ngwl];      
-                    a5 = &anl_loc_gamma[2*(ia+ipr5*ia_block_size)*ngwl];      
-                    a6 = &anl_loc_gamma[2*(ia+ipr6*ia_block_size)*ngwl];      
-                    a7 = &anl_loc_gamma[2*(ia+ipr7*ia_block_size)*ngwl];      
-                    a8 = &anl_loc_gamma[2*(ia+ipr8*ia_block_size)*ngwl];      
-                  }
-                  else {
-                    a4 = (double*)&anl_loc[(ia+ipr4*ia_block_size)*ngwl];      
-                    a5 = (double*)&anl_loc[(ia+ipr5*ia_block_size)*ngwl];      
-                    a6 = (double*)&anl_loc[(ia+ipr6*ia_block_size)*ngwl];      
-                    a7 = (double*)&anl_loc[(ia+ipr7*ia_block_size)*ngwl];      
-                    a8 = (double*)&anl_loc[(ia+ipr8*ia_block_size)*ngwl];      
-                  }
-                  const double* c = &ckpgr[ia*ngwl];                            
-                  const double* s = &skpgr[ia*ngwl];                            
- 
-                  for ( int ig = 0; ig < ngwl; ig++ ) {
-                    const double d4 = dt4[ig];                                
-                    const double d5 = dt5[ig];                                
-                    const double d6 = dt6[ig];                                
-                    const double d7 = dt7[ig];                                
-                    const double d8 = dt8[ig];                                
-                    // Next lines: (-i)^2 * ( a + ib ) =  - ( a + ib )        
-                    const double tc = -c[ig]; //  -cosgr[ia][ig]              
-                    const double ts = -s[ig]; //  -singr[ia][ig]              
-                    a4[2*ig]   = d4 * tc;                                     
-                    a4[2*ig+1] = d4 * ts;                                     
-                    a5[2*ig]   = d5 * tc;                                     
-                    a5[2*ig+1] = d5 * ts;                                     
-                    a6[2*ig]   = d6 * tc;                                     
-                    a6[2*ig+1] = d6 * ts;                                     
-                    a7[2*ig]   = d7 * tc;                                     
-                    a7[2*ig+1] = d7 * ts;                                     
-                    a8[2*ig]   = d8 * tc;                                     
-                    a8[2*ig+1] = d8 * ts;                                     
-                  }              
-                }                
-              }                  
-              else if ( l == 3 ) {
-                const int ipr9 = ipr;                                         
-                const int ipr10 = ipr + 1;
-                const int ipr11 = ipr + 2;
-                const int ipr12 = ipr + 3;
-                const int ipr13 = ipr + 4;
-                const int ipr14 = ipr + 5;
-                const int ipr15 = ipr + 6;
+           if (basis_.real())
+              dfnl_gam.init_size(npr[is]*na[is],nst,anl_nb_[is],nb);
+           else
+              dfnl.init_size(npr[is]*na[is],nst,anl_nb_[is],nb);
 
-                // dtwnl[is][ipr][iquad][ij][ngwl]                            
-                // index = ig + ngwl * ( ij + 6 * ( iquad + nquad[is] * ipr ))
-                const double *dt9 = &dtwnl[is][ngwl*(ij+6*ipr9)];
-                const double *dt10 = &dtwnl[is][ngwl*(ij+6*ipr10)];
-                const double *dt11 = &dtwnl[is][ngwl*(ij+6*ipr11)];
-                const double *dt12 = &dtwnl[is][ngwl*(ij+6*ipr12)];
-                const double *dt13 = &dtwnl[is][ngwl*(ij+6*ipr13)];
-                const double *dt14 = &dtwnl[is][ngwl*(ij+6*ipr14)];
-                const double *dt15 = &dtwnl[is][ngwl*(ij+6*ipr15)];
-                for ( int ia = 0; ia < ia_block_size; ia++ ) {
-                  double* a9;
-                  double* a10;
-                  double* a11;
-                  double* a12;
-                  double* a13;
-                  double* a14;
-                  double* a15;
-                  if (basis_.real()) {
-                    a9 = &anl_loc_gamma[2*(ia+ipr9*ia_block_size)*ngwl];      
-                    a10 = &anl_loc_gamma[2*(ia+ipr10*ia_block_size)*ngwl];      
-                    a11 = &anl_loc_gamma[2*(ia+ipr11*ia_block_size)*ngwl];      
-                    a12 = &anl_loc_gamma[2*(ia+ipr12*ia_block_size)*ngwl];      
-                    a13 = &anl_loc_gamma[2*(ia+ipr13*ia_block_size)*ngwl];      
-                    a14 = &anl_loc_gamma[2*(ia+ipr14*ia_block_size)*ngwl];      
-                    a15 = &anl_loc_gamma[2*(ia+ipr15*ia_block_size)*ngwl];      
-                  }
-                  else {
-                    a9 = (double*)&anl_loc[(ia+ipr9*ia_block_size)*ngwl];      
-                    a10 = (double*)&anl_loc[(ia+ipr10*ia_block_size)*ngwl];      
-                    a11 = (double*)&anl_loc[(ia+ipr11*ia_block_size)*ngwl];      
-                    a12 = (double*)&anl_loc[(ia+ipr12*ia_block_size)*ngwl];      
-                    a13 = (double*)&anl_loc[(ia+ipr13*ia_block_size)*ngwl];      
-                    a14 = (double*)&anl_loc[(ia+ipr14*ia_block_size)*ngwl];      
-                    a15 = (double*)&anl_loc[(ia+ipr15*ia_block_size)*ngwl];      
-                  }
-                  const double* c = &ckpgr[ia*ngwl];                            
-                  const double* s = &skpgr[ia*ngwl];                            
- 
-                  for ( int ig = 0; ig < ngwl; ig++ ) {
-                    const double d9 = dt9[ig];
-                    const double d10 = dt10[ig];
-                    const double d11 = dt11[ig];
-                    const double d12 = dt12[ig];
-                    const double d13 = dt13[ig];
-                    const double d14 = dt14[ig];
-                    const double d15 = dt15[ig];
-                    // Next lines: (-i)^3 * ( a + ib ) =  -b + ia        
-                    const double ts = -s[ig]; //  -singr[ia][ig]              
-                    const double tc = c[ig]; //  cosgr[ia][ig]
-
-                    a9[2*ig]   = d9 * ts;
-                    a9[2*ig+1] = d9 * tc;
-                    a10[2*ig]   = d10 * ts;
-                    a10[2*ig+1] = d10 * tc;
-                    a11[2*ig]   = d11 * ts;
-                    a11[2*ig+1] = d11 * tc;
-                    a12[2*ig]   = d12 * ts;
-                    a12[2*ig+1] = d12 * tc;
-                    a13[2*ig]   = d13 * ts;
-                    a13[2*ig+1] = d13 * tc;
-                    a14[2*ig]   = d14 * ts;
-                    a14[2*ig+1] = d14 * tc;
-                    a15[2*ig]   = d15 * ts;
-                    a15[2*ig+1] = d15 * tc;
-                  }              
-                }                
+           for ( int ij = 0; ij < 6; ij++)
+           {
+           
+              tmap["dfnl_gemm"].start();
+              if (basis_.real()) {
+                 // Note: no need to correct for double counting of the            
+                 // G=0 component which is always zero                             
+                 DoubleMatrix c_proxy(sd_.c());
+                 dfnl_gam.gemm('t','n',2.0,*anl_gam_sigma_[6*is+ij],c_proxy,0.0);
               }
-              else {                  
-                assert(false);   
-              } // l             
-              ipr += 2*l+1;      
-            } // while ipr       
-      
-            // array anl_loc is complete                                      
-                                 
-            // compute dfnl      
-            // dfnl.gemm('t','n',2.0,anl,c_proxy,0.0);                        
-            // compute dfnl[npra][nstloc] = anl^T * c                         
-            const int nprnaloc = ia_block_size * npr[is];                     
-            const complex<double>* c = sd_.c().cvalptr();                     
-            if (basis_.real()) {
-              double one=1.0;      
-              char ct='t';         
-              const int twongwl = 2 * ngwl;                                     
-              dgemm(&ct,&cn,(int*)&nprnaloc,(int*)&nstloc,(int*)&twongwl,&one,  
-                    &anl_loc_gamma[0],(int*)&twongwl, (double*)c,(int*)&c_lda,        
-                    &zero,&dfnl_loc_gamma[0],(int*)&nprnaloc);                        
-              //ewd:  this "fix" may actually be a bug, comment it out (10/1/2012)
-              //dgemm(&ct,&cn,(int*)&nprnaloc,(int*)&nstloc,(int*)&twomloc,&one,  
-              //      &anl_loc_gamma[0],(int*)&twomloc, (double*)c,(int*)&c_lda,        
-              //      &zero,&dfnl_loc_gamma[0],(int*)&nprnaloc);                        
-            }
-            else {
-              complex<double> zzero = complex<double>(0.0,0.0);
-              complex<double> zone = complex<double>(1.0,0.0);
-              char cc='c';
-              zgemm(&cc,&cn,(int*)&nprnaloc,(int*)&nstloc,(int*)&ngwl,&zone, 
-                    &anl_loc[0],(int*)&ngwl, (complex<double> *)c,(int*)&c_lda,       
-                    &zzero,&dfnl_loc[0],(int*)&nprnaloc);                       
-              //ewd:  this "fix" may actually be a bug, comment it out (10/1/2012)
-              //zgemm(&cc,&cn,(int*)&nprnaloc,(int*)&nstloc,(int*)&mloc,&zone, 
-              //      &anl_loc[0],(int*)&mloc, (complex<double> *)c,(int*)&c_lda,       
-              //      &zzero,&dfnl_loc[0],(int*)&nprnaloc);                       
-            }
+              else
+              {
+                 ComplexMatrix &c_proxy = sd_.c();
+                 dfnl.gemm('c','n',1.0,*anl_sigma_[6*is+ij],c_proxy,0.0);
+              }
+              tmap["dfnl_gemm"].stop();
 
-            // Note: no need to correct for double counting of the            
-            // G=0 component which is always zero                             
-
-            // factor 2.0 in next line is: counting G, -G                     
-            if (basis_.real()) 
-              dfnl_loc_gamma *= 2.0;
-                                 
-            // accumulate non-local contributions to sigma_ij                 
-            if (basis_.real())
-            {
-               for ( int lj=0; lj < sd_.c().nblocks(); lj++ )
-               {
-                  for ( int jj=0; jj < sd_.c().nbs(lj); jj++ )
-                  {
-                     // global state index
-                     const int nglobal = sd_.c().j(lj,jj);
-                     const int norig = lj*sd_.c().nb()+jj;
-                     // Factor 2.0 in next line from derivative of |Fnl|^2           
-                     const double facn = 2.0 * occ[nglobal];                       
-                     for ( int ipra = 0; ipra < npr[is]*ia_block_size; ipra++ ) {
-                        const int i = ipra + norig * nprnaloc;                            
-                        tsum[ij] += facn * fnl_loc_gamma[i] * dfnl_loc_gamma[i];
-                     }                  
-                  }
-               }
-            }
-            else {
-               for ( int lj=0; lj < sd_.c().nblocks(); lj++ )
-               {
-                  for ( int jj=0; jj < sd_.c().nbs(lj); jj++ )
-                  {
-                     // global state index
-                     const int nglobal = sd_.c().j(lj,jj);
-                     const int norig = lj*sd_.c().nb()+jj;
-                     // Factor 2.0 in next line from derivative of |Fnl|^2           
-                     const double facn = 2.0 * occ[nglobal];                       
-                     for ( int ipra = 0; ipra < npr[is]*ia_block_size; ipra++ ) {
-                        const int i = ipra + norig * nprnaloc;                            
-                        tsum[ij] += facn * real(fnl_loc[i] * conj(dfnl_loc[i]));
-                     }
-                  }
-               }
-            }
-          } // ij                
-          tmap["enl_sigma"].stop();                                           
+              // accumulate non-local contributions to sigma_ij                 
+              if (basis_.real())
+              {
+                 if (fnl_gam.localsize() > 0 && dfnl_gam.localsize() > 0)
+                 {
+                    double* fp = (double*)fnl_gam.valptr();
+                    double* dfp = (double*)dfnl_gam.valptr();
+                    for ( int lj=0; lj < sd_.c().nblocks(); lj++ )
+                    {
+                       for ( int jj=0; jj < sd_.c().nbs(lj); jj++ )
+                       {
+                          // global state index
+                          const int nglobal = sd_.c().j(lj,jj);
+                          const int norig = lj*sd_.c().nb()+jj;
+                          // Factor 2.0 in next line from derivative of |Fnl|^2           
+                          const double facn = 2.0 * occ[nglobal];                       
+                          for ( int ipra = 0; ipra < npr[is]*anl_naloc_[is]; ipra++ ) {
+                             const int i = ipra + norig * fnl_gam.mloc();                            
+                             tsum[ij] += facn * fp[i] * dfp[i];
+                          }                  
+                       }
+                    }
+                 }
+              }
+              else {
+                 if (fnl.localsize() > 0 && dfnl.localsize() > 0)
+                 {
+                    complex<double>* fp = (complex<double>*)fnl.valptr();
+                    complex<double>* dfp = (complex<double>*)dfnl.valptr();
+                    for ( int lj=0; lj < sd_.c().nblocks(); lj++ )
+                    {
+                       for ( int jj=0; jj < sd_.c().nbs(lj); jj++ )
+                       {
+                          // global state index
+                          const int nglobal = sd_.c().j(lj,jj);
+                          const int norig = lj*sd_.c().nb()+jj;
+                          // Factor 2.0 in next line from derivative of |Fnl|^2           
+                          const double facn = 2.0 * occ[nglobal];                       
+                          for ( int ipra = 0; ipra < npr[is]*anl_naloc_[is]; ipra++ ) {
+                             const int i = ipra + norig * fnl.mloc();                            
+                             tsum[ij] += facn * real(fp[i] * conj(dfp[i]));
+                          }
+                       }
+                    }
+                 }
+              }
+           } // ij                
+           tmap["enl_sigma"].stop();                                           
         } // compute_stress      
-      } // ia_block              
-     
-      if ( compute_forces ) {
-        ctxt_.dsum(3*na[is],1,&tmpfion[0],3*na[is]);
-        //#pragma omp parallel for schedule(guided)
-        for ( int ia = 0; ia < na[is]; ia++ ) {
-          fion[is][3*ia+0] = tmpfion[3*ia];
-          fion[is][3*ia+1] = tmpfion[3*ia+1];
-          fion[is][3*ia+2] = tmpfion[3*ia+2];
+        
+        if ( compute_forces ) {
+           ctxt_.dsum(3*na[is],1,&tmpfion[0],3*na[is]);
+           //#pragma omp parallel for schedule(guided)
+           for ( int ia = 0; ia < na[is]; ia++ ) {
+              fion[is][3*ia+0] = tmpfion[3*ia];
+              fion[is][3*ia+1] = tmpfion[3*ia+1];
+              fion[is][3*ia+2] = tmpfion[3*ia+2];
+           }
         }
-      }
-    } // npr[is]>0
+     } // npr[is]>0
   } // is
   
   // reduction of enl across rows
   ctxt_.dsum('r',1,1,&enl,1);    
+
+  //ewd DEBUG
+  if (ctxt_.mype() == 0)
+     cout << "NLP.ENL3, mype = " << ctxt_.mype() << ", enl = " << enl << endl;
+
 
   sigma_enl = 0.0;
   if ( compute_stress ) {

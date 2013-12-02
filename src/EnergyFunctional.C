@@ -1459,6 +1459,12 @@ void EnergyFunctional::atoms_moved(void)
   }
   sigma_esr *= - omega_inv;
 
+  // update nonlocal potential projectors
+  for ( int ispin = 0; ispin < wf_.nspin(); ispin++ ) 
+     if (wf_.spinactive(ispin)) 
+        for (int k=0; k<nlp[ispin].size(); k++)
+           nlp[ispin][k]->atoms_moved();
+
   // update ultrasoft potentials
   if (s_.ctrl.ultrasoft)
     for ( int ispin = 0; ispin < wf_.nspin(); ispin++ ) 

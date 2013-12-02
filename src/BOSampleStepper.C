@@ -1294,7 +1294,7 @@ void BOSampleStepper::step(int niter)
                double energy = ef_.energy(true,dwf,false,fion,false,sigma_eks);
                tmap["scf_ef"].stop();
                //QB_Pstop(energy+hamiltonian_update);
-
+               
                // compute the sum of eigenvalues (with fixed weight)
                // to measure convergence of the subspace update
                // compute trace of the Hamiltonian matrix Y^T H Y

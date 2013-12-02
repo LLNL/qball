@@ -51,6 +51,11 @@ class NonLocalPotential
   int nspnl;        // number of non-local species
   bool ultrasoft_;  // there are ultrasoft potentials
   bool highmem_; 
+  bool have_anl_sigma_;  // if true, anl_sigma needs to be calculated
+  int na_block_size_;    // minimum block size of distributed atom matrices
+  vector<int> anl_nb_;       // block size of anl (local atoms*npr)
+  vector<int> anl_iastart_;  // first index of local atom in anl arrays
+  vector<int> anl_naloc_;    // number of atoms in local anl arrays
   
   vector<int>             lmax;     // lmax[is]
   vector<int>             lloc;     // lloc[is]
@@ -70,6 +75,12 @@ class NonLocalPotential
   vector<vector<complex<double> > > sfactcd_;  // structure factor of local atoms, cd basis
   vector<vector<complex<double> > > sfactwf_;  // structure factor of local atoms, wf basis
   
+  vector<DoubleMatrix*> anl_gam_;
+  vector<DoubleMatrix*> anl_gam_fion_;
+  vector<DoubleMatrix*> anl_gam_sigma_;
+  vector<ComplexMatrix*> anl_;
+  vector<ComplexMatrix*> anl_fion_;
+  vector<ComplexMatrix*> anl_sigma_;
   
   mutable TimerMap tmap;
   void init(void);
@@ -77,12 +88,16 @@ class NonLocalPotential
   public:
   
   NonLocalPotential(AtomSet& as, SlaterDet& sd) :  
-    ctxt_(sd.context()), atoms_(as), sd_(sd), basis_(sd.basis()) { init(); }
+  ctxt_(sd.context()), atoms_(as), sd_(sd), basis_(sd.basis()),have_anl_sigma_(false) { init(); }
   ~NonLocalPotential(void);
                
   void update_twnl(void);
   void update_usfns(Basis* cdbasis);  // update Q_nm^I(G), beta^I(G) when atoms
                                       // move or basis changes
+  void atoms_moved(void);
+  void cell_moved(void);
+  void calc_anl_sigma(void);
+  
   void use_highmem(void) { highmem_ = true; }  // use extra memory to speed calculation
   double energy(bool compute_hpsi, SlaterDet& dsd, 
     bool compute_forces, vector<vector<double> >& fion, 
