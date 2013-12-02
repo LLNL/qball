@@ -2542,7 +2542,7 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
       }
     } // npr[is]>0
   } // is
-  
+
   // reduction of enl across rows
   ctxt_.dsum('r',1,1,&enl,1);    
 

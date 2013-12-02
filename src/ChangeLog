@@ -1,4 +1,11 @@
 ------------------------------------------------------------------------
+r149 | draeger1 | 2013-11-05 10:37:53 -0800 (Tue, 05 Nov 2013) | 4 lines
+
+
+Fixed bug in load -states when loading states into block-cyclic distribution (e.g. set with matrix_loc or pblock variables).
+
+
+------------------------------------------------------------------------
 r148 | draeger1 | 2013-11-04 12:52:11 -0800 (Mon, 04 Nov 2013) | 4 lines
 
 
