@@ -1419,6 +1419,7 @@ void NonLocalPotential::atoms_moved(void)
    const int ngwl = basis_.localsize();
    const int m = sd_.c().m();
    const int mloc = sd_.c().mloc();
+   const int myrow = ctxt_.myrow();  
    const int npcol = ctxt_.npcol();  
    const int mycol = ctxt_.mycol();  
    vector<vector<double> > tau;
@@ -1426,6 +1427,8 @@ void NonLocalPotential::atoms_moved(void)
    anl_nb_.resize(nsp);
    anl_iastart_.resize(nsp);
    anl_naloc_.resize(nsp);
+   fnl_iastart_.resize(nsp);
+   fnl_naloc_.resize(nsp);
    
    if (basis_.real())
    {
@@ -1444,21 +1447,30 @@ void NonLocalPotential::atoms_moved(void)
       if (!s->ultrasoft() && npr[is] > 0 ) // species is is non-local, norm-conserving
       {
          // distribute atoms over columns
-         int naloc = na_block_size_;
-         if (na[is] > npcol*na_block_size_)
-            naloc = na[is]/npcol;
-         if (na[is]%npcol != 0)
-            naloc++;
+         //int naloc = na_block_size_;
+         int naloc = na[is]%npcol == 0 ? na[is]/npcol : na[is]/npcol + 1;
          if (naloc > na[is])
             naloc = na[is];
          if (naloc <= 0) naloc = 1;
-         
-         anl_iastart_[is] = mycol*naloc;
-         const int iaend = anl_iastart_[is]+naloc < na[is] ? anl_iastart_[is]+naloc : na[is];
-         const int ia_block_size = iaend > anl_iastart_[is] ? iaend - anl_iastart_[is] : 0;
 
-         anl_nb_[is] = naloc*npr[is];
-         anl_naloc_[is] = ia_block_size;
+         //ewd impose minimum local atom size for better SIMDization?
+         if (naloc < na_block_size_ && na_block_size_ < na[is])
+            naloc = na_block_size_;
+
+         {
+            anl_iastart_[is] = mycol*naloc;
+            const int iaend = anl_iastart_[is]+naloc < na[is] ? anl_iastart_[is]+naloc : na[is];
+            const int ia_block_size = iaend > anl_iastart_[is] ? iaend - anl_iastart_[is] : 0;
+            anl_nb_[is] = naloc*npr[is];
+            anl_naloc_[is] = ia_block_size;
+         }
+         
+         {
+            fnl_iastart_[is] = myrow*naloc;
+            const int iaend = fnl_iastart_[is]+naloc < na[is] ? fnl_iastart_[is]+naloc : na[is];
+            const int ia_block_size = iaend > fnl_iastart_[is] ? iaend - fnl_iastart_[is] : 0;
+            fnl_naloc_[is] = ia_block_size;
+         }
          
          const int mb = sd_.c().mb();
          if (basis_.real())
@@ -1486,6 +1498,11 @@ void NonLocalPotential::atoms_moved(void)
                if (anl_fion_[3*is+j] == 0)
                   anl_fion_[3*is+j] = new ComplexMatrix(ctxt_,m,npr[is]*na[is],mb,anl_nb_[is]);
             }
+
+            //ewd DEBUG
+            //cout << "ANLFION, mype = " << ctxt_.mype() << ", anl_fion_[0].localsize = " << anl_fion_[0]->localsize() << ", anl_naloc = " << anl_naloc_[is] << ", mloc = " << mloc << endl;
+
+
          }
 
          valarray<double> kpgr(anl_naloc_[is]*ngwl); // kpgr[ig+ia*ngwl]
@@ -2311,6 +2328,12 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
         }
         else {
            fnl.resize(npr[is]*na[is],nst,anl_nb_[is],nb);
+
+           //ewd DEBUG
+           //cout << "FNLRESIZE, mype = " << ctxt_.mype() << ", fnl mxn = " << fnl.m() << " x " << fnl.n() << ", mbxnb = " << fnl.mb() << " x " << fnl.nb() << ", mlocxnloc = " << fnl.mloc() << " x " << fnl.nloc() << endl;
+
+
+
         }
 
 
@@ -2343,7 +2366,10 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
         */        
         //ewd DEBUG
 
-
+        //ewd DEBUG
+        //cout << "GEMM.CHK1, mype = " << ctxt_.mype() << endl;
+        //MPI_Barrier(MPI_COMM_WORLD);
+        //ewd DEBUG
         
         tmap["fnl_gemm"].start();
         if (basis_.real()) {
@@ -2358,6 +2384,11 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
         }
         tmap["fnl_gemm"].stop();
 
+        //ewd DEBUG
+        //cout << "GEMM.CHK2, mype = " << ctxt_.mype() << ", fnl.localsize = " << fnl.localsize() << ", fnl.nloc = " << fnl.nloc() << ", fnl.mloc = " << fnl.mloc() << endl;
+        //MPI_Barrier(MPI_COMM_WORLD);
+        //ewd DEBUG
+        
         // accumulate Enl contribution                                       
         if (basis_.real()) {
            if (fnl_gam.localsize() > 0)
@@ -2378,8 +2409,8 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
                        //cout << "STATES, mype = " << ctxt_.mype() << ", lj = " << lj << ", jj = " << jj << ", norig = " << norig << ", nglobal = " << nglobal << endl;
 
 
-                       for ( int ia = 0; ia < anl_naloc_[is]; ia++ ) {
-                          const int i = ia + ipr*anl_naloc_[is] + norig*fnl_gam.mloc();
+                       for ( int ia = 0; ia < fnl_naloc_[is]; ia++ ) {
+                          const int i = ia + ipr*fnl_naloc_[is] + norig*fnl_gam.mloc();
                           const double tmp = fp[i];
                           enl += facn * tmp * tmp;
 
@@ -2409,8 +2440,8 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
                        const int nglobal = sd_.c().j(lj,jj);
                        const int norig = lj*sd_.c().nb()+jj;
                        const double facn = fac * occ[nglobal];
-                       for ( int ia = 0; ia < anl_naloc_[is]; ia++ ) {
-                          const int i = ia + ipr*anl_naloc_[is] + norig*fnl.mloc();
+                       for ( int ia = 0; ia < fnl_naloc_[is]; ia++ ) {
+                          const int i = ia + ipr*fnl_naloc_[is] + norig*fnl.mloc();
                           const complex<double> tmp = fp[i];
                           //enl += facn * norm(tmp);
                           enl += facn * (real(tmp)*real(tmp) + imag(tmp)*imag(tmp));
@@ -2434,6 +2465,11 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
         //   cout << "NLP.ENL2, mype = " << ctxt_.mype() << ", enl = " << enl << endl;
 
         
+        //ewd DEBUG
+        //cout << "GEMM.CHK3, mype = " << ctxt_.mype() << endl;
+        //MPI_Barrier(MPI_COMM_WORLD);
+        //ewd DEBUG
+        
         if ( compute_hpsi ) {
            tmap["enl_hpsi"].start();                                          
            tmap["fnl_gemm"].start();
@@ -2451,6 +2487,11 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
            tmap["enl_hpsi"].stop();
         }
 
+        //ewd DEBUG
+        //cout << "GEMM.CHK4, mype = " << ctxt_.mype() << endl;
+        //MPI_Barrier(MPI_COMM_WORLD);
+        //ewd DEBUG
+        
         // ionic forces
         if ( compute_forces ) {
            tmap["enl_fion"].start();
@@ -2496,9 +2537,9 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
                              const int norig = lj*sd_.c().nb()+jj;
                              // Factor 2.0 in next line from derivative of |Fnl|^2        
                              const double facn = 2.0 * occ[nglobal];                    
-                             for ( int ia = 0; ia < anl_naloc_[is]; ia++ ) {
-                                const int ia_global = ia + anl_iastart_[is];                        
-                                const int i = ia + ipr*anl_naloc_[is] + norig * fnl_gam.mloc();       
+                             for ( int ia = 0; ia < fnl_naloc_[is]; ia++ ) {
+                                const int ia_global = ia + fnl_iastart_[is];                        
+                                const int i = ia + ipr*fnl_naloc_[is] + norig * fnl_gam.mloc();       
                                 tmpfion[3*ia_global+j] -= facn * fp[i] * dfp[i];
                              }
                           }
@@ -2522,9 +2563,9 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
                              const int norig = lj*sd_.c().nb()+jj;
                              // Factor 2.0 in next line from derivative of |Fnl|^2        
                              const double facn = 2.0 * occ[nglobal];                    
-                             for ( int ia = 0; ia < anl_naloc_[is]; ia++ ) {
-                                const int ia_global = ia + anl_iastart_[is];                        
-                                const int i = ia + ipr*anl_naloc_[is] + norig * fnl.mloc();       
+                             for ( int ia = 0; ia < fnl_naloc_[is]; ia++ ) {
+                                const int ia_global = ia + fnl_iastart_[is];                        
+                                const int i = ia + ipr*fnl_naloc_[is] + norig * fnl.mloc();       
                                 tmpfion[3*ia_global+j] -= facn * real(fp[i] * conj(dfp[i]));
                              }
                           }
@@ -2536,6 +2577,11 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
            tmap["enl_fion"].stop();                                           
         } // compute_forces     
                                 
+        //ewd DEBUG
+        //cout << "GEMM.CHK5, mype = " << ctxt_.mype() << endl;
+        //MPI_Barrier(MPI_COMM_WORLD);
+        //ewd DEBUG
+        
 
         //ewd:  rewritten up to here
 
@@ -2583,7 +2629,7 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
                           const int norig = lj*sd_.c().nb()+jj;
                           // Factor 2.0 in next line from derivative of |Fnl|^2           
                           const double facn = 2.0 * occ[nglobal];                       
-                          for ( int ipra = 0; ipra < npr[is]*anl_naloc_[is]; ipra++ ) {
+                          for ( int ipra = 0; ipra < npr[is]*fnl_naloc_[is]; ipra++ ) {
                              const int i = ipra + norig * fnl_gam.mloc();                            
                              tsum[ij] += facn * fp[i] * dfp[i];
                           }                  
@@ -2605,7 +2651,7 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
                           const int norig = lj*sd_.c().nb()+jj;
                           // Factor 2.0 in next line from derivative of |Fnl|^2           
                           const double facn = 2.0 * occ[nglobal];                       
-                          for ( int ipra = 0; ipra < npr[is]*anl_naloc_[is]; ipra++ ) {
+                          for ( int ipra = 0; ipra < npr[is]*fnl_naloc_[is]; ipra++ ) {
                              const int i = ipra + norig * fnl.mloc();                            
                              tsum[ij] += facn * real(fp[i] * conj(dfp[i]));
                           }

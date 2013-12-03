@@ -56,6 +56,8 @@ class NonLocalPotential
   vector<int> anl_nb_;       // block size of anl (local atoms*npr)
   vector<int> anl_iastart_;  // first index of local atom in anl arrays
   vector<int> anl_naloc_;    // number of atoms in local anl arrays
+  vector<int> fnl_iastart_;  // first index of local atom in fnl arrays
+  vector<int> fnl_naloc_;    // number of atoms in local fnl arrays
   
   vector<int>             lmax;     // lmax[is]
   vector<int>             lloc;     // lloc[is]
