@@ -38,7 +38,7 @@
 #ifdef USE_MPI
 #include <mpi.h>
 #endif
-#ifdef USE_CTF
+#ifdef USE_OLD_CTF
 #include "cyclopstf.h"
 #endif
 #ifdef BGQ
@@ -64,7 +64,7 @@ int main(int argc, char **argv)
   mype=0;
 #endif
 
-#ifdef USE_CTF
+#ifdef USE_OLD_CTF
   {
     int myRank,numPes;
     MPI_Comm_rank(MPI_COMM_WORLD, &myRank);
@@ -78,14 +78,15 @@ int main(int argc, char **argv)
 
   {
      int nprow, npcol, m, n;
-     if (argc == 5) {
+     if (argc == 4) {
         nprow = atoi(argv[1]);
-        npcol = atoi(argv[2]);
-        m = atoi(argv[3]);
-        n = atoi(argv[4]);
+        //npcol = atoi(argv[2]);
+        npcol = npes/nprow;
+        m = atoi(argv[2]);
+        n = atoi(argv[3]);
      }
      else {
-        cerr << "Usage:  testPgemm nprow npcol m n" << endl;
+        cerr << "Usage:  testPgemm nprow m n" << endl;
 #if USE_MPI
         MPI_Abort(MPI_COMM_WORLD,2);
 #else
@@ -193,13 +194,18 @@ int main(int argc, char **argv)
      }
      tmap["init"].stop();
 
-     tmap["pzgemm1"].start();
-     s1.gemm('c','n',1.0,c1,c2,0.0);
-     tmap["pzgemm1"].stop();
+     if ( mype == 0 )
+        cout << "Initialization complete, calling pzgemm..." << endl;
 
-     tmap["pzgemm2"].start();
-     s2.gemm('c','n',1.0,c2,c1,0.0);
-     tmap["pzgemm2"].stop();
+     tmap["pzgemm-psda1"].start();
+     s1.gemm('c','n',1.0,c1,c2,0.0);
+     tmap["pzgemm-psda1"].stop();
+
+     MPI_Barrier(MPI_COMM_WORLD);
+     
+     tmap["pzgemm-psda2"].start();
+     c1.gemm('n','n',-1.0,c2,s1,1.0);
+     tmap["pzgemm-psda2"].stop();
     
     if (mype == 0) 
       cout << "Done." << endl;
@@ -224,7 +230,7 @@ int main(int argc, char **argv)
     }
   }
 
-#ifdef USE_CTF
+#ifdef USE_OLD_CTF
   CTF_exit();
 #endif  
 #ifdef USE_MPI

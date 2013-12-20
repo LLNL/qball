@@ -20,8 +20,10 @@
  ESSLDIR = /usr/local/tools/essl/5.1
  HPMLIBS = -L/usr/local/tools/mpitrace/lib -lmpihpm_smp -L/bgsys/drivers/ppcfloor/bgpm/lib -lbgpm
  JAGGEMMLIB = $(LIBHOME)/jaggemm_opt/libjaggemm.a
- CTFDIR = $(LIBHOME)/ctf-latest/cyclopstf
- CTFLIB = -L$(LIBHOME)/lib -lcyclopstf.jag
+ #CTFDIR = $(LIBHOME)/ctf-latest/cyclopstf
+ #CTFLIB = -L$(LIBHOME)/lib -lcyclopstf.jag
+ CTFDIR = $(LIBHOME)/ctf-git-new
+ CTFLIB = -L$(CTFDIR)/lib -lctf
 
 
  BGQ_SDK_PATH = /bgsys/drivers/ppcfloor
@@ -34,7 +36,7 @@
 # DFLAGS += -DPRINTALL -DALIGN4 -DUSE_CTF -DUSE_JAGGEMM -DUSE_ESSL -DUSE_CSTDIO_LFS -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DHPM
  DFLAGS += -DPRINTALL -DUSE_CTF -DUSE_JAGGEMM -DUSE_ESSL -DUSE_CSTDIO_LFS -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DHPM
  
- INCLUDE = -I$(ESSLDIR)/include -I$(CTFDIR)/include
+ INCLUDE = -I$(ESSLDIR)/include -I$(CTFDIR)/src/dist_tensor
  
  CXXFLAGS= -g -O3 -qarch=qp -DUSE_MPI -DSCALAPACK -D$(PLT) $(INCLUDE) $(DFLAGS)
  CFLAGS= -qhot=novector -qsimd=auto -g -O3 -DUSE_MPI -DSCALAPACK -D$(PLT) $(INCLUDE) $(DFLAGS)

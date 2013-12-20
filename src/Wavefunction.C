@@ -2725,6 +2725,7 @@ void Wavefunction::read_states(string filebase) {
       allocate();
    }
 
+   int checkPointFound = 0;
    for ( int ispin = 0; ispin < nspin_; ispin++ ) {
       if (spinactive(ispin)) {
          for ( int ikp = 0; ikp < sdcontext_[ispin].size(); ikp++ ) {
@@ -2756,7 +2757,7 @@ void Wavefunction::read_states(string filebase) {
                            vector<complex<double> > wftmp(ft.np012loc());
 
                            ifstream is;
-                           int fileFound = -1;
+                           int fileFound = 0;
                            if (mype == readerTask) {
                               // read in wavefunction for this state and k-point
                               ostringstream oss1,oss2,oss3;
@@ -2776,7 +2777,8 @@ void Wavefunction::read_states(string filebase) {
                                  fileFound = 1;
                               }
                               else {
-                                 fileFound = 0;
+                                 fileFound = -1;
+                                 checkPointFound = -1;
                                  if ( ctxt_.oncoutpe())
                                     cout << "<!-- LoadCmd: " << filebase << " checkpoint files not found, skipping load. -->" << endl;
                               }
@@ -2810,22 +2812,31 @@ void Wavefunction::read_states(string filebase) {
                               }
                            }
 
-                           if (fileFound == 0)
-                              return;
-                           
-                           if (mype == readerTask)
-                              is.close();
+                           // this causes a hang when nstloc = 0 on some tasks
+                           //if (fileFound <= 0)
+                           //   return;
+
+                           if (fileFound = 1)
+                           {
+                              if (mype == readerTask)
+                                 is.close();
                   
-                           //ewd when k=0, force complex part to zero
-                           //if (basis.real()) 
-                           //   for ( int i = 0; i < ft.np012loc(); i++ )
-                           //      wftmp[i] = complex<double>(real(wftmp[i]),0.0);
+                              //ewd when k=0, force complex part to zero
+                              //if (basis.real()) 
+                              //   for ( int i = 0; i < ft.np012loc(); i++ )
+                              //      wftmp[i] = complex<double>(real(wftmp[i]),0.0);
                            
-                           ComplexMatrix& c = sd_[ispin][kp]->c();
-                           int mloc = sd_[ispin][kp]->c().mloc();
-                           ft.forward(&wftmp[0],c.valptr(mloc*n));
+                              ComplexMatrix& c = sd_[ispin][kp]->c();
+                              int mloc = sd_[ispin][kp]->c().mloc();
+                              ft.forward(&wftmp[0],c.valptr(mloc*n));
+                           }
                         } // for n < nstloc
-              
+
+                        // sync up file found info across all tasks
+                        tctxt->imin(1,1,&checkPointFound,1);
+                        if (checkPointFound < 0)
+                           return;
+                        
                         // if there are empty states, load occupation and eigenvalues
                         if (ifempty)
                         {

@@ -42,10 +42,6 @@ using namespace std;
 
 #include "Matrix.h"
 #include "profile.h"
-#ifdef USE_CTF
-#include "cyclopstf.h"
-//#include "ctf.hpp"
-#endif
 
 #ifdef ADD_
 #define numroc     numroc_
@@ -506,6 +502,16 @@ void DoubleMatrix::init_size(int m, int n, int mb, int nb)
   desc_[7] = 0;
   desc_[8] = lld_;
 
+#ifdef USE_CTF
+  myctf_ = new CTF;
+#ifdef BGQ
+  myctf_->init(ctxt_.comm(),ctxt_.mype(),ctxt_.size(),MACHINE_BGQ);
+#else
+  myctf_->init(ctxt_.comm(),ctxt_.mype(),ctxt_.size());
+#endif
+#endif
+
+  
 }
     
 ////////////////////////////////////////////////////////////////////////////////
@@ -599,6 +605,15 @@ void ComplexMatrix::init_size(int m, int n, int mb, int nb)
   desc_[7] = 0;
   desc_[8] = lld_;
 
+#ifdef USE_CTF
+  myctf_ = new tCTF< std::complex<double> >;
+#ifdef BGQ
+  myctf_->init(ctxt_.comm(),ctxt_.mype(),ctxt_.size(),MACHINE_BGQ);
+#else
+  myctf_->init(ctxt_.comm(),ctxt_.mype(),ctxt_.size());
+#endif
+#endif
+  
 }
 ////////////////////////////////////////////////////////////////////////////////
 void DoubleMatrix::set_context(Context newctxt) {
@@ -1572,7 +1587,11 @@ void DoubleMatrix::gemm(char transa, char transb,
     QB_Pstart(3, pdgemm);
     int ione=1;
 #ifdef USE_CTF
-    CTF_pdgemm(transa, transb, m, n, k, alpha,
+    //CTF_pdgemm(transa, transb, m, n, k, alpha,
+	 //      a.val, ione, ione, a.desc_,
+	 //      b.val, ione, ione, b.desc_,
+	 //      beta, val, ione, ione, desc_);
+    myctf_->pgemm(transa, transb, m, n, k, alpha,
 	       a.val, ione, ione, a.desc_,
 	       b.val, ione, ione, b.desc_,
 	       beta, val, ione, ione, desc_);
@@ -1624,7 +1643,11 @@ void ComplexMatrix::gemm(char transa, char transb,
     int ione=1;
     QB_Pstart(4, pzgemm);
 #ifdef USE_CTF
-    CTF_pzgemm(transa, transb, m, n, k, alpha,
+    //CTF_pzgemm(transa, transb, m, n, k, alpha,
+	 //      a.val, ione, ione, a.desc_,
+	 //      b.val, ione, ione, b.desc_,
+	 //      beta, val, ione, ione, desc_);
+    myctf_->pgemm(transa, transb, m, n, k, alpha,
 	       a.val, ione, ione, a.desc_,
 	       b.val, ione, ione, b.desc_,
 	       beta, val, ione, ione, desc_);

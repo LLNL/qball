@@ -36,6 +36,9 @@ class Context;
 #include <valarray>
 #include <complex>
 #include <cstring>
+#ifdef USE_CTF
+#include "cyclopstf.hpp"
+#endif
 using namespace std;
 
 class ComplexMatrix;
@@ -59,7 +62,10 @@ class DoubleMatrix
     bool m_incomplete_, n_incomplete_; // this process has an incomplete block
     bool reference_; // object was created using the copy constructor
     double* val;
-
+#ifdef USE_CTF
+    CTF* myctf_;
+#endif
+    
   public:
   
     double* valptr(int i=0) { return &val[i]; }
@@ -299,6 +305,9 @@ class ComplexMatrix
     bool m_incomplete_, n_incomplete_; // this process has an incomplete block
     bool reference_; // object was created using the copy constructor
     complex<double>* val;
+#ifdef USE_CTF
+    tCTF< std::complex<double> > * myctf_;
+#endif
 
   public:
   

@@ -155,7 +155,7 @@ using namespace std;
 #include "SaveDenFreq.h"
 #include "SaveWfFreq.h"
 
-#ifdef USE_CTF
+#ifdef USE_OLD_CTF
 #include "cyclopstf.h"
 #endif
 #if BGLDEBUG
@@ -180,7 +180,7 @@ int main(int argc, char **argv, char **envp)
 #ifdef USE_MPIP
   MPI_Pcontrol(0);
 #endif
-#ifdef USE_CTF
+#ifdef USE_OLD_CTF
   {
     int myRank,numPes;
     MPI_Comm_rank(MPI_COMM_WORLD, &myRank);
@@ -459,7 +459,7 @@ int main(int argc, char **argv, char **envp)
 #if USE_APC
   ApcFinalize();
 #endif
-#ifdef USE_CTF
+#ifdef USE_OLD_CTF
   CTF_exit();
 #endif
 #if USE_MPI
