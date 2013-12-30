@@ -200,7 +200,13 @@ int main(int argc, char **argv)
      tmap["pzgemm2"].start();
      s2.gemm('c','n',1.0,c2,c1,0.0);
      tmap["pzgemm2"].stop();
-    
+
+     tmap["pzgemm3"].start();
+     c2.gemm('n','n',1.0,c1,s1,0.0);
+     tmap["pzgemm3"].stop();
+
+
+     
     if (mype == 0) 
       cout << "Done." << endl;
     tmap["total"].stop();

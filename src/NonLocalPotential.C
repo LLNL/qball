@@ -1461,6 +1461,7 @@ void NonLocalPotential::atoms_moved(void)
             anl_iastart_[is] = mycol*naloc;
             const int iaend = anl_iastart_[is]+naloc < na[is] ? anl_iastart_[is]+naloc : na[is];
             const int ia_block_size = iaend > anl_iastart_[is] ? iaend - anl_iastart_[is] : 0;
+
             anl_nb_[is] = naloc*npr[is];
             anl_naloc_[is] = ia_block_size;
          }
@@ -2472,7 +2473,7 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
         
         if ( compute_hpsi ) {
            tmap["enl_hpsi"].start();                                          
-           tmap["fnl_gemm"].start();
+           tmap["hpsi_gemm"].start();
            // compute cp += anl * fnl                                         
            if (basis_.real()) {
               DoubleMatrix cp_proxy(dsd.c());
@@ -2483,7 +2484,7 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
               ComplexMatrix& cp_proxy = dsd.c();
               cp_proxy.gemm('n','n',complex<double>(1.0,0.0),*anl_[is],fnl,complex<double>(1.0,0.0));
            }
-           tmap["fnl_gemm"].stop();
+           tmap["hpsi_gemm"].stop();
            tmap["enl_hpsi"].stop();
         }
 
