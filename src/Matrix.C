@@ -606,9 +606,29 @@ void ComplexMatrix::init_size(int m, int n, int mb, int nb)
   desc_[8] = lld_;
 
 #ifdef USE_CTF
+  //ewd DEBUG
+  MPI_Barrier(MPI_COMM_WORLD);
+  if (ctxt_.mype() == 0)
+     cout << "MATRIX.INIT_SIZE, CTF1" << endl;
+
   myctf_ = new tCTF< std::complex<double> >;
+  //ewd DEBUG
+  MPI_Barrier(MPI_COMM_WORLD);
+  if (ctxt_.mype() == 0)
+     cout << "MATRIX.INIT_SIZE, CTF2" << endl;
+
 #ifdef BGQ
-  myctf_->init(ctxt_.comm(),ctxt_.mype(),ctxt_.size(),MACHINE_BGQ);
+  //myctf_->init(ctxt_.comm(),ctxt_.mype(),ctxt_.size(),MACHINE_BGQ);
+
+  //ewd DEBUG
+  int npes = ctxt_.size();
+  int mype = ctxt_.mype();
+  
+  myctf_->init(MPI_COMM_WORLD,mype,npes,MACHINE_BGQ);
+  MPI_Barrier(MPI_COMM_WORLD);
+  if (ctxt_.mype() == 0)
+     cout << "MATRIX.INIT_SIZE, CTF3" << endl;
+
 #else
   myctf_->init(ctxt_.comm(),ctxt_.mype(),ctxt_.size());
 #endif

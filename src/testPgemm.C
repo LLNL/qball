@@ -41,6 +41,9 @@
 #ifdef USE_OLD_CTF
 #include "cyclopstf.h"
 #endif
+#ifdef USE_CTF
+#include "cyclopstf.hpp"
+#endif
 #ifdef BGQ
 #include <spi/include/kernel/process.h>
 #include <spi/include/kernel/location.h>
@@ -64,12 +67,35 @@ int main(int argc, char **argv)
   mype=0;
 #endif
 
+  /*  
+#ifdef USE_CTF
+  CTF* myctf_ = new CTF;
+
+  if (mype == 0)
+     cout << "Calling myctf_->init..." << endl;
+
+#ifdef BGQ
+  myctf_->init(MPI_COMM_WORLD,mype,npes,,MACHINE_BGQ);
+#else
+  myctf_->init(MPI_COMM_WORLD,mype,npes);
+#endif
+#endif
+  */
+  
 #ifdef USE_OLD_CTF
   {
     int myRank,numPes;
     MPI_Comm_rank(MPI_COMM_WORLD, &myRank);
     MPI_Comm_size(MPI_COMM_WORLD, &numPes);
+
+    if (mype == 0)
+       cout << "Calling CTF_init..." << endl;
+
     CTF_init(MPI_COMM_WORLD, MACHINE_BGQ, myRank, numPes); 
+
+    if (mype == 0)
+       cout << "Calling CTF_init_complex..." << endl;
+
     CTF_init_complex(MPI_COMM_WORLD, MACHINE_BGQ, myRank, numPes); 
     //CTF_init(MPI_COMM_WORLD, myRank, numPes); 
     //CTF_init_complex(MPI_COMM_WORLD, myRank, numPes); 
@@ -131,6 +157,9 @@ int main(int argc, char **argv)
 #endif
 
 
+
+    if (mype == 0)
+       cout << "Initializing matrices..." << endl;
 
      
      tmap["total"].start();
@@ -196,6 +225,8 @@ int main(int argc, char **argv)
 
      if ( mype == 0 )
         cout << "Initialization complete, calling pzgemm..." << endl;
+
+     MPI_Barrier(MPI_COMM_WORLD);
 
      tmap["pzgemm-psda1"].start();
      s1.gemm('c','n',1.0,c1,c2,0.0);

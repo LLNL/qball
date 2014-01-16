@@ -228,6 +228,16 @@ void SlaterDet::resize(const UnitCell& cell, const UnitCell& refcell,
        mb = tmb;
        nb = tnb;
     }
+
+#ifdef ALIGN16
+    while (mb%16 != 0) mb++;
+    while (nb%16 != 0) nb++;
+#endif    
+#ifdef ALIGN32
+    while (mb%32 != 0) mb++;
+    while (nb%32 != 0) nb++;
+#endif    
+
     
     //ewd: if maxlocalsize is not a multiple of mb, increase to next highest multiple
     int maxlocal = basis_->maxlocalsize();
@@ -365,6 +375,15 @@ void SlaterDet::reshape(const Context& newctxt, const Context& new_col_ctxt, boo
        nb = tnb;
     }
 
+#ifdef ALIGN16
+    while (mb%16 != 0) mb++;
+    while (nb%16 != 0) nb++;
+#endif
+#ifdef ALIGN32
+    while (mb%32 != 0) mb++;
+    while (nb%32 != 0) nb++;
+#endif
+    
     //ewd: if maxlocalsize is not a multiple of mb, increase to next highest multiple
     int maxlocal = basis_->maxlocalsize();
     if (maxlocal%mb != 0)

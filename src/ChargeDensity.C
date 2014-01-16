@@ -81,13 +81,27 @@ void ChargeDensity::initialize(const Sample& s)
    // define vft_, FT on vbasis context for transforming the density  
    // add 2 to grid size to avoid aliasing when using non-zero k-points
    // adding 1 would suffice, but add 2 to keep even numbers
+
+
    np0v_ = vbasis_->np(0) + 2;
    np1v_ = vbasis_->np(1) + 2;
    np2v_ = vbasis_->np(2) + 2;
+
+   //np0v_ = vbasis_->np(0);
+   //np1v_ = vbasis_->np(1);
+   //np2v_ = vbasis_->np(2);
+
+   
    while (!vbasis_->factorizable(np0v_)) np0v_ += 2;
    while (!vbasis_->factorizable(np1v_)) np1v_ += 2;
    while (!vbasis_->factorizable(np2v_)) np2v_ += 2;
    
+   //ewd DEBUG
+   if ( vcontext_.oncoutpe() )
+      cout << "ChargeDensity:  vbasis = " << vbasis_->np(0) << " " << vbasis_->np(1)
+           << " " << vbasis_->np(2) << ", resize to " << np0v_
+           << " " << np1v_ << " " << np2v_ << endl;
+
   vft_ = new FourierTransform(*vbasis_,np0v_,np1v_,np2v_);
   rhor.resize(wf_.nspin());
   rhog.resize(wf_.nspin());

@@ -1211,12 +1211,8 @@ void NonLocalPotential::update_twnl(void) {
                     const double s = sin(z);
                     const double j3 = (15.0*zi*zi - 6.0) * zi*zi * s - (15.0*zi*zi-1.0) * zi * c;
                     const double z2 = z * z;
-
-                    //ewd THIS NEEDS TO BE CALCULATED!
-                    assert(false);
-                    const double dj3 = 0.0;
-                    // ewd
-
+                    const double dj3 = 
+                        ( (-60.*zi + 27.*z - z*z2) * s + (60.0 - 7.*z2) * c ) / (z2*z2) ;
                     // v = 4 pi j3(Gr) r
                     v = fpi * j3 * r;
                     // dv = d/dG v = 4 pi dj3(Gr)/d(Gr) d(Gr)/dG r
@@ -1406,7 +1402,8 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
   //const int mloc = basis_.maxlocalsize();
   const int mloc = sd_.c().mloc();
   // define atom block size
-  const int na_block_size = 32;
+  //const int na_block_size = 32;
+  const int na_block_size = 256;
   vector<vector<double> > tau;
   atoms_.get_positions(tau,true);
 

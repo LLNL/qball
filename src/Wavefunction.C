@@ -2816,7 +2816,7 @@ void Wavefunction::read_states(string filebase) {
                            //if (fileFound <= 0)
                            //   return;
 
-                           if (fileFound = 1)
+                           if (fileFound == 1)
                            {
                               if (mype == readerTask)
                                  is.close();

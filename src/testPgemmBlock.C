@@ -21,7 +21,7 @@
 // root directory of this distribution or <http://www.gnu.org/licenses/>.
 //
 //
-// usage:  testPgemmBlock nprow npcol m n mb nb
+// usage:  testPgemm nprow npcol m n
 
 #include <cassert>
 #include <cstdlib>
@@ -38,17 +38,15 @@
 #ifdef USE_MPI
 #include <mpi.h>
 #endif
-#ifdef USE_CTF
+#ifdef USE_OLD_CTF
 #include "cyclopstf.h"
+#endif
+#ifdef USE_CTF
+#include "cyclopstf.hpp"
 #endif
 #ifdef BGQ
 #include <spi/include/kernel/process.h>
 #include <spi/include/kernel/location.h>
-#endif
-#ifdef HPM
-#include <bgpm/include/bgpm.h>
-extern "C" void HPM_Start(char *);
-extern "C" void HPM_Stop(char *);
 #endif
 using namespace std;
 
@@ -69,12 +67,35 @@ int main(int argc, char **argv)
   mype=0;
 #endif
 
+  /*  
 #ifdef USE_CTF
+  CTF* myctf_ = new CTF;
+
+  if (mype == 0)
+     cout << "Calling myctf_->init..." << endl;
+
+#ifdef BGQ
+  myctf_->init(MPI_COMM_WORLD,mype,npes,,MACHINE_BGQ);
+#else
+  myctf_->init(MPI_COMM_WORLD,mype,npes);
+#endif
+#endif
+  */
+  
+#ifdef USE_OLD_CTF
   {
     int myRank,numPes;
     MPI_Comm_rank(MPI_COMM_WORLD, &myRank);
     MPI_Comm_size(MPI_COMM_WORLD, &numPes);
+
+    if (mype == 0)
+       cout << "Calling CTF_init..." << endl;
+
     CTF_init(MPI_COMM_WORLD, MACHINE_BGQ, myRank, numPes); 
+
+    if (mype == 0)
+       cout << "Calling CTF_init_complex..." << endl;
+
     CTF_init_complex(MPI_COMM_WORLD, MACHINE_BGQ, myRank, numPes); 
     //CTF_init(MPI_COMM_WORLD, myRank, numPes); 
     //CTF_init_complex(MPI_COMM_WORLD, myRank, numPes); 
@@ -83,13 +104,14 @@ int main(int argc, char **argv)
 
   {
      int nprow, npcol, m, n, mb, nb;
-     if (argc == 7) {
+     if (argc == 6) {
         nprow = atoi(argv[1]);
-        npcol = atoi(argv[2]);
-        m = atoi(argv[3]);
-        n = atoi(argv[4]);
-        mb = atoi(argv[5]);
-        nb = atoi(argv[6]);
+        //npcol = atoi(argv[2]);
+        npcol = npes/nprow;
+        m = atoi(argv[2]);
+        n = atoi(argv[3]);
+        mb = atoi(argv[4]);
+        nb = atoi(argv[5]);
      }
      else {
         cerr << "Usage:  testPgemmBlock nprow npcol m n mb nb" << endl;
@@ -138,6 +160,9 @@ int main(int argc, char **argv)
 
 
 
+    if (mype == 0)
+       cout << "Initializing matrices..." << endl;
+
      
      tmap["total"].start();
      tmap["init"].start();
@@ -159,6 +184,7 @@ int main(int argc, char **argv)
      ComplexMatrix c1(ctxt,m,n,mb,nb);
      ComplexMatrix c2(ctxt,m,n,mb,nb);
      ComplexMatrix s1(ctxt,n,n,nb,nb);
+     ComplexMatrix s2(ctxt,n,n,nb,nb);
 
      // randomize initial values:  ewd, this is core dumping on some sizes, make sure local ranges are right
      
@@ -182,15 +208,21 @@ int main(int argc, char **argv)
      }
      tmap["init"].stop();
 
-#ifdef HPM  
-        HPM_Start("pzgemm");
-#endif
-     tmap["pzgemm1"].start();
+     if ( mype == 0 )
+        cout << "Initialization complete, calling pzgemm..." << endl;
+
+     MPI_Barrier(MPI_COMM_WORLD);
+
+     tmap["pzgemm-psda1"].start();
      s1.gemm('c','n',1.0,c1,c2,0.0);
-     tmap["pzgemm1"].stop();
-#ifdef HPM  
-        HPM_Stop("pzgemm");
-#endif    
+     tmap["pzgemm-psda1"].stop();
+
+     MPI_Barrier(MPI_COMM_WORLD);
+     
+     tmap["pzgemm-psda2"].start();
+     c1.gemm('n','n',-1.0,c2,s1,1.0);
+     tmap["pzgemm-psda2"].stop();
+    
     if (mype == 0) 
       cout << "Done." << endl;
     tmap["total"].stop();
@@ -214,7 +246,7 @@ int main(int argc, char **argv)
     }
   }
 
-#ifdef USE_CTF
+#ifdef USE_OLD_CTF
   CTF_exit();
 #endif  
 #ifdef USE_MPI

@@ -1,4 +1,18 @@
 ------------------------------------------------------------------------
+r156 | draeger1 | 2013-12-20 11:37:48 -0800 (Fri, 20 Dec 2013) | 4 lines
+
+
+Fixed bug with load -states when checkpoint files are not found and nstloc = 0 on some tasks.
+
+
+------------------------------------------------------------------------
+r153 | draeger1 | 2013-12-02 13:13:35 -0800 (Mon, 02 Dec 2013) | 4 lines
+
+
+Added missing WfExtrap.h file to repo.  WfExtrap.h adds variable to choose wf extrapolation method for MD.
+
+
+------------------------------------------------------------------------
 r152 | draeger1 | 2013-12-02 13:05:54 -0800 (Mon, 02 Dec 2013) | 4 lines
 
 
