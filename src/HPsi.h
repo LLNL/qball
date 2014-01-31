@@ -31,6 +31,8 @@
 
 #include "Wavefunction.h"
 #include "AtomSet.h"
+#include "FourierTransform.h"
+#include "ChargeDensity.h"
 #include "Matrix.h"
 #include <vector>
 
@@ -38,32 +40,34 @@ class HPsi
 {
   private:
   
-  AtomSet& atoms_;
+   const AtomSet& atoms_;
   
-  int nsp;          // number of species
-  int nspnl;        // number of non-local species
+   int nsp;          // number of species
+   int nspnl;        // number of non-local species
   
-  vector<int>             lmax;          // lmax[is]
-  vector<int>             lloc;          // lloc[is]
-  vector<int>             na;            // na[is]
-  vector<int>             npr;           // npr[is]
-  vector<int>             nprna;         // nprna[is]
-  vector<vector<int> >    lproj;         // lproj[is][ipr]
-  vector<vector<double> > wt;            // wt[is][ipr]
-  vector<vector<vector<double> > > twnl; // twnl[is][npr*ngwl]
+   vector<int>             lmax;          // lmax[is]
+   vector<int>             lloc;          // lloc[is]
+   vector<int>             na;            // na[is]
+   vector<int>             npr;           // npr[is]
+   vector<int>             nprna;         // nprna[is]
+   vector<vector<int> >    lproj;         // lproj[is][ipr]
+   vector<vector<double> > wt;            // wt[is][ipr]
+   vector<vector<vector<double> > > twnl; // twnl[is][npr*ngwl]
   
-  vector<int>             nquad;    // nquad[is]
-  vector<vector<double> > rquad;    // rquad[is][iquad], iquad = 0, nquad[is]-1
-  vector<vector<double> > wquad;    // wquad[is][iquad], iquad = 0, nquad[is]-1
-
-  void init(const Wavefunction& wfi);
+   vector<int>             nquad;    // nquad[is]
+   vector<vector<double> > rquad;    // rquad[is][iquad], iquad = 0, nquad[is]-1
+   vector<vector<double> > wquad;    // wquad[is][iquad], iquad = 0, nquad[is]-1
+   vector<vector<double> >& vofr_;
+   vector<vector<FourierTransform*> > ft;
+   
+   void init(const Wavefunction& wfi);
    
   public:
   
-  HPsi(const Wavefunction& wfi, AtomSet& as);
-  ~HPsi(void);
+   HPsi(const Wavefunction& wfi, const AtomSet& as, const ChargeDensity& cd, vector<vector<double> >& v_r);
+   ~HPsi(void);
                
-  void cell_moved(const Wavefunction& wfi);
-  void compute(const Wavefunction& wf, vector<vector<double> >& v_r, Wavefunction& hpsi);
+   void cell_moved(const Wavefunction& wfi);
+   void compute(const Wavefunction& wf, Wavefunction& dwf);
 };
 #endif

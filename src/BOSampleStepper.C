@@ -35,6 +35,7 @@
 #include "JDWavefunctionStepper.h"
 #include "PSDWavefunctionStepper.h"
 #include "PSDAWavefunctionStepper.h"
+#include "DQBPCGWavefunctionStepper.h"
 #include "SDIonicStepper.h"
 #include "SDAIonicStepper.h"
 #include "CGIonicStepper.h"
@@ -253,7 +254,7 @@ void BOSampleStepper::step(int niter)
   
   Timer tm_iter;
 
-  const bool use_preconditioner = wf_dyn == "PSD" || wf_dyn == "PSDA" || wf_dyn == "JD";
+  const bool use_preconditioner = wf_dyn == "PSD" || wf_dyn == "PSDA" || wf_dyn == "JD" || wf_dyn == "DQBPCG";
   Preconditioner *preconditioner = 0;
   if ( use_preconditioner )
   {
@@ -285,6 +286,8 @@ void BOSampleStepper::step(int niter)
     wf_stepper = new PSDAWavefunctionStepper(wf,*preconditioner,tmap);  
   else if ( wf_dyn == "JD" )
     wf_stepper = new JDWavefunctionStepper(wf,*preconditioner,ef_,tmap);  
+  else if ( wf_dyn == "DQBPCG" )
+     wf_stepper = new DQBPCGWavefunctionStepper(wf,*preconditioner,atoms,cd_,ef_.v_r,tmap);  
   // wf_stepper == 0 indicates that wf_dyn == LOCKED
 
   IonicStepper* ionic_stepper = 0;

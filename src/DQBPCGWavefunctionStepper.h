@@ -31,31 +31,33 @@
 
 #include "WavefunctionStepper.h"
 #include "Wavefunction.h"
+#include "HPsi.h"
 class Preconditioner;
+class AtomSet;
+class ChargeDensity;
 
 class DQBPCGWavefunctionStepper : public WavefunctionStepper
 {
   private:
 
   Preconditioner& prec_;
-  Wavefunction wf_last_, dwf_last_;
+  HPsi hpsi_;
+  //Wavefunction wf_last_, dwf_last_;
 
-  // Anderson acceleration flag
   int nkp_;
   int nspin_;
-  vector<vector<bool> > extrapolate_;
   
   public:
 
+  void cell_moved(void);
   void update(Wavefunction& dwf);
   virtual void preprocess(void)
   {
-    for (int i=0; i<nspin_; i++)
-      for (int k=0; k<nkp_; k++)
-        extrapolate_[i][k] = false;
   }
 
-  DQBPCGWavefunctionStepper(Wavefunction& wf, Preconditioner& p, TimerMap& tmap);
+  DQBPCGWavefunctionStepper(Wavefunction& wf, Preconditioner& p,
+                            const AtomSet& atoms, const ChargeDensity& cd_,
+                            vector<vector<double> >& v_r, TimerMap& tmap);
   ~DQBPCGWavefunctionStepper() {};
 };
 #endif

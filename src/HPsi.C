@@ -42,12 +42,22 @@ extern "C" void vsincos(double *x, double *y, double *z, int *n);
 #endif
 
 ////////////////////////////////////////////////////////////////////////////////
-HPsi::HPsi(const Wavefunction& wfi, AtomSet& as) : atoms_(as)
+HPsi::HPsi(const Wavefunction& wfi, const AtomSet& as, const ChargeDensity& cd, vector<vector<double> >& v_r) : atoms_(as),vofr_(v_r)
 {
    // wfi just used to initialize data structures with the correct basis
    // plane wave coefficients don't matter
    init(wfi);
    cell_moved(wfi);
+
+  // FT for interpolation of wavefunctions on the fine grid
+  ft.resize(wfi.nspin());
+  for ( int ispin = 0; ispin < wfi.nspin(); ispin++ )
+    ft[ispin].resize(wfi.nkp());
+
+  for ( int ispin = 0; ispin < wfi.nspin(); ispin++ )
+    for ( int ikp = 0; ikp < wfi.nkp(); ikp++ ) 
+      ft[ispin][ikp] = cd.ft(ispin,ikp);
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -688,7 +698,7 @@ void HPsi::cell_moved(const Wavefunction& wfi) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-void HPsi::compute(const Wavefunction& wf, vector<vector<double> >& v_r, Wavefunction& dwf)
+void HPsi::compute(const Wavefunction& wf, Wavefunction& dwf)
 {
    // apply Hamiltonian operator to input Wavefunction wf, store in dwf
    //
@@ -992,7 +1002,7 @@ void HPsi::compute(const Wavefunction& wf, vector<vector<double> >& v_r, Wavefun
                      cp[ig+mloc*n] += 0.5 * kpg2[ig] * c[ig+mloc*n];
                   }
                }
-               sdp->rs_mul_add(*ft[ispin][ikp], &v_r[ispin][0], *dsdp);
+               sdp->rs_mul_add(*ft[ispin][ikp], &vofr_[ispin][0], *dsdp);
 
             } // if kptactive
          } // kloc
