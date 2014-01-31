@@ -33,7 +33,7 @@ QBSRC=AtomSet.C Atom.C SymmetrySet.C Symmetry.C Species.C Wavefunction.C SlaterD
       SaveESPCmd.C AndersonMixer.C SDAIonicStepper.C CGIonicStepper.C jacobi.C HubbardPotential.C \
       SphericalIntegration.C PrintMem.C PlotCmd.C SOTDWavefunctionStepper.C \
       SORKTDWavefunctionStepper.C FORKTDWavefunctionStepper.C TDEULERWavefunctionStepper.C \
-	   EhrenSampleStepper.C MDSaveCmd.C
+	   EhrenSampleStepper.C MDSaveCmd.C HPsi.C
 KPTSRC=SymOpSet.C SymOp.C
 
 SIMDSRC = clooper.c
