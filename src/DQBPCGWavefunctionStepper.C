@@ -40,11 +40,12 @@ DQBPCGWavefunctionStepper::DQBPCGWavefunctionStepper(Wavefunction& wf,
                                                      Preconditioner& p,const AtomSet& atoms,
                                                      const ChargeDensity& cd_,vector<vector<double> >& v_r,
                                                      TimerMap& tmap) :
-    WavefunctionStepper(wf,tmap), prec_(p), hpsi_(wf,atoms,cd_,v_r)
+    WavefunctionStepper(wf,tmap), prec_(p), hpsi_(wf,atoms,cd_,v_r), reswf_(wf), hreswf_(wf)
 {
 
   nkp_ = wf_.nkp();
   nspin_ = wf_.nspin();
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -66,8 +67,12 @@ void DQBPCGWavefunctionStepper::update(Wavefunction& dwf)
                   // proxy real matrices c, cp
                   DoubleMatrix c_proxy(wf_.sd(ispin,ikp)->c());
                   DoubleMatrix cp_proxy(dwf.sd(ispin,ikp)->c());
+                  DoubleMatrix w_proxy(reswf_.sd(ispin,ikp)->c());
+                  DoubleMatrix hw_proxy(hreswf_.sd(ispin,ikp)->c());
              
                   DoubleMatrix a(c_proxy.context(),c_proxy.n(),c_proxy.n(),
+                                 c_proxy.nb(),c_proxy.nb());
+                  DoubleMatrix g(c_proxy.context(),c_proxy.n(),c_proxy.n(),
                                  c_proxy.nb(),c_proxy.nb());
             
                   tmap_["dqbpcg_residual"].start();
@@ -76,94 +81,113 @@ void DQBPCGWavefunctionStepper::update(Wavefunction& dwf)
                   // rank-1 update correction
                   a.ger(-1.0,c_proxy,0,cp_proxy,0);
           
-                  // cp = cp - c * a
-                  if (wf_.ultrasoft()) {
-                     assert(false);  // ultrasoft not implemented yet
-                     // cp = cp - spsi * a
-                     DoubleMatrix spsi(wf_.sd(ispin,ikp)->spsi());
-                     cp_proxy.gemm('n','n',-1.0,spsi,a,1.0);
-                  }
-                  else {
-                     // cp = cp - c * a
-                     cp_proxy.gemm('n','n',-1.0,c_proxy,a,1.0);
-                  }
-                  // dwf.sd->c() now contains the descent direction (HV-VA)
+                  // w = cp - c * a
+                  w_proxy = cp_proxy;
+                  w_proxy.gemm('n','n',-1.0,c_proxy,a,1.0);
+
+                  // w now contains the descent direction (HV-VA)
                   tmap_["dqbpcg_residual"].stop();
 
+                  // apply preconditioner to dwf                  
                   tmap_["dqbpcg_prec"].start();
-                  // apply preconditioner to dwf
-                  
                   const valarray<double>& diag = prec_.diag(ispin,ikp);
-                  double* dc = (double*) dwf.sd(ispin,ikp)->c().valptr();
-                  const int mloc = wf_.sd(ispin,ikp)->c().mloc();
+                  double* wc = (double*) w_proxy.valptr();
+                  const int mloc = w_proxy.mloc();
+                  const int nloc = w_proxy.nloc();
                   const int ngwl = wf_.sd(ispin,ikp)->basis().localsize();
-                  const int nloc = wf_.sd(ispin,ikp)->c().nloc();
             
                   for ( int n = 0; n < nloc; n++ ) {
-                     double* dcn = &dc[2*mloc*n];
+                     double* wcn = &wc[2*mloc*n];
                      for ( int i = 0; i < ngwl; i++ ) {
                         const double fac = diag[i];
-                        const double f0 = -fac * dcn[2*i];
-                        const double f1 = -fac * dcn[2*i+1];
-                        dcn[2*i] = f0;
-                        dcn[2*i+1] = f1;
+                        const double f0 = fac * wcn[2*i];
+                        const double f1 = fac * wcn[2*i+1];
+                        wcn[2*i] = f0;
+                        wcn[2*i+1] = f1;
                      }
                   }
-                  // dwf now contains the preconditioned descent
-                  // direction -K(HV-VA)
+                  // w now contains the preconditioned descent
+                  // direction K(HV-VA)
                   tmap_["dqbpcg_prec"].stop();
+
+                  tmap_["dqbpcg_iter0"].start();
+                  // w -> (w - psi^t psi dwf)
+                  g.gemm('t','n',2.0,c_proxy,cp_proxy,0.0);
+                  g.ger(-1.0,c_proxy,0,cp_proxy,0);
+                  w_proxy.gemm('n','n',-1.0,c_proxy,g,1.0);
+                  
+                  // compute H*residual
+                  hpsi_.compute(reswf_,hreswf_);
+
+
+                  tmap_["dqbpcg_iter0"].stop();
+                  tmap_["dqbpcg_iterloop"].start();
+
+
+
+                  tmap_["dqbpcg_iterloop"].stop();
 
 
                   
-                  // do stuff
-
-
-             
                }
                else {
                   ComplexMatrix &c_proxy = wf_.sd(ispin,ikp)->c();
                   ComplexMatrix &cp = dwf.sd(ispin,ikp)->c();
+                  ComplexMatrix &w_proxy = reswf_.sd(ispin,ikp)->c();
+                  ComplexMatrix &hw = hreswf_.sd(ispin,ikp)->c();
                   ComplexMatrix a(c_proxy.context(),c_proxy.n(),c_proxy.n(),c_proxy.nb(),c_proxy.nb());
+                  ComplexMatrix g(c_proxy.context(),c_proxy.n(),c_proxy.n(),c_proxy.nb(),c_proxy.nb());
 
                   tmap_["dqbpcg_residual"].start();
                   a.gemm('c','n',1.0,c_proxy,cp,0.0);
-                  if (wf_.ultrasoft()) {
-                     assert(false);  // ultrasoft not implemented yet
-                     // cp = cp - spsi * a
-                     ComplexMatrix &spsi = wf_.sd(ispin,ikp)->spsi();
-                     cp.gemm('n','n',-1.0,spsi,a,1.0);
-                  }
-                  else {
-                     // cp = cp - c * a
-                     cp.gemm('n','n',-1.0,c_proxy,a,1.0);
-                  }
+                  // w = cp - c * a
+                  w_proxy = cp;
+                  w_proxy.gemm('n','n',-1.0,c_proxy,a,1.0);
                   // dwf.sd->c() now contains the descent direction (HV-VA)
                   tmap_["dqbpcg_residual"].stop();
              
-             
+                  // apply preconditioner to dwf             
                   tmap_["dqbpcg_prec"].start();
-                  // apply preconditioner to dwf
                   const valarray<double>& diag = prec_.diag(ispin,ikp);
-                  double* dc = (double*) dwf.sd(ispin,ikp)->c().valptr();
-                  const int mloc = wf_.sd(ispin,ikp)->c().mloc();
+                  double* wc = (double*) w_proxy.valptr();
+                  const int mloc = w_proxy.mloc();
+                  const int nloc = w_proxy.nloc();
                   const int ngwl = wf_.sd(ispin,ikp)->basis().localsize();
-                  const int nloc = wf_.sd(ispin,ikp)->c().nloc();
                   for ( int n = 0; n < nloc; n++ ) {
-                     double* dcn = &dc[2*mloc*n];
+                     double* wcn = &wc[2*mloc*n];
                      for ( int i = 0; i < ngwl; i++ ) {
                         const double fac = diag[i];
-                        const double f0 = -fac * dcn[2*i];
-                        const double f1 = -fac * dcn[2*i+1];
-                        dcn[2*i] = f0;
-                        dcn[2*i+1] = f1;
+                        const double f0 = fac * wcn[2*i];
+                        const double f1 = fac * wcn[2*i+1];
+                        wcn[2*i] = f0;
+                        wcn[2*i+1] = f1;
                      }
                   }
-                  // dwf now contains the preconditioned descent
-                  // direction -K(HV-VA)
+                  // w now contains the preconditioned descent
+                  // direction K(HV-VA)
                   tmap_["dqbpcg_prec"].stop();
 
+
+                  tmap_["dqbpcg_iter0"].start();                  
+                  // dwf -> (dwf - psi^t psi dwf)
+                  g.gemm('c','n',1.0,c_proxy,cp,0.0);
+                  w_proxy.gemm('n','n',-1.0,c_proxy,g,1.0);
                   
-                  // do stuff
+                  // compute H*residual
+                  hpsi_.compute(reswf_,hreswf_);
+
+
+
+
+
+                  
+                  tmap_["dqbpcg_iter0"].stop();
+                  tmap_["dqbpcg_iterloop"].start();
+
+
+
+                  tmap_["dqbpcg_iterloop"].stop();
+                  
              
                }
             }

@@ -42,7 +42,7 @@ class DQBPCGWavefunctionStepper : public WavefunctionStepper
 
   Preconditioner& prec_;
   HPsi hpsi_;
-  //Wavefunction wf_last_, dwf_last_;
+  Wavefunction reswf_,hreswf_;
 
   int nkp_;
   int nspin_;
