@@ -46,6 +46,8 @@ DQBPCGWavefunctionStepper::DQBPCGWavefunctionStepper(Wavefunction& wf,
   nkp_ = wf_.nkp();
   nspin_ = wf_.nspin();
 
+  cell_moved();
+  
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -74,8 +76,13 @@ void DQBPCGWavefunctionStepper::update(Wavefunction& dwf)
                                  c_proxy.nb(),c_proxy.nb());
                   DoubleMatrix g(c_proxy.context(),c_proxy.n(),c_proxy.n(),
                                  c_proxy.nb(),c_proxy.nb());
-            
+
+                  const int mloc = wf_.sd(ispin,ikp)->c().mloc();
+                  const int ngwl = wf_.sd(ispin,ikp)->basis().localsize();
+                  const int nloc = wf_.sd(ispin,ikp)->c().nloc();
+
                   tmap_["dqbpcg_residual"].start();
+
                   // factor 2.0 in next line: G and -G
                   a.gemm('t','n',2.0,c_proxy,cp_proxy,0.0);
                   // rank-1 update correction
@@ -92,10 +99,7 @@ void DQBPCGWavefunctionStepper::update(Wavefunction& dwf)
                   tmap_["dqbpcg_prec"].start();
                   const valarray<double>& diag = prec_.diag(ispin,ikp);
                   double* wc = (double*) w_proxy.valptr();
-                  const int mloc = w_proxy.mloc();
-                  const int nloc = w_proxy.nloc();
-                  const int ngwl = wf_.sd(ispin,ikp)->basis().localsize();
-            
+
                   for ( int n = 0; n < nloc; n++ ) {
                      double* wcn = &wc[2*mloc*n];
                      for ( int i = 0; i < ngwl; i++ ) {
@@ -137,11 +141,14 @@ void DQBPCGWavefunctionStepper::update(Wavefunction& dwf)
                   ComplexMatrix &hw = hreswf_.sd(ispin,ikp)->c();
                   ComplexMatrix a(c_proxy.context(),c_proxy.n(),c_proxy.n(),c_proxy.nb(),c_proxy.nb());
                   ComplexMatrix g(c_proxy.context(),c_proxy.n(),c_proxy.n(),c_proxy.nb(),c_proxy.nb());
+                  const int mloc = wf_.sd(ispin,ikp)->c().mloc();
+                  const int ngwl = wf_.sd(ispin,ikp)->basis().localsize();
+                  const int nloc = wf_.sd(ispin,ikp)->c().nloc();
 
                   tmap_["dqbpcg_residual"].start();
                   a.gemm('c','n',1.0,c_proxy,cp,0.0);
+
                   // w = cp - c * a
-                  w_proxy = cp;
                   w_proxy.gemm('n','n',-1.0,c_proxy,a,1.0);
                   // dwf.sd->c() now contains the descent direction (HV-VA)
                   tmap_["dqbpcg_residual"].stop();
@@ -150,9 +157,6 @@ void DQBPCGWavefunctionStepper::update(Wavefunction& dwf)
                   tmap_["dqbpcg_prec"].start();
                   const valarray<double>& diag = prec_.diag(ispin,ikp);
                   double* wc = (double*) w_proxy.valptr();
-                  const int mloc = w_proxy.mloc();
-                  const int nloc = w_proxy.nloc();
-                  const int ngwl = wf_.sd(ispin,ikp)->basis().localsize();
                   for ( int n = 0; n < nloc; n++ ) {
                      double* wcn = &wc[2*mloc*n];
                      for ( int i = 0; i < ngwl; i++ ) {
@@ -171,6 +175,7 @@ void DQBPCGWavefunctionStepper::update(Wavefunction& dwf)
                   tmap_["dqbpcg_iter0"].start();                  
                   // dwf -> (dwf - psi^t psi dwf)
                   g.gemm('c','n',1.0,c_proxy,cp,0.0);
+                  w_proxy = cp;
                   w_proxy.gemm('n','n',-1.0,c_proxy,g,1.0);
                   
                   // compute H*residual

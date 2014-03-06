@@ -61,10 +61,10 @@ class WfDyn : public Var
     if ( !( v == "LOCKED" || v == "SD" || v == "PSD" ||
             v == "PSDA" || v == "JD" || v == "MD" || 
             v == "TDEULER" || v == "SOTD" || v == "SORKTD" ||
-            v == "FORKTD" ) )
+            v == "FORKTD" || v == "DQBPCG") )
     {
        if ( ui->oncoutpe() )
-          cout << " wf_dyn must be in [LOCKED,SD,PSD,PSDA,JD,MD,TDEULER,SOTD,SORKTD,FORKTD]" << endl;
+          cout << " wf_dyn must be in [LOCKED,SD,PSD,PSDA,JD,MD,TDEULER,SOTD,SORKTD,FORKTD,DQBPCG]" << endl;
        return 1;
     }
 
