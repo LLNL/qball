@@ -197,7 +197,7 @@ void ParallelOptimizer::optimize(int niter, int nitscf, int nite) {
       // do nothing, try next nrowmax
     }
     else {
-      double testtime = runtime(testnrow,1,nspin,false,true);
+      double testtime = runtime(testnrow,1,nspin,true);
       if ( s_.ctxt_.oncoutpe() ) 
         cout << "  <!-- ParallelOptimizer: nparallelkpts = " << nparkp << ", nrowmax = " << testnrow << ", runtime = " << testtime << " -->" << endl;
       
