@@ -88,8 +88,6 @@ int ParOptCmd::action(int argc, char **argv) {
     os << "set nrowmax " << s->wf.nrowmax() << endl;
     if (s->wf.nkp() > 1) 
       os << "set nparallelkpts " << s->wf.nparallelkpts() << endl;
-    if (s->ctrl.reshape_context)
-      os << "set reshape_context ON" << endl;    
     os.close();
   }
 

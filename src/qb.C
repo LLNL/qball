@@ -138,7 +138,6 @@ using namespace std;
 #include "Nkpoints.h"
 #include "IPrint.h"
 #include "CellStepFreq.h"
-#include "ReshapeContext.h"
 #include "EnthalpyPressure.h"
 #include "EnthalpyThreshold.h"
 #include "HugoniostatVar.h"
@@ -400,7 +399,6 @@ int main(int argc, char **argv, char **envp)
   ui->addVar(new Nkpoints(s));
   ui->addVar(new IPrint(s));
   ui->addVar(new CellStepFreq(s));
-  ui->addVar(new ReshapeContext(s));
   ui->addVar(new EnthalpyPressure(s));
   ui->addVar(new EnthalpyThreshold(s));
   ui->addVar(new HugoniostatVar(s));

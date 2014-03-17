@@ -64,7 +64,6 @@ Wavefunction::Wavefunction(const Context& ctxt) : ctxt_(ctxt),nel_(0),nempty_(0)
   weight_[0] = 1.0;
   weightsum_ = 1.0;
   compute_nst();
-  reshape_context_ = false;
   hasdata_ = false;
   mbset_ = -1;
   nbset_ = -1;
@@ -83,7 +82,7 @@ deltaspin_(wf.deltaspin_), nrowmax_(wf.nrowmax_),
 nparallelkpts_(wf.nparallelkpts_), kpt_added_(wf.kpt_added_),
 nkptloc_(wf.nkptloc_), spinloc_(wf.spinloc_),
 cell_(wf.cell_), refcell_(wf.refcell_), 
-ecut_(wf.ecut_), weightsum_(wf.weightsum_), reshape_context_(wf.reshape_context_),
+ecut_(wf.ecut_), weightsum_(wf.weightsum_), 
 ultrasoft_(wf.ultrasoft_), force_complex_wf_(wf.force_complex_wf_),
 wf_phase_real_(wf.wf_phase_real_),mbset_(wf.mbset_),nbset_(wf.nbset_),
 mblks_(wf.mblks_),nblks_(wf.nblks_)
@@ -101,12 +100,11 @@ mblks_(wf.mblks_),nblks_(wf.nblks_)
   spincontext_.resize(nspin_);
   sdcontext_.resize(nspin_);
   sd_.resize(nspin_);
-  if (reshape_context_) 
-    sdcontextsq_.resize(nspin_);
+
+  sdcontextsq_.resize(nspin_);
   for (int ispin=0; ispin<nspin_; ispin++) {
     sdcontext_[ispin].resize(nkppar);
-    if (reshape_context_) 
-      sdcontextsq_[ispin].resize(nkppar);
+    sdcontextsq_[ispin].resize(nkppar);
     sd_[ispin].resize(wf.nkp());
   }
   
@@ -164,8 +162,6 @@ mblks_(wf.mblks_),nblks_(wf.nblks_)
                   Context* col_ctxt = new Context(wf.sd(ispin,kp)->col_ctxt());
                   sd_[ispin][kp] = new SlaterDet(*sdcontext_[ispin][ikp],*col_ctxt,kpoint_[kp],ultrasoft_,force_complex_wf_);
                   mysdctxt_[kp] = ikp;
-                  if (reshape_context_)
-                     sd_[ispin][kp]->set_gram_reshape(reshape_context_);
                   if (wf.sd(ispin,kp)->highmem())
                      sd_[ispin][kp]->set_highmem();
 
@@ -191,8 +187,6 @@ mblks_(wf.mblks_),nblks_(wf.nblks_)
   }
   resize(cell_,refcell_,ecut_);
   reset();
-  if (reshape_context_)
-    set_reshape_context(reshape_context_);
 
   hasdata_ = true;   // wf has been allocated
 
@@ -299,8 +293,6 @@ void Wavefunction::allocate(void) {
         }
 
         sd_[ispin][0] = new SlaterDet(*sdcontext_[ispin][0],*my_col_ctxt,kpoint_[0],ultrasoft_,force_complex_wf_);
-        if (reshape_context_)
-          sd_[ispin][0]->set_gram_reshape(reshape_context_);
         mysdctxt_[0] = 0;
       }
     }
@@ -348,8 +340,6 @@ void Wavefunction::allocate(void) {
               mysdctxt_[kp] = k;
 
               kptloc_[localcnt++] = kp;
-              if (reshape_context_)
-                sd_[ispin][kp]->set_gram_reshape(reshape_context_);
             }
           }
           else {
@@ -359,9 +349,6 @@ void Wavefunction::allocate(void) {
       }
     }
   }
-
-  if (reshape_context_)
-    set_reshape_context(reshape_context_);
 
   for (int ispin=0; ispin<nspin_; ispin++) {
     int tnkploc_;
@@ -426,8 +413,7 @@ void Wavefunction::deallocate(void) {
                   }
                }
                delete sdcontext_[ispin][ikp];
-               if (reshape_context_) 
-                  delete sdcontextsq_[ispin][ikp];
+               delete sdcontextsq_[ispin][ikp];
             }
          }
          delete spincontext_[ispin];
@@ -451,45 +437,6 @@ void Wavefunction::clear(void) {
     }
   }
 }
-////////////////////////////////////////////////////////////////////////////////
-void Wavefunction::set_reshape_context(bool reshape) { 
-  reshape_context_ = reshape;
-  // context reshaping for SlaterDet.gram
-  if (reshape_context_) {
-
-    for ( int ispin = 0; ispin < nspin_; ispin++ ) {
-      for ( int ikp=0; ikp<nkp(); ikp++) {
-        if (kptactive(ikp)) {
-          assert(sd_[ispin][ikp] != 0);
-          sd_[ispin][ikp]->set_gram_reshape(reshape_context_);
-        }
-      }
-    }
-
-    // context reshaping for Wavefunction.diag
-    for ( int ispin = 0; ispin < nspin_; ispin++ ) {
-      if (spinactive(ispin) ) {
-        for ( int ikp = 0; ikp < sdcontext_[ispin].size(); ikp++ ) {
-          if (sdcontext_[ispin][ikp] != 0 ) {
-            if (sdcontext_[ispin][ikp]->active() ) {
-              int tmpcol = sdcontext_[ispin][ikp]->size();
-              int tmprow = 1;
-              while (tmpcol > tmprow) {
-                tmprow *= 2;
-                tmpcol /= 2;
-              }
-              
-              if (sdcontext_[ispin][ikp]->oncoutpe()) 
-                cout << "<!-- WF DIAG:  Reshaping context from " << sdcontext_[ispin][ikp]->nprow() << " x " << sdcontext_[ispin][ikp]->npcol() << " to " << tmprow << " x " << tmpcol << " -->" << endl;
-              sdcontextsq_[ispin][ikp] = new Context(*sdcontext_[ispin][ikp],tmprow,tmpcol);
-            }
-          }
-        }
-      }
-    }
-  }
-} 
-
 ////////////////////////////////////////////////////////////////////////////////
 void Wavefunction::set_ultrasoft(bool us) {
   ultrasoft_ = us;
@@ -932,8 +879,6 @@ void Wavefunction::reshape(void) {
           }
           tmpsd = new SlaterDet(*newctxt,*my_col_ctxt,kpoint_[0],ultrasoft_,force_complex_wf_);
           tmpsd->resize(cell_,refcell_,ecut_,nst_[ispin]);
-          if (reshape_context_)
-            tmpsd->set_gram_reshape(reshape_context_);
         }
         sd_[ispin][0]->copyTo(tmpsd);
 
@@ -970,8 +915,6 @@ void Wavefunction::reshape(void) {
                 }
 
                 tmpsd = new SlaterDet(*subctxt_,*my_col_ctxt,kpoint_[ikp],ultrasoft_,force_complex_wf_);
-                if (reshape_context_)
-                  tmpsd->set_gram_reshape(reshape_context_);
               }
             }
             sd_[ispin][ikp]->copyTo(tmpsd);
@@ -1508,7 +1451,7 @@ void Wavefunction::diag(Wavefunction& dwf, bool eigvec) {
                     h.ger(-1.0,c,0,cp,0);
                   }
                   
-                  if (reshape_context_) {
+                  if (false) {
                     int mbsq = c.n()/sdcontextsq_[ispin][ikp]->nprow() + (c.n()%sdcontextsq_[ispin][ikp]->nprow() == 0 ? 0 : 1);
                     int nbsq = c.n()/sdcontextsq_[ispin][ikp]->npcol() + (c.n()%sdcontextsq_[ispin][ikp]->npcol() == 0 ? 0 : 1);
 
@@ -1576,7 +1519,7 @@ void Wavefunction::diag(Wavefunction& dwf, bool eigvec) {
                   h.gemm('c','n',1.0,c,cp,0.0);
                   valarray<double> w(h.m());
 
-                  if (reshape_context_) {
+                  if (false) {
                     int mbsq = c.n()/sdcontextsq_[ispin][ikp]->nprow() + (c.n()%sdcontextsq_[ispin][ikp]->nprow() == 0 ? 0 : 1);
                     int nbsq = c.n()/sdcontextsq_[ispin][ikp]->npcol() + (c.n()%sdcontextsq_[ispin][ikp]->npcol() == 0 ? 0 : 1);
                     

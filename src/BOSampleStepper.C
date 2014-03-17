@@ -187,10 +187,6 @@ void BOSampleStepper::step(int niter)
   else if (onpe0)
        cout << "<!-- BOSampleStepper:  fractional occupation not detected. -->" << endl;
    
-  
-  if (s_.ctrl.reshape_context)
-    s_.wf.set_reshape_context(s_.ctrl.reshape_context);
-
   AtomSet& atoms = s_.atoms;
   Wavefunction& wf = s_.wf;
   const int nspin = wf.nspin();

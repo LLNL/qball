@@ -55,7 +55,6 @@ SlaterDet::SlaterDet(Context& ctxt, const Context& my_col_ctxt, D3vector kpoint,
   ultrasoft_ = ultrasoft;
   force_complex_ = (ultrasoft_ || force_complex);
   basis_ = new Basis(col_ctxt_,kpoint,force_complex_);
-  gram_reshape_ = false;
   highmem_ = false;
   // set seed for randomization
   srand48(ctxt_.myproc());
@@ -64,7 +63,7 @@ SlaterDet::SlaterDet(Context& ctxt, const Context& my_col_ctxt, D3vector kpoint,
 }
 ////////////////////////////////////////////////////////////////////////////////
 SlaterDet::SlaterDet(const SlaterDet& rhs) : ctxt_(rhs.context()),
-  basis_(new Basis(*(rhs.basis_))), c_(rhs.c_), gram_reshape_(rhs.gram_reshape_),
+  basis_(new Basis(*(rhs.basis_))), c_(rhs.c_), 
   spsi_(rhs.spsi_), highmem_(rhs.highmem_), ultrasoft_(rhs.ultrasoft_),
   mbset_(rhs.mbset_),nbset_(rhs.nbset_),mblks_(rhs.mblks_),nblks_(rhs.nblks_),
   col_ctxt_(rhs.col_ctxt_){}
@@ -973,10 +972,6 @@ void SlaterDet::rs_mul_add(FourierTransform& ft,
 ////////////////////////////////////////////////////////////////////////////////
 void SlaterDet::gram() {
 
-   //ewd DEBUG:  disable gram reshaping for now
-   gram_reshape_ = false;
-
-   
    //if (ultrasoft_)
    //   update_usfns();   // calculate betapsi, spsi
 
@@ -1019,7 +1014,7 @@ void SlaterDet::gram() {
     else
        s.herk('l','c',1.0,c_,0.0);
     
-    if (gram_reshape_) {
+    if (false) {
       int mbsq = c_.n()/ctxtsq_.nprow() + (c_.n()%ctxtsq_.nprow() == 0 ? 0 : 1);
       int nbsq = c_.n()/ctxtsq_.npcol() + (c_.n()%ctxtsq_.npcol() == 0 ? 0 : 1);
       
@@ -1047,24 +1042,6 @@ void SlaterDet::gram() {
    if (ultrasoft_)
       update_usfns();   // calculate betapsi, spsi
 
-}
-////////////////////////////////////////////////////////////////////////////////
-void SlaterDet::set_gram_reshape(bool reshape) {
-  gram_reshape_ = reshape;
-  if (gram_reshape_) {
-    // create most square rectangular context for Cholesky decomposition
-    int tmpcol = ctxt_.size();
-    int tmprow = 1;
-    while (tmpcol > tmprow) {
-      tmprow *= 2;
-      tmpcol /= 2;
-    }
-
-    if (ctxt_.oncoutpe()) 
-      cout << "<!-- SlaterDet.set_gram_reshape:  reshaping context from " << ctxt_.nprow() << " x " << ctxt_.npcol() << " to " << tmprow << " x " << tmpcol << " -->" << endl;
-    
-    ctxtsq_ = Context(ctxt_,tmprow,tmpcol);
-  }
 }
 ////////////////////////////////////////////////////////////////////////////////
 void SlaterDet::set_local_block(int mb, int nb) {

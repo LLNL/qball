@@ -116,7 +116,7 @@ void ParallelOptimizer::optimize(int niter, int nitscf, int nite) {
   // if nkpts > 1, optimize nparallelkpts
   double kpttime = 1.E+20;
   if (nkpts > 1) {     
-    kpttime = runtime(nrowmax,nparkp,nspin,s_.ctrl.reshape_context,true);
+    kpttime = runtime(nrowmax,nparkp,nspin,true);
     if ( s_.ctxt_.oncoutpe() ) 
       cout << "  <!-- ParallelOptimizer: nparallelkpts = " << nparkp << ", nrowmax = " << nrowmax << ", runtime = " << kpttime << " -->" << endl;
 
@@ -132,7 +132,7 @@ void ParallelOptimizer::optimize(int niter, int nitscf, int nite) {
         if (npcol > nrowmax) {
           nprow = npcol;
         }
-        double testtime = runtime(nrowmax,testnpkp,nspin,s_.ctrl.reshape_context,true);
+        double testtime = runtime(nrowmax,testnpkp,nspin,true);
         if ( s_.ctxt_.oncoutpe() ) 
           cout << "  <!-- ParallelOptimizer: nparallelkpts = " << testnpkp << ", nrowmax = " << nprow    << ", runtime = " << testtime << " -->" << endl;
         if (testtime < kpttime) {
@@ -159,7 +159,7 @@ void ParallelOptimizer::optimize(int niter, int nitscf, int nite) {
         int npcol = npes/(nspin*testnpkp*nrowmax);
         if (npcol > nrowmax)
           nprow = npcol;
-        double testtime = runtime(nprow,testnpkp,nspin,s_.ctrl.reshape_context,true);
+        double testtime = runtime(nprow,testnpkp,nspin,true);
         if ( s_.ctxt_.oncoutpe() ) 
           cout << "  <!-- ParallelOptimizer: nparallelkpts = " << testnpkp << ", nrowmax = " << nprow << ", runtime = " << testtime << " -->" << endl;
         if (testtime < kpttime) {
@@ -186,7 +186,6 @@ void ParallelOptimizer::optimize(int niter, int nitscf, int nite) {
 
   double nrowtime = kpttime;  // best timing so far
   bool improve = true;
-  bool reshape = false;
   list<int>::reverse_iterator lit = nrow_factors.rbegin();
   while (improve && lit != nrow_factors.rend()) { 
     int testnrow = *lit;
@@ -198,28 +197,11 @@ void ParallelOptimizer::optimize(int niter, int nitscf, int nite) {
       // do nothing, try next nrowmax
     }
     else {
-      bool testreshape = false;
       double testtime = runtime(testnrow,1,nspin,false,true);
       if ( s_.ctxt_.oncoutpe() ) 
-        cout << "  <!-- ParallelOptimizer: nparallelkpts = " << nparkp << ", nrowmax = " << testnrow << ", reshape = false, runtime = " << testtime << " -->" << endl;
-
-      // try turning on context reshaping, see if time improves
-      //ewd:  disable context reshaping for now
-      if (false && testnrow > 2*npcol) {
-        double reshapetime = runtime(testnrow,1,nspin,true,true);
-        if ( s_.ctxt_.oncoutpe() ) 
-          cout << "  <!-- ParallelOptimizer: nparallelkpts = " << nparkp << ", nrowmax = " << testnrow << ", reshape = true, runtime = " << reshapetime << " -->" << endl;
-      
-        if (reshapetime < testtime)
-        {
-           testtime = reshapetime;
-           testreshape = true;
-        }
-      }
+        cout << "  <!-- ParallelOptimizer: nparallelkpts = " << nparkp << ", nrowmax = " << testnrow << ", runtime = " << testtime << " -->" << endl;
       
       if (testtime < nrowtime) {
-        if (testreshape)
-          reshape = true;
         nrowtime = testtime;
         nrowmax = testnrow;
       }
@@ -230,11 +212,8 @@ void ParallelOptimizer::optimize(int niter, int nitscf, int nite) {
     lit++;
   }
 
-  string reshapetxt = "OFF";
-  if (reshape)
-    reshapetxt = "ON";
   if ( s_.ctxt_.oncoutpe() ) 
-    cout << "<!-- ParallelOptimizer:  best runtime = " << nrowtime << ", nrowmax = " << nrowmax << ", nparallelkpts = " << nparkp << ", reshape_context = " << reshapetxt << " -->" << endl;
+    cout << "<!-- ParallelOptimizer:  best runtime = " << nrowtime << ", nrowmax = " << nrowmax << ", nparallelkpts = " << nparkp << " -->" << endl;
   s_.wf.set_nrowmax(nrowmax);
   s_.wf.set_nparallelkpts(nparkp);
 
@@ -246,8 +225,6 @@ void ParallelOptimizer::optimize(int niter, int nitscf, int nite) {
      s_.wf.randomize_us(0.02,s_.atoms,highmem);     // this will force allocate() and resize()
   else
      s_.wf.randomize(0.02,highmem);              // this will force allocate() and resize()
-  s_.ctrl.reshape_context = reshape;
-  s_.wf.set_reshape_context(reshape);
 
 
   tm_partot.stop();
@@ -266,10 +243,10 @@ void ParallelOptimizer::optimize(int niter, int nitscf, int nite) {
 
 }
 ////////////////////////////////////////////////////////////////////////////////
-double ParallelOptimizer::runtime(int nrowmax, int npark, int nspin, bool reshape, bool print_timing) {
+double ParallelOptimizer::runtime(int nrowmax, int npark, int nspin, bool print_timing) {
 
    if (s_.ctxt_.oncoutpe())
-      cout << "<!--ParallelOptimizer::runtime called w. nparallelkpts = " << npark << ", nrowmax = " << nrowmax << ", nspin = " << nspin << ", reshape = " << reshape << "-->" << endl;
+      cout << "<!--ParallelOptimizer::runtime called w. nparallelkpts = " << npark << ", nrowmax = " << nrowmax << ", nspin = " << nspin << "-->" << endl;
 
    const int nempty = s_.wf.nempty();
    const bool compute_eigvec = nempty > 0 || s_.ctrl.wf_diag == "T";
@@ -310,7 +287,6 @@ double ParallelOptimizer::runtime(int nrowmax, int npark, int nspin, bool reshap
      wf.randomize_us(0.02,atoms,highmem);  // this will force allocate() and resize()
   else
      wf.randomize(0.02,highmem);              // this will force allocate() and resize()
-  wf.set_reshape_context(reshape);
   
   if ( nempty > 0 )
     wf.update_occ(s_.ctrl.smearing_width,s_.ctrl.smearing_ngauss);

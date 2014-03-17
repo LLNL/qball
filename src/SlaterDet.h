@@ -59,7 +59,6 @@ class SlaterDet {
   ComplexMatrix c_;
   vector<double> occ_;
   vector<double> eig_;
-  bool gram_reshape_;
   Context ctxtsq_;
   int nbetagloc_;                     // number of local ultrasoft betag 
   vector<ComplexMatrix*> betag_;      // ultrasoft beta function
@@ -121,7 +120,6 @@ class SlaterDet {
   void cleanup(void);
   void reset(void);
   void gram();
-  void set_gram_reshape(bool reshape);
   void set_local_block(int mb, int nb);
   void set_nblocks(int mblks, int nblks);
   void riccati(SlaterDet& sd);

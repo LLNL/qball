@@ -81,7 +81,6 @@ class Wavefunction {
   vector<vector<Context*> > sdcontext_;   // sdcontext_[ispin][ikp]
   vector<vector<SlaterDet*> > sd_;        // sd[ispin][ikp]
   vector<vector<Context*> > sdcontextsq_;   // sdcontextsq_[ispin][ikp]
-  bool reshape_context_;
   int mbset_, nbset_;    // user defined local data size
   int mblks_, nblks_;    // user defined number of blocks in block-cycle distribution
   
@@ -154,7 +153,6 @@ class Wavefunction {
   void set_nparallelkpts(int n);
   void add_kpoint(D3vector kpoint, double weight);
   void del_kpoint(D3vector kpoint);
-  void set_reshape_context(bool reshape);
   void set_ultrasoft(bool us);
   void set_local_block(int mb, int nb);
   void set_nblocks(int mblks, int nblks);

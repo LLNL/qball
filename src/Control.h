@@ -98,8 +98,6 @@ struct Control
   double enthalpy_pressure;
   double enthalpy_threshold;
 
-  bool reshape_context;
-
   double run_timer;  // total maximum run time in seconds
   double time_init;
   bool timer_hit;
