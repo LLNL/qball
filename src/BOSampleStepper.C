@@ -1487,6 +1487,7 @@ void BOSampleStepper::step(int niter)
 
         if ( gs_only && !fastend)
         {
+
            tmap["postscf"].start();
            // need eigenvalues to compute forces w. ultrasoft
            if (ultrasoft) { 
@@ -1832,6 +1833,7 @@ void BOSampleStepper::step(int niter)
   //ewd print timing
   cd_.print_timing();
   ef_.print_timing();
+  s_.wf.print_timing();
   // print timer map
   for ( TimerMap::iterator i = tmap.begin(); i != tmap.end(); i++ )
   {

@@ -1050,6 +1050,12 @@ void ComplexMatrix::axpy(double alpha, const ComplexMatrix &x)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+// copy data in place between overlapping contexts
+void DoubleMatrix::copyInPlace(DoubleMatrix& a)
+{
+   memcpy(a.val, val, mloc_*nloc_*sizeof(double));   
+}
+////////////////////////////////////////////////////////////////////////////////
 // real getsub: *this = sub(A)
 // copy submatrix A(ia:ia+m, ja:ja+n) into *this;
 // *this and A may live in different contexts
@@ -1102,6 +1108,12 @@ void DoubleMatrix::getsub(const DoubleMatrix &a,
 #endif
 }
 
+////////////////////////////////////////////////////////////////////////////////
+// copy data in place between overlapping contexts
+void ComplexMatrix::copyInPlace(ComplexMatrix& a)
+{
+   memcpy(a.val, val, mloc_*nloc_*sizeof(complex<double>));   
+}
 ////////////////////////////////////////////////////////////////////////////////
 // complex getsub: *this = sub(A)
 // copy submatrix A(ia:ia+m, ja:ja+n) into *this;

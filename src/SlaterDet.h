@@ -54,12 +54,12 @@ class SlaterDet {
   private:
 
   Context& ctxt_;
+  Context& ctxtsq_;
   const Context& col_ctxt_;
   Basis* basis_;
   ComplexMatrix c_;
   vector<double> occ_;
   vector<double> eig_;
-  Context ctxtsq_;
   int nbetagloc_;                     // number of local ultrasoft betag 
   vector<ComplexMatrix*> betag_;      // ultrasoft beta function
   vector<ComplexMatrix*> betapsi_;    // <beta|phi>
@@ -81,9 +81,10 @@ class SlaterDet {
   
   mutable TimerMap tmap;
 
-  SlaterDet(Context& ctxt, const Context& my_col_ctxt, D3vector kpoint, bool ultrasoft, bool force_complex);
+  SlaterDet(Context& ctxt, const Context& my_col_ctxt, Context& ctxtsq, D3vector kpoint, bool ultrasoft, bool force_complex);
   SlaterDet(const SlaterDet& rhs);
   ~SlaterDet();
+  void print_timing(void);
   Context& context(void) const { return ctxt_; }
   const Context& col_ctxt(void) const { return col_ctxt_; }
   const Basis& basis(void) const { return *basis_; }
@@ -105,7 +106,7 @@ class SlaterDet {
   int nstloc(void) const { return c_.nloc(); }
   void resize(const UnitCell& cell, const UnitCell& refcell,
               double ecut, int nst);
-  void reshape(const Context& newctxt, const Context& new_col_ctxt, bool setnewctxt);
+  void reshape(const Context& newctxt, const Context& new_col_ctxt, const Context& newctxtsq, bool setnewctxt);
   void copyTo(SlaterDet* newsd);
   void compute_density(FourierTransform& ft, double weight, double* rho) const;
   void rs_mul_add(FourierTransform& ft, const double* v, SlaterDet& sdp) const;

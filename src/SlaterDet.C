@@ -47,9 +47,10 @@
 using namespace std;
 
 ////////////////////////////////////////////////////////////////////////////////
-SlaterDet::SlaterDet(Context& ctxt, const Context& my_col_ctxt, D3vector kpoint,
+SlaterDet::SlaterDet(Context& ctxt, const Context& my_col_ctxt, Context& ctxtsq,
+                     D3vector kpoint,
                      bool ultrasoft, bool force_complex) : ctxt_(ctxt), c_(ctxt),
-                                                           ctxtsq_(ctxt), spsi_(ctxt),
+                                                           ctxtsq_(ctxtsq), spsi_(ctxt),
                                                            col_ctxt_(my_col_ctxt)
 {
   ultrasoft_ = ultrasoft;
@@ -66,7 +67,7 @@ SlaterDet::SlaterDet(const SlaterDet& rhs) : ctxt_(rhs.context()),
   basis_(new Basis(*(rhs.basis_))), c_(rhs.c_), 
   spsi_(rhs.spsi_), highmem_(rhs.highmem_), ultrasoft_(rhs.ultrasoft_),
   mbset_(rhs.mbset_),nbset_(rhs.nbset_),mblks_(rhs.mblks_),nblks_(rhs.nblks_),
-  col_ctxt_(rhs.col_ctxt_){}
+  col_ctxt_(rhs.col_ctxt_),ctxtsq_(rhs.ctxtsq_){}
 ////////////////////////////////////////////////////////////////////////////////
 SlaterDet::~SlaterDet()  {
   delete basis_;
@@ -74,6 +75,26 @@ SlaterDet::~SlaterDet()  {
     delete betag_[i];
     delete betapsi_[i];
     delete dbetapsi_[i];
+  }
+}
+////////////////////////////////////////////////////////////////////////////////
+void SlaterDet::print_timing(void) {
+  for ( TimerMap::iterator i = tmap.begin(); i != tmap.end(); i++ ) {
+    double time = (*i).second.real();
+    double tmin = time;
+    double tmax = time;
+    ctxt_.dmin(1,1,&tmin,1);
+    ctxt_.dmax(1,1,&tmax,1);
+    uint64_t count = (*i).second.counts();
+    if ( ctxt_.mype()==0 ) {
+       cout << left << setw(34) << "<timing where=\"slaterdet\""
+            << setw(8) << " name=\""
+            << setw(15) << (*i).first << "\""
+            << " min=\"" << setprecision(3) << setw(9) << tmin << "\""
+            << " max=\"" << setprecision(3) << setw(9) << tmax << "\""
+            << " count=\"" << setw(9) << count << "\"/>"
+            << endl;
+    }
   }
 }
 ////////////////////////////////////////////////////////////////////////////////
@@ -187,6 +208,8 @@ void SlaterDet::resize(const UnitCell& cell, const UnitCell& refcell,
     //cout << " SlaterDet::resize: refcell=" << basis_->refcell();
     //throw SlaterDetException("could not resize: cell not in refcell");
   //}
+
+   tmap["resize"].start();
 
   try {
     // create a temporary copy of the basis and of the coefficient matrix
@@ -330,9 +353,11 @@ void SlaterDet::resize(const UnitCell& cell, const UnitCell& refcell,
     cout << "<ERROR> bad_alloc exception caught in SlaterDet::resize </ERROR>" << endl;
     throw;
   }
+   tmap["resize"].stop();
 }
 ////////////////////////////////////////////////////////////////////////////////
-void SlaterDet::reshape(const Context& newctxt, const Context& new_col_ctxt, bool setnewctxt) {
+void SlaterDet::reshape(const Context& newctxt, const Context& new_col_ctxt, const Context& newctxtsq, bool setnewctxt) {
+   tmap["reshape"].start();
   try {
     bool is_finite_ = ( c_.m() > 0 && c_.n() > 0 );
 
@@ -406,7 +431,10 @@ void SlaterDet::reshape(const Context& newctxt, const Context& new_col_ctxt, boo
     */
     
     if (setnewctxt)
+    {
       ctxt_ = newctxt;
+      ctxtsq_ = newctxtsq;
+    }
     c_.set_context(newctxt);
     c_.resize(m,ctmp.n(),mb,nb);
     if (ultrasoft_)
@@ -577,6 +605,7 @@ void SlaterDet::reshape(const Context& newctxt, const Context& new_col_ctxt, boo
     cout << "<ERROR> bad_alloc exception caught in SlaterDet::reshape </ERROR>" << endl;
     throw;
   }
+   tmap["reshape"].stop();
 }
 ////////////////////////////////////////////////////////////////////////////////
 void SlaterDet::copyTo(SlaterDet* newsd) {
@@ -972,6 +1001,9 @@ void SlaterDet::rs_mul_add(FourierTransform& ft,
 ////////////////////////////////////////////////////////////////////////////////
 void SlaterDet::gram() {
 
+    bool copyToSquareContext = false;
+
+
    //if (ultrasoft_)
    //   update_usfns();   // calculate betapsi, spsi
 
@@ -982,6 +1014,7 @@ void SlaterDet::gram() {
     DoubleMatrix sc_proxy(spsi_);
     DoubleMatrix s(ctxt_,c_.n(),c_.n(),c_.nb(),c_.nb());
 
+    tmap["gram-gemm"].start();
     if (ultrasoft_) {   // orthogonalize psi and S*psi
       s.gemm('t','n',2.0,sc_proxy,c_proxy,0.0);
       s.ger(-1.0,sc_proxy,0,c_proxy,0);
@@ -990,9 +1023,27 @@ void SlaterDet::gram() {
       s.syrk('l','t',2.0,c_proxy,0.0); 
       s.syr('l',-1.0,c_proxy,0,'r');
     }
-    s.potrf('l'); // Cholesky decomposition: S = L * L^T
+    tmap["gram-gemm"].stop();
+    tmap["gram-potrf"].start();
+    if (copyToSquareContext)
+    {
+       DoubleMatrix ssq(ctxtsq_,c_.n(),c_.n(),c_.nb(),c_.nb());
+       if (ssq.active())
+       {
+          s.copyInPlace(ssq);
+          ssq.potrf('l'); // Cholesky decomposition: S = L * L^T
+          ssq.copyInPlace(s);
+       }
+    }
+    else
+    {
+       s.potrf('l'); // Cholesky decomposition: S = L * L^T
+    }
+    tmap["gram-potrf"].stop();
     // solve triangular system X * L^T = C
+    tmap["gram-trsm"].start();
     c_proxy.trsm('r','l','t','n',1.0,s);
+    tmap["gram-trsm"].stop();
 
     /*
     // create a square context for the Cholesky decomposition
@@ -1009,30 +1060,32 @@ void SlaterDet::gram() {
   else {
     // k != 0 case
     ComplexMatrix s(ctxt_,c_.n(),c_.n(),c_.nb(),c_.nb());
+    tmap["gram-gemm"].start();
     if (ultrasoft_)  // orthogonalize psi and S*psi
       s.gemm('c','n',1.0,c_,spsi_,0.0);
     else
        s.herk('l','c',1.0,c_,0.0);
-    
-    if (false) {
-      int mbsq = c_.n()/ctxtsq_.nprow() + (c_.n()%ctxtsq_.nprow() == 0 ? 0 : 1);
-      int nbsq = c_.n()/ctxtsq_.npcol() + (c_.n()%ctxtsq_.npcol() == 0 ? 0 : 1);
-      
-      if (mbsq > nbsq) 
-        nbsq = mbsq;
-      else
-        mbsq = nbsq;
-                
-      ComplexMatrix ssq(ctxtsq_,c_.n(),c_.n(),nbsq,nbsq);
-      ssq.getsub(s,s.m(),s.n(),0,0);
-      ssq.potrf('l'); // Cholesky decomposition: S = L * L^T
-      s.getsub(ssq,ssq.m(),ssq.n(),0,0);
+    tmap["gram-gemm"].stop();
+
+    tmap["gram-potrf"].start();
+    if (copyToSquareContext)
+    {
+       ComplexMatrix ssq(ctxtsq_,c_.n(),c_.n(),c_.nb(),c_.nb());
+       if (ssq.active())
+       {
+          s.copyInPlace(ssq);
+          ssq.potrf('l'); // Cholesky decomposition: S = L * L^T
+          ssq.copyInPlace(s);
+       }
     }
     else {
-      s.potrf('l'); // Cholesky decomposition: S = L * L^T
+       s.potrf('l'); // Cholesky decomposition: S = L * L^T
     }
+    tmap["gram-potrf"].stop();
     // solve triangular system X * L^T = C
+    tmap["gram-trsm"].start();
     c_.trsm('r','l','c','n',1.0,s);
+    tmap["gram-trsm"].stop();
 
     //ewd:  let's have functions that use betapsi call this themselves
     //if (ultrasoft_)
@@ -1040,8 +1093,11 @@ void SlaterDet::gram() {
   }
 
    if (ultrasoft_)
+   {
+      tmap["gram-ultrasoft"].start();
       update_usfns();   // calculate betapsi, spsi
-
+      tmap["gram-ultrasoft"].stop();
+   }
 }
 ////////////////////////////////////////////////////////////////////////////////
 void SlaterDet::set_local_block(int mb, int nb) {
