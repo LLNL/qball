@@ -358,6 +358,7 @@ int main(int argc, char **argv, char **envp)
   ui->addCmd(new ShiftWFCmd(s));
   ui->addCmd(new WFPhaseRealCmd(s));
   ui->addCmd(new PlotCmd(s));
+  ui->addCmd(new ResetVcmCmd(s));
   
   ui->addVar(new AtomsDyn(s));
   ui->addVar(new Cell(s));

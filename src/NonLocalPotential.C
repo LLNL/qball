@@ -1402,8 +1402,13 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
   //const int mloc = basis_.maxlocalsize();
   const int mloc = sd_.c().mloc();
   // define atom block size
+
   //const int na_block_size = 32;
-  const int na_block_size = 256;
+  int namax = 0;
+  for (int is=0; is<nsp; is++)
+     if (atoms_.na(is) > namax) namax = atoms_.na(is);
+  const int na_block_size = (namax > 256) ? 256 : namax;
+
   vector<vector<double> > tau;
   atoms_.get_positions(tau,true);
 

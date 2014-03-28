@@ -136,6 +136,14 @@ using namespace std;
 #include "RunTimer.h"
 #include "HubbardU.h"
 #include "Memory.h"
+#include "MDIter.h"
+#include "profile.h"
+#include "MatrixLoc.h"
+#include "Pblock.h"
+#include "SaveFreq.h"
+#include "SaveDenFreq.h"
+#include "SaveWfFreq.h"
+#include "NetCharge.h"
 
 qbLink::qbLink() {
   ctxt = new Context();
@@ -325,6 +333,10 @@ void qbLink::init(void) {
   ui->addCmd(new UnlockCmd(s));
   ui->addCmd(new ComputeMLWFCmd(s));
   ui->addCmd(new ConstraintCmd(s));
+  ui->addCmd(new ShiftWFCmd(s));
+  ui->addCmd(new WFPhaseRealCmd(s));
+  ui->addCmd(new PlotCmd(s));
+  ui->addCmd(new ResetVcmCmd(s));
   
   ui->addVar(new AtomsDyn(s));
   ui->addVar(new Cell(s));
@@ -374,6 +386,23 @@ void qbLink::init(void) {
   ui->addVar(new RunTimer(s));
   ui->addVar(new HubbardU(s));
   ui->addVar(new Memory(s));
+  ui->addVar(new MatrixLoc(s));
+  ui->addVar(new Pblock(s));
+  ui->addVar(new MDIter(s));
+  ui->addVar(new Force_Complex_WF(s));
+  ui->addVar(new Non_Selfconsistent_Energy_Output(s));
+  ui->addVar(new TDDt(s));
+  ui->addVar(new NA_overlaps(s));
+  ui->addVar(new WF_Phase_RealVar(s));
+  ui->addVar(new SaveFreq(s));
+  ui->addVar(new SaveDenFreq(s));
+  ui->addVar(new SaveWfFreq(s));
+  ui->addVar(new NetCharge(s));
+
+#ifdef USE_JAGGEMM
+  setup_grid();
+#endif  
+
 }
 void qbLink::cout_to_qboxlog(void) {
   cout.flush();
