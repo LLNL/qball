@@ -1001,7 +1001,7 @@ void SlaterDet::rs_mul_add(FourierTransform& ft,
 ////////////////////////////////////////////////////////////////////////////////
 void SlaterDet::gram() {
 
-    bool copyToSquareContext = false;
+    bool copyToSquareContext = true;
 
 
    //if (ultrasoft_)

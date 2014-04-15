@@ -1,4 +1,53 @@
 ------------------------------------------------------------------------
+r170 | draeger | 2014-03-28 16:37:14 -0700 (Fri, 28 Mar 2014) | 4 lines
+
+
+Added reset_vcm command to qb.C (it was in src directory, just not added within code) and updated qbLink.C to have same variables and commands as qb.C.
+
+
+------------------------------------------------------------------------
+r169 | draeger | 2014-03-22 15:38:52 -0700 (Sat, 22 Mar 2014) | 4 lines
+
+
+Bug fix in NetCharge -- don't update_occ until SlaterDets are created.
+
+
+------------------------------------------------------------------------
+r168 | draeger | 2014-03-21 11:16:39 -0700 (Fri, 21 Mar 2014) | 4 lines
+
+
+Enabled net_charge variable.
+
+
+------------------------------------------------------------------------
+r167 | draeger | 2014-03-21 11:14:36 -0700 (Fri, 21 Mar 2014) | 4 lines
+
+
+Added option to copy data in place to separate square contexts to speed up square matrix operations (eigensolve and Cholesky decomposition).  Currently disabled.
+
+
+------------------------------------------------------------------------
+r166 | draeger | 2014-03-17 09:48:49 -0700 (Mon, 17 Mar 2014) | 4 lines
+
+
+Bug fix:  removed extra argument from runtime() in ParallelOptimizer.C.
+
+
+------------------------------------------------------------------------
+r165 | draeger | 2014-03-17 09:45:21 -0700 (Mon, 17 Mar 2014) | 4 lines
+
+
+Removed context reshaping option.  Instead, we'll do an in-place copy from rectangular context to square context.
+
+
+------------------------------------------------------------------------
+r158 | draeger1 | 2014-01-16 13:59:17 -0800 (Thu, 16 Jan 2014) | 4 lines
+
+
+Added dj3 term to NonLocalPotential.C, allowing users to use semilocal potentials with nonlocal l=3 channels.
+
+
+------------------------------------------------------------------------
 r156 | draeger1 | 2013-12-20 11:37:48 -0800 (Fri, 20 Dec 2013) | 4 lines
 
 

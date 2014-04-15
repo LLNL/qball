@@ -1475,7 +1475,7 @@ double Wavefunction::sdot(const Wavefunction& wf) const {
 ////////////////////////////////////////////////////////////////////////////////
 void Wavefunction::diag(Wavefunction& dwf, bool eigvec) {
 
-   bool copyToSquareContext = false;
+   bool copyToSquareContext = true;
 
    QB_Pstart(13,diag);
   // subspace diagonalization of <*this | dwf>
