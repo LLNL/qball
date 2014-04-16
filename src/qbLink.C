@@ -62,13 +62,17 @@ using namespace std;
 #include "PromoteOccCmd.h"
 #include "QuitCmd.h"
 #include "RandomizeWfCmd.h"
+#include "RandomizeRealWfCmd.h"
 #include "RandomizeVelCmd.h"
 #include "RunCmd.h"
+#include "MDSaveCmd.h"
 #include "SaveCmd.h"
 #include "SavesysCmd.h"
 #include "SavedenCmd.h"
 #include "SaveESPCmd.h"
 #include "SetCmd.h"
+#include "ShiftWFCmd.h"
+#include "WFPhaseRealCmd.h"
 #include "SpeciesCmd.h"
 #include "MMSpeciesCmd.h"
 #include "EmpiricalPotentialCmd.h"
@@ -78,6 +82,7 @@ using namespace std;
 #include "ParOptCmd.h"
 #include "LockCmd.h"
 #include "UnlockCmd.h"
+#include "SetVelCmd.h"
 #include "ComputeMLWFCmd.h"
 #include "AngleCmd.h"
 #include "ConstraintCmd.h"
@@ -87,6 +92,7 @@ using namespace std;
 #include "TorsionCmd.h"
 #include "ResetVcmCmd.h"
 #include "ListConstraintsCmd.h"
+#include "PlotCmd.h"
 
 #include "AtomsDyn.h"
 #include "Cell.h"
@@ -107,6 +113,10 @@ using namespace std;
 #include "Smearing.h"
 #include "SmearingWidth.h"
 #include "FermiTemp.h"
+#include "Force_Complex_WF.h"
+#include "Non_Selfconsistent_Energy_Output.h"
+#include "TDDt.h"
+#include "NA_overlaps.h"
 #include "Dt.h"
 #include "Nempty.h"
 #include "Nrowmax.h"
@@ -123,6 +133,8 @@ using namespace std;
 #include "CenterOfMass.h"
 #include "WfDiag.h"
 #include "WfDyn.h"
+#include "WfExtrap.h"
+#include "WFPhaseRealVar.h"
 #include "Xc.h"
 #include "Nparallelkpts.h"
 #include "Nkpoints.h"
@@ -144,6 +156,10 @@ using namespace std;
 #include "SaveDenFreq.h"
 #include "SaveWfFreq.h"
 #include "NetCharge.h"
+
+#ifdef USE_JAGGEMM
+extern "C" int setup_grid();
+#endif
 
 qbLink::qbLink() {
   ctxt = new Context();

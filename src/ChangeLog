@@ -1,4 +1,11 @@
 ------------------------------------------------------------------------
+r171 | draeger | 2014-04-15 15:47:58 -0700 (Tue, 15 Apr 2014) | 4 lines
+
+
+Added code to copy square matrix data in place to a square context containing only the processes in the upper square of the rectangular process grid, to speed up Cholesky decomposition and eigensolve for large, very rectangular contexts.  Not extensively tested, but so far works in all tests and can produce a significant speedup.
+
+
+------------------------------------------------------------------------
 r170 | draeger | 2014-03-28 16:37:14 -0700 (Fri, 28 Mar 2014) | 4 lines
 
 

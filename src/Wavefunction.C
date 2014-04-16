@@ -350,7 +350,7 @@ void Wavefunction::allocate(void) {
           Context* subctxt_ = new Context(*spincontext_[ispin],npr,tnpck,0,kcol0);
           if (subctxt_->active()) {
             sdcontext_[ispin][k] = subctxt_;
-            sdcontextsq_[ispin][0] = new Context(*sdcontext_[ispin][k],sdcontext_[ispin][k]->npcol(),sdcontext_[ispin][k]->npcol(),0,0);
+            sdcontextsq_[ispin][0] = new Context(*sdcontext_[ispin][k],sdcontext_[ispin][k]->npcol(),sdcontext_[ispin][k]->npcol(),0,kcol0);
             // index of first kpoint for this context
             int kp0 = k*nkptloc_ + (nkpleftover > k ? k : nkpleftover);
 
