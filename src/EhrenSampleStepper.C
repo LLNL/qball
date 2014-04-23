@@ -491,7 +491,7 @@ void EhrenSampleStepper::step(int niter)
           cell_stepper->update_cell();
 
           tmap["efn"].start();
-          ef_.cell_moved();
+          ef_.cell_moved(compute_stress);
           ef_.atoms_moved(); // modifications of the cell also move ions
           tmap["efn"].stop();
           if (ultrasoft) {

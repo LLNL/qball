@@ -350,7 +350,8 @@ void Wavefunction::allocate(void) {
           Context* subctxt_ = new Context(*spincontext_[ispin],npr,tnpck,0,kcol0);
           if (subctxt_->active()) {
             sdcontext_[ispin][k] = subctxt_;
-            sdcontextsq_[ispin][0] = new Context(*sdcontext_[ispin][k],sdcontext_[ispin][k]->npcol(),sdcontext_[ispin][k]->npcol(),0,kcol0);
+            sdcontextsq_[ispin][k] = new Context(*sdcontext_[ispin][k],sdcontext_[ispin][k]->npcol(),sdcontext_[ispin][k]->npcol(),0,0);
+            //sdcontextsq_[ispin][k] = new Context(*spincontext_[ispin],tnpck,tnpck,0,kcol0);
             // index of first kpoint for this context
             int kp0 = k*nkptloc_ + (nkpleftover > k ? k : nkpleftover);
 
@@ -1517,8 +1518,8 @@ void Wavefunction::diag(Wavefunction& dwf, bool eigvec) {
                   if (copyToSquareContext)
                   {
 
-                    if (sdcontext_[ispin][ikp]->oncoutpe()) 
-                       cout << "<!-- Wavefunction::diag: using in-place data move to speed up eigensolve. -->" << endl; 
+                     //if (sdcontext_[ispin][ikp]->oncoutpe()) 
+                     //  cout << "<!-- Wavefunction::diag: using in-place data move to speed up eigensolve. -->" << endl; 
                   
                     DoubleMatrix hsq(*sdcontextsq_[ispin][ikp],c.n(),c.n(),c.nb(),c.nb());
                     if (hsq.active())
@@ -1606,8 +1607,8 @@ void Wavefunction::diag(Wavefunction& dwf, bool eigvec) {
 
                   if (copyToSquareContext)
                   {
-                    if (sdcontext_[ispin][ikp]->oncoutpe()) 
-                       cout << "<!-- Wavefunction::diag: using in-place data move to speed up eigensolve. -->" << endl; 
+                     //if (sdcontext_[ispin][ikp]->oncoutpe()) 
+                     //  cout << "<!-- Wavefunction::diag: using in-place data move to speed up eigensolve. -->" << endl; 
                     ComplexMatrix hsq(*sdcontextsq_[ispin][ikp],c.n(),c.n(),c.nb(),c.nb());
                     if (hsq.active())
                        h.copyInPlace(hsq);

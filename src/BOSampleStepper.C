@@ -817,7 +817,7 @@ void BOSampleStepper::step(int niter)
             // Update cell
             cell_stepper->update_cell();
 
-            ef_.cell_moved();
+            ef_.cell_moved(compute_stress);
             ef_.atoms_moved(); // modifications of the cell also move ions
             if (ultrasoft) {
               tmap["usfns"].start();
@@ -1834,6 +1834,7 @@ void BOSampleStepper::step(int niter)
   cd_.print_timing();
   ef_.print_timing();
   s_.wf.print_timing();
+
   // print timer map
   for ( TimerMap::iterator i = tmap.begin(); i != tmap.end(); i++ )
   {

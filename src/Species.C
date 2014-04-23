@@ -134,12 +134,12 @@ bool Species::initialize(double rcpsval)
   ndft_ *= 2;
 
   //ewd DEBUG:  try increasing accuracy of vnlg spline by extending potential out to large r
-  //const double rmax = 40.0;
-  //while (deltar_*ndft_ < rmax) 
-  //  ndft_ *= 2;
-  //if (ctxt_.oncoutpe()) 
-  //   cout << "<!-- Species " << name_ << ":  extending grid to rmax = " << rmax 
-  //       << " to increase vnlg resolution (" << ndft_ << " pts) -->" << endl;
+  const double rmax = 40.0;
+  while (deltar_*ndft_ < rmax) 
+    ndft_ *= 2;
+  if (ctxt_.oncoutpe()) 
+     cout << "<!-- Species " << name_ << ":  extending grid to rmax = " << rmax 
+         << " to increase vnlg resolution (" << ndft_ << " pts) -->" << endl;
 
   //ewd DEBUG
   //ndft_ *= 2;
