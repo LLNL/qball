@@ -3427,7 +3427,8 @@ void Wavefunction::print_casino(ostream& os, int ispin, int kk) const {
    
    }
    // pes not involved in basis print need to wait before sending data to proc 0
-   wfcontext_->barrier();  
+   if (sdctxt_active)
+      sdcontext_[ispin][kpc]->barrier();
    
    if ( onproc0 ) {
       os << "WAVE FUNCTION" << endl;
