@@ -62,13 +62,17 @@ using namespace std;
 #include "PromoteOccCmd.h"
 #include "QuitCmd.h"
 #include "RandomizeWfCmd.h"
+#include "RandomizeRealWfCmd.h"
 #include "RandomizeVelCmd.h"
 #include "RunCmd.h"
+#include "MDSaveCmd.h"
 #include "SaveCmd.h"
 #include "SavesysCmd.h"
 #include "SavedenCmd.h"
 #include "SaveESPCmd.h"
 #include "SetCmd.h"
+#include "ShiftWFCmd.h"
+#include "WFPhaseRealCmd.h"
 #include "SpeciesCmd.h"
 #include "MMSpeciesCmd.h"
 #include "EmpiricalPotentialCmd.h"
@@ -78,6 +82,7 @@ using namespace std;
 #include "ParOptCmd.h"
 #include "LockCmd.h"
 #include "UnlockCmd.h"
+#include "SetVelCmd.h"
 #include "ComputeMLWFCmd.h"
 #include "AngleCmd.h"
 #include "ConstraintCmd.h"
@@ -87,6 +92,7 @@ using namespace std;
 #include "TorsionCmd.h"
 #include "ResetVcmCmd.h"
 #include "ListConstraintsCmd.h"
+#include "PlotCmd.h"
 
 #include "AtomsDyn.h"
 #include "Cell.h"
@@ -107,6 +113,10 @@ using namespace std;
 #include "Smearing.h"
 #include "SmearingWidth.h"
 #include "FermiTemp.h"
+#include "Force_Complex_WF.h"
+#include "Non_Selfconsistent_Energy_Output.h"
+#include "TDDt.h"
+#include "NA_overlaps.h"
 #include "Dt.h"
 #include "Nempty.h"
 #include "Nrowmax.h"
@@ -123,12 +133,13 @@ using namespace std;
 #include "CenterOfMass.h"
 #include "WfDiag.h"
 #include "WfDyn.h"
+#include "WfExtrap.h"
+#include "WFPhaseRealVar.h"
 #include "Xc.h"
 #include "Nparallelkpts.h"
 #include "Nkpoints.h"
 #include "IPrint.h"
 #include "CellStepFreq.h"
-#include "ReshapeContext.h"
 #include "EnthalpyPressure.h"
 #include "EnthalpyThreshold.h"
 #include "HugoniostatVar.h"
@@ -137,6 +148,19 @@ using namespace std;
 #include "RunTimer.h"
 #include "HubbardU.h"
 #include "Memory.h"
+#include "MDIter.h"
+#include "profile.h"
+#include "MatrixLoc.h"
+#include "Pblock.h"
+#include "SaveFreq.h"
+#include "SaveDenFreq.h"
+#include "SaveWfFreq.h"
+#include "NetCharge.h"
+#include "WfInner.h"
+
+#ifdef USE_JAGGEMM
+extern "C" int setup_grid();
+#endif
 
 qbLink::qbLink() {
   ctxt = new Context();
@@ -326,6 +350,10 @@ void qbLink::init(void) {
   ui->addCmd(new UnlockCmd(s));
   ui->addCmd(new ComputeMLWFCmd(s));
   ui->addCmd(new ConstraintCmd(s));
+  ui->addCmd(new ShiftWFCmd(s));
+  ui->addCmd(new WFPhaseRealCmd(s));
+  ui->addCmd(new PlotCmd(s));
+  ui->addCmd(new ResetVcmCmd(s));
   
   ui->addVar(new AtomsDyn(s));
   ui->addVar(new Cell(s));
@@ -367,7 +395,6 @@ void qbLink::init(void) {
   ui->addVar(new Nkpoints(s));
   ui->addVar(new IPrint(s));
   ui->addVar(new CellStepFreq(s));
-  ui->addVar(new ReshapeContext(s));
   ui->addVar(new EnthalpyPressure(s));
   ui->addVar(new EnthalpyThreshold(s));
   ui->addVar(new HugoniostatVar(s));
@@ -376,6 +403,24 @@ void qbLink::init(void) {
   ui->addVar(new RunTimer(s));
   ui->addVar(new HubbardU(s));
   ui->addVar(new Memory(s));
+  ui->addVar(new MatrixLoc(s));
+  ui->addVar(new Pblock(s));
+  ui->addVar(new MDIter(s));
+  ui->addVar(new Force_Complex_WF(s));
+  ui->addVar(new Non_Selfconsistent_Energy_Output(s));
+  ui->addVar(new TDDt(s));
+  ui->addVar(new NA_overlaps(s));
+  ui->addVar(new WF_Phase_RealVar(s));
+  ui->addVar(new SaveFreq(s));
+  ui->addVar(new SaveDenFreq(s));
+  ui->addVar(new SaveWfFreq(s));
+  ui->addVar(new NetCharge(s));
+  ui->addVar(new WfInner(s));
+
+#ifdef USE_JAGGEMM
+  setup_grid();
+#endif  
+
 }
 void qbLink::cout_to_qboxlog(void) {
   cout.flush();

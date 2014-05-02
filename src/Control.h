@@ -94,6 +94,8 @@ struct Control
   double charge_mix_coeff;
   double charge_mix_rcut;
   int charge_mix_ndim;
+
+  int wf_inner; // number of inner iterations for wf steppers like DQBPCG that have inner loop inside stepper
     
   double enthalpy_pressure;
   double enthalpy_threshold;

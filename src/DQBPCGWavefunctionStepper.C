@@ -1,4 +1,3 @@
-
 ////////////////////////////////////////////////////////////////////////////////  
 // Copyright (c) 2013, Lawrence Livermore National Security, LLC. 
 // qb@ll:  Qbox at Lawrence Livermore
@@ -45,10 +44,10 @@ using namespace std;
 
 ////////////////////////////////////////////////////////////////////////////////
 DQBPCGWavefunctionStepper::DQBPCGWavefunctionStepper(Wavefunction& wf,
-                                                     Preconditioner& p,const AtomSet& atoms,
+                                                     Preconditioner& p, const int maxit, const AtomSet& atoms,
                                                      const ChargeDensity& cd_,vector<vector<double> >& v_r,
                                                      TimerMap& tmap) :
-    WavefunctionStepper(wf,tmap), prec_(p), hpsi_(wf,atoms,cd_,v_r), reswf_(wf), hreswf_(wf)
+    WavefunctionStepper(wf,tmap), prec_(p), hpsi_(wf,atoms,cd_,v_r), reswf_(wf), hreswf_(wf),maxit_(maxit)
 {
 
 
@@ -57,7 +56,7 @@ DQBPCGWavefunctionStepper::DQBPCGWavefunctionStepper(Wavefunction& wf,
 
 
  // eugene add
-  cell_moved();
+ cell_moved();
 
 }
 
@@ -78,37 +77,20 @@ void DQBPCGWavefunctionStepper::update(Wavefunction& hwf)
                // compute A = V^T H V  and descent direction HV - VA
                if ( wf_.sd(ispin,ikp)->basis().real() ) {
 
-                  for (int rr_step = 0; rr_step < 1; rr_step++)
-                  {
-
-                     const int maxit = 1;  // set max number of eigensolver iterations 
+//                  for (int rr_step = 0; rr_step < 1; rr_step++)
+//                  {
 
                      // proxy real matrices for wavefunctions and residuals
                      DoubleMatrix wf_proxy(wf_.sd(ispin,ikp)->c());
                      DoubleMatrix hwf_proxy(hwf.sd(ispin,ikp)->c());
                      DoubleMatrix res_proxy(reswf_.sd(ispin,ikp)->c());
                      DoubleMatrix hres_proxy(hreswf_.sd(ispin,ikp)->c());
-
+                     
                      // the ``conjugate direction''                   
                      DoubleMatrix p(wf_proxy.context(),wf_proxy.m(),wf_proxy.n(),
                                     wf_proxy.mb(),wf_proxy.nb());
                      DoubleMatrix hp(wf_proxy.context(),wf_proxy.m(),wf_proxy.n(),
                                      wf_proxy.mb(),wf_proxy.nb());
-
-
-                     // Create single column matrices. 
-                     // These are auxiliary objects needed to perform distributed linear algebra 
-                     // operations on columns (e.g., scalar products)
-                     
-                     //ewd:  this only puts a single matrix column on the first column of process grid
-                     //ewd:  need to replace with arrays
-                     
-                     DoubleMatrix wfcol(wf_proxy.context(),wf_proxy.m(), 1, wf_proxy.mb(),1);
-                     DoubleMatrix rescol(wf_proxy.context(),wf_proxy.m(), 1, wf_proxy.mb(),1);
-                     DoubleMatrix pcol(wf_proxy.context(),wf_proxy.m(), 1, wf_proxy.mb(),1);
-                     DoubleMatrix hwfcol(wf_proxy.context(),wf_proxy.m(), 1, wf_proxy.mb(),1);
-                     DoubleMatrix hrescol(wf_proxy.context(),wf_proxy.m(), 1, wf_proxy.mb(),1);
-                     DoubleMatrix hpcol(wf_proxy.context(),wf_proxy.m(), 1, wf_proxy.mb(),1);
 
                      // ``cross-product'' matrices
                      DoubleMatrix a(wf_proxy.context(),wf_proxy.n(),wf_proxy.n(),
@@ -120,6 +102,8 @@ void DQBPCGWavefunctionStepper::update(Wavefunction& hwf)
                      const int ngwl = wf_.sd(ispin,ikp)->basis().localsize();
                      const int nloc = wf_.sd(ispin,ikp)->c().nloc();
                      
+                     // store communication data
+                     const Context& ctxt = wf_proxy.context();
                      const int me = wf_proxy.context().myproc(); // eugene: temporary, for printing
                      cout << std::scientific;
 
@@ -127,6 +111,7 @@ void DQBPCGWavefunctionStepper::update(Wavefunction& hwf)
                      if (me==0){
                         cout << " m = " << wf_proxy.m() << " n = " << wf_proxy.n() << "mb = " << wf_proxy.mb() << "nb = " << wf_proxy.nb() << endl;
                         cout << " mloc = " << mloc << " ngwl = " << ngwl << " nloc = " << nloc << endl;
+                        cout << " nprow = " << ctxt.nprow() << " npcol = " << ctxt.npcol() << endl;
                      }
 
                      tmap_["dqbpcg_residual"].start();
@@ -141,12 +126,11 @@ void DQBPCGWavefunctionStepper::update(Wavefunction& hwf)
                      res_proxy.gemm('n','n',-1.0,wf_proxy,a,1.0);
         
                      // reswf now contains the descent direction (HV-VA)
-            
-                     //       double nrm = res_proxy.nrm2();
                      double nrm = sqrt(2.0*res_proxy.dot(res_proxy));
                      if (me == 0){ cout << "Init. residual norm est. = " << nrm   << endl; }
                   
                      tmap_["dqbpcg_residual"].stop();
+
 
                      // apply preconditioner
                      tmap_["dqbpcg_prec"].start();
@@ -174,172 +158,101 @@ void DQBPCGWavefunctionStepper::update(Wavefunction& hwf)
                      g.gemm('t','n',2.0,wf_proxy,res_proxy,0.0);
                      g.ger(-1.0,wf_proxy,0,res_proxy,0);
                      res_proxy.gemm('n','n',-1.0,wf_proxy,g,1.0);
-                  
+ 
                      // compute H*residual
                      hpsi_.compute(reswf_,hreswf_);
-
-                     // eugene: complete the initial iteration
-
 
                      // the 3-by-3 projected matrices  
                      double kmat[9], mmat[9];   
 
                      // parameters for lapack calls 
                      char jobz = 'V', uplo = 'U';
-                     double* work;
-                     double  ev[3];
-                     int itype = 1, dimp, ld, lwork, liwork, info = 0; 
-                     int* iwork;
+                     double  ev[3] = {0};
+                     int itype = 1; 
+                     int info  = 0;
 
                      // initialize parameters for separate eigensolves  
-                     dimp = 2;  // dimension of the projected problem
-                     ld   = 3;  // leading dimension for kmat and mmat  
-                     lwork  = 1 + 6*ld + 2*ld*ld;
-                     liwork = 3 + 5*ld;
-                     work   = new double[max(1,lwork)]; 
-                     iwork  = new int[max(1,liwork)]; 
-
-                     // Get pointers to values of single column matrices
-                     double* wfcol_coeff   = (double*) wfcol.valptr();
-                     double* rescol_coeff  = (double*) rescol.valptr();
-                     double* pcol_coeff    = (double*) pcol.valptr();
-                     double* hwfcol_coeff  = (double*) hwfcol.valptr();
-                     double* hrescol_coeff = (double*) hrescol.valptr();
-                     double* hpcol_coeff   = (double*) hpcol.valptr();
-          
- 
-                     // initialize the ``conjugate direction'' with the residual
-                     p  = res_proxy;
-                     hp = hres_proxy;   // ewd:  crashing here
+                     int dimp = 2;  // dimension of the projected problem
+                     int ld   = 3;  // leading dimension for kmat and mmat  
+                     int lwork  = 1 + 6*ld + 2*ld*ld;
+                     int liwork = 3 + 5*ld;
+                     double* work   = new double[max(1,lwork)]; 
+                     int* iwork  = new int[max(1,liwork)]; 
 
                      // update wavefunctions by constructing and solving 2x2 problems
                      for ( int j = 0; j < nloc; j++ ) {
 
                         // get pointer to j-th column of wf_proxy, hwf_proxy, res_proxy, and hres_proxy
-                        double* wf_coeff   =  (double*) wf_proxy.valptr(2*mloc*j);
-                        double* hwf_coeff  =  (double*) hwf_proxy.valptr(2*mloc*j);
-                        double* res_coeff  =  (double*) res_proxy.valptr(2*mloc*j);
-                        double* hres_coeff =  (double*) hres_proxy.valptr(2*mloc*j);
-
-                        // get pointer to j-th column of p and hp 
-                        double* p_coeff   =  (double*) p.valptr(2*mloc*j);
-                        double* hp_coeff  =  (double*) hp.valptr(2*mloc*j);
-                       
-
-                        // copy j-th column of wf_proxy, hwf_proxy, res_proxy, and hres_proxy to 
-                        // wfcol, hwfcol, rescol, and hrescol, respectively
-                        for ( int i = 0; i < ngwl; i++ ) {
-
-                           wfcol_coeff[2*i]    =  wf_coeff[2*i];
-                           wfcol_coeff[2*i+1]  =  wf_coeff[2*i+1];
-             
-                           hwfcol_coeff[2*i]   =  hwf_coeff[2*i];
-                           hwfcol_coeff[2*i+1] =  hwf_coeff[2*i+1];
-             
-                           rescol_coeff[2*i]   =  res_coeff[2*i];
-                           rescol_coeff[2*i+1] =  res_coeff[2*i+1];
-            
-                           hrescol_coeff[2*i]   =  hres_coeff[2*i];
-                           hrescol_coeff[2*i+1] =  hres_coeff[2*i+1];
-
-                        }
-
-                        //double dd = wfcol.dot(rescol);
-                        //if (me == 0){cout << "dot = " << 2*dd - rescol_coeff[0]*wfcol_coeff[0] << endl;}
-
+                        double* wfcol   =  (double*) wf_proxy.valptr(2*mloc*j);
+                        double* hwfcol  =  (double*) hwf_proxy.valptr(2*mloc*j);
+                        double* rescol  =  (double*) res_proxy.valptr(2*mloc*j);
+                        double* hrescol =  (double*) hres_proxy.valptr(2*mloc*j);
+                        double* pcol  =  (double*) p.valptr(2*mloc*j);
+                        double* hpcol =  (double*) hp.valptr(2*mloc*j);
 
                         // form the 2 by 2 lhs projected matrix kmat
-                    
-                        double mat_loc [9] = {0} ;
                         int ngwl2 = 2*ngwl;
                         int ione = 1;
 
-                        mat_loc[0]=2.0*ddot(&ngwl2, wfcol_coeff, &ione, hwfcol_coeff, &ione);
-                        if (me == 0){
-                           mat_loc[0] -= wfcol_coeff[0]*hwfcol_coeff[0];
+                        kmat[0]=2.0*ddot(&ngwl2, wfcol, &ione, hwfcol, &ione);
+                        if (wf_proxy.context().myrow() == 0){
+                           kmat[0] -= wfcol[0]*hwfcol[0];
                         }
                      
-                        mat_loc[1]=2.0*ddot(&ngwl2, rescol_coeff, &ione, hwfcol_coeff, &ione);
-                        if (me == 0){
-                           mat_loc[1] -= rescol_coeff[0]*hwfcol_coeff[0];
+                        kmat[1]=2.0*ddot(&ngwl2, rescol, &ione, hwfcol, &ione);
+                        if (wf_proxy.context().myrow() == 0){
+                           kmat[1] -= rescol[0]*hwfcol[0];
                         }
 
-                        mat_loc[4]=2.0*ddot(&ngwl2, rescol_coeff, &ione, hrescol_coeff, &ione);
-                        if (me == 0){
-                           mat_loc[4] -= rescol_coeff[0]*hrescol_coeff[0];
+                        kmat[4]=2.0*ddot(&ngwl2, rescol, &ione, hrescol, &ione);
+                        if (wf_proxy.context().myrow() == 0){
+                           kmat[4] -= rescol[0]*hrescol[0];
                         }
-
-                        MPI_Allreduce(mat_loc, kmat, 9, MPI_DOUBLE, MPI_SUM, wf_proxy.context().comm() ); 
 
                         kmat[3] = kmat[1];
 
-                        mat_loc[0]=2.0*ddot(&ngwl2, wfcol_coeff, &ione, wfcol_coeff, &ione);
-                        if (me == 0){
-                           mat_loc[0] -= wfcol_coeff[0]*wfcol_coeff[0];
+                        ctxt.dsum('C', 2, 2, kmat, ld);  
+ 
+                        // form the 2 by 2 rhs projected matrix mmat
+                        mmat[0]=2.0*ddot(&ngwl2, wfcol, &ione, wfcol, &ione);
+                        if (wf_proxy.context().myrow() == 0){
+                           mmat[0] -= wfcol[0]*wfcol[0];
                         }
                      
-                        mat_loc[1]=2.0*ddot(&ngwl2, rescol_coeff, &ione, wfcol_coeff, &ione);
-                        if (me == 0){
-                           mat_loc[1] -= rescol_coeff[0]*wfcol_coeff[0];
+                        mmat[1]=2.0*ddot(&ngwl2, rescol, &ione, wfcol, &ione);
+                        if (wf_proxy.context().myrow() == 0){
+                           mmat[1] -= rescol[0]*wfcol[0];
                         }
 
-                        mat_loc[4]=2.0*ddot(&ngwl2, rescol_coeff, &ione, rescol_coeff, &ione);
-                        if (me == 0){
-                           mat_loc[4] -= rescol_coeff[0]*rescol_coeff[0];
+                        mmat[4]=2.0*ddot(&ngwl2, rescol, &ione, rescol, &ione);
+                        if (wf_proxy.context().myrow() == 0){
+                           mmat[4] -= rescol[0]*rescol[0];
                         }
 
-                        MPI_Allreduce(mat_loc, mmat, 9, MPI_DOUBLE, MPI_SUM, wf_proxy.context().comm() ); 
-  
                         mmat[3] = mmat[1];
-                    
-                        /*
-                          kmat[0]  = 2.0*wfcol.dot(hwfcol);
-                          kmat[0] -= wfcol_coeff[0]*hwfcol_coeff[0];      /// !!!! <---- 
-  
-                          kmat[1]  = 2.0*rescol.dot(hwfcol);
-                          kmat[1] -= rescol_coeff[0]*hwfcol_coeff[0];   
-                          kmat[3]  = kmat[1];
-                          kmat[4]  = 2.0*rescol.dot(hrescol);
-                          kmat[4] -= rescol_coeff[0]*hrescol_coeff[0];   
 
-
-                          // form the 2 by 2 rhs projected matrix mmat
-                          mmat[0]  = 2.0*wfcol.dot(wfcol);
-                          mmat[0] -= wfcol_coeff[0]*wfcol_coeff[0];   
-                          mmat[1]  = 2.0*rescol.dot(wfcol);
-                          mmat[1] -= rescol_coeff[0]*wfcol_coeff[0];   
-                          mmat[3]  = mmat[1];
-                          mmat[4]  = 2.0*rescol.dot(rescol);
-                          mmat[4] -= rescol_coeff[0]*rescol_coeff[0];   
-                        */
+                        ctxt.dsum('C', 2, 2, mmat, ld);  
+                     
                         // Solve the 2-by-2 problem
                         dsygvd(&itype, &jobz, &uplo, &dimp, kmat, &ld, mmat, &ld, ev, work, &lwork, iwork, &liwork, &info);
                         assert ( info == 0 );
 
                         // update the conjugate direction and the wavefunction
                         for ( int i = 0; i < ngwl; i++ ) {
-                           p_coeff[2*i]  *= kmat[1]; 
-                           hp_coeff[2*i] *= kmat[1]; 
-                           p_coeff[2*i+1]  *= kmat[1]; 
-                           hp_coeff[2*i+1] *= kmat[1]; 
+                           pcol[2*i]    = rescol[2*i]*kmat[1]; 
+                           pcol[2*i+1]  = rescol[2*i+1]*kmat[1]; 
+                           hpcol[2*i]   = hrescol[2*i]*kmat[1]; 
+                           hpcol[2*i+1] = hrescol[2*i+1]*kmat[1]; 
                               
-                           wf_coeff[2*i]  = wf_coeff[2*i]*kmat[0] + p_coeff[2*i];
-                           hwf_coeff[2*i] = hwf_coeff[2*i]*kmat[0] + hp_coeff[2*i];
-                           wf_coeff[2*i+1]  = wf_coeff[2*i+1]*kmat[0] + p_coeff[2*i+1];
-                           hwf_coeff[2*i+1] = hwf_coeff[2*i+1]*kmat[0] + hp_coeff[2*i+1];
+                           wfcol[2*i]    = wfcol[2*i]*kmat[0] + pcol[2*i];
+                           wfcol[2*i+1]  = wfcol[2*i+1]*kmat[0] + pcol[2*i+1];
+                           hwfcol[2*i]   = hwfcol[2*i]*kmat[0] + hpcol[2*i];
+                           hwfcol[2*i+1] = hwfcol[2*i+1]*kmat[0] + hpcol[2*i+1];
                         }
                     
 
                      } // end for j
 
-                     //cout << " m = " << a.m() << " n = " << a.n() << "mb = " << a.mb() << "nb = " << a.nb() << endl;
-                     //cout << " mloc = " << mloc << " ngwl = " << ngwl << " nloc = " << nloc << endl;
-                     //cout << " m = " << wf_proxy.m() << " n = " << wf_proxy.n() << endl;
-                     //                 double* acoef = (double*) a.valptr();
-                     //                       for (int ii = 0; ii < 64; ii++){
-                     //                            cout << ii << endl;
-                     //                            cout << acoef[ii] << endl;
-                     //                       }
 
                      // Now orthonormalize wavefunctions using Cholesky based QR
                      a.gemm('t','n', 2.0, wf_proxy, wf_proxy, 0.0);
@@ -364,8 +277,8 @@ void DQBPCGWavefunctionStepper::update(Wavefunction& hwf)
 
                      tmap_["dqbpcg_iterloop"].start();
                
-                     // Start the main loop
-                     for (int iter=1; iter<maxit; iter++){   // loop condition to be changed
+//// !----             // Start the main loop
+                     for (int iter=1; iter<maxit_; iter++){   // loop condition to be changed
 
                         // apply preconditioner to hwf                  
                         tmap_["dqbpcg_prec"].start();
@@ -387,7 +300,6 @@ void DQBPCGWavefunctionStepper::update(Wavefunction& hwf)
                         // direction K(HV-VA)
                         tmap_["dqbpcg_prec"].stop();
 
-
                         // orthogonalize preconditioned residual against wavefunction
                         g.gemm('t','n',2.0,wf_proxy,res_proxy,0.0);
                         g.ger(-1.0,wf_proxy,0,res_proxy,0);
@@ -404,234 +316,130 @@ void DQBPCGWavefunctionStepper::update(Wavefunction& hwf)
                         hp.gemm('n','n',-1.0,hwf_proxy,g,1.0);
 
                         // inner loop
-                        // update wavefunctions by constructing and solving 2x2 problems
+                        // update wavefunctions by constructing and solving 3x3 eigenproblems
                         for ( int j = 0; j < nloc; j++ ) {
 
                            // get pointer to j-th column of wf_proxy, hwf_proxy, res_proxy, and hres_proxy
-                           double* wf_coeff   =  (double*) wf_proxy.valptr(2*mloc*j);
-                           double* hwf_coeff  =  (double*) hwf_proxy.valptr(2*mloc*j);
-                           double* res_coeff  =  (double*) res_proxy.valptr(2*mloc*j);
-                           double* hres_coeff =  (double*) hres_proxy.valptr(2*mloc*j);
-
-                           // get pointer to j-th column of p and hp 
-                           double* p_coeff   =  (double*) p.valptr(2*mloc*j);
-                           double* hp_coeff  =  (double*) hp.valptr(2*mloc*j);
-                       
-
-                           // copy j-th column of blocks to the single column matrices 
-                           for ( int i = 0; i < ngwl; i++ ) {
-
-                              wfcol_coeff[2*i]    =  wf_coeff[2*i];
-                              wfcol_coeff[2*i+1]  =  wf_coeff[2*i+1];
-             
-                              hwfcol_coeff[2*i]   =  hwf_coeff[2*i];
-                              hwfcol_coeff[2*i+1] =  hwf_coeff[2*i+1];
-             
-                              rescol_coeff[2*i]   =  res_coeff[2*i];
-                              rescol_coeff[2*i+1] =  res_coeff[2*i+1];
-            
-                              hrescol_coeff[2*i]   =  hres_coeff[2*i];
-                              hrescol_coeff[2*i+1] =  hres_coeff[2*i+1];
-
-                              pcol_coeff[2*i]   =  p_coeff[2*i];
-                              pcol_coeff[2*i+1] =  p_coeff[2*i+1];
-            
-                              hpcol_coeff[2*i]   =  hp_coeff[2*i];
-                              hpcol_coeff[2*i+1] =  hp_coeff[2*i+1];
-                           
-                           }
-
-                           /*
-                         //// normalize separate res and p columns 
-                         //double res_nrm = rescol.nrm2();
-                         //if (me == 0){
-                         //cout << hrescol_coeff[0] << endl;
-                         //cout << hrescol_coeff[1] << endl;
-                         //}
-
-                         double res_nrm = rescol.dot(rescol);
-                         res_nrm = sqrt( 2.0*res_nrm - rescol_coeff[0]*rescol_coeff[0] ) ; 
-                         rescol *=  1/res_nrm; 
-                         hrescol *= 1/res_nrm; 
-
-
-                      
-                         //             res_nrm = rescol.nrm2();
-                         //             res_nrm = sqrt( 2.0*res_nrm*res_nrm - rescol_coeff[0]*rescol_coeff[0] ) ; 
-                         //             if (me == 0){cout << res_nrm << endl;}                   
- 
-                         //double p_nrm = rescol.nrm2();
-                         // p_nrm = sqrt( 2.0*p_nrm*p_nrm - pcol_coeff[0]*pcol_coeff[0] ) ; 
-                         // finish normalization of p vectors....
-
-                         // Copy the normalized column back to res_proxy and hres_proxy 
-                         for ( int i = 0; i < ngwl; i++ ) {
-             
-                         res_coeff[2*i] = rescol_coeff[2*i];
-                         res_coeff[2*i+1] = rescol_coeff[2*i+1];  
-                         hres_coeff[2*i] =  hrescol_coeff[2*i];
-                         hres_coeff[2*i+1] = hrescol_coeff[2*i+1];
-
-                         //              pcol_coeff[2*i]   =  p_coeff[2*i];
-                         //              pcol_coeff[2*i+1] =  p_coeff[2*i+1];
-            
-                         //              hpcol_coeff[2*i]   =  hp_coeff[2*i];
-                         //              hpcol_coeff[2*i+1] =  hp_coeff[2*i+1];
-                           
-                         }
-                         //// end normalize separate res and p columns 
-                         */
-
-                           //double dd = wfcol.dot(rescol);
-                           //double ddp = wfcol.dot(pcol);
-                           //if (me == 0){cout << "dot = " << 2*dd - rescol_coeff[0]*wfcol_coeff[0] << endl;}
-                           //if (me == 0){cout << "pdot = " << 2*ddp - pcol_coeff[0]*wfcol_coeff[0] << endl;}
-                       
-                           double mat_loc [9] = {0} ;
+                           double* wfcol   =  (double*) wf_proxy.valptr(2*mloc*j);
+                           double* hwfcol  =  (double*) hwf_proxy.valptr(2*mloc*j);
+                           double* rescol  =  (double*) res_proxy.valptr(2*mloc*j);
+                           double* hrescol =  (double*) hres_proxy.valptr(2*mloc*j);
+                           double* pcol  =  (double*) p.valptr(2*mloc*j);
+                           double* hpcol =  (double*) hp.valptr(2*mloc*j);
+         
+                          // EV: Normalizing rescol and pcol can be added here if needed (haven't observe any benefit)
+                     
                            int ngwl2 = 2*ngwl;
                            int ione = 1;
 
-                           mat_loc[0]=2.0*ddot(&ngwl2, wfcol_coeff, &ione, hwfcol_coeff, &ione);
-                           if (me == 0){
-                              mat_loc[0] -= wfcol_coeff[0]*hwfcol_coeff[0];
-                           }
-                     
-                           mat_loc[1]=2.0*ddot(&ngwl2, rescol_coeff, &ione, hwfcol_coeff, &ione);
-                           if (me == 0){
-                              mat_loc[1] -= rescol_coeff[0]*hwfcol_coeff[0];
-                           }
-
-                           mat_loc[2]=2.0*ddot(&ngwl2, pcol_coeff, &ione, hwfcol_coeff, &ione);
-                           if (me == 0){
-                              mat_loc[2] -= pcol_coeff[0]*hwfcol_coeff[0];
-                           }
-
-
-
-                           mat_loc[4]=2.0*ddot(&ngwl2, rescol_coeff, &ione, hrescol_coeff, &ione);
-                           if (me == 0){
-                              mat_loc[4] -= rescol_coeff[0]*hrescol_coeff[0];
-                           }
-
-                           mat_loc[5]=2.0*ddot(&ngwl2, pcol_coeff, &ione, hrescol_coeff, &ione);
-                           if (me == 0){
-                              mat_loc[5] -= pcol_coeff[0]*hrescol_coeff[0];
-                           }
-
-                           mat_loc[8]=2.0*ddot(&ngwl2, pcol_coeff, &ione, hpcol_coeff, &ione);
-                           if (me == 0){
-                              mat_loc[5] -= pcol_coeff[0]*hpcol_coeff[0];
-                           }
-
-
-                           MPI_Allreduce(mat_loc, kmat, 9, MPI_DOUBLE, MPI_SUM, wf_proxy.context().comm() ); 
-                           kmat[3] = kmat[1];
-                           kmat[6]  = kmat[2];
-                           kmat[7]  = kmat[5];
-
-
-                           mat_loc[0]=2.0*ddot(&ngwl2, wfcol_coeff, &ione, wfcol_coeff, &ione);
-                           if (me == 0){
-                              mat_loc[0] -= wfcol_coeff[0]*wfcol_coeff[0];
-                           }
-                     
-                           mat_loc[1]=2.0*ddot(&ngwl2, rescol_coeff, &ione, wfcol_coeff, &ione);
-                           if (me == 0){
-                              mat_loc[1] -= rescol_coeff[0]*wfcol_coeff[0];
-                           }
-
-
-                           mat_loc[2]=2.0*ddot(&ngwl2, pcol_coeff, &ione, wfcol_coeff, &ione);
-                           if (me == 0){
-                              mat_loc[2] -= pcol_coeff[0]*wfcol_coeff[0];
-                           }
-
-
-                           mat_loc[4]=2.0*ddot(&ngwl2, rescol_coeff, &ione, rescol_coeff, &ione);
-                           if (me == 0){
-                              mat_loc[4] -= rescol_coeff[0]*rescol_coeff[0];
-                           }
-
-
-                           mat_loc[5]=2.0*ddot(&ngwl2, pcol_coeff, &ione, rescol_coeff, &ione);
-                           if (me == 0){
-                              mat_loc[5] -= pcol_coeff[0]*rescol_coeff[0];
-                           }
-
-                           mat_loc[8]=2.0*ddot(&ngwl2, pcol_coeff, &ione, pcol_coeff, &ione);
-                           if (me == 0){
-                              mat_loc[5] -= pcol_coeff[0]*pcol_coeff[0];
-                           }
-
-
-
-                           MPI_Allreduce(mat_loc, mmat, 9, MPI_DOUBLE, MPI_SUM, wf_proxy.context().comm() ); 
-                           mmat[3] = mmat[1];
-                           mmat[6]  = mmat[2];
-                           mmat[7]  = mmat[5];
-
-
-                           /*
                            // form the 3 by 3 lhs projected matrix kmat
-                           kmat[0]  = 2.0*wfcol.dot(hwfcol);
-                           kmat[0] -= wfcol_coeff[0]*hwfcol_coeff[0];   
-                           kmat[1]  = 2.0*rescol.dot(hwfcol);
-                           kmat[1] -= rescol_coeff[0]*hwfcol_coeff[0];   
-                           kmat[2]  = 2.0*pcol.dot(hwfcol);
-                           kmat[2] -= pcol_coeff[0]*hwfcol_coeff[0]; 
+                           kmat[0]=2.0*ddot(&ngwl2, wfcol, &ione, hwfcol, &ione);
+                           if (wf_proxy.context().myrow() == 0){
+                              kmat[0] -= wfcol[0]*hwfcol[0];
+                           }
+                     
+                           kmat[1]=2.0*ddot(&ngwl2, rescol, &ione, hwfcol, &ione);
+                           if (wf_proxy.context().myrow() == 0){
+                              kmat[1] -= rescol[0]*hwfcol[0];
+                           }
 
-                           kmat[3]  = kmat[1];
-                           kmat[4]  = 2.0*rescol.dot(hrescol);
-                           kmat[4] -= rescol_coeff[0]*hrescol_coeff[0];   
-                           kmat[5]  = 2.0*pcol.dot(hrescol);
-                           kmat[5] -= pcol_coeff[0]*hrescol_coeff[0]; 
+                           kmat[2]=2.0*ddot(&ngwl2, pcol, &ione, hwfcol, &ione);
+                           if (wf_proxy.context().myrow() == 0){
+                              kmat[2] -= pcol[0]*hwfcol[0];
+                           }
 
-                           kmat[6]  = kmat[2];
-                           kmat[7]  = kmat[5];
-                           kmat[8]  = 2.0*pcol.dot(hpcol);
-                           kmat[8] -= pcol_coeff[0]*hpcol_coeff[0]; 
+                          
+                           kmat[4]=2.0*ddot(&ngwl2, rescol, &ione, hrescol, &ione);
+                           if (wf_proxy.context().myrow() == 0){
+                              kmat[4] -= rescol[0]*hrescol[0];
+                           }
+
+                           kmat[5]=2.0*ddot(&ngwl2, pcol, &ione, hrescol, &ione);
+                           if (wf_proxy.context().myrow() == 0){
+                              kmat[5] -= pcol[0]*hrescol[0];
+                           }
+
+                           kmat[8]=2.0*ddot(&ngwl2, pcol, &ione, hpcol, &ione);
+                           if (wf_proxy.context().myrow() == 0){
+                              kmat[8] -= pcol[0]*hpcol[0];
+                           }
+                       
+                           kmat[3] = kmat[1];
+                           kmat[6] = kmat[2];
+                           kmat[7] = kmat[5];
+
+                           ctxt.dsum('C', 3, 3, kmat, ld);  
+
+                          // form the 3 by 3 rhs projected matrix mmat
+                           mmat[0]=2.0*ddot(&ngwl2, wfcol, &ione, wfcol, &ione);
+                           if (wf_proxy.context().myrow() == 0){
+                              mmat[0] -= wfcol[0]*wfcol[0];
+                           }
+                     
+                           mmat[1]=2.0*ddot(&ngwl2, rescol, &ione, wfcol, &ione);
+                           if (wf_proxy.context().myrow() == 0){
+                              mmat[1] -= rescol[0]*wfcol[0];
+                           }
+
+                           mmat[2]=2.0*ddot(&ngwl2, pcol, &ione, wfcol, &ione);
+                           if (wf_proxy.context().myrow() == 0){
+                              mmat[2] -= pcol[0]*wfcol[0];
+                           }
+
+                           mmat[4]=2.0*ddot(&ngwl2, rescol, &ione, rescol, &ione);
+                           if (wf_proxy.context().myrow() == 0){
+                              mmat[4] -= rescol[0]*rescol[0];
+                           }
+
+                           mmat[5]=2.0*ddot(&ngwl2, pcol, &ione, rescol, &ione);
+                           if (wf_proxy.context().myrow() == 0){
+                              mmat[5] -= pcol[0]*rescol[0];
+                           }
+
+                           mmat[8]=2.0*ddot(&ngwl2, pcol, &ione, pcol, &ione);
+                           if (wf_proxy.context().myrow() == 0){
+                              mmat[8] -= pcol[0]*pcol[0];
+                           }
+
+                           mmat[3] = mmat[1];
+                           mmat[6] = mmat[2];
+                           mmat[7] = mmat[5];
+
+                           ctxt.dsum('C', 3, 3, mmat, ld);  
 
 
-                           // form the 3 by 3 rhs projected matrix mmat
-                           mmat[0]  = 2.0*wfcol.dot(wfcol);
-                           mmat[0] -= wfcol_coeff[0]*wfcol_coeff[0];   
-                           mmat[1]  = 2.0*rescol.dot(wfcol);
-                           mmat[1] -= rescol_coeff[0]*wfcol_coeff[0];   
-                           mmat[2]  = 2.0*pcol.dot(wfcol);
-                           mmat[2] -= pcol_coeff[0]*wfcol_coeff[0]; 
+//if (me == 0){
+//   cout << "kmat: " << endl;
+//   cout << kmat[0] << " " << kmat[3] << endl;
+//   cout << kmat[1] << " " << kmat[4] << endl;
+//   cout << "mmat: " << endl;
+//   cout << mmat[0] << " " << mmat[3] << endl;
+//   cout << mmat[1] << " " << mmat[4] << endl;
+//}
 
 
-                           mmat[3]  = mmat[1];
-                           mmat[4]  = 2.0*rescol.dot(rescol);
-                           mmat[4] -= rescol_coeff[0]*rescol_coeff[0];   
-                           mmat[5]  = 2.0*pcol.dot(rescol);
-                           mmat[5] -= pcol_coeff[0]*rescol_coeff[0]; 
 
-
-                           mmat[6]  = mmat[2];
-                           mmat[7]  = mmat[5];
-                           mmat[8]  = 2.0*pcol.dot(pcol);
-                           mmat[8] -= pcol_coeff[0]*pcol_coeff[0]; 
-                           */
 
                            // Solve the 3-by-3 problem
                            dimp = 3;
                            dsygvd(&itype, &jobz, &uplo, &dimp, kmat, &ld, mmat, &ld, ev, work, &lwork, iwork, &liwork, &info);
                            assert ( info == 0 );
-                           //if (me==0){cout << ev[0] << " " << ev[1] << " " << ev[2] << endl;}
+//if (me == 0){cout << "ev = " << ev[0] << "    " << ev[1] << endl;}
+
                            // update the conjugate direction and the wavefunction
                            for ( int i = 0; i < ngwl; i++ ) {
-                              p_coeff[2*i]  =   kmat[1]*res_coeff[2*i] +  kmat[2]*p_coeff[2*i]; 
-                              hp_coeff[2*i] =   kmat[1]*hres_coeff[2*i] +  kmat[2]*hp_coeff[2*i]; 
-                              p_coeff[2*i+1]  =  kmat[1]*res_coeff[2*i+1] +  kmat[2]*p_coeff[2*i+1]; 
-                              hp_coeff[2*i+1] =  kmat[1]*hres_coeff[2*i+1] + kmat[2]*hp_coeff[2*i+1]; 
                               
-                              wf_coeff[2*i]  = wf_coeff[2*i]*kmat[0] + p_coeff[2*i];
-                              hwf_coeff[2*i] = hwf_coeff[2*i]*kmat[0] + hp_coeff[2*i];
-                              wf_coeff[2*i+1]  = wf_coeff[2*i+1]*kmat[0] + p_coeff[2*i+1];
-                              hwf_coeff[2*i+1] = hwf_coeff[2*i+1]*kmat[0] + hp_coeff[2*i+1];
+                              pcol[2*i]    =  kmat[1]*rescol[2*i]  +  kmat[2]*pcol[2*i]; 
+                              pcol[2*i+1]  =  kmat[1]*rescol[2*i+1] +  kmat[2]*pcol[2*i+1]; 
+                              hpcol[2*i]   =  kmat[1]*hrescol[2*i] +  kmat[2]*hpcol[2*i]; 
+                              hpcol[2*i+1] =  kmat[1]*hrescol[2*i+1] + kmat[2]*hpcol[2*i+1];
+ 
+                              wfcol[2*i]    = wfcol[2*i]*kmat[0] + pcol[2*i];
+                              wfcol[2*i+1]  = wfcol[2*i+1]*kmat[0] + pcol[2*i+1];
+                              hwfcol[2*i]   = hwfcol[2*i]*kmat[0] + hpcol[2*i];
+                              hwfcol[2*i+1] = hwfcol[2*i+1]*kmat[0] + hpcol[2*i+1];
+
                            }
-                    
 
                         } // end for j
 
@@ -641,10 +449,6 @@ void DQBPCGWavefunctionStepper::update(Wavefunction& hwf)
                         a.potrf('U');
                         wf_proxy.trsm('r', 'U', 'n', 'n', 1.0, a);
                         hwf_proxy.trsm('r', 'U', 'n', 'n', 1.0, a);
-                        ///begin????
-                        //                    p.trsm('r', 'U', 'n', 'n', 1.0, a);
-                        //                    hp.trsm('r', 'U', 'n', 'n', 1.0, a);
-                        ///end????
 
                         // Compute new residual
                         a.gemm('t','n',2.0, wf_proxy,hwf_proxy,0.0);
@@ -653,7 +457,7 @@ void DQBPCGWavefunctionStepper::update(Wavefunction& hwf)
                         res_proxy = hwf_proxy;
                         res_proxy.gemm('n','n',-1.0,wf_proxy,a,1.0);
 
-                        //                    nrm = res_proxy.nrm2();
+                        // Print out Frob. norm estimate at this iteration
                         nrm = sqrt(2.0*res_proxy.dot(res_proxy));
                         if (me == 0){ cout << "Iteration = " << iter+1 <<  ". Residual norm est. = " <<  nrm  << endl; }
 
@@ -665,101 +469,162 @@ void DQBPCGWavefunctionStepper::update(Wavefunction& hwf)
                      tmap_["dqbpcg_iterloop"].stop();
                   
 
-                     tmap_["dqbpcg_rr"].start();
-                     //   hpsi_.compute(wf_,hwf);
- 
-                     // The Rayleigh-Ritz procedure
-                     a.gemm('t','n',2.0, wf_proxy,hwf_proxy,0.0);
-                     a.ger(-1.0,wf_proxy,0,hwf_proxy,0);
+//------------- The RR procedure comment begin !!!!! ------------------------------------------
+//                     tmap_["dqbpcg_rr"].start();
+//
+//
+//
+// 
+//                     // The Rayleigh-Ritz procedure
+//                     a.gemm('t','n',2.0, wf_proxy,hwf_proxy,0.0);
+//                     a.ger(-1.0,wf_proxy,0,hwf_proxy,0);
+//
+//                
+////ev                     g.gemm('t','n',2.0, wf_proxy,wf_proxy,0.0);
+////ev                     g.ger(-1.0,wf_proxy,0,wf_proxy,0);
+////ev
+////ev                     // Transform to standard eigenvalue problem
+////ev                     g.potrf('U');
+////ev                     a.sygst(1,'U', g);
+//                  
+//
+//                     // Eigenvectors and eigenvalues of the reduced problem
+//                     DoubleMatrix z(wf_proxy.context(),wf_proxy.n(),wf_proxy.n(),
+//                                    wf_proxy.nb(),wf_proxy.nb());
+//                     valarray<double> evalues(z.m());
+//
+//                     a.syevd('U', evalues, z);
+////ev                     z.trsm('l', 'U', 'n', 'n', 1.0, g);
+//
+////ev                     p.gemm('n','n',1.0,wf_proxy, z,0.0);
+////ev                     hp.gemm('n','n',1.0,hwf_proxy, z,0.0);
+////ev                     wf_proxy = p;
+////ev                     hwf_proxy = hp;
+//// use res_proxy and hres_proxy as temporary variables
+//                     res_proxy.gemm('n','n',1.0,wf_proxy, z,0.0);
+//                     hres_proxy.gemm('n','n',1.0,hwf_proxy, z,0.0);
+//                     wf_proxy = res_proxy;
+//                     hwf_proxy = hres_proxy;
+//
+//
+//
+//
+//
+////// check orthogonality
+///*
+//                     g.gemm('t','n',2.0,wf_proxy,res_proxy,0.0);
+//                     g.ger(-1.0,wf_proxy,0,res_proxy,0);
+//                     double* gc = (double*) g.valptr();
+//                     if (me == 0){
+//                        for (int i = 0; i<8; i++){ 
+//                          for (int j = 0; j<8;j++){
+//                             cout << gc[8*i+j] << " ";
+//                          }
+//                          cout << endl; 
+//                        }
+//                       cout << endl; 
+//                     }
+//
+//                     g.gemm('t','n',2.0,wf_proxy,wf_proxy,0.0);
+//                     g.ger(-1.0,wf_proxy,0,wf_proxy,0);
+//                     double* gc = (double*) g.valptr();
+//                     if (me == 0){
+//                        for (int i = 0; i<8; i++){ 
+//                          for (int j = 0; j<8;j++){
+//                             cout << gc[8*i+j] << " ";
+//                          }
+//                          cout << endl; 
+//                        }
+//                     }
+//*/
+///////////// end check                      
 
-                
-                     g.gemm('t','n',2.0, wf_proxy,wf_proxy,0.0);
-                     g.ger(-1.0,wf_proxy,0,wf_proxy,0);
-
-                     // Transform to standard eigenvalue problem
-                     g.potrf('U');
-                     a.sygst(1,'U', g);
-                  
-
-                     // Eigenvectors and eigenvalues of the reduced problem
-                     DoubleMatrix z(wf_proxy.context(),wf_proxy.n(),wf_proxy.n(),
-                                    wf_proxy.nb(),wf_proxy.nb());
-                     valarray<double> evalues(z.m());
-
-                     a.syevd('U', evalues, z);
-                     z.trsm('l', 'U', 'n', 'n', 1.0, g);
-
-                     p.gemm('n','n',1.0,wf_proxy, z,0.0);
-                     hp.gemm('n','n',1.0,hwf_proxy, z,0.0);
-                     wf_proxy = p;
-                     hwf_proxy = hp;
-
-                     ///////
-                     // Compute new residual
-                     //                 a.gemm('t','n',2.0, wf_proxy,hwf_proxy,0.0);
-                     //                 a.ger(-1.0,wf_proxy,0,hwf_proxy,0);
-                     //         
-                     //                 res_proxy = hwf_proxy;
-                     //                 res_proxy.gemm('n','n',-1.0,wf_proxy,a,1.0);
-                     // New code begin
-                     for ( int j = 0; j < nloc; j++ ) {
-
-                        // get pointer to j-th column of wf_proxy, hwf_proxy, res_proxy, and hres_proxy
-                        double* wf_coeff   =  (double*) wf_proxy.valptr(2*mloc*j);
-                        double* hwf_coeff  =  (double*) hwf_proxy.valptr(2*mloc*j);
-                        double* res_coeff  =  (double*) res_proxy.valptr(2*mloc*j);
-
-                        // Copy the normalized column back to res_proxy and hres_proxy 
-                        for ( int i = 0; i < ngwl; i++ ) {
-             
-                           res_coeff[2*i] =   hwf_coeff[2*i] - wf_coeff[2*i]*evalues[j];
-                           res_coeff[2*i+1] =  hwf_coeff[2*i+1] - wf_coeff[2*i+1]*evalues[j];
-                           
-                        }
-                     }
-                     // New code end
-                
 
 
+/////////////
+//const double eigenvalue_sum = wf_.dot(hwf);
+//if (me == 0){
+//   double es = 0;
+//   for (int j = 0; j<8; j++){
+//     es += evalues[j]; 
+//   }
+//cout << "Evalues sum = " << es << endl;
+//cout << "Evalues sum check = " << eigenvalue_sum << endl;
+//
+//}
+//
+////////////
 
-                     //                    nrm = res_proxy.nrm2();
-                     //                    if (me == 0){ cout << "Final Residual norm = " <<  nrm  << endl; }
-                     //
-                     ////  --- Print out individual residuals
-                     //
-                     double nrms [8];
-                     for (int jj = 0; jj<8; jj++){
-
-                        double* res_coeff  =  (double*) res_proxy.valptr(2*mloc*jj);
-                        for ( int i = 0; i < ngwl; i++ ) {
-                           rescol_coeff[2*i]   =  res_coeff[2*i];
-                           rescol_coeff[2*i+1] =  res_coeff[2*i+1];
-                        }
-                        nrms[jj] = rescol.nrm2();
-                     } 
-
-                     if (me == 0){
-                        for (int jj = 0; jj < 8; jj++){ 
-                           cout << "Eigenvalue " << jj+1 << "= " <<  evalues[jj] << ". Res. = " << nrms[jj] << endl;
-                        }
-                     }
-
-                     ///////
- 
-                     tmap_["dqbpcg_rr"].stop();
-
+//                     ///////
+//                     // Compute new residual
+//                     //                 a.gemm('t','n',2.0, wf_proxy,hwf_proxy,0.0);
+//                     //                 a.ger(-1.0,wf_proxy,0,hwf_proxy,0);
+//                     //         
+//                     //                 res_proxy = hwf_proxy;
+//                     //                 res_proxy.gemm('n','n',-1.0,wf_proxy,a,1.0);
+//                     // New code begin
+//                     for ( int j = 0; j < nloc; j++ ) {
+//
+//                        // get pointer to j-th column of wf_proxy, hwf_proxy, res_proxy, and hres_proxy
+//                        double* wf_coeff   =  (double*) wf_proxy.valptr(2*mloc*j);
+//                        double* hwf_coeff  =  (double*) hwf_proxy.valptr(2*mloc*j);
+//                        double* res_coeff  =  (double*) res_proxy.valptr(2*mloc*j);
+//
+//                        // Copy the normalized column back to res_proxy and hres_proxy 
+//                        for ( int i = 0; i < ngwl; i++ ) {
+//             
+//                           res_coeff[2*i] =   hwf_coeff[2*i] - wf_coeff[2*i]*evalues[j];
+//                           res_coeff[2*i+1] =  hwf_coeff[2*i+1] - wf_coeff[2*i+1]*evalues[j];
+//                           
+//                        }
+//                     }
+//                     // New code end
+//                
+//
+//
+//
+//                     //                    nrm = res_proxy.nrm2();
+//                     //                    if (me == 0){ cout << "Final Residual norm = " <<  nrm  << endl; }
+//                     //
+//                     ////  --- Print out individual residuals
+//                     //
+//                     int ngwl2 = 2*ngwl;
+//                     int ione = 1;
+//                     double loc_nrms [8];
+//                     double nrms [8];
+//                     for (int jj = 0; jj<8; jj++){
+//                        double* rescol  =  (double*) res_proxy.valptr(2*mloc*jj);
+//                        loc_nrms[jj]=2.0*ddot(&ngwl2, rescol, &ione, rescol, &ione);
+////                        if (me == 0){
+//                        if (wf_proxy.context().myrow() == 0){
+//                           loc_nrms[jj] -= rescol[0]*rescol[0];
+//                        }
+//                     }
+//
+//                    MPI_Allreduce(loc_nrms, nrms, 8, MPI_DOUBLE, MPI_SUM, wf_proxy.context().comm() ); 
+//                      
+// 
+//                     if (me == 0){
+//                        for (int jj = 0; jj < 8; jj++){ 
+//                           cout << "Eigenvalue " << jj+1 << "= " <<  evalues[jj] << ". Res. = " << nrms[jj] << endl;
+//                        }
+//                     }
+//
+//
+//             
+//
+//
+//                     /////// iend Print out --- needs to be redone
+// 
+ //                    tmap_["dqbpcg_rr"].stop();
+//
 
                 
                      delete [] work;
                      delete [] iwork;
-                     if (me == 0) {cout << "rr_step = " << rr_step << endl;}
+//                     if (me == 0) {cout << "rr_step = " << rr_step << endl;}
 
-                  } /// end RR STEP
-
-
-
-
-
+//                  } /// end RR STEP
 
                   
                }

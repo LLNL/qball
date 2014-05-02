@@ -212,6 +212,12 @@ void BOSampleStepper::step(int niter)
     }
     return;
   }
+
+  //ewd DQBPCG requires preprocessing even when charge mixing not used
+  if (wf_dyn == "DQBPCG" && nite_ == 0)
+  {
+     nite_ = 1;
+  }
   
   const bool extrapolate_wf = (atoms_dyn == "MD" && s_.ctrl.wf_extrap != "OFF");
   Wavefunction* wfmm;
@@ -287,7 +293,8 @@ void BOSampleStepper::step(int niter)
   else if ( wf_dyn == "JD" )
     wf_stepper = new JDWavefunctionStepper(wf,*preconditioner,ef_,tmap);  
   else if ( wf_dyn == "DQBPCG" )
-     wf_stepper = new DQBPCGWavefunctionStepper(wf,*preconditioner,atoms,cd_,ef_.v_r,tmap);  
+     wf_stepper = new DQBPCGWavefunctionStepper(wf,*preconditioner,s_.ctrl.wf_inner,atoms,cd_,ef_.v_r,tmap);  
+
   // wf_stepper == 0 indicates that wf_dyn == LOCKED
 
   IonicStepper* ionic_stepper = 0;

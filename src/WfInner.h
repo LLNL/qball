@@ -22,43 +22,55 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 //
-// DQBPCGWavefunctionStepper.h
+// WfInner.h
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef DQBPCGWAVEFUNCTIONSTEPPER_H
-#define DQBPCGWAVEFUNCTIONSTEPPER_H
+#ifndef WFINNER_H
+#define WFINNER_H
 
-#include "WavefunctionStepper.h"
+#include<iostream>
+#include<iomanip>
+#include<sstream>
+#include<stdlib.h>
+
+#include "Sample.h"
 #include "Wavefunction.h"
-#include "HPsi.h"
-class Preconditioner;
-class AtomSet;
-class ChargeDensity;
+#include "SlaterDet.h"
 
-class DQBPCGWavefunctionStepper : public WavefunctionStepper
+class WfInner : public Var
 {
-  private:
+  Sample *s;
 
-  Preconditioner& prec_;
-  HPsi hpsi_;
-  Wavefunction reswf_,hreswf_;
-  int maxit_;
-  
-  int nkp_;
-  int nspin_;
-  
   public:
 
-  void cell_moved(void);
-  void update(Wavefunction& dwf);
-  virtual void preprocess(void)
+  char *name ( void ) const { return "wf_inner"; };
+
+  int set ( int argc, char **argv )
   {
+    if ( argc != 2 )
+    {
+      if ( ui->oncoutpe() )
+      cout << " <ERROR> wf_inner takes only one value </ERROR>" << endl;
+      return 1;
+    }
+    
+    int v = atoi(argv[1]);
+    s->ctrl.wf_inner = v;
+
+    return 0;
   }
 
-  DQBPCGWavefunctionStepper(Wavefunction& wf, Preconditioner& p, const int maxit,
-                            const AtomSet& atoms, const ChargeDensity& cd_,
-                            vector<vector<double> >& v_r, TimerMap& tmap);
-  ~DQBPCGWavefunctionStepper() {};
+  string print (void) const
+  {
+     ostringstream st;
+     st.setf(ios::left,ios::adjustfield);
+     st << setw(10) << name() << " = ";
+     st.setf(ios::right,ios::adjustfield);
+     st << setw(10) << s->ctrl.wf_inner;
+     return st.str();
+  }
+
+  WfInner(Sample *sample) : s(sample) { s->ctrl.wf_inner = 5;};
 };
 #endif
