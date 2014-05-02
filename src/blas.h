@@ -58,6 +58,7 @@ using namespace std;
 #define dscal  dscal_  
 #define dsysv  dsysv_
 #define dsyev  dsyev_  
+#define dsygvd  dsygvd_  
 #define zdscal zdscal_ 
 #define idamax idamax_ 
 #define dvea   dvea_   
@@ -116,6 +117,8 @@ void zgerc(int *,int *, complex<double> *, complex<double> *, int *,
 void dscal(int *len, double *alpha, double *x, int *incx);
 double dasum(int *len, double *x, int *incx);
 int idamax(int *len, double *x, int *incx);
+void dsygvd(int*, char*, char*, int*, double*, int*, double*, int*,
+            double*, double*, int*, int*, int*, int*);
 void dsyev(char *c1,char *c2,int *n, 
 double *a,int *lda, double *wr,
 double *wrk,int *lwrk, int *ierr);

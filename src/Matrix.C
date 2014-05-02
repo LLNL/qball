@@ -1418,6 +1418,13 @@ DoubleMatrix& DoubleMatrix::operator=(const DoubleMatrix& a)
 {
   if ( this == &a ) return *this;
 
+  //ewd DEBUG
+  if ( a.ictxt() != ictxt_ || a.m() != m_ || a.mb() != mb_ || 
+          a.n() != n_ || a.nb() != nb_ )
+     cout << "MATRIX COPY ERROR!!" << endl;
+  MPI_Barrier(MPI_COMM_WORLD);
+  //ewd DEBUG
+  
   // operator= works only for matrices having same distribution on same context
   assert( a.ictxt() == ictxt_ && a.m() == m_ && a.mb() == mb_ && 
           a.n() == n_ && a.nb() == nb_ );
