@@ -1,4 +1,25 @@
 ------------------------------------------------------------------------
+r174 | draeger | 2014-04-24 14:34:42 -0700 (Thu, 24 Apr 2014) | 4 lines
+
+
+Modified save -casino to improve performance when many k-points are used.
+
+
+------------------------------------------------------------------------
+r173 | draeger | 2014-04-23 11:09:26 -0700 (Wed, 23 Apr 2014) | 4 lines
+
+
+Avoid allocating dtwnl arrays when stress variable not defined.
+
+
+------------------------------------------------------------------------
+r172 | draeger | 2014-04-15 17:37:15 -0700 (Tue, 15 Apr 2014) | 4 lines
+
+
+Bug fix to square context copy code when nkpts > 1.
+
+
+------------------------------------------------------------------------
 r171 | draeger | 2014-04-15 15:47:58 -0700 (Tue, 15 Apr 2014) | 4 lines
 
 

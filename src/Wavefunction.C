@@ -1591,10 +1591,9 @@ void Wavefunction::diag(Wavefunction& dwf, bool eigvec) {
                       //h.syev('l',w);
                     }
 #endif
-                    
-                    // set eigenvalues in SlaterDet
-                    sd(ispin,kp)->set_eig(w);
                   }
+                  // set eigenvalues in SlaterDet
+                  sd(ispin,kp)->set_eig(w);
                 }
                 else {
                   ComplexMatrix& c = sd(ispin,kp)->c();
