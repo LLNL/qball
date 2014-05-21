@@ -306,7 +306,9 @@ void DQBPCGWavefunctionStepper::update(Wavefunction& hwf)
                         res_proxy.gemm('n','n',-1.0,wf_proxy,g,1.0);
                   
                         // compute H*residual
+                        tmap_["dqbpcg_hpsi"].start();
                         hpsi_.compute(reswf_,hreswf_);
+                        tmap_["dqbpcg_hpsi"].stop();
 
   
                         // orthogonalize conjugate direction  against wavefunction
@@ -444,11 +446,13 @@ void DQBPCGWavefunctionStepper::update(Wavefunction& hwf)
                         } // end for j
 
                         // Orthogonalize wavefunctions
+                        tmap_["dqbpcg_ortho"].start();
                         a.gemm('t','n', 2.0, wf_proxy, wf_proxy, 0.0);
                         a.ger(-1.0, wf_proxy,0, wf_proxy,0);
                         a.potrf('U');
                         wf_proxy.trsm('r', 'U', 'n', 'n', 1.0, a);
                         hwf_proxy.trsm('r', 'U', 'n', 'n', 1.0, a);
+                        tmap_["dqbpcg_ortho"].stop();
 
                         // Compute new residual
                         a.gemm('t','n',2.0, wf_proxy,hwf_proxy,0.0);
@@ -465,7 +469,31 @@ void DQBPCGWavefunctionStepper::update(Wavefunction& hwf)
                      } //end main loop
 
 
-
+                     //ewd DEBUG:  calculate eigenvalues
+                     if (false)
+                     {
+                        DoubleMatrix h(wf_proxy.context(),wf_proxy.n(),wf_proxy.n(),
+                                       wf_proxy.nb(),wf_proxy.nb());
+                        valarray<double> w(h.m());
+                        h.gemm('t','n',2.0,wf_proxy,hwf_proxy,0.0);
+                        h.ger(-1.0,wf_proxy,0,hwf_proxy,0);
+                        h.syevd('l',w);
+                        if (me == 0)
+                        {
+                           int neig = wf_proxy.n();
+                           const double eVolt = 2.0 * 13.6056923;
+                           const int neig_line = 8;
+                           cout <<    "DEBUG, wfstepper eigenvalues" << endl;
+                           for ( int i = 0; i < neig; i++ ) {
+                              cout << w[i]*eVolt;
+                              if ( i%neig_line == neig_line-1 ) cout << endl;
+                           }
+                           if ( neig%neig_line != 0 ) cout << endl;
+                           
+                        }
+                     }
+                     //ewd DEBUG
+                     
                      tmap_["dqbpcg_iterloop"].stop();
                   
 
@@ -698,12 +726,23 @@ void DQBPCGWavefunctionStepper::update(Wavefunction& hwf)
                }
                // eugene: Run the inner loop
 
-               
-
-
 
             }
          }
       }
    }
+
+   //ewd DEBUG
+   //wf_.diag(hwf,true);
+   //wf_.printeig();
+
+   const int me = wf_.context().mype();
+   const double eigsum = wf_.dot(hwf);
+   const double selfsum = wf_.dot(wf_);
+   const double hwfsum = hwf.dot(hwf);
+
+   if (me == 0)
+      cout << "DEBUG SUMS:  " << eigsum << " " << selfsum << " " << hwfsum << endl;
+   //ewd DEBUG
+   
 }

@@ -71,7 +71,7 @@ void NonLocalPotential::print_timing(void) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-void NonLocalPotential::init(void) {
+void NonLocalPotential::init(const bool compute_stress) {
 
   // max deviation from locality at upper quadrature point rcutloc[is]
   const double epsilon = 1.e-4;
@@ -124,7 +124,9 @@ void NonLocalPotential::init(void) {
       lproj[is].resize(npr[is]);
       
       twnl[is].resize(npr[is]*ngwl);      
-      dtwnl[is].resize(npr[is]*6*ngwl);
+
+      if (compute_stress)
+         dtwnl[is].resize(npr[is]*6*ngwl);
       
       // quadrature abcissae and weights
       rquad[is].resize(nquad[is]);
@@ -238,7 +240,7 @@ void NonLocalPotential::init(void) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-void NonLocalPotential::update_twnl(void) {
+void NonLocalPotential::update_twnl(const bool compute_stress) {
   // update arrays twnl[is][ipr][ig], dtwnl[is][ipr][j][ig],
   // following a change of cell dimensions
   // It is assumed that basis_ has been updated
@@ -286,33 +288,40 @@ void NonLocalPotential::update_twnl(void) {
               // dtwnl[is][ipr][ij][ngwl]
               // index = ig + ngwl * ( ij + 6 * ipr ), ipr = 0
               // i.e. index = ig + ij * ngwl
-              double *dt0_xx = &dtwnl[is][0*ngwl];
-              double *dt0_yy = &dtwnl[is][1*ngwl];
-              double *dt0_zz = &dtwnl[is][2*ngwl];
-              double *dt0_xy = &dtwnl[is][3*ngwl];
-              double *dt0_yz = &dtwnl[is][4*ngwl];
-              double *dt0_xz = &dtwnl[is][5*ngwl];
-
+              double *dt0_xx,*dt0_yy,*dt0_zz,*dt0_xy,*dt0_yz,*dt0_xz;
+              if (compute_stress)
+              {
+                 dt0_xx = &dtwnl[is][0*ngwl];
+                 dt0_yy = &dtwnl[is][1*ngwl];
+                 dt0_zz = &dtwnl[is][2*ngwl];
+                 dt0_xy = &dtwnl[is][3*ngwl];
+                 dt0_yz = &dtwnl[is][4*ngwl];
+                 dt0_xz = &dtwnl[is][5*ngwl];
+              }
+              
               for ( int ig = 0; ig < ngwl; ig++ ) {
                 double v,dv;
                 s->dvnlg(0,kpg[ig],v,dv);
 
                 t0[ig] = s14pi * v;
-                
-                const double tgx = kpg_x[ig];
-                const double tgy = kpg_y[ig];
-                const double tgz = kpg_z[ig];
-                const double tgx2 = tgx * tgx;
-                const double tgy2 = tgy * tgy;
-                const double tgz2 = tgz * tgz;
+
+                if (compute_stress)
+                {
+                   const double tgx = kpg_x[ig];
+                   const double tgy = kpg_y[ig];
+                   const double tgz = kpg_z[ig];
+                   const double tgx2 = tgx * tgx;
+                   const double tgy2 = tgy * tgy;
+                   const double tgz2 = tgz * tgz;
               
-                const double tmp = kpgi[ig] * s14pi * dv;
-                dt0_xx[ig] = tmp * tgx * tgx;
-                dt0_yy[ig] = tmp * tgy * tgy;
-                dt0_zz[ig] = tmp * tgz * tgz;
-                dt0_xy[ig] = tmp * tgx * tgy;
-                dt0_yz[ig] = tmp * tgy * tgz;
-                dt0_xz[ig] = tmp * tgx * tgz;
+                   const double tmp = kpgi[ig] * s14pi * dv;
+                   dt0_xx[ig] = tmp * tgx * tgx;
+                   dt0_yy[ig] = tmp * tgy * tgy;
+                   dt0_zz[ig] = tmp * tgz * tgz;
+                   dt0_xy[ig] = tmp * tgx * tgy;
+                   dt0_yz[ig] = tmp * tgy * tgz;
+                   dt0_xz[ig] = tmp * tgx * tgz;
+                }
               }
             }
             else {
@@ -325,12 +334,16 @@ void NonLocalPotential::update_twnl(void) {
                 double *t0 = &twnl[is][ngwl*iquad];
                 // dtwnl[is][ipr][j][ngwl]
                 // index = ig + ngwl * ( ij + 6 * iquad)
-                double *dt0_xx = &dtwnl[is][ngwl*(0+6*iquad)];
-                double *dt0_yy = &dtwnl[is][ngwl*(1+6*iquad)];
-                double *dt0_zz = &dtwnl[is][ngwl*(2+6*iquad)];
-                double *dt0_xy = &dtwnl[is][ngwl*(3+6*iquad)];
-                double *dt0_yz = &dtwnl[is][ngwl*(4+6*iquad)];
-                double *dt0_xz = &dtwnl[is][ngwl*(5+6*iquad)];
+                double *dt0_xx,*dt0_yy,*dt0_zz,*dt0_xy,*dt0_yz,*dt0_xz;
+                if (compute_stress)
+                {
+                   dt0_xx = &dtwnl[is][ngwl*(0+6*iquad)];
+                   dt0_yy = &dtwnl[is][ngwl*(1+6*iquad)];
+                   dt0_zz = &dtwnl[is][ngwl*(2+6*iquad)];
+                   dt0_xy = &dtwnl[is][ngwl*(3+6*iquad)];
+                   dt0_yz = &dtwnl[is][ngwl*(4+6*iquad)];
+                   dt0_xz = &dtwnl[is][ngwl*(5+6*iquad)];
+                }
                 const double r = rquad[is][iquad];
 
                 for ( int ig = 0; ig < ngwl; ig++ ) {
@@ -357,13 +370,16 @@ void NonLocalPotential::update_twnl(void) {
                     t0[ig] = fpi * s14pi * r;
                   
                   // dtwnl = fpi s14pi G_i G_j / G (r cos(Gr)/G -sin(Gr)/G^2)
-                  const double tmp = fpi * s14pi * tgi2 * (r*tc - ts*tgi);
-                  dt0_xx[ig] = tmp * tgx * tgx;
-                  dt0_yy[ig] = tmp * tgy * tgy;
-                  dt0_zz[ig] = tmp * tgz * tgz;
-                  dt0_xy[ig] = tmp * tgx * tgy;
-                  dt0_yz[ig] = tmp * tgy * tgz;
-                  dt0_xz[ig] = tmp * tgx * tgz;
+                  if (compute_stress)
+                  {
+                     const double tmp = fpi * s14pi * tgi2 * (r*tc - ts*tgi);
+                     dt0_xx[ig] = tmp * tgx * tgx;
+                     dt0_yy[ig] = tmp * tgy * tgy;
+                     dt0_zz[ig] = tmp * tgz * tgz;
+                     dt0_xy[ig] = tmp * tgx * tgy;
+                     dt0_yz[ig] = tmp * tgy * tgz;
+                     dt0_xz[ig] = tmp * tgx * tgz;
+                  }
                 }
               }
             }
@@ -385,27 +401,33 @@ void NonLocalPotential::update_twnl(void) {
               
               // dtwnl[is][ipr][ij][ngwl]
               // index = ig + ngwl * ( ij + 6 * ipr )
-              double *dt1_xx = &dtwnl[is][ngwl*(0+6*ipr1)];
-              double *dt1_yy = &dtwnl[is][ngwl*(1+6*ipr1)];
-              double *dt1_zz = &dtwnl[is][ngwl*(2+6*ipr1)];
-              double *dt1_xy = &dtwnl[is][ngwl*(3+6*ipr1)];
-              double *dt1_yz = &dtwnl[is][ngwl*(4+6*ipr1)];
-              double *dt1_xz = &dtwnl[is][ngwl*(5+6*ipr1)];
+              double *dt1_xx,*dt1_yy,*dt1_zz,*dt1_xy,*dt1_yz,*dt1_xz;
+              double *dt2_xx,*dt2_yy,*dt2_zz,*dt2_xy,*dt2_yz,*dt2_xz;
+              double *dt3_xx,*dt3_yy,*dt3_zz,*dt3_xy,*dt3_yz,*dt3_xz;
+              if (compute_stress)
+              {
+                 dt1_xx = &dtwnl[is][ngwl*(0+6*ipr1)];
+                 dt1_yy = &dtwnl[is][ngwl*(1+6*ipr1)];
+                 dt1_zz = &dtwnl[is][ngwl*(2+6*ipr1)];
+                 dt1_xy = &dtwnl[is][ngwl*(3+6*ipr1)];
+                 dt1_yz = &dtwnl[is][ngwl*(4+6*ipr1)];
+                 dt1_xz = &dtwnl[is][ngwl*(5+6*ipr1)];
 
-              double *dt2_xx = &dtwnl[is][ngwl*(0+6*ipr2)];
-              double *dt2_yy = &dtwnl[is][ngwl*(1+6*ipr2)];
-              double *dt2_zz = &dtwnl[is][ngwl*(2+6*ipr2)];
-              double *dt2_xy = &dtwnl[is][ngwl*(3+6*ipr2)];
-              double *dt2_yz = &dtwnl[is][ngwl*(4+6*ipr2)];
-              double *dt2_xz = &dtwnl[is][ngwl*(5+6*ipr2)];
+                 dt2_xx = &dtwnl[is][ngwl*(0+6*ipr2)];
+                 dt2_yy = &dtwnl[is][ngwl*(1+6*ipr2)];
+                 dt2_zz = &dtwnl[is][ngwl*(2+6*ipr2)];
+                 dt2_xy = &dtwnl[is][ngwl*(3+6*ipr2)];
+                 dt2_yz = &dtwnl[is][ngwl*(4+6*ipr2)];
+                 dt2_xz = &dtwnl[is][ngwl*(5+6*ipr2)];
               
-              double *dt3_xx = &dtwnl[is][ngwl*(0+6*ipr3)];
-              double *dt3_yy = &dtwnl[is][ngwl*(1+6*ipr3)];
-              double *dt3_zz = &dtwnl[is][ngwl*(2+6*ipr3)];
-              double *dt3_xy = &dtwnl[is][ngwl*(3+6*ipr3)];
-              double *dt3_yz = &dtwnl[is][ngwl*(4+6*ipr3)];
-              double *dt3_xz = &dtwnl[is][ngwl*(5+6*ipr3)];
-
+                 dt3_xx = &dtwnl[is][ngwl*(0+6*ipr3)];
+                 dt3_yy = &dtwnl[is][ngwl*(1+6*ipr3)];
+                 dt3_zz = &dtwnl[is][ngwl*(2+6*ipr3)];
+                 dt3_xy = &dtwnl[is][ngwl*(3+6*ipr3)];
+                 dt3_yz = &dtwnl[is][ngwl*(4+6*ipr3)];
+                 dt3_xz = &dtwnl[is][ngwl*(5+6*ipr3)];
+              }
+              
               for ( int ig = 0; ig < ngwl; ig++ ) {
                 double v,dv;
                 const double tg = kpg[ig];
@@ -429,32 +451,35 @@ void NonLocalPotential::update_twnl(void) {
                 t2[ig]  = y2 * v;
                 t3[ig]  = y3 * v;
 
-                const double fac1 = - y1 * ( v - tg * dv ) * tgi2;
-                // m=x
-                dt1_xx[ig] = fac1 * tgx2 + v * y1;
-                dt1_yy[ig] = fac1 * tgy2;
-                dt1_zz[ig] = fac1 * tgz2;
-                dt1_xy[ig] = fac1 * tgx * tgy;
-                dt1_yz[ig] = fac1 * tgy * tgz;
-                dt1_xz[ig] = fac1 * tgx * tgz;
+                if (compute_stress)
+                {
+                   const double fac1 = - y1 * ( v - tg * dv ) * tgi2;
+                   // m=x
+                   dt1_xx[ig] = fac1 * tgx2 + v * y1;
+                   dt1_yy[ig] = fac1 * tgy2;
+                   dt1_zz[ig] = fac1 * tgz2;
+                   dt1_xy[ig] = fac1 * tgx * tgy;
+                   dt1_yz[ig] = fac1 * tgy * tgz;
+                   dt1_xz[ig] = fac1 * tgx * tgz;
               
-                const double fac2 = - y2 * ( v - tg * dv ) * tgi2;
-                // m=y
-                dt2_xx[ig] = fac2 * tgx2;
-                dt2_yy[ig] = fac2 * tgy2 + v * y2;
-                dt2_zz[ig] = fac2 * tgz2;
-                dt2_xy[ig] = fac2 * tgx * tgy + v * y1;
-                dt2_yz[ig] = fac2 * tgy * tgz;
-                dt2_xz[ig] = fac2 * tgx * tgz;
+                   const double fac2 = - y2 * ( v - tg * dv ) * tgi2;
+                   // m=y
+                   dt2_xx[ig] = fac2 * tgx2;
+                   dt2_yy[ig] = fac2 * tgy2 + v * y2;
+                   dt2_zz[ig] = fac2 * tgz2;
+                   dt2_xy[ig] = fac2 * tgx * tgy + v * y1;
+                   dt2_yz[ig] = fac2 * tgy * tgz;
+                   dt2_xz[ig] = fac2 * tgx * tgz;
               
-                const double fac3 = - y3 * ( v - tg * dv ) * tgi2;
-                // m=z
-                dt3_xx[ig] = fac3 * tgx2;
-                dt3_yy[ig] = fac3 * tgy2;
-                dt3_zz[ig] = fac3 * tgz2 + v * y3;
-                dt3_xy[ig] = fac3 * tgx * tgy;
-                dt3_yz[ig] = fac3 * tgy * tgz + v * y2;
-                dt3_xz[ig] = fac3 * tgx * tgz + v * y1;
+                   const double fac3 = - y3 * ( v - tg * dv ) * tgi2;
+                   // m=z
+                   dt3_xx[ig] = fac3 * tgx2;
+                   dt3_yy[ig] = fac3 * tgy2;
+                   dt3_zz[ig] = fac3 * tgz2 + v * y3;
+                   dt3_xy[ig] = fac3 * tgx * tgy;
+                   dt3_yz[ig] = fac3 * tgy * tgz + v * y2;
+                   dt3_xz[ig] = fac3 * tgx * tgz + v * y1;
+                }
               }
             }
             else {
@@ -471,27 +496,32 @@ void NonLocalPotential::update_twnl(void) {
             
                 // dtwnl[is][ipr][j][ngwl]
                 // index = ig + ngwl * ( ij + 6 * ipr )
-                double *dt1_xx = &dtwnl[is][ngwl*(0+6*ipr1)];
-                double *dt1_yy = &dtwnl[is][ngwl*(1+6*ipr1)];
-                double *dt1_zz = &dtwnl[is][ngwl*(2+6*ipr1)];
-                double *dt1_xy = &dtwnl[is][ngwl*(3+6*ipr1)];
-                double *dt1_yz = &dtwnl[is][ngwl*(4+6*ipr1)];
-                double *dt1_xz = &dtwnl[is][ngwl*(5+6*ipr1)];
+                double *dt1_xx,*dt1_yy,*dt1_zz,*dt1_xy,*dt1_yz,*dt1_xz;
+                double *dt2_xx,*dt2_yy,*dt2_zz,*dt2_xy,*dt2_yz,*dt2_xz;
+                double *dt3_xx,*dt3_yy,*dt3_zz,*dt3_xy,*dt3_yz,*dt3_xz;
+                if (compute_stress)
+                {
+                   dt1_xx = &dtwnl[is][ngwl*(0+6*ipr1)];
+                   dt1_yy = &dtwnl[is][ngwl*(1+6*ipr1)];
+                   dt1_zz = &dtwnl[is][ngwl*(2+6*ipr1)];
+                   dt1_xy = &dtwnl[is][ngwl*(3+6*ipr1)];
+                   dt1_yz = &dtwnl[is][ngwl*(4+6*ipr1)];
+                   dt1_xz = &dtwnl[is][ngwl*(5+6*ipr1)];
 
-                double *dt2_xx = &dtwnl[is][ngwl*(0+6*ipr2)];
-                double *dt2_yy = &dtwnl[is][ngwl*(1+6*ipr2)];
-                double *dt2_zz = &dtwnl[is][ngwl*(2+6*ipr2)];
-                double *dt2_xy = &dtwnl[is][ngwl*(3+6*ipr2)];
-                double *dt2_yz = &dtwnl[is][ngwl*(4+6*ipr2)];
-                double *dt2_xz = &dtwnl[is][ngwl*(5+6*ipr2)];
+                   dt2_xx = &dtwnl[is][ngwl*(0+6*ipr2)];
+                   dt2_yy = &dtwnl[is][ngwl*(1+6*ipr2)];
+                   dt2_zz = &dtwnl[is][ngwl*(2+6*ipr2)];
+                   dt2_xy = &dtwnl[is][ngwl*(3+6*ipr2)];
+                   dt2_yz = &dtwnl[is][ngwl*(4+6*ipr2)];
+                   dt2_xz = &dtwnl[is][ngwl*(5+6*ipr2)];
 
-                double *dt3_xx = &dtwnl[is][ngwl*(0+6*ipr3)];
-                double *dt3_yy = &dtwnl[is][ngwl*(1+6*ipr3)];
-                double *dt3_zz = &dtwnl[is][ngwl*(2+6*ipr3)];
-                double *dt3_xy = &dtwnl[is][ngwl*(3+6*ipr3)];
-                double *dt3_yz = &dtwnl[is][ngwl*(4+6*ipr3)];
-                double *dt3_xz = &dtwnl[is][ngwl*(5+6*ipr3)];
-            
+                   dt3_xx = &dtwnl[is][ngwl*(0+6*ipr3)];
+                   dt3_yy = &dtwnl[is][ngwl*(1+6*ipr3)];
+                   dt3_zz = &dtwnl[is][ngwl*(2+6*ipr3)];
+                   dt3_xy = &dtwnl[is][ngwl*(3+6*ipr3)];
+                   dt3_yz = &dtwnl[is][ngwl*(4+6*ipr3)];
+                   dt3_xz = &dtwnl[is][ngwl*(5+6*ipr3)];
+                }
                 const double r = rquad[is][iquad];
                 for ( int ig = 0; ig < ngwl; ig++ ) {
                   double v = 0.0, dv = 0.0;
@@ -530,32 +560,35 @@ void NonLocalPotential::update_twnl(void) {
                   t2[ig]  = y2 * v;
                   t3[ig]  = y3 * v;
 
-                  const double fac1 = - y1 * ( v - tg * dv ) * tgi2;
-                  // m=x
-                  dt1_xx[ig] = fac1 * tgx2 + v * y1;
-                  dt1_yy[ig] = fac1 * tgy2;
-                  dt1_zz[ig] = fac1 * tgz2;
-                  dt1_xy[ig] = fac1 * tgx * tgy;
-                  dt1_yz[ig] = fac1 * tgy * tgz;
-                  dt1_xz[ig] = fac1 * tgx * tgz;
+                  if (compute_stress)
+                  {
+                     const double fac1 = - y1 * ( v - tg * dv ) * tgi2;
+                     // m=x
+                     dt1_xx[ig] = fac1 * tgx2 + v * y1;
+                     dt1_yy[ig] = fac1 * tgy2;
+                     dt1_zz[ig] = fac1 * tgz2;
+                     dt1_xy[ig] = fac1 * tgx * tgy;
+                     dt1_yz[ig] = fac1 * tgy * tgz;
+                     dt1_xz[ig] = fac1 * tgx * tgz;
  
-                  const double fac2 = - y2 * ( v - tg * dv ) * tgi2;
-                  // m=y
-                  dt2_xx[ig] = fac2 * tgx2;
-                  dt2_yy[ig] = fac2 * tgy2 + v * y2;
-                  dt2_zz[ig] = fac2 * tgz2;
-                  dt2_xy[ig] = fac2 * tgx * tgy + v * y1;
-                  dt2_yz[ig] = fac2 * tgy * tgz;
-                  dt2_xz[ig] = fac2 * tgx * tgz;
- 
-                  const double fac3 = - y3 * ( v - tg * dv ) * tgi2;
-                  // m=z
-                  dt3_xx[ig] = fac3 * tgx2;
-                  dt3_yy[ig] = fac3 * tgy2;
-                  dt3_zz[ig] = fac3 * tgz2 + v * y3;
-                  dt3_xy[ig] = fac3 * tgx * tgy;
-                  dt3_yz[ig] = fac3 * tgy * tgz + v * y2;
-                  dt3_xz[ig] = fac3 * tgx * tgz + v * y1;
+                     const double fac2 = - y2 * ( v - tg * dv ) * tgi2;
+                     // m=y
+                     dt2_xx[ig] = fac2 * tgx2;
+                     dt2_yy[ig] = fac2 * tgy2 + v * y2;
+                     dt2_zz[ig] = fac2 * tgz2;
+                     dt2_xy[ig] = fac2 * tgx * tgy + v * y1;
+                     dt2_yz[ig] = fac2 * tgy * tgz;
+                     dt2_xz[ig] = fac2 * tgx * tgz;
+                     
+                     const double fac3 = - y3 * ( v - tg * dv ) * tgi2;
+                     // m=z
+                     dt3_xx[ig] = fac3 * tgx2;
+                     dt3_yy[ig] = fac3 * tgy2;
+                     dt3_zz[ig] = fac3 * tgz2 + v * y3;
+                     dt3_xy[ig] = fac3 * tgx * tgy;
+                     dt3_yz[ig] = fac3 * tgy * tgz + v * y2;
+                     dt3_xz[ig] = fac3 * tgx * tgz + v * y1;
+                  }
                 } // ig
               }
             }
@@ -578,41 +611,49 @@ void NonLocalPotential::update_twnl(void) {
             
               // dtwnl[is][ipr][ij][ngwl]
               // index = ig + ngwl * ( ij + 6 * ipr )
-              double *dt4_xx = &dtwnl[is][ngwl*(0+6*ipr4)];
-              double *dt4_yy = &dtwnl[is][ngwl*(1+6*ipr4)];
-              double *dt4_zz = &dtwnl[is][ngwl*(2+6*ipr4)];
-              double *dt4_xy = &dtwnl[is][ngwl*(3+6*ipr4)];
-              double *dt4_yz = &dtwnl[is][ngwl*(4+6*ipr4)];
-              double *dt4_xz = &dtwnl[is][ngwl*(5+6*ipr4)];
+              double *dt4_xx,*dt4_yy,*dt4_zz,*dt4_xy,*dt4_yz,*dt4_xz;
+              double *dt5_xx,*dt5_yy,*dt5_zz,*dt5_xy,*dt5_yz,*dt5_xz;
+              double *dt6_xx,*dt6_yy,*dt6_zz,*dt6_xy,*dt6_yz,*dt6_xz;
+              double *dt7_xx,*dt7_yy,*dt7_zz,*dt7_xy,*dt7_yz,*dt7_xz;
+              double *dt8_xx,*dt8_yy,*dt8_zz,*dt8_xy,*dt8_yz,*dt8_xz;
+              if (compute_stress)
+              {
+                 dt4_xx = &dtwnl[is][ngwl*(0+6*ipr4)];
+                 dt4_yy = &dtwnl[is][ngwl*(1+6*ipr4)];
+                 dt4_zz = &dtwnl[is][ngwl*(2+6*ipr4)];
+                 dt4_xy = &dtwnl[is][ngwl*(3+6*ipr4)];
+                 dt4_yz = &dtwnl[is][ngwl*(4+6*ipr4)];
+                 dt4_xz = &dtwnl[is][ngwl*(5+6*ipr4)];
 
-              double *dt5_xx = &dtwnl[is][ngwl*(0+6*ipr5)];
-              double *dt5_yy = &dtwnl[is][ngwl*(1+6*ipr5)];
-              double *dt5_zz = &dtwnl[is][ngwl*(2+6*ipr5)];
-              double *dt5_xy = &dtwnl[is][ngwl*(3+6*ipr5)];
-              double *dt5_yz = &dtwnl[is][ngwl*(4+6*ipr5)];
-              double *dt5_xz = &dtwnl[is][ngwl*(5+6*ipr5)];
+                 dt5_xx = &dtwnl[is][ngwl*(0+6*ipr5)];
+                 dt5_yy = &dtwnl[is][ngwl*(1+6*ipr5)];
+                 dt5_zz = &dtwnl[is][ngwl*(2+6*ipr5)];
+                 dt5_xy = &dtwnl[is][ngwl*(3+6*ipr5)];
+                 dt5_yz = &dtwnl[is][ngwl*(4+6*ipr5)];
+                 dt5_xz = &dtwnl[is][ngwl*(5+6*ipr5)];
             
-              double *dt6_xx = &dtwnl[is][ngwl*(0+6*ipr6)];
-              double *dt6_yy = &dtwnl[is][ngwl*(1+6*ipr6)];
-              double *dt6_zz = &dtwnl[is][ngwl*(2+6*ipr6)];
-              double *dt6_xy = &dtwnl[is][ngwl*(3+6*ipr6)];
-              double *dt6_yz = &dtwnl[is][ngwl*(4+6*ipr6)];
-              double *dt6_xz = &dtwnl[is][ngwl*(5+6*ipr6)];
+                 dt6_xx = &dtwnl[is][ngwl*(0+6*ipr6)];
+                 dt6_yy = &dtwnl[is][ngwl*(1+6*ipr6)];
+                 dt6_zz = &dtwnl[is][ngwl*(2+6*ipr6)];
+                 dt6_xy = &dtwnl[is][ngwl*(3+6*ipr6)];
+                 dt6_yz = &dtwnl[is][ngwl*(4+6*ipr6)];
+                 dt6_xz = &dtwnl[is][ngwl*(5+6*ipr6)];
             
-              double *dt7_xx = &dtwnl[is][ngwl*(0+6*ipr7)];
-              double *dt7_yy = &dtwnl[is][ngwl*(1+6*ipr7)];
-              double *dt7_zz = &dtwnl[is][ngwl*(2+6*ipr7)];
-              double *dt7_xy = &dtwnl[is][ngwl*(3+6*ipr7)];
-              double *dt7_yz = &dtwnl[is][ngwl*(4+6*ipr7)];
-              double *dt7_xz = &dtwnl[is][ngwl*(5+6*ipr7)];
+                 dt7_xx = &dtwnl[is][ngwl*(0+6*ipr7)];
+                 dt7_yy = &dtwnl[is][ngwl*(1+6*ipr7)];
+                 dt7_zz = &dtwnl[is][ngwl*(2+6*ipr7)];
+                 dt7_xy = &dtwnl[is][ngwl*(3+6*ipr7)];
+                 dt7_yz = &dtwnl[is][ngwl*(4+6*ipr7)];
+                 dt7_xz = &dtwnl[is][ngwl*(5+6*ipr7)];
             
-              double *dt8_xx = &dtwnl[is][ngwl*(0+6*ipr8)];
-              double *dt8_yy = &dtwnl[is][ngwl*(1+6*ipr8)];
-              double *dt8_zz = &dtwnl[is][ngwl*(2+6*ipr8)];
-              double *dt8_xy = &dtwnl[is][ngwl*(3+6*ipr8)];
-              double *dt8_yz = &dtwnl[is][ngwl*(4+6*ipr8)];
-              double *dt8_xz = &dtwnl[is][ngwl*(5+6*ipr8)];
-
+                 dt8_xx = &dtwnl[is][ngwl*(0+6*ipr8)];
+                 dt8_yy = &dtwnl[is][ngwl*(1+6*ipr8)];
+                 dt8_zz = &dtwnl[is][ngwl*(2+6*ipr8)];
+                 dt8_xy = &dtwnl[is][ngwl*(3+6*ipr8)];
+                 dt8_yz = &dtwnl[is][ngwl*(4+6*ipr8)];
+                 dt8_xz = &dtwnl[is][ngwl*(5+6*ipr8)];
+              }
+              
               for ( int ig = 0; ig < ngwl; ig++ ) {
                 double v,dv;
                 const double tg = kpg[ig];
@@ -674,45 +715,48 @@ void NonLocalPotential::update_twnl(void) {
                 t7[ig]  = y7 * v;
                 t8[ig]  = y8 * v;
 
-                // y4 = s54pi 1/2 ( 3 z^2/r^2 - 1 )
-                dt4_xx[ig] = -(v * s20pi * dz_xx * y1z - y4 * dv * tg * tgxx);
-                dt4_yy[ig] = -(v * s20pi * dz_yy * y1z - y4 * dv * tg * tgyy);
-                dt4_zz[ig] = -(v * s20pi * dz_zz * y1z - y4 * dv * tg * tgzz);
-                dt4_xy[ig] = -(v * s20pi * dz_xy * y1z - y4 * dv * tg * tgxy);
-                dt4_yz[ig] = -(v * s20pi * dz_yz * y1z - y4 * dv * tg * tgyz);
-                dt4_xz[ig] = -(v * s20pi * dz_xz * y1z - y4 * dv * tg * tgxz);
+                if (compute_stress)
+                {
+                   // y4 = s54pi 1/2 ( 3 z^2/r^2 - 1 )
+                   dt4_xx[ig] = -(v * s20pi * dz_xx * y1z - y4 * dv * tg * tgxx);
+                   dt4_yy[ig] = -(v * s20pi * dz_yy * y1z - y4 * dv * tg * tgyy);
+                   dt4_zz[ig] = -(v * s20pi * dz_zz * y1z - y4 * dv * tg * tgzz);
+                   dt4_xy[ig] = -(v * s20pi * dz_xy * y1z - y4 * dv * tg * tgxy);
+                   dt4_yz[ig] = -(v * s20pi * dz_yz * y1z - y4 * dv * tg * tgyz);
+                   dt4_xz[ig] = -(v * s20pi * dz_xz * y1z - y4 * dv * tg * tgxz);
               
-                // y5 = s54pi sqrt(3)/2 ( x^2 - y^2 ) / r^2
-                dt5_xx[ig] = -(v * s20pi3 * (y1x * dx_xx - y1y * dy_xx) - y5 * dv * tg * tgxx);
-                dt5_yy[ig] = -(v * s20pi3 * (y1x * dx_yy - y1y * dy_yy) - y5 * dv * tg * tgyy);
-                dt5_zz[ig] = -(v * s20pi3 * (y1x * dx_zz - y1y * dy_zz) - y5 * dv * tg * tgzz);
-                dt5_xy[ig] = -(v * s20pi3 * (y1x * dx_xy - y1y * dy_xy) - y5 * dv * tg * tgxy);
-                dt5_yz[ig] = -(v * s20pi3 * (y1x * dx_yz - y1y * dy_yz) - y5 * dv * tg * tgyz);
-                dt5_xz[ig] = -(v * s20pi3 * (y1x * dx_xz - y1y * dy_xz) - y5 * dv * tg * tgxz);
+                   // y5 = s54pi sqrt(3)/2 ( x^2 - y^2 ) / r^2
+                   dt5_xx[ig] = -(v * s20pi3 * (y1x * dx_xx - y1y * dy_xx) - y5 * dv * tg * tgxx);
+                   dt5_yy[ig] = -(v * s20pi3 * (y1x * dx_yy - y1y * dy_yy) - y5 * dv * tg * tgyy);
+                   dt5_zz[ig] = -(v * s20pi3 * (y1x * dx_zz - y1y * dy_zz) - y5 * dv * tg * tgzz);
+                   dt5_xy[ig] = -(v * s20pi3 * (y1x * dx_xy - y1y * dy_xy) - y5 * dv * tg * tgxy);
+                   dt5_yz[ig] = -(v * s20pi3 * (y1x * dx_yz - y1y * dy_yz) - y5 * dv * tg * tgyz);
+                   dt5_xz[ig] = -(v * s20pi3 * (y1x * dx_xz - y1y * dy_xz) - y5 * dv * tg * tgxz);
 
-                // y6 = s54pi sqrt(3) x y / r^2
-                dt6_xx[ig] = -(v * s20pi3 * (dx_xx * y1y + y1x * dy_xx) - y6 * dv * tg * tgxx);
-                dt6_yy[ig] = -(v * s20pi3 * (dx_yy * y1y + y1x * dy_yy) - y6 * dv * tg * tgyy);
-                dt6_zz[ig] = -(v * s20pi3 * (dx_zz * y1y + y1x * dy_zz) - y6 * dv * tg * tgzz);
-                dt6_xy[ig] = -(v * s20pi3 * (dx_xy * y1y + y1x * dy_xy) - y6 * dv * tg * tgxy);
-                dt6_yz[ig] = -(v * s20pi3 * (dx_yz * y1y + y1x * dy_yz) - y6 * dv * tg * tgyz);
-                dt6_xz[ig] = -(v * s20pi3 * (dx_xz * y1y + y1x * dy_xz) - y6 * dv * tg * tgxz);
+                   // y6 = s54pi sqrt(3) x y / r^2
+                   dt6_xx[ig] = -(v * s20pi3 * (dx_xx * y1y + y1x * dy_xx) - y6 * dv * tg * tgxx);
+                   dt6_yy[ig] = -(v * s20pi3 * (dx_yy * y1y + y1x * dy_yy) - y6 * dv * tg * tgyy);
+                   dt6_zz[ig] = -(v * s20pi3 * (dx_zz * y1y + y1x * dy_zz) - y6 * dv * tg * tgzz);
+                   dt6_xy[ig] = -(v * s20pi3 * (dx_xy * y1y + y1x * dy_xy) - y6 * dv * tg * tgxy);
+                   dt6_yz[ig] = -(v * s20pi3 * (dx_yz * y1y + y1x * dy_yz) - y6 * dv * tg * tgyz);
+                   dt6_xz[ig] = -(v * s20pi3 * (dx_xz * y1y + y1x * dy_xz) - y6 * dv * tg * tgxz);
 
-                // y7 = s54pi sqrt(3) y z / r^2
-                dt7_xx[ig] = -(v * s20pi3 * (dy_xx * y1z + y1y * dz_xx) - y7 * dv * tg * tgxx);
-                dt7_yy[ig] = -(v * s20pi3 * (dy_yy * y1z + y1y * dz_yy) - y7 * dv * tg * tgyy);
-                dt7_zz[ig] = -(v * s20pi3 * (dy_zz * y1z + y1y * dz_zz) - y7 * dv * tg * tgzz);
-                dt7_xy[ig] = -(v * s20pi3 * (dy_xy * y1z + y1y * dz_xy) - y7 * dv * tg * tgxy);
-                dt7_yz[ig] = -(v * s20pi3 * (dy_yz * y1z + y1y * dz_yz) - y7 * dv * tg * tgyz);
-                dt7_xz[ig] = -(v * s20pi3 * (dy_xz * y1z + y1y * dz_xz) - y7 * dv * tg * tgxz);
+                   // y7 = s54pi sqrt(3) y z / r^2
+                   dt7_xx[ig] = -(v * s20pi3 * (dy_xx * y1z + y1y * dz_xx) - y7 * dv * tg * tgxx);
+                   dt7_yy[ig] = -(v * s20pi3 * (dy_yy * y1z + y1y * dz_yy) - y7 * dv * tg * tgyy);
+                   dt7_zz[ig] = -(v * s20pi3 * (dy_zz * y1z + y1y * dz_zz) - y7 * dv * tg * tgzz);
+                   dt7_xy[ig] = -(v * s20pi3 * (dy_xy * y1z + y1y * dz_xy) - y7 * dv * tg * tgxy);
+                   dt7_yz[ig] = -(v * s20pi3 * (dy_yz * y1z + y1y * dz_yz) - y7 * dv * tg * tgyz);
+                   dt7_xz[ig] = -(v * s20pi3 * (dy_xz * y1z + y1y * dz_xz) - y7 * dv * tg * tgxz);
               
-                // y8 = s54pi sqrt(3) z x / r^2
-                dt8_xx[ig] = -(v * s20pi3 * (dx_xx * y1z + y1x * dz_xx) - y8 * dv * tg * tgxx);
-                dt8_yy[ig] = -(v * s20pi3 * (dx_yy * y1z + y1x * dz_yy) - y8 * dv * tg * tgyy);
-                dt8_zz[ig] = -(v * s20pi3 * (dx_zz * y1z + y1x * dz_zz) - y8 * dv * tg * tgzz);
-                dt8_xy[ig] = -(v * s20pi3 * (dx_xy * y1z + y1x * dz_xy) - y8 * dv * tg * tgxy);
-                dt8_yz[ig] = -(v * s20pi3 * (dx_yz * y1z + y1x * dz_yz) - y8 * dv * tg * tgyz);
-                dt8_xz[ig] = -(v * s20pi3 * (dx_xz * y1z + y1x * dz_xz) - y8 * dv * tg * tgxz);
+                   // y8 = s54pi sqrt(3) z x / r^2
+                   dt8_xx[ig] = -(v * s20pi3 * (dx_xx * y1z + y1x * dz_xx) - y8 * dv * tg * tgxx);
+                   dt8_yy[ig] = -(v * s20pi3 * (dx_yy * y1z + y1x * dz_yy) - y8 * dv * tg * tgyy);
+                   dt8_zz[ig] = -(v * s20pi3 * (dx_zz * y1z + y1x * dz_zz) - y8 * dv * tg * tgzz);
+                   dt8_xy[ig] = -(v * s20pi3 * (dx_xy * y1z + y1x * dz_xy) - y8 * dv * tg * tgxy);
+                   dt8_yz[ig] = -(v * s20pi3 * (dx_yz * y1z + y1x * dz_yz) - y8 * dv * tg * tgyz);
+                   dt8_xz[ig] = -(v * s20pi3 * (dx_xz * y1z + y1x * dz_xz) - y8 * dv * tg * tgxz);
+                }
               }
             }
             else {
@@ -735,41 +779,49 @@ void NonLocalPotential::update_twnl(void) {
 
                 // dtwnl[is][ipr][ij][ngwl]
                 // index = ig + ngwl * ( ij + 6 * ipr )
-                double *dt4_xx = &dtwnl[is][ngwl*(0+6*ipr4)];
-                double *dt4_yy = &dtwnl[is][ngwl*(1+6*ipr4)];
-                double *dt4_zz = &dtwnl[is][ngwl*(2+6*ipr4)];
-                double *dt4_xy = &dtwnl[is][ngwl*(3+6*ipr4)];
-                double *dt4_yz = &dtwnl[is][ngwl*(4+6*ipr4)];
-                double *dt4_xz = &dtwnl[is][ngwl*(5+6*ipr4)];
+                double *dt4_xx,*dt4_yy,*dt4_zz,*dt4_xy,*dt4_yz,*dt4_xz;
+                double *dt5_xx,*dt5_yy,*dt5_zz,*dt5_xy,*dt5_yz,*dt5_xz;
+                double *dt6_xx,*dt6_yy,*dt6_zz,*dt6_xy,*dt6_yz,*dt6_xz;
+                double *dt7_xx,*dt7_yy,*dt7_zz,*dt7_xy,*dt7_yz,*dt7_xz;
+                double *dt8_xx,*dt8_yy,*dt8_zz,*dt8_xy,*dt8_yz,*dt8_xz;
+                if (compute_stress)
+                {
+                   dt4_xx = &dtwnl[is][ngwl*(0+6*ipr4)];
+                   dt4_yy = &dtwnl[is][ngwl*(1+6*ipr4)];
+                   dt4_zz = &dtwnl[is][ngwl*(2+6*ipr4)];
+                   dt4_xy = &dtwnl[is][ngwl*(3+6*ipr4)];
+                   dt4_yz = &dtwnl[is][ngwl*(4+6*ipr4)];
+                   dt4_xz = &dtwnl[is][ngwl*(5+6*ipr4)];
 
-                double *dt5_xx = &dtwnl[is][ngwl*(0+6*ipr5)];
-                double *dt5_yy = &dtwnl[is][ngwl*(1+6*ipr5)];
-                double *dt5_zz = &dtwnl[is][ngwl*(2+6*ipr5)];
-                double *dt5_xy = &dtwnl[is][ngwl*(3+6*ipr5)];
-                double *dt5_yz = &dtwnl[is][ngwl*(4+6*ipr5)];
-                double *dt5_xz = &dtwnl[is][ngwl*(5+6*ipr5)];
+                   dt5_xx = &dtwnl[is][ngwl*(0+6*ipr5)];
+                   dt5_yy = &dtwnl[is][ngwl*(1+6*ipr5)];
+                   dt5_zz = &dtwnl[is][ngwl*(2+6*ipr5)];
+                   dt5_xy = &dtwnl[is][ngwl*(3+6*ipr5)];
+                   dt5_yz = &dtwnl[is][ngwl*(4+6*ipr5)];
+                   dt5_xz = &dtwnl[is][ngwl*(5+6*ipr5)];
  
-                double *dt6_xx = &dtwnl[is][ngwl*(0+6*ipr6)];
-                double *dt6_yy = &dtwnl[is][ngwl*(1+6*ipr6)];
-                double *dt6_zz = &dtwnl[is][ngwl*(2+6*ipr6)];
-                double *dt6_xy = &dtwnl[is][ngwl*(3+6*ipr6)];
-                double *dt6_yz = &dtwnl[is][ngwl*(4+6*ipr6)];
-                double *dt6_xz = &dtwnl[is][ngwl*(5+6*ipr6)];
+                   dt6_xx = &dtwnl[is][ngwl*(0+6*ipr6)];
+                   dt6_yy = &dtwnl[is][ngwl*(1+6*ipr6)];
+                   dt6_zz = &dtwnl[is][ngwl*(2+6*ipr6)];
+                   dt6_xy = &dtwnl[is][ngwl*(3+6*ipr6)];
+                   dt6_yz = &dtwnl[is][ngwl*(4+6*ipr6)];
+                   dt6_xz = &dtwnl[is][ngwl*(5+6*ipr6)];
  
-                double *dt7_xx = &dtwnl[is][ngwl*(0+6*ipr7)];
-                double *dt7_yy = &dtwnl[is][ngwl*(1+6*ipr7)];
-                double *dt7_zz = &dtwnl[is][ngwl*(2+6*ipr7)];
-                double *dt7_xy = &dtwnl[is][ngwl*(3+6*ipr7)];
-                double *dt7_yz = &dtwnl[is][ngwl*(4+6*ipr7)];
-                double *dt7_xz = &dtwnl[is][ngwl*(5+6*ipr7)];
+                   dt7_xx = &dtwnl[is][ngwl*(0+6*ipr7)];
+                   dt7_yy = &dtwnl[is][ngwl*(1+6*ipr7)];
+                   dt7_zz = &dtwnl[is][ngwl*(2+6*ipr7)];
+                   dt7_xy = &dtwnl[is][ngwl*(3+6*ipr7)];
+                   dt7_yz = &dtwnl[is][ngwl*(4+6*ipr7)];
+                   dt7_xz = &dtwnl[is][ngwl*(5+6*ipr7)];
  
-                double *dt8_xx = &dtwnl[is][ngwl*(0+6*ipr8)];
-                double *dt8_yy = &dtwnl[is][ngwl*(1+6*ipr8)];
-                double *dt8_zz = &dtwnl[is][ngwl*(2+6*ipr8)];
-                double *dt8_xy = &dtwnl[is][ngwl*(3+6*ipr8)];
-                double *dt8_yz = &dtwnl[is][ngwl*(4+6*ipr8)];
-                double *dt8_xz = &dtwnl[is][ngwl*(5+6*ipr8)];
-
+                   dt8_xx = &dtwnl[is][ngwl*(0+6*ipr8)];
+                   dt8_yy = &dtwnl[is][ngwl*(1+6*ipr8)];
+                   dt8_zz = &dtwnl[is][ngwl*(2+6*ipr8)];
+                   dt8_xy = &dtwnl[is][ngwl*(3+6*ipr8)];
+                   dt8_yz = &dtwnl[is][ngwl*(4+6*ipr8)];
+                   dt8_xz = &dtwnl[is][ngwl*(5+6*ipr8)];
+                }
+                
                 const double r = rquad[is][iquad];
                 for ( int ig = 0; ig < ngwl; ig++ ) {
                   double v = 0.0, dv = 0.0;
@@ -848,45 +900,48 @@ void NonLocalPotential::update_twnl(void) {
                   t7[ig]  = y7 * v;
                   t8[ig]  = y8 * v;
 
-                  // y4 = s54pi 1/2 ( 3 z^2/r^2 - 1 )
-                  dt4_xx[ig] = -(v * s20pi * dz_xx * y1z - y4 * dv * tg * tgxx);
-                  dt4_yy[ig] = -(v * s20pi * dz_yy * y1z - y4 * dv * tg * tgyy);
-                  dt4_zz[ig] = -(v * s20pi * dz_zz * y1z - y4 * dv * tg * tgzz);
-                  dt4_xy[ig] = -(v * s20pi * dz_xy * y1z - y4 * dv * tg * tgxy);
-                  dt4_yz[ig] = -(v * s20pi * dz_yz * y1z - y4 * dv * tg * tgyz);
-                  dt4_xz[ig] = -(v * s20pi * dz_xz * y1z - y4 * dv * tg * tgxz);
+                  if (compute_stress)
+                  {
+                     // y4 = s54pi 1/2 ( 3 z^2/r^2 - 1 )
+                     dt4_xx[ig] = -(v * s20pi * dz_xx * y1z - y4 * dv * tg * tgxx);
+                     dt4_yy[ig] = -(v * s20pi * dz_yy * y1z - y4 * dv * tg * tgyy);
+                     dt4_zz[ig] = -(v * s20pi * dz_zz * y1z - y4 * dv * tg * tgzz);
+                     dt4_xy[ig] = -(v * s20pi * dz_xy * y1z - y4 * dv * tg * tgxy);
+                     dt4_yz[ig] = -(v * s20pi * dz_yz * y1z - y4 * dv * tg * tgyz);
+                     dt4_xz[ig] = -(v * s20pi * dz_xz * y1z - y4 * dv * tg * tgxz);
  
-                  // y5 = s54pi sqrt(3)/2 ( x^2 - y^2 ) / r^2
-                  dt5_xx[ig] = -(v * s20pi3 * (y1x * dx_xx - y1y * dy_xx) - y5 * dv * tg * tgxx);
-                  dt5_yy[ig] = -(v * s20pi3 * (y1x * dx_yy - y1y * dy_yy) - y5 * dv * tg * tgyy);
-                  dt5_zz[ig] = -(v * s20pi3 * (y1x * dx_zz - y1y * dy_zz) - y5 * dv * tg * tgzz);
-                  dt5_xy[ig] = -(v * s20pi3 * (y1x * dx_xy - y1y * dy_xy) - y5 * dv * tg * tgxy);
-                  dt5_yz[ig] = -(v * s20pi3 * (y1x * dx_yz - y1y * dy_yz) - y5 * dv * tg * tgyz);
-                  dt5_xz[ig] = -(v * s20pi3 * (y1x * dx_xz - y1y * dy_xz) - y5 * dv * tg * tgxz);
+                     // y5 = s54pi sqrt(3)/2 ( x^2 - y^2 ) / r^2
+                     dt5_xx[ig] = -(v * s20pi3 * (y1x * dx_xx - y1y * dy_xx) - y5 * dv * tg * tgxx);
+                     dt5_yy[ig] = -(v * s20pi3 * (y1x * dx_yy - y1y * dy_yy) - y5 * dv * tg * tgyy);
+                     dt5_zz[ig] = -(v * s20pi3 * (y1x * dx_zz - y1y * dy_zz) - y5 * dv * tg * tgzz);
+                     dt5_xy[ig] = -(v * s20pi3 * (y1x * dx_xy - y1y * dy_xy) - y5 * dv * tg * tgxy);
+                     dt5_yz[ig] = -(v * s20pi3 * (y1x * dx_yz - y1y * dy_yz) - y5 * dv * tg * tgyz);
+                     dt5_xz[ig] = -(v * s20pi3 * (y1x * dx_xz - y1y * dy_xz) - y5 * dv * tg * tgxz);
 
-                  // y6 = s54pi sqrt(3) x y / r^2
-                  dt6_xx[ig] = -(v * s20pi3 * (dx_xx * y1y + y1x * dy_xx) - y6 * dv * tg * tgxx);
-                  dt6_yy[ig] = -(v * s20pi3 * (dx_yy * y1y + y1x * dy_yy) - y6 * dv * tg * tgyy);
-                  dt6_zz[ig] = -(v * s20pi3 * (dx_zz * y1y + y1x * dy_zz) - y6 * dv * tg * tgzz);
-                  dt6_xy[ig] = -(v * s20pi3 * (dx_xy * y1y + y1x * dy_xy) - y6 * dv * tg * tgxy);
-                  dt6_yz[ig] = -(v * s20pi3 * (dx_yz * y1y + y1x * dy_yz) - y6 * dv * tg * tgyz);
-                  dt6_xz[ig] = -(v * s20pi3 * (dx_xz * y1y + y1x * dy_xz) - y6 * dv * tg * tgxz);
+                     // y6 = s54pi sqrt(3) x y / r^2
+                     dt6_xx[ig] = -(v * s20pi3 * (dx_xx * y1y + y1x * dy_xx) - y6 * dv * tg * tgxx);
+                     dt6_yy[ig] = -(v * s20pi3 * (dx_yy * y1y + y1x * dy_yy) - y6 * dv * tg * tgyy);
+                     dt6_zz[ig] = -(v * s20pi3 * (dx_zz * y1y + y1x * dy_zz) - y6 * dv * tg * tgzz);
+                     dt6_xy[ig] = -(v * s20pi3 * (dx_xy * y1y + y1x * dy_xy) - y6 * dv * tg * tgxy);
+                     dt6_yz[ig] = -(v * s20pi3 * (dx_yz * y1y + y1x * dy_yz) - y6 * dv * tg * tgyz);
+                     dt6_xz[ig] = -(v * s20pi3 * (dx_xz * y1y + y1x * dy_xz) - y6 * dv * tg * tgxz);
 
-                  // y7 = s54pi sqrt(3) y z / r^2
-                  dt7_xx[ig] = -(v * s20pi3 * (dy_xx * y1z + y1y * dz_xx) - y7 * dv * tg * tgxx);
-                  dt7_yy[ig] = -(v * s20pi3 * (dy_yy * y1z + y1y * dz_yy) - y7 * dv * tg * tgyy);
-                  dt7_zz[ig] = -(v * s20pi3 * (dy_zz * y1z + y1y * dz_zz) - y7 * dv * tg * tgzz);
-                  dt7_xy[ig] = -(v * s20pi3 * (dy_xy * y1z + y1y * dz_xy) - y7 * dv * tg * tgxy);
-                  dt7_yz[ig] = -(v * s20pi3 * (dy_yz * y1z + y1y * dz_yz) - y7 * dv * tg * tgyz);
-                  dt7_xz[ig] = -(v * s20pi3 * (dy_xz * y1z + y1y * dz_xz) - y7 * dv * tg * tgxz);
+                     // y7 = s54pi sqrt(3) y z / r^2
+                     dt7_xx[ig] = -(v * s20pi3 * (dy_xx * y1z + y1y * dz_xx) - y7 * dv * tg * tgxx);
+                     dt7_yy[ig] = -(v * s20pi3 * (dy_yy * y1z + y1y * dz_yy) - y7 * dv * tg * tgyy);
+                     dt7_zz[ig] = -(v * s20pi3 * (dy_zz * y1z + y1y * dz_zz) - y7 * dv * tg * tgzz);
+                     dt7_xy[ig] = -(v * s20pi3 * (dy_xy * y1z + y1y * dz_xy) - y7 * dv * tg * tgxy);
+                     dt7_yz[ig] = -(v * s20pi3 * (dy_yz * y1z + y1y * dz_yz) - y7 * dv * tg * tgyz);
+                     dt7_xz[ig] = -(v * s20pi3 * (dy_xz * y1z + y1y * dz_xz) - y7 * dv * tg * tgxz);
  
-                  // y8 = s54pi sqrt(3) z x / r^2
-                  dt8_xx[ig] = -(v * s20pi3 * (dx_xx * y1z + y1x * dz_xx) - y8 * dv * tg * tgxx);
-                  dt8_yy[ig] = -(v * s20pi3 * (dx_yy * y1z + y1x * dz_yy) - y8 * dv * tg * tgyy);
-                  dt8_zz[ig] = -(v * s20pi3 * (dx_zz * y1z + y1x * dz_zz) - y8 * dv * tg * tgzz);
-                  dt8_xy[ig] = -(v * s20pi3 * (dx_xy * y1z + y1x * dz_xy) - y8 * dv * tg * tgxy);
-                  dt8_yz[ig] = -(v * s20pi3 * (dx_yz * y1z + y1x * dz_yz) - y8 * dv * tg * tgyz);
-                  dt8_xz[ig] = -(v * s20pi3 * (dx_xz * y1z + y1x * dz_xz) - y8 * dv * tg * tgxz);
+                     // y8 = s54pi sqrt(3) z x / r^2
+                     dt8_xx[ig] = -(v * s20pi3 * (dx_xx * y1z + y1x * dz_xx) - y8 * dv * tg * tgxx);
+                     dt8_yy[ig] = -(v * s20pi3 * (dx_yy * y1z + y1x * dz_yy) - y8 * dv * tg * tgyy);
+                     dt8_zz[ig] = -(v * s20pi3 * (dx_zz * y1z + y1x * dz_zz) - y8 * dv * tg * tgzz);
+                     dt8_xy[ig] = -(v * s20pi3 * (dx_xy * y1z + y1x * dz_xy) - y8 * dv * tg * tgxy);
+                     dt8_yz[ig] = -(v * s20pi3 * (dx_yz * y1z + y1x * dz_yz) - y8 * dv * tg * tgyz);
+                     dt8_xz[ig] = -(v * s20pi3 * (dx_xz * y1z + y1x * dz_xz) - y8 * dv * tg * tgxz);
+                  }
                 } // ig
               } // iquad
             }
@@ -913,55 +968,65 @@ void NonLocalPotential::update_twnl(void) {
             
               // dtwnl[is][ipr][ij][ngwl]
               // index = ig + ngwl * ( ij + 6 * ipr )
-              double *dt9_xx = &dtwnl[is][ngwl*(0+6*ipr9)];
-              double *dt9_yy = &dtwnl[is][ngwl*(1+6*ipr9)];
-              double *dt9_zz = &dtwnl[is][ngwl*(2+6*ipr9)];
-              double *dt9_xy = &dtwnl[is][ngwl*(3+6*ipr9)];
-              double *dt9_yz = &dtwnl[is][ngwl*(4+6*ipr9)];
-              double *dt9_xz = &dtwnl[is][ngwl*(5+6*ipr9)];
+              double *dt9_xx,*dt9_yy,*dt9_zz,*dt9_xy,*dt9_yz,*dt9_xz;
+              double *dt10_xx,*dt10_yy,*dt10_zz,*dt10_xy,*dt10_yz,*dt10_xz;
+              double *dt11_xx,*dt11_yy,*dt11_zz,*dt11_xy,*dt11_yz,*dt11_xz;
+              double *dt12_xx,*dt12_yy,*dt12_zz,*dt12_xy,*dt12_yz,*dt12_xz;
+              double *dt13_xx,*dt13_yy,*dt13_zz,*dt13_xy,*dt13_yz,*dt13_xz;
+              double *dt14_xx,*dt14_yy,*dt14_zz,*dt14_xy,*dt14_yz,*dt14_xz;
+              double *dt15_xx,*dt15_yy,*dt15_zz,*dt15_xy,*dt15_yz,*dt15_xz;
+              if (compute_stress)
+              {
+                 dt9_xx = &dtwnl[is][ngwl*(0+6*ipr9)];
+                 dt9_yy = &dtwnl[is][ngwl*(1+6*ipr9)];
+                 dt9_zz = &dtwnl[is][ngwl*(2+6*ipr9)];
+                 dt9_xy = &dtwnl[is][ngwl*(3+6*ipr9)];
+                 dt9_yz = &dtwnl[is][ngwl*(4+6*ipr9)];
+                 dt9_xz = &dtwnl[is][ngwl*(5+6*ipr9)];
 
-              double *dt10_xx = &dtwnl[is][ngwl*(0+6*ipr10)];
-              double *dt10_yy = &dtwnl[is][ngwl*(1+6*ipr10)];
-              double *dt10_zz = &dtwnl[is][ngwl*(2+6*ipr10)];
-              double *dt10_xy = &dtwnl[is][ngwl*(3+6*ipr10)];
-              double *dt10_yz = &dtwnl[is][ngwl*(4+6*ipr10)];
-              double *dt10_xz = &dtwnl[is][ngwl*(5+6*ipr10)];
+                 dt10_xx = &dtwnl[is][ngwl*(0+6*ipr10)];
+                 dt10_yy = &dtwnl[is][ngwl*(1+6*ipr10)];
+                 dt10_zz = &dtwnl[is][ngwl*(2+6*ipr10)];
+                 dt10_xy = &dtwnl[is][ngwl*(3+6*ipr10)];
+                 dt10_yz = &dtwnl[is][ngwl*(4+6*ipr10)];
+                 dt10_xz = &dtwnl[is][ngwl*(5+6*ipr10)];
             
-              double *dt11_xx = &dtwnl[is][ngwl*(0+6*ipr11)];
-              double *dt11_yy = &dtwnl[is][ngwl*(1+6*ipr11)];
-              double *dt11_zz = &dtwnl[is][ngwl*(2+6*ipr11)];
-              double *dt11_xy = &dtwnl[is][ngwl*(3+6*ipr11)];
-              double *dt11_yz = &dtwnl[is][ngwl*(4+6*ipr11)];
-              double *dt11_xz = &dtwnl[is][ngwl*(5+6*ipr11)];
+                 dt11_xx = &dtwnl[is][ngwl*(0+6*ipr11)];
+                 dt11_yy = &dtwnl[is][ngwl*(1+6*ipr11)];
+                 dt11_zz = &dtwnl[is][ngwl*(2+6*ipr11)];
+                 dt11_xy = &dtwnl[is][ngwl*(3+6*ipr11)];
+                 dt11_yz = &dtwnl[is][ngwl*(4+6*ipr11)];
+                 dt11_xz = &dtwnl[is][ngwl*(5+6*ipr11)];
             
-              double *dt12_xx = &dtwnl[is][ngwl*(0+6*ipr12)];
-              double *dt12_yy = &dtwnl[is][ngwl*(1+6*ipr12)];
-              double *dt12_zz = &dtwnl[is][ngwl*(2+6*ipr12)];
-              double *dt12_xy = &dtwnl[is][ngwl*(3+6*ipr12)];
-              double *dt12_yz = &dtwnl[is][ngwl*(4+6*ipr12)];
-              double *dt12_xz = &dtwnl[is][ngwl*(5+6*ipr12)];
+                 dt12_xx = &dtwnl[is][ngwl*(0+6*ipr12)];
+                 dt12_yy = &dtwnl[is][ngwl*(1+6*ipr12)];
+                 dt12_zz = &dtwnl[is][ngwl*(2+6*ipr12)];
+                 dt12_xy = &dtwnl[is][ngwl*(3+6*ipr12)];
+                 dt12_yz = &dtwnl[is][ngwl*(4+6*ipr12)];
+                 dt12_xz = &dtwnl[is][ngwl*(5+6*ipr12)];
             
-              double *dt13_xx = &dtwnl[is][ngwl*(0+6*ipr13)];
-              double *dt13_yy = &dtwnl[is][ngwl*(1+6*ipr13)];
-              double *dt13_zz = &dtwnl[is][ngwl*(2+6*ipr13)];
-              double *dt13_xy = &dtwnl[is][ngwl*(3+6*ipr13)];
-              double *dt13_yz = &dtwnl[is][ngwl*(4+6*ipr13)];
-              double *dt13_xz = &dtwnl[is][ngwl*(5+6*ipr13)];
+                 dt13_xx = &dtwnl[is][ngwl*(0+6*ipr13)];
+                 dt13_yy = &dtwnl[is][ngwl*(1+6*ipr13)];
+                 dt13_zz = &dtwnl[is][ngwl*(2+6*ipr13)];
+                 dt13_xy = &dtwnl[is][ngwl*(3+6*ipr13)];
+                 dt13_yz = &dtwnl[is][ngwl*(4+6*ipr13)];
+                 dt13_xz = &dtwnl[is][ngwl*(5+6*ipr13)];
 
-              double *dt14_xx = &dtwnl[is][ngwl*(0+6*ipr14)];
-              double *dt14_yy = &dtwnl[is][ngwl*(1+6*ipr14)];
-              double *dt14_zz = &dtwnl[is][ngwl*(2+6*ipr14)];
-              double *dt14_xy = &dtwnl[is][ngwl*(3+6*ipr14)];
-              double *dt14_yz = &dtwnl[is][ngwl*(4+6*ipr14)];
-              double *dt14_xz = &dtwnl[is][ngwl*(5+6*ipr14)];
+                 dt14_xx = &dtwnl[is][ngwl*(0+6*ipr14)];
+                 dt14_yy = &dtwnl[is][ngwl*(1+6*ipr14)];
+                 dt14_zz = &dtwnl[is][ngwl*(2+6*ipr14)];
+                 dt14_xy = &dtwnl[is][ngwl*(3+6*ipr14)];
+                 dt14_yz = &dtwnl[is][ngwl*(4+6*ipr14)];
+                 dt14_xz = &dtwnl[is][ngwl*(5+6*ipr14)];
             
-              double *dt15_xx = &dtwnl[is][ngwl*(0+6*ipr15)];
-              double *dt15_yy = &dtwnl[is][ngwl*(1+6*ipr15)];
-              double *dt15_zz = &dtwnl[is][ngwl*(2+6*ipr15)];
-              double *dt15_xy = &dtwnl[is][ngwl*(3+6*ipr15)];
-              double *dt15_yz = &dtwnl[is][ngwl*(4+6*ipr15)];
-              double *dt15_xz = &dtwnl[is][ngwl*(5+6*ipr15)];
-
+                 dt15_xx = &dtwnl[is][ngwl*(0+6*ipr15)];
+                 dt15_yy = &dtwnl[is][ngwl*(1+6*ipr15)];
+                 dt15_zz = &dtwnl[is][ngwl*(2+6*ipr15)];
+                 dt15_xy = &dtwnl[is][ngwl*(3+6*ipr15)];
+                 dt15_yz = &dtwnl[is][ngwl*(4+6*ipr15)];
+                 dt15_xz = &dtwnl[is][ngwl*(5+6*ipr15)];
+              }
+              
               for ( int ig = 0; ig < ngwl; ig++ ) {
                 double v,dv;
                 const double tg = kpg[ig];
@@ -1052,77 +1117,80 @@ void NonLocalPotential::update_twnl(void) {
                 // note:  we follow Francois' convention of pulling the minus sign out of 
                 //   the dx_xx,dz_yy, etc. terms
 
-                // y9 = s74pi * 0.5 * (5*z^3 - 3z)
-                const double dy9z = s74pi * 0.5 * (15.*tgzz - 3.);
-                dt9_xx[ig] = -dy9z * dz_xx * v + y9 * tg * tgxx * dv;
-                dt9_yy[ig] = -dy9z * dz_yy * v + y9 * tg * tgyy * dv;
-                dt9_zz[ig] = -dy9z * dz_zz * v + y9 * tg * tgzz * dv;
-                dt9_xy[ig] = -dy9z * dz_xy * v + y9 * tg * tgxy * dv;
-                dt9_yz[ig] = -dy9z * dz_yz * v + y9 * tg * tgyz * dv;
-                dt9_xz[ig] = -dy9z * dz_xz * v + y9 * tg * tgxz * dv;
+                if (compute_stress)
+                {
+                   // y9 = s74pi * 0.5 * (5*z^3 - 3z)
+                   const double dy9z = s74pi * 0.5 * (15.*tgzz - 3.);
+                   dt9_xx[ig] = -dy9z * dz_xx * v + y9 * tg * tgxx * dv;
+                   dt9_yy[ig] = -dy9z * dz_yy * v + y9 * tg * tgyy * dv;
+                   dt9_zz[ig] = -dy9z * dz_zz * v + y9 * tg * tgzz * dv;
+                   dt9_xy[ig] = -dy9z * dz_xy * v + y9 * tg * tgxy * dv;
+                   dt9_yz[ig] = -dy9z * dz_yz * v + y9 * tg * tgyz * dv;
+                   dt9_xz[ig] = -dy9z * dz_xz * v + y9 * tg * tgxz * dv;
 
-                // y10 = s2132pi * x * (5z^2 - 1)
-                const double dy10x = s2132pi * (5.*tgzz-1.0);
-                const double dy10z = s2132pi * 10.*tgxz;
-                dt10_xx[ig] = -(dy10x*dx_xx + dy10z*dz_xx) * v + y10 * tg * tgxx * dv;
-                dt10_yy[ig] = -(dy10x*dx_yy + dy10z*dz_yy) * v + y10 * tg * tgyy * dv;
-                dt10_zz[ig] = -(dy10x*dx_zz + dy10z*dz_zz) * v + y10 * tg * tgzz * dv;
-                dt10_xy[ig] = -(dy10x*dx_xy + dy10z*dz_xy) * v + y10 * tg * tgxy * dv;
-                dt10_yz[ig] = -(dy10x*dx_yz + dy10z*dz_yz) * v + y10 * tg * tgyz * dv;
-                dt10_xz[ig] = -(dy10x*dx_xz + dy10z*dz_xz) * v + y10 * tg * tgxz * dv;
+                   // y10 = s2132pi * x * (5z^2 - 1)
+                   const double dy10x = s2132pi * (5.*tgzz-1.0);
+                   const double dy10z = s2132pi * 10.*tgxz;
+                   dt10_xx[ig] = -(dy10x*dx_xx + dy10z*dz_xx) * v + y10 * tg * tgxx * dv;
+                   dt10_yy[ig] = -(dy10x*dx_yy + dy10z*dz_yy) * v + y10 * tg * tgyy * dv;
+                   dt10_zz[ig] = -(dy10x*dx_zz + dy10z*dz_zz) * v + y10 * tg * tgzz * dv;
+                   dt10_xy[ig] = -(dy10x*dx_xy + dy10z*dz_xy) * v + y10 * tg * tgxy * dv;
+                   dt10_yz[ig] = -(dy10x*dx_yz + dy10z*dz_yz) * v + y10 * tg * tgyz * dv;
+                   dt10_xz[ig] = -(dy10x*dx_xz + dy10z*dz_xz) * v + y10 * tg * tgxz * dv;
 
 
-                // y11 = s2132pi * y * (5z^2 - 1)
-                const double dy11y = s2132pi * (5.*tgzz-1.0);
-                const double dy11z = s2132pi * 10.*tgyz;
-                dt11_xx[ig] = -(dy11y*dy_xx + dy11z*dz_xx) * v + y11 * tg * tgxx * dv;
-                dt11_yy[ig] = -(dy11y*dy_yy + dy11z*dz_yy) * v + y11 * tg * tgyy * dv;
-                dt11_zz[ig] = -(dy11y*dy_zz + dy11z*dz_zz) * v + y11 * tg * tgzz * dv;
-                dt11_xy[ig] = -(dy11y*dy_xy + dy11z*dz_xy) * v + y11 * tg * tgxy * dv;
-                dt11_yz[ig] = -(dy11y*dy_yz + dy11z*dz_yz) * v + y11 * tg * tgyz * dv;
-                dt11_xz[ig] = -(dy11y*dy_xz + dy11z*dz_xz) * v + y11 * tg * tgxz * dv;
+                   // y11 = s2132pi * y * (5z^2 - 1)
+                   const double dy11y = s2132pi * (5.*tgzz-1.0);
+                   const double dy11z = s2132pi * 10.*tgyz;
+                   dt11_xx[ig] = -(dy11y*dy_xx + dy11z*dz_xx) * v + y11 * tg * tgxx * dv;
+                   dt11_yy[ig] = -(dy11y*dy_yy + dy11z*dz_yy) * v + y11 * tg * tgyy * dv;
+                   dt11_zz[ig] = -(dy11y*dy_zz + dy11z*dz_zz) * v + y11 * tg * tgzz * dv;
+                   dt11_xy[ig] = -(dy11y*dy_xy + dy11z*dz_xy) * v + y11 * tg * tgxy * dv;
+                   dt11_yz[ig] = -(dy11y*dy_yz + dy11z*dz_yz) * v + y11 * tg * tgyz * dv;
+                   dt11_xz[ig] = -(dy11y*dy_xz + dy11z*dz_xz) * v + y11 * tg * tgxz * dv;
 
-                // y12 = s1054pi * x * y * z;
-                const double dy12x = s1054pi * tgyz;
-                const double dy12y = s1054pi * tgxz;
-                const double dy12z = s1054pi * tgxy;
-                dt12_xx[ig] = -(dy12x*dx_xx + dy12y*dy_xx + dy12z*dz_xx) * v + y12 * tg * tgxx * dv;
-                dt12_yy[ig] = -(dy12x*dx_yy + dy12y*dy_yy + dy12z*dz_yy) * v + y12 * tg * tgyy * dv;
-                dt12_zz[ig] = -(dy12x*dx_zz + dy12y*dy_zz + dy12z*dz_zz) * v + y12 * tg * tgzz * dv;
-                dt12_xy[ig] = -(dy12x*dx_xy + dy12y*dy_xy + dy12z*dz_xy) * v + y12 * tg * tgxy * dv;
-                dt12_yz[ig] = -(dy12x*dx_yz + dy12y*dy_yz + dy12z*dz_yz) * v + y12 * tg * tgyz * dv;
-                dt12_xz[ig] = -(dy12x*dx_xz + dy12y*dy_xz + dy12z*dz_xz) * v + y12 * tg * tgxz * dv;
+                   // y12 = s1054pi * x * y * z;
+                   const double dy12x = s1054pi * tgyz;
+                   const double dy12y = s1054pi * tgxz;
+                   const double dy12z = s1054pi * tgxy;
+                   dt12_xx[ig] = -(dy12x*dx_xx + dy12y*dy_xx + dy12z*dz_xx) * v + y12 * tg * tgxx * dv;
+                   dt12_yy[ig] = -(dy12x*dx_yy + dy12y*dy_yy + dy12z*dz_yy) * v + y12 * tg * tgyy * dv;
+                   dt12_zz[ig] = -(dy12x*dx_zz + dy12y*dy_zz + dy12z*dz_zz) * v + y12 * tg * tgzz * dv;
+                   dt12_xy[ig] = -(dy12x*dx_xy + dy12y*dy_xy + dy12z*dz_xy) * v + y12 * tg * tgxy * dv;
+                   dt12_yz[ig] = -(dy12x*dx_yz + dy12y*dy_yz + dy12z*dz_yz) * v + y12 * tg * tgyz * dv;
+                   dt12_xz[ig] = -(dy12x*dx_xz + dy12y*dy_xz + dy12z*dz_xz) * v + y12 * tg * tgxz * dv;
 
-                // y13 = s1054pi * 0.5 * z * (x^2 - y^2)
-                const double dy13x = s1054pi * tgxz;
-                const double dy13y = -s1054pi * tgyz;
-                const double dy13z = s1054pi * 0.5 * (tgxx - tgyy);
-                dt13_xx[ig] = -(dy13x*dx_xx + dy13y*dy_xx + dy13z*dz_xx) * v + y13 * tg * tgxx * dv;
-                dt13_yy[ig] = -(dy13x*dx_yy + dy13y*dy_yy + dy13z*dz_yy) * v + y13 * tg * tgyy * dv;
-                dt13_zz[ig] = -(dy13x*dx_zz + dy13y*dy_zz + dy13z*dz_zz) * v + y13 * tg * tgzz * dv;
-                dt13_xy[ig] = -(dy13x*dx_xy + dy13y*dy_xy + dy13z*dz_xy) * v + y13 * tg * tgxy * dv;
-                dt13_yz[ig] = -(dy13x*dx_yz + dy13y*dy_yz + dy13z*dz_yz) * v + y13 * tg * tgyz * dv;
-                dt13_xz[ig] = -(dy13x*dx_xz + dy13y*dy_xz + dy13z*dz_xz) * v + y13 * tg * tgxz * dv;
+                   // y13 = s1054pi * 0.5 * z * (x^2 - y^2)
+                   const double dy13x = s1054pi * tgxz;
+                   const double dy13y = -s1054pi * tgyz;
+                   const double dy13z = s1054pi * 0.5 * (tgxx - tgyy);
+                   dt13_xx[ig] = -(dy13x*dx_xx + dy13y*dy_xx + dy13z*dz_xx) * v + y13 * tg * tgxx * dv;
+                   dt13_yy[ig] = -(dy13x*dx_yy + dy13y*dy_yy + dy13z*dz_yy) * v + y13 * tg * tgyy * dv;
+                   dt13_zz[ig] = -(dy13x*dx_zz + dy13y*dy_zz + dy13z*dz_zz) * v + y13 * tg * tgzz * dv;
+                   dt13_xy[ig] = -(dy13x*dx_xy + dy13y*dy_xy + dy13z*dz_xy) * v + y13 * tg * tgxy * dv;
+                   dt13_yz[ig] = -(dy13x*dx_yz + dy13y*dy_yz + dy13z*dz_yz) * v + y13 * tg * tgyz * dv;
+                   dt13_xz[ig] = -(dy13x*dx_xz + dy13y*dy_xz + dy13z*dz_xz) * v + y13 * tg * tgxz * dv;
 
-                // y14 = s3532pi * (x^3 - 3*x*y^2)
-                const double dy14x = s3532pi * 3. * (tgxx - tgyy);
-                const double dy14y = -s3532pi * 6. * tgxy;
-                dt14_xx[ig] = -(dy14x*dx_xx + dy14y*dy_xx) * v + y14 * tg * tgxx * dv;
-                dt14_yy[ig] = -(dy14x*dx_yy + dy14y*dy_yy) * v + y14 * tg * tgyy * dv;
-                dt14_zz[ig] = -(dy14x*dx_zz + dy14y*dy_zz) * v + y14 * tg * tgzz * dv;
-                dt14_xy[ig] = -(dy14x*dx_xy + dy14y*dy_xy) * v + y14 * tg * tgxy * dv;
-                dt14_yz[ig] = -(dy14x*dx_yz + dy14y*dy_yz) * v + y14 * tg * tgyz * dv;
-                dt14_xz[ig] = -(dy14x*dx_xz + dy14y*dy_xz) * v + y14 * tg * tgxz * dv;
+                   // y14 = s3532pi * (x^3 - 3*x*y^2)
+                   const double dy14x = s3532pi * 3. * (tgxx - tgyy);
+                   const double dy14y = -s3532pi * 6. * tgxy;
+                   dt14_xx[ig] = -(dy14x*dx_xx + dy14y*dy_xx) * v + y14 * tg * tgxx * dv;
+                   dt14_yy[ig] = -(dy14x*dx_yy + dy14y*dy_yy) * v + y14 * tg * tgyy * dv;
+                   dt14_zz[ig] = -(dy14x*dx_zz + dy14y*dy_zz) * v + y14 * tg * tgzz * dv;
+                   dt14_xy[ig] = -(dy14x*dx_xy + dy14y*dy_xy) * v + y14 * tg * tgxy * dv;
+                   dt14_yz[ig] = -(dy14x*dx_yz + dy14y*dy_yz) * v + y14 * tg * tgyz * dv;
+                   dt14_xz[ig] = -(dy14x*dx_xz + dy14y*dy_xz) * v + y14 * tg * tgxz * dv;
 
-                // y15 = s3532pi * (3*y*x^2 - y^3)
-                const double dy15x = s3532pi * 6.* tgxy;
-                const double dy15y = s3532pi * 3. * (tgxx - tgyy);
-                dt15_xx[ig] = -(dy15x*dx_xx + dy15y*dy_xx) * v + y15 * tg * tgxx * dv;
-                dt15_yy[ig] = -(dy15x*dx_yy + dy15y*dy_yy) * v + y15 * tg * tgyy * dv;
-                dt15_zz[ig] = -(dy15x*dx_zz + dy15y*dy_zz) * v + y15 * tg * tgzz * dv;
-                dt15_xy[ig] = -(dy15x*dx_xy + dy15y*dy_xy) * v + y15 * tg * tgxy * dv;
-                dt15_yz[ig] = -(dy15x*dx_yz + dy15y*dy_yz) * v + y15 * tg * tgyz * dv;
-                dt15_xz[ig] = -(dy15x*dx_xz + dy15y*dy_xz) * v + y15 * tg * tgxz * dv;
+                   // y15 = s3532pi * (3*y*x^2 - y^3)
+                   const double dy15x = s3532pi * 6.* tgxy;
+                   const double dy15y = s3532pi * 3. * (tgxx - tgyy);
+                   dt15_xx[ig] = -(dy15x*dx_xx + dy15y*dy_xx) * v + y15 * tg * tgxx * dv;
+                   dt15_yy[ig] = -(dy15x*dx_yy + dy15y*dy_yy) * v + y15 * tg * tgyy * dv;
+                   dt15_zz[ig] = -(dy15x*dx_zz + dy15y*dy_zz) * v + y15 * tg * tgzz * dv;
+                   dt15_xy[ig] = -(dy15x*dx_xy + dy15y*dy_xy) * v + y15 * tg * tgxy * dv;
+                   dt15_yz[ig] = -(dy15x*dx_yz + dy15y*dy_yz) * v + y15 * tg * tgyz * dv;
+                   dt15_xz[ig] = -(dy15x*dx_xz + dy15y*dy_xz) * v + y15 * tg * tgxz * dv;
+                }
               }
             }
             else {
@@ -1149,55 +1217,66 @@ void NonLocalPotential::update_twnl(void) {
 
                 // dtwnl[is][ipr][ij][ngwl]
                 // index = ig + ngwl * ( ij + 6 * ipr )
-                double *dt9_xx = &dtwnl[is][ngwl*(0+6*ipr9)];
-                double *dt9_yy = &dtwnl[is][ngwl*(1+6*ipr9)];
-                double *dt9_zz = &dtwnl[is][ngwl*(2+6*ipr9)];
-                double *dt9_xy = &dtwnl[is][ngwl*(3+6*ipr9)];
-                double *dt9_yz = &dtwnl[is][ngwl*(4+6*ipr9)];
-                double *dt9_xz = &dtwnl[is][ngwl*(5+6*ipr9)];
+                double *dt9_xx,*dt9_yy,*dt9_zz,*dt9_xy,*dt9_yz,*dt9_xz;
+                double *dt10_xx,*dt10_yy,*dt10_zz,*dt10_xy,*dt10_yz,*dt10_xz;
+                double *dt11_xx,*dt11_yy,*dt11_zz,*dt11_xy,*dt11_yz,*dt11_xz;
+                double *dt12_xx,*dt12_yy,*dt12_zz,*dt12_xy,*dt12_yz,*dt12_xz;
+                double *dt13_xx,*dt13_yy,*dt13_zz,*dt13_xy,*dt13_yz,*dt13_xz;
+                double *dt14_xx,*dt14_yy,*dt14_zz,*dt14_xy,*dt14_yz,*dt14_xz;
+                double *dt15_xx,*dt15_yy,*dt15_zz,*dt15_xy,*dt15_yz,*dt15_xz;
 
-                double *dt10_xx = &dtwnl[is][ngwl*(0+6*ipr10)];
-                double *dt10_yy = &dtwnl[is][ngwl*(1+6*ipr10)];
-                double *dt10_zz = &dtwnl[is][ngwl*(2+6*ipr10)];
-                double *dt10_xy = &dtwnl[is][ngwl*(3+6*ipr10)];
-                double *dt10_yz = &dtwnl[is][ngwl*(4+6*ipr10)];
-                double *dt10_xz = &dtwnl[is][ngwl*(5+6*ipr10)];
+                if (compute_stress)
+                {
+                   dt9_xx = &dtwnl[is][ngwl*(0+6*ipr9)];
+                   dt9_yy = &dtwnl[is][ngwl*(1+6*ipr9)];
+                   dt9_zz = &dtwnl[is][ngwl*(2+6*ipr9)];
+                   dt9_xy = &dtwnl[is][ngwl*(3+6*ipr9)];
+                   dt9_yz = &dtwnl[is][ngwl*(4+6*ipr9)];
+                   dt9_xz = &dtwnl[is][ngwl*(5+6*ipr9)];
+
+                   dt10_xx = &dtwnl[is][ngwl*(0+6*ipr10)];
+                   dt10_yy = &dtwnl[is][ngwl*(1+6*ipr10)];
+                   dt10_zz = &dtwnl[is][ngwl*(2+6*ipr10)];
+                   dt10_xy = &dtwnl[is][ngwl*(3+6*ipr10)];
+                   dt10_yz = &dtwnl[is][ngwl*(4+6*ipr10)];
+                   dt10_xz = &dtwnl[is][ngwl*(5+6*ipr10)];
  
-                double *dt11_xx = &dtwnl[is][ngwl*(0+6*ipr11)];
-                double *dt11_yy = &dtwnl[is][ngwl*(1+6*ipr11)];
-                double *dt11_zz = &dtwnl[is][ngwl*(2+6*ipr11)];
-                double *dt11_xy = &dtwnl[is][ngwl*(3+6*ipr11)];
-                double *dt11_yz = &dtwnl[is][ngwl*(4+6*ipr11)];
-                double *dt11_xz = &dtwnl[is][ngwl*(5+6*ipr11)];
+                   dt11_xx = &dtwnl[is][ngwl*(0+6*ipr11)];
+                   dt11_yy = &dtwnl[is][ngwl*(1+6*ipr11)];
+                   dt11_zz = &dtwnl[is][ngwl*(2+6*ipr11)];
+                   dt11_xy = &dtwnl[is][ngwl*(3+6*ipr11)];
+                   dt11_yz = &dtwnl[is][ngwl*(4+6*ipr11)];
+                   dt11_xz = &dtwnl[is][ngwl*(5+6*ipr11)];
  
-                double *dt12_xx = &dtwnl[is][ngwl*(0+6*ipr12)];
-                double *dt12_yy = &dtwnl[is][ngwl*(1+6*ipr12)];
-                double *dt12_zz = &dtwnl[is][ngwl*(2+6*ipr12)];
-                double *dt12_xy = &dtwnl[is][ngwl*(3+6*ipr12)];
-                double *dt12_yz = &dtwnl[is][ngwl*(4+6*ipr12)];
-                double *dt12_xz = &dtwnl[is][ngwl*(5+6*ipr12)];
+                   dt12_xx = &dtwnl[is][ngwl*(0+6*ipr12)];
+                   dt12_yy = &dtwnl[is][ngwl*(1+6*ipr12)];
+                   dt12_zz = &dtwnl[is][ngwl*(2+6*ipr12)];
+                   dt12_xy = &dtwnl[is][ngwl*(3+6*ipr12)];
+                   dt12_yz = &dtwnl[is][ngwl*(4+6*ipr12)];
+                   dt12_xz = &dtwnl[is][ngwl*(5+6*ipr12)];
  
-                double *dt13_xx = &dtwnl[is][ngwl*(0+6*ipr13)];
-                double *dt13_yy = &dtwnl[is][ngwl*(1+6*ipr13)];
-                double *dt13_zz = &dtwnl[is][ngwl*(2+6*ipr13)];
-                double *dt13_xy = &dtwnl[is][ngwl*(3+6*ipr13)];
-                double *dt13_yz = &dtwnl[is][ngwl*(4+6*ipr13)];
-                double *dt13_xz = &dtwnl[is][ngwl*(5+6*ipr13)];
+                   dt13_xx = &dtwnl[is][ngwl*(0+6*ipr13)];
+                   dt13_yy = &dtwnl[is][ngwl*(1+6*ipr13)];
+                   dt13_zz = &dtwnl[is][ngwl*(2+6*ipr13)];
+                   dt13_xy = &dtwnl[is][ngwl*(3+6*ipr13)];
+                   dt13_yz = &dtwnl[is][ngwl*(4+6*ipr13)];
+                   dt13_xz = &dtwnl[is][ngwl*(5+6*ipr13)];
 
-                double *dt14_xx = &dtwnl[is][ngwl*(0+6*ipr14)];
-                double *dt14_yy = &dtwnl[is][ngwl*(1+6*ipr14)];
-                double *dt14_zz = &dtwnl[is][ngwl*(2+6*ipr14)];
-                double *dt14_xy = &dtwnl[is][ngwl*(3+6*ipr14)];
-                double *dt14_yz = &dtwnl[is][ngwl*(4+6*ipr14)];
-                double *dt14_xz = &dtwnl[is][ngwl*(5+6*ipr14)];
+                   dt14_xx = &dtwnl[is][ngwl*(0+6*ipr14)];
+                   dt14_yy = &dtwnl[is][ngwl*(1+6*ipr14)];
+                   dt14_zz = &dtwnl[is][ngwl*(2+6*ipr14)];
+                   dt14_xy = &dtwnl[is][ngwl*(3+6*ipr14)];
+                   dt14_yz = &dtwnl[is][ngwl*(4+6*ipr14)];
+                   dt14_xz = &dtwnl[is][ngwl*(5+6*ipr14)];
 
-                double *dt15_xx = &dtwnl[is][ngwl*(0+6*ipr15)];
-                double *dt15_yy = &dtwnl[is][ngwl*(1+6*ipr15)];
-                double *dt15_zz = &dtwnl[is][ngwl*(2+6*ipr15)];
-                double *dt15_xy = &dtwnl[is][ngwl*(3+6*ipr15)];
-                double *dt15_yz = &dtwnl[is][ngwl*(4+6*ipr15)];
-                double *dt15_xz = &dtwnl[is][ngwl*(5+6*ipr15)];
-
+                   dt15_xx = &dtwnl[is][ngwl*(0+6*ipr15)];
+                   dt15_yy = &dtwnl[is][ngwl*(1+6*ipr15)];
+                   dt15_zz = &dtwnl[is][ngwl*(2+6*ipr15)];
+                   dt15_xy = &dtwnl[is][ngwl*(3+6*ipr15)];
+                   dt15_yz = &dtwnl[is][ngwl*(4+6*ipr15)];
+                   dt15_xz = &dtwnl[is][ngwl*(5+6*ipr15)];
+                }
+                
                 const double r = rquad[is][iquad];
                 for ( int ig = 0; ig < ngwl; ig++ ) {
                   double v = 0.0, dv = 0.0;
@@ -1304,77 +1383,80 @@ void NonLocalPotential::update_twnl(void) {
                   // note:  we follow Francois' convention of pulling the minus sign out of 
                   //   the dx_xx,dz_yy, etc. terms
                 
-                  // y9 = s74pi * 0.5 * (5*z^3 - 3z)
-                  const double dy9z = s74pi * 0.5 * (15.*tgzz - 3.);
-                  dt9_xx[ig] = -dy9z * dz_xx * v + y9 * tg * tgxx * dv;
-                  dt9_yy[ig] = -dy9z * dz_yy * v + y9 * tg * tgyy * dv;
-                  dt9_zz[ig] = -dy9z * dz_zz * v + y9 * tg * tgzz * dv;
-                  dt9_xy[ig] = -dy9z * dz_xy * v + y9 * tg * tgxy * dv;
-                  dt9_yz[ig] = -dy9z * dz_yz * v + y9 * tg * tgyz * dv;
-                  dt9_xz[ig] = -dy9z * dz_xz * v + y9 * tg * tgxz * dv;
+                  if (compute_stress)
+                  {
+                     // y9 = s74pi * 0.5 * (5*z^3 - 3z)
+                     const double dy9z = s74pi * 0.5 * (15.*tgzz - 3.);
+                     dt9_xx[ig] = -dy9z * dz_xx * v + y9 * tg * tgxx * dv;
+                     dt9_yy[ig] = -dy9z * dz_yy * v + y9 * tg * tgyy * dv;
+                     dt9_zz[ig] = -dy9z * dz_zz * v + y9 * tg * tgzz * dv;
+                     dt9_xy[ig] = -dy9z * dz_xy * v + y9 * tg * tgxy * dv;
+                     dt9_yz[ig] = -dy9z * dz_yz * v + y9 * tg * tgyz * dv;
+                     dt9_xz[ig] = -dy9z * dz_xz * v + y9 * tg * tgxz * dv;
                 
-                  // y10 = s2132pi * x * (5z^2 - 1)
-                  const double dy10x = s2132pi * (5.*tgzz-1.0);
-                  const double dy10z = s2132pi * 10.*tgxz;
-                  dt10_xx[ig] = -(dy10x*dx_xx + dy10z*dz_xx) * v + y10 * tg * tgxx * dv;
-                  dt10_yy[ig] = -(dy10x*dx_yy + dy10z*dz_yy) * v + y10 * tg * tgyy * dv;
-                  dt10_zz[ig] = -(dy10x*dx_zz + dy10z*dz_zz) * v + y10 * tg * tgzz * dv;
-                  dt10_xy[ig] = -(dy10x*dx_xy + dy10z*dz_xy) * v + y10 * tg * tgxy * dv;
-                  dt10_yz[ig] = -(dy10x*dx_yz + dy10z*dz_yz) * v + y10 * tg * tgyz * dv;
-                  dt10_xz[ig] = -(dy10x*dx_xz + dy10z*dz_xz) * v + y10 * tg * tgxz * dv;
+                     // y10 = s2132pi * x * (5z^2 - 1)
+                     const double dy10x = s2132pi * (5.*tgzz-1.0);
+                     const double dy10z = s2132pi * 10.*tgxz;
+                     dt10_xx[ig] = -(dy10x*dx_xx + dy10z*dz_xx) * v + y10 * tg * tgxx * dv;
+                     dt10_yy[ig] = -(dy10x*dx_yy + dy10z*dz_yy) * v + y10 * tg * tgyy * dv;
+                     dt10_zz[ig] = -(dy10x*dx_zz + dy10z*dz_zz) * v + y10 * tg * tgzz * dv;
+                     dt10_xy[ig] = -(dy10x*dx_xy + dy10z*dz_xy) * v + y10 * tg * tgxy * dv;
+                     dt10_yz[ig] = -(dy10x*dx_yz + dy10z*dz_yz) * v + y10 * tg * tgyz * dv;
+                     dt10_xz[ig] = -(dy10x*dx_xz + dy10z*dz_xz) * v + y10 * tg * tgxz * dv;
                 
                 
-                  // y11 = s2132pi * y * (5z^2 - 1)
-                  const double dy11y = s2132pi * (5.*tgzz-1.0);
-                  const double dy11z = s2132pi * 10.*tgyz;
-                  dt11_xx[ig] = -(dy11y*dy_xx + dy11z*dz_xx) * v + y11 * tg * tgxx * dv;
-                  dt11_yy[ig] = -(dy11y*dy_yy + dy11z*dz_yy) * v + y11 * tg * tgyy * dv;
-                  dt11_zz[ig] = -(dy11y*dy_zz + dy11z*dz_zz) * v + y11 * tg * tgzz * dv;
-                  dt11_xy[ig] = -(dy11y*dy_xy + dy11z*dz_xy) * v + y11 * tg * tgxy * dv;
-                  dt11_yz[ig] = -(dy11y*dy_yz + dy11z*dz_yz) * v + y11 * tg * tgyz * dv;
-                  dt11_xz[ig] = -(dy11y*dy_xz + dy11z*dz_xz) * v + y11 * tg * tgxz * dv;
+                     // y11 = s2132pi * y * (5z^2 - 1)
+                     const double dy11y = s2132pi * (5.*tgzz-1.0);
+                     const double dy11z = s2132pi * 10.*tgyz;
+                     dt11_xx[ig] = -(dy11y*dy_xx + dy11z*dz_xx) * v + y11 * tg * tgxx * dv;
+                     dt11_yy[ig] = -(dy11y*dy_yy + dy11z*dz_yy) * v + y11 * tg * tgyy * dv;
+                     dt11_zz[ig] = -(dy11y*dy_zz + dy11z*dz_zz) * v + y11 * tg * tgzz * dv;
+                     dt11_xy[ig] = -(dy11y*dy_xy + dy11z*dz_xy) * v + y11 * tg * tgxy * dv;
+                     dt11_yz[ig] = -(dy11y*dy_yz + dy11z*dz_yz) * v + y11 * tg * tgyz * dv;
+                     dt11_xz[ig] = -(dy11y*dy_xz + dy11z*dz_xz) * v + y11 * tg * tgxz * dv;
                 
-                  // y12 = s1054pi * x * y * z;
-                  const double dy12x = s1054pi * tgyz;
-                  const double dy12y = s1054pi * tgxz;
-                  const double dy12z = s1054pi * tgxy;
-                  dt12_xx[ig] = -(dy12x*dx_xx + dy12y*dy_xx + dy12z*dz_xx) * v + y12 * tg * tgxx * dv;
-                  dt12_yy[ig] = -(dy12x*dx_yy + dy12y*dy_yy + dy12z*dz_yy) * v + y12 * tg * tgyy * dv;
-                  dt12_zz[ig] = -(dy12x*dx_zz + dy12y*dy_zz + dy12z*dz_zz) * v + y12 * tg * tgzz * dv;
-                  dt12_xy[ig] = -(dy12x*dx_xy + dy12y*dy_xy + dy12z*dz_xy) * v + y12 * tg * tgxy * dv;
-                  dt12_yz[ig] = -(dy12x*dx_yz + dy12y*dy_yz + dy12z*dz_yz) * v + y12 * tg * tgyz * dv;
-                  dt12_xz[ig] = -(dy12x*dx_xz + dy12y*dy_xz + dy12z*dz_xz) * v + y12 * tg * tgxz * dv;
+                     // y12 = s1054pi * x * y * z;
+                     const double dy12x = s1054pi * tgyz;
+                     const double dy12y = s1054pi * tgxz;
+                     const double dy12z = s1054pi * tgxy;
+                     dt12_xx[ig] = -(dy12x*dx_xx + dy12y*dy_xx + dy12z*dz_xx) * v + y12 * tg * tgxx * dv;
+                     dt12_yy[ig] = -(dy12x*dx_yy + dy12y*dy_yy + dy12z*dz_yy) * v + y12 * tg * tgyy * dv;
+                     dt12_zz[ig] = -(dy12x*dx_zz + dy12y*dy_zz + dy12z*dz_zz) * v + y12 * tg * tgzz * dv;
+                     dt12_xy[ig] = -(dy12x*dx_xy + dy12y*dy_xy + dy12z*dz_xy) * v + y12 * tg * tgxy * dv;
+                     dt12_yz[ig] = -(dy12x*dx_yz + dy12y*dy_yz + dy12z*dz_yz) * v + y12 * tg * tgyz * dv;
+                     dt12_xz[ig] = -(dy12x*dx_xz + dy12y*dy_xz + dy12z*dz_xz) * v + y12 * tg * tgxz * dv;
                 
-                  // y13 = s1054pi * 0.5 * z * (x^2 - y^2)
-                  const double dy13x = s1054pi * tgxz;
-                  const double dy13y = -s1054pi * tgyz;
-                  const double dy13z = s1054pi * 0.5 * (tgxx - tgyy);
-                  dt13_xx[ig] = -(dy13x*dx_xx + dy13y*dy_xx + dy13z*dz_xx) * v + y13 * tg * tgxx * dv;
-                  dt13_yy[ig] = -(dy13x*dx_yy + dy13y*dy_yy + dy13z*dz_yy) * v + y13 * tg * tgyy * dv;
-                  dt13_zz[ig] = -(dy13x*dx_zz + dy13y*dy_zz + dy13z*dz_zz) * v + y13 * tg * tgzz * dv;
-                  dt13_xy[ig] = -(dy13x*dx_xy + dy13y*dy_xy + dy13z*dz_xy) * v + y13 * tg * tgxy * dv;
-                  dt13_yz[ig] = -(dy13x*dx_yz + dy13y*dy_yz + dy13z*dz_yz) * v + y13 * tg * tgyz * dv;
-                  dt13_xz[ig] = -(dy13x*dx_xz + dy13y*dy_xz + dy13z*dz_xz) * v + y13 * tg * tgxz * dv;
+                     // y13 = s1054pi * 0.5 * z * (x^2 - y^2)
+                     const double dy13x = s1054pi * tgxz;
+                     const double dy13y = -s1054pi * tgyz;
+                     const double dy13z = s1054pi * 0.5 * (tgxx - tgyy);
+                     dt13_xx[ig] = -(dy13x*dx_xx + dy13y*dy_xx + dy13z*dz_xx) * v + y13 * tg * tgxx * dv;
+                     dt13_yy[ig] = -(dy13x*dx_yy + dy13y*dy_yy + dy13z*dz_yy) * v + y13 * tg * tgyy * dv;
+                     dt13_zz[ig] = -(dy13x*dx_zz + dy13y*dy_zz + dy13z*dz_zz) * v + y13 * tg * tgzz * dv;
+                     dt13_xy[ig] = -(dy13x*dx_xy + dy13y*dy_xy + dy13z*dz_xy) * v + y13 * tg * tgxy * dv;
+                     dt13_yz[ig] = -(dy13x*dx_yz + dy13y*dy_yz + dy13z*dz_yz) * v + y13 * tg * tgyz * dv;
+                     dt13_xz[ig] = -(dy13x*dx_xz + dy13y*dy_xz + dy13z*dz_xz) * v + y13 * tg * tgxz * dv;
                 
-                  // y14 = s3532pi * (x^3 - 3*x*y^2)
-                  const double dy14x = s3532pi * 3. * (tgxx - tgyy);
-                  const double dy14y = -s3532pi * 6. * tgxy;
-                  dt14_xx[ig] = -(dy14x*dx_xx + dy14y*dy_xx) * v + y14 * tg * tgxx * dv;
-                  dt14_yy[ig] = -(dy14x*dx_yy + dy14y*dy_yy) * v + y14 * tg * tgyy * dv;
-                  dt14_zz[ig] = -(dy14x*dx_zz + dy14y*dy_zz) * v + y14 * tg * tgzz * dv;
-                  dt14_xy[ig] = -(dy14x*dx_xy + dy14y*dy_xy) * v + y14 * tg * tgxy * dv;
-                  dt14_yz[ig] = -(dy14x*dx_yz + dy14y*dy_yz) * v + y14 * tg * tgyz * dv;
-                  dt14_xz[ig] = -(dy14x*dx_xz + dy14y*dy_xz) * v + y14 * tg * tgxz * dv;
+                     // y14 = s3532pi * (x^3 - 3*x*y^2)
+                     const double dy14x = s3532pi * 3. * (tgxx - tgyy);
+                     const double dy14y = -s3532pi * 6. * tgxy;
+                     dt14_xx[ig] = -(dy14x*dx_xx + dy14y*dy_xx) * v + y14 * tg * tgxx * dv;
+                     dt14_yy[ig] = -(dy14x*dx_yy + dy14y*dy_yy) * v + y14 * tg * tgyy * dv;
+                     dt14_zz[ig] = -(dy14x*dx_zz + dy14y*dy_zz) * v + y14 * tg * tgzz * dv;
+                     dt14_xy[ig] = -(dy14x*dx_xy + dy14y*dy_xy) * v + y14 * tg * tgxy * dv;
+                     dt14_yz[ig] = -(dy14x*dx_yz + dy14y*dy_yz) * v + y14 * tg * tgyz * dv;
+                     dt14_xz[ig] = -(dy14x*dx_xz + dy14y*dy_xz) * v + y14 * tg * tgxz * dv;
                 
-                  // y15 = s3532pi * (3*y*x^2 - y^3)
-                  const double dy15x = s3532pi * 6.* tgxy;
-                  const double dy15y = s3532pi * 3. * (tgxx - tgyy);
-                  dt15_xx[ig] = -(dy15x*dx_xx + dy15y*dy_xx) * v + y15 * tg * tgxx * dv;
-                  dt15_yy[ig] = -(dy15x*dx_yy + dy15y*dy_yy) * v + y15 * tg * tgyy * dv;
-                  dt15_zz[ig] = -(dy15x*dx_zz + dy15y*dy_zz) * v + y15 * tg * tgzz * dv;
-                  dt15_xy[ig] = -(dy15x*dx_xy + dy15y*dy_xy) * v + y15 * tg * tgxy * dv;
-                  dt15_yz[ig] = -(dy15x*dx_yz + dy15y*dy_yz) * v + y15 * tg * tgyz * dv;
-                  dt15_xz[ig] = -(dy15x*dx_xz + dy15y*dy_xz) * v + y15 * tg * tgxz * dv;
+                     // y15 = s3532pi * (3*y*x^2 - y^3)
+                     const double dy15x = s3532pi * 6.* tgxy;
+                     const double dy15y = s3532pi * 3. * (tgxx - tgyy);
+                     dt15_xx[ig] = -(dy15x*dx_xx + dy15y*dy_xx) * v + y15 * tg * tgxx * dv;
+                     dt15_yy[ig] = -(dy15x*dx_yy + dy15y*dy_yy) * v + y15 * tg * tgyy * dv;
+                     dt15_zz[ig] = -(dy15x*dx_zz + dy15y*dy_zz) * v + y15 * tg * tgzz * dv;
+                     dt15_xy[ig] = -(dy15x*dx_xy + dy15y*dy_xy) * v + y15 * tg * tgxy * dv;
+                     dt15_yz[ig] = -(dy15x*dx_yz + dy15y*dy_yz) * v + y15 * tg * tgyz * dv;
+                     dt15_xz[ig] = -(dy15x*dx_xz + dy15y*dy_xz) * v + y15 * tg * tgxz * dv;
+                  }
                 } // ig
               } // iquad
             }
@@ -1402,8 +1484,13 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
   //const int mloc = basis_.maxlocalsize();
   const int mloc = sd_.c().mloc();
   // define atom block size
+
   //const int na_block_size = 32;
-  const int na_block_size = 256;
+  int namax = 0;
+  for (int is=0; is<nsp; is++)
+     if (atoms_.na(is) > namax) namax = atoms_.na(is);
+  const int na_block_size = (namax > 256) ? 256 : namax;
+
   vector<vector<double> > tau;
   atoms_.get_positions(tau,true);
 
@@ -2675,22 +2762,24 @@ void NonLocalPotential::print_memory(ostream& os, int kmult, int kmultloc, doubl
   const int ngw = basis_.size();
   const int ngwl = basis_.localsize();
   for (int is=0; is<nsp; is++) {
-    twnl_size += (double)(7*npr[is]*ngw*sizeof(double));      // includes dtwnl
-    twnl_locsize += (double)(7*npr[is]*ngwl*sizeof(double));
-    Species *s = atoms_.species_list[is];
-    if (s->ultrasoft()) { 
-      int nqtot = s->nqtot();
-      if (highmem_) {
-        int na = atoms_.na(is);
-        int naloc = atoms_.usloc_atind[is].size();
-        qnmg_size += (double)(nqtot*na*ngw*sizeof(complex<double>));
-        qnmg_locsize += (double)(nqtot*naloc*ngwl*sizeof(complex<double>));
-      }
-      else {
-        qnmg_size += (double)(nqtot*ngw*sizeof(complex<double>));
-        qnmg_locsize += (double)(nqtot*ngwl*sizeof(complex<double>));
-      }
-    }
+     //twnl_size += (double)(7*npr[is]*ngw*sizeof(double));      // includes dtwnl
+     //twnl_locsize += (double)(7*npr[is]*ngwl*sizeof(double));
+     twnl_size += (double)(npr[is]*ngw*sizeof(double));
+     twnl_locsize += (double)(npr[is]*ngwl*sizeof(double));
+     Species *s = atoms_.species_list[is];
+     if (s->ultrasoft()) { 
+        int nqtot = s->nqtot();
+        if (highmem_) {
+           int na = atoms_.na(is);
+           int naloc = atoms_.usloc_atind[is].size();
+           qnmg_size += (double)(nqtot*na*ngw*sizeof(complex<double>));
+           qnmg_locsize += (double)(nqtot*naloc*ngwl*sizeof(complex<double>));
+        }
+        else {
+           qnmg_size += (double)(nqtot*ngw*sizeof(complex<double>));
+           qnmg_locsize += (double)(nqtot*ngwl*sizeof(complex<double>));
+        }
+     }
   }
 
   qnmg_size *= kmult;

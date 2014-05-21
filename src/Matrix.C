@@ -1050,6 +1050,12 @@ void ComplexMatrix::axpy(double alpha, const ComplexMatrix &x)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+// copy data in place between overlapping contexts
+void DoubleMatrix::copyInPlace(DoubleMatrix& a)
+{
+   memcpy(a.val, val, mloc_*nloc_*sizeof(double));   
+}
+////////////////////////////////////////////////////////////////////////////////
 // real getsub: *this = sub(A)
 // copy submatrix A(ia:ia+m, ja:ja+n) into *this;
 // *this and A may live in different contexts
@@ -1102,6 +1108,12 @@ void DoubleMatrix::getsub(const DoubleMatrix &a,
 #endif
 }
 
+////////////////////////////////////////////////////////////////////////////////
+// copy data in place between overlapping contexts
+void ComplexMatrix::copyInPlace(ComplexMatrix& a)
+{
+   memcpy(a.val, val, mloc_*nloc_*sizeof(complex<double>));   
+}
 ////////////////////////////////////////////////////////////////////////////////
 // complex getsub: *this = sub(A)
 // copy submatrix A(ia:ia+m, ja:ja+n) into *this;
@@ -1418,13 +1430,6 @@ DoubleMatrix& DoubleMatrix::operator=(const DoubleMatrix& a)
 {
   if ( this == &a ) return *this;
 
-  //ewd DEBUG
-  if ( a.ictxt() != ictxt_ || a.m() != m_ || a.mb() != mb_ || 
-          a.n() != n_ || a.nb() != nb_ )
-     cout << "MATRIX COPY ERROR!!" << endl;
-  MPI_Barrier(MPI_COMM_WORLD);
-  //ewd DEBUG
-  
   // operator= works only for matrices having same distribution on same context
   assert( a.ictxt() == ictxt_ && a.m() == m_ && a.mb() == mb_ && 
           a.n() == n_ && a.nb() == nb_ );

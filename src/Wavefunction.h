@@ -33,6 +33,7 @@
 #include "UnitCell.h"
 #include "AtomSet.h"
 #include "SharedFilePtr.h"
+#include "Timer.h"
 #include <vector>
 #if USE_CSTDIO_LFS
 #include <cstdio>
@@ -41,6 +42,8 @@ using namespace std;
 
 class SlaterDet;
 class Context;
+
+typedef map<string,Timer> TimerMap;
 
 class Wavefunction {
   private:
@@ -81,7 +84,6 @@ class Wavefunction {
   vector<vector<Context*> > sdcontext_;   // sdcontext_[ispin][ikp]
   vector<vector<SlaterDet*> > sd_;        // sd[ispin][ikp]
   vector<vector<Context*> > sdcontextsq_;   // sdcontextsq_[ispin][ikp]
-  bool reshape_context_;
   int mbset_, nbset_;    // user defined local data size
   int mblks_, nblks_;    // user defined number of blocks in block-cycle distribution
   
@@ -93,11 +95,14 @@ class Wavefunction {
   void reshape(); // reshape SlaterDets onto new parallel distribution while
                   // preserving existing data
   
+  mutable TimerMap tmap;
+
   public:
   
   Wavefunction(const Context& ctxt);
   Wavefunction(const Wavefunction& wf);
   ~Wavefunction();
+  void print_timing(void);
   Wavefunction& operator=(const Wavefunction& wf);
   
   const Context& context(void) const { return ctxt_; }
@@ -111,7 +116,7 @@ class Wavefunction {
   const Context* wfcontext(void) const { return wfcontext_; }
   const Context* sdcontext(int ispin, int ikp) const 
     { return sdcontext_[ispin][ikp]; }
-  const Context* sdcontextsq(int ispin, int ikp) { return sdcontextsq_[ispin][ikp]; }
+  const Context* sdcontextsq(int ispin, int ikp) const { return sdcontextsq_[ispin][ikp]; }
   const Context* spincontext(int ispin) const 
     { return spincontext_[ispin]; }
   int nkp(void) const;            // number of k points
@@ -154,7 +159,6 @@ class Wavefunction {
   void set_nparallelkpts(int n);
   void add_kpoint(D3vector kpoint, double weight);
   void del_kpoint(D3vector kpoint);
-  void set_reshape_context(bool reshape);
   void set_ultrasoft(bool us);
   void set_local_block(int mb, int nb);
   void set_nblocks(int mblks, int nblks);

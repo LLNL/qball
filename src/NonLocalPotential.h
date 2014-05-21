@@ -72,15 +72,15 @@ class NonLocalPotential
   
   
   mutable TimerMap tmap;
-  void init(void);
+  void init(const bool compute_stress);
    
   public:
   
-  NonLocalPotential(AtomSet& as, SlaterDet& sd) :  
-    ctxt_(sd.context()), atoms_(as), sd_(sd), basis_(sd.basis()) { init(); }
+  NonLocalPotential(AtomSet& as, SlaterDet& sd, const bool compute_stress) :  
+    ctxt_(sd.context()), atoms_(as), sd_(sd), basis_(sd.basis()) { init(compute_stress); }
   ~NonLocalPotential(void);
                
-  void update_twnl(void);
+  void update_twnl(const bool compute_stress);
   void update_usfns(Basis* cdbasis);  // update Q_nm^I(G), beta^I(G) when atoms
                                       // move or basis changes
   void use_highmem(void) { highmem_ = true; }  // use extra memory to speed calculation

@@ -271,7 +271,7 @@ void CPSampleStepper::step(int niter)
         // Update cell
         cell_stepper->update_cell();
 
-        ef_.cell_moved();
+        ef_.cell_moved(compute_stress);
         ef_.atoms_moved();
       }
     }

@@ -132,7 +132,7 @@ class EnergyFunctional
   void update_hamiltonian(void);
   
   void atoms_moved(void);
-  void cell_moved(void);
+  void cell_moved(const bool compute_stress);
   
   void print(ostream& os) const;
   void print_memory(ostream&os, double& totsum, double& locsum) const;

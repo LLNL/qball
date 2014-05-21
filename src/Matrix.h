@@ -214,6 +214,9 @@ class DoubleMatrix
     void syr(char uplo, double alpha, const DoubleMatrix& x,
              int ix, char rowcol);
     
+    // copy data in place between overlapping contexts
+    void copyInPlace(DoubleMatrix& a);
+
     // get submatrix A(ia:ia+m,ja:ja+n) of A
     void getsub(const DoubleMatrix& a,int m,int n,int ia,int ja);
 
@@ -465,6 +468,9 @@ class ComplexMatrix
     void her(char uplo, complex<double> alpha, 
              const ComplexMatrix& x, int ix, char rowcol);
     
+    // copy data in place between overlapping contexts
+    void copyInPlace(ComplexMatrix& a);
+
     // get submatrix A(ia:ia+m,ja:ja+n) of A
     void getsub(const ComplexMatrix& a, int m, int n, int ia, int ja);
 

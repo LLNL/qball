@@ -116,9 +116,6 @@ void EhrenSampleStepper::step(int niter)
   else if (oncoutpe)
        cout << "<!-- EhrenSampleStepper:  fractional occupation not detected. -->" << endl;
    
-  if (s_.ctrl.reshape_context)
-     s_.wf.set_reshape_context(s_.ctrl.reshape_context);
-  
   AtomSet& atoms = s_.atoms;
   Wavefunction& wf = s_.wf;
   const int nspin = wf.nspin();
@@ -494,7 +491,7 @@ void EhrenSampleStepper::step(int niter)
           cell_stepper->update_cell();
 
           tmap["efn"].start();
-          ef_.cell_moved();
+          ef_.cell_moved(compute_stress);
           ef_.atoms_moved(); // modifications of the cell also move ions
           tmap["efn"].stop();
           if (ultrasoft) {

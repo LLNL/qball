@@ -73,7 +73,7 @@ class NetCharge : public Var
     }
 
     s->wf.set_nel(s->atoms.nel() - v);
-    s->wf.update_occ(0.0,0);
+    //s->wf.update_occ(0.0,0);
     if ( s->wfv != 0 )
     {
       s->wfv->set_nel(s->atoms.nel() - v);

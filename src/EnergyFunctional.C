@@ -52,6 +52,8 @@ EnergyFunctional::EnergyFunctional(const Sample& s, const Wavefunction& wf, Char
     : s_(s), wf_(wf), cd_(cd) {
   const AtomSet& atoms = s_.atoms;
   
+  const bool compute_stress = ( s_.ctrl.stress == "ON" );  // if stress off, don't store dtwnl
+
   sigma_ekin.resize(6);
   sigma_econf.resize(6);
   sigma_eps.resize(6);
@@ -137,7 +139,7 @@ EnergyFunctional::EnergyFunctional(const Sample& s, const Wavefunction& wf, Char
   for ( int ispin = 0; ispin < wf_.nspin(); ispin++ )
     if (wf_.spinactive(ispin)) 
       for (int kloc=0; kloc<wf_.nkptloc(); kloc++) 
-        nlp[ispin][kloc] = new NonLocalPotential((AtomSet&)s_.atoms, *wf_.sdloc(ispin,kloc));
+         nlp[ispin][kloc] = new NonLocalPotential((AtomSet&)s_.atoms, *wf_.sdloc(ispin,kloc),compute_stress);
 
   if (s_.ctrl.extra_memory >= 5) // use extra memory in large, huge mode
     for ( int ispin = 0; ispin < wf_.nspin(); ispin++ )
@@ -225,7 +227,7 @@ EnergyFunctional::EnergyFunctional(const Sample& s, const Wavefunction& wf, Char
   
   sf.init(tau0,*vbasis_);
   
-  cell_moved();
+  cell_moved(compute_stress);  //ewd:  compute_stress = false, don't store dtwnl
   
   atoms_moved();
 
@@ -1469,7 +1471,7 @@ void EnergyFunctional::atoms_moved(void)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-void EnergyFunctional::cell_moved(void) {
+void EnergyFunctional::cell_moved(const bool compute_stress) {
   const UnitCell& cell = wf_.cell();
   // resize vbasis_
   vbasis_->resize(cell,wf_.refcell(),vbasis_->ecut());
@@ -1504,7 +1506,7 @@ void EnergyFunctional::cell_moved(void) {
   for ( int ispin = 0; ispin < wf_.nspin(); ispin++ ) 
     if (wf_.spinactive(ispin)) 
       for (int k=0; k<nlp[ispin].size(); k++) {
-        nlp[ispin][k]->update_twnl();
+        nlp[ispin][k]->update_twnl(compute_stress);
         if (s_.ctrl.ultrasoft)
           nlp[ispin][k]->update_usfns(vbasis_);
       }

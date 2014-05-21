@@ -53,7 +53,7 @@ class ParallelOptimizer {
   
   void optimize(int niter, int nitscf, int nite);
   //double runtime(bool print_timing);
-  double runtime(int nrowmax, int npark, int nspin, bool reshape, bool print_timing);
+  double runtime(int nrowmax, int npark, int nspin, bool print_timing);
   list<int> factorize(int n);
   list<int> factorize(int n1, int n2);
   ParallelOptimizer(Sample& s);

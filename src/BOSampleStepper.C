@@ -188,10 +188,6 @@ void BOSampleStepper::step(int niter)
   else if (onpe0)
        cout << "<!-- BOSampleStepper:  fractional occupation not detected. -->" << endl;
    
-  
-  if (s_.ctrl.reshape_context)
-    s_.wf.set_reshape_context(s_.ctrl.reshape_context);
-
   AtomSet& atoms = s_.atoms;
   Wavefunction& wf = s_.wf;
   const int nspin = wf.nspin();
@@ -831,7 +827,7 @@ void BOSampleStepper::step(int niter)
             // Update cell
             cell_stepper->update_cell();
 
-            ef_.cell_moved();
+            ef_.cell_moved(compute_stress);
             ef_.atoms_moved(); // modifications of the cell also move ions
             if (ultrasoft) {
               tmap["usfns"].start();
@@ -1324,7 +1320,7 @@ void BOSampleStepper::step(int niter)
                      cout << "  <eigenvalue_sum> "
                           << eigenvalue_sum << " </eigenvalue_sum>" << endl;
                }
-               //QB_Pstart(pzgemm used to update wf)               
+               //QB_Pstart(pzgemm used to update wf)
                wf_stepper->update(dwf); 
                //QB_Pstop(pzgemm used to update wf)
                
@@ -1846,6 +1842,8 @@ void BOSampleStepper::step(int niter)
   //ewd print timing
   cd_.print_timing();
   ef_.print_timing();
+  s_.wf.print_timing();
+
   // print timer map
   for ( TimerMap::iterator i = tmap.begin(); i != tmap.end(); i++ )
   {
