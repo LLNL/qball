@@ -120,5 +120,9 @@ struct Control
   int savewffreq;  // if > 0, checkpoint within iteration loop
   string savewffilebase; // optional subdirectory and filename base for density snapshots
   int savewfstate;  // if >= 0, only save this state
+
+  string esm_bc;
+  double esm_w;
+
 };
 #endif

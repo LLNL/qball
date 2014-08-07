@@ -133,5 +133,13 @@ class FourierTransform
   void reset_timers(void);
   Timer tm_f_map, tm_f_fft, tm_f_pack, tm_f_mpi, tm_f_zero, tm_f_unpack,
         tm_b_map, tm_b_fft, tm_b_pack, tm_b_mpi, tm_b_zero, tm_b_unpack;
+
+  void forward_1z( std::vector<std::complex<double> >& val_in,
+                   std::vector<std::complex<double> >& val_out );
+  void backward_1z( std::vector<std::complex<double> >& val_in,
+                    std::vector<std::complex<double> >& val_out );
+  void fft_1z( std::vector<std::complex<double> >& val_in,
+               std::vector<std::complex<double> >& val_out, int isign );
+
 };
 #endif

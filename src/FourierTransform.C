@@ -1629,3 +1629,69 @@ void FourierTransform::reset_timers(void)
   tm_b_unpack.reset();
 #endif
 }
+
+////////////////////////////////////////////////////////////////////////////////
+void FourierTransform::forward_1z( vector<complex<double> >& val_in,
+                                   vector<complex<double> >& val_out )
+{
+  fft_1z( val_in, val_out, 1 );
+}
+
+////////////////////////////////////////////////////////////////////////////////
+void FourierTransform::backward_1z( vector<complex<double> >& val_in,
+                                    vector<complex<double> >& val_out )
+{
+  fft_1z( val_in, val_out, -1 );
+}
+
+////////////////////////////////////////////////////////////////////////////////
+void FourierTransform::fft_1z( vector<complex<double> >& val_in,
+                               vector<complex<double> >& val_out, int isign )
+{
+  val_out.resize(np2_);
+
+#if USE_ESSL
+  int inc1 = 1, inc2 = np2_, ntrans = 1, initflag = 0;
+  double scale = 1.0;
+
+  dcft_(&initflag,&val_in[0],&inc1,&inc2,&val_out[0],&inc1,&inc2,&np2_,&ntrans,
+       &isign,&scale,&aux1zb[0],&naux1z,&aux2[0],&naux2);
+
+  //  dcft_(&initflag,p,&inc1,&inc2,p,&inc1,&inc2,&np0_,&ntrans,
+  //         &isign,&scale,&aux1xb[0],&naux1x,&aux2[0],&naux2);
+
+#elif USE_FFTW
+   /*
+    * void fftw(fftw_plan plan, int howmany,
+    *    FFTW_COMPLEX *in, int istride, int idist,
+    *    FFTW_COMPLEX *out, int ostride, int odist);
+    */
+  val_out = val_in;
+  if( isign > 0 )
+  {
+    fftw_one(fwplan2,(FFTW_COMPLEX*)&val_out[0],(FFTW_COMPLEX*)0);
+  }
+  else {
+    fftw_one(bwplan2,(FFTW_COMPLEX*)&val_out[0],(FFTW_COMPLEX*)0);
+  }
+#else
+  // No library
+  /* Transform along z */
+  int ntrans = 1;
+  int length = np2_;
+  int ainc   = 1;
+  int ajmp   = np2_;
+  double scale = 1.0;
+  cfftm ( &val_in[0], &val_out[0], scale, ntrans, length, ainc, ajmp, isign );
+#endif
+
+  if( isign > 0 )
+  {
+    const double fac = 1.0 / np2_;
+    for( int i = 0; i < np2_; ++i  )
+    {
+      val_out[i] *= fac;
+    }
+  }
+}
+

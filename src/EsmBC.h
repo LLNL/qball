@@ -22,11 +22,62 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 //
-// release.C
+// EsmBC.h
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "release.h"
-std::string release(void) {
-  return std::string("qb@LL-r179");
-}
+#ifndef ESMBC_H
+#define ESMBC_H
+
+#include<iostream>
+#include<iomanip>
+#include<sstream>
+#include<stdlib.h>
+
+#include "Sample.h"
+
+class EsmBC : public Var
+{
+  Sample *s;
+
+  public:
+
+  char *name ( void ) const { return "esm_bc"; };
+
+  int set ( int argc, char **argv )
+  {
+    if ( argc != 2 )
+    {
+      if ( ui->oncoutpe() )
+      cout << " esm_bc takes only one value" << endl;
+      return 1;
+    }
+
+    string v = argv[1];
+    if ( !( v == "bc1" ||
+            v == "bc2" ||
+            v == "bc3" ) )
+    {
+      if ( ui->oncoutpe() )
+        cout << " esm_bc must be bc1, bc2 or bc3" << endl;
+      return 1;
+    }
+
+    s->ctrl.esm_bc= v;
+
+    return 0;
+  }
+
+  string print (void) const
+  {
+     ostringstream st;
+     st.setf(ios::left,ios::adjustfield);
+     st << setw(10) << name() << " = ";
+     st.setf(ios::right,ios::adjustfield);
+     st << setw(10) << s->ctrl.esm_bc;
+     return st.str();
+  }
+
+  EsmBC(Sample *sample) : s(sample) { s->ctrl.esm_bc = ""; };
+};
+#endif

@@ -22,11 +22,61 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 //
-// release.C
+// EsmW.h
 //
 ////////////////////////////////////////////////////////////////////////////////
+// $Id: EsmW.h,v 1.8 2008-09-08 15:56:18 fgygi Exp $
 
-#include "release.h"
-std::string release(void) {
-  return std::string("qb@LL-r179");
-}
+#ifndef ESMW_H
+#define ESMW_H
+
+#include<iostream>
+#include<iomanip>
+#include<sstream>
+#include<stdlib.h>
+
+#include "Sample.h"
+
+class EsmW : public Var
+{
+  Sample *s;
+
+  public:
+
+  char *name ( void ) const { return "esm_w"; };
+
+  int set ( int argc, char **argv )
+  {
+    if ( argc != 2 )
+    {
+      if ( ui->oncoutpe() )
+      cout << " esm_w takes only one value" << endl;
+      return 1;
+    }
+
+    double v = atof(argv[1]);
+    if ( v < 0.0 )
+    {
+      if ( ui->oncoutpe() )
+        cout << " esm_w must be non-negative" << endl;
+      return 1;
+    }
+
+    s->ctrl.esm_w = v;
+
+    return 0;
+  }
+
+  string print (void) const
+  {
+     ostringstream st;
+     st.setf(ios::left,ios::adjustfield);
+     st << setw(10) << name() << " = ";
+     st.setf(ios::right,ios::adjustfield);
+     st << setw(10) << 2 * s->ctrl.esm_w;
+     return st.str();
+  }
+
+  EsmW(Sample *sample) : s(sample) { s->ctrl.esm_w = 0.0; }
+};
+#endif

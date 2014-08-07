@@ -324,7 +324,7 @@ void EnergyFunctional::update_vhxc(void) {
   const double *const g2i = vbasis_->g2i_ptr();
   const double fpi = 4.0 * M_PI;
   const int ngloc = vbasis_->localsize();
-  double tsum[2];
+  double sum[2], tsum[2];
   tsum[0] = 0.0;
   tsum[1] = 0.0;
   
@@ -429,58 +429,392 @@ void EnergyFunctional::update_vhxc(void) {
   
   // Hartree energy
   ehart_ = 0.0;
-  double ehsum = 0.0;
-  if (s_.ctrl.tddft_involved)
+
+  if ( s_.ctrl.esm_bc == "" )
   {
-     // AS: the individual terms of the sum are complex in general
-     complex<double> ehsum_cplx = complex<double>(0.0,0.0);
+     double ehsum = 0.0;
+     if (s_.ctrl.tddft_involved)
+     {
+        // AS: the individual terms of the sum are complex in general
+        complex<double> ehsum_cplx = complex<double>(0.0,0.0);
+        for ( int ig = 0; ig < ngloc; ig++ )
+        {
+           const complex<double> tmp = rhoelg[ig] + rhopst[ig];
+           const complex<double> hamil_tmp = hamil_rhoelg[ig] + rhopst[ig];
+           ehsum_cplx += tmp * conj(hamil_tmp) * complex<double>(g2i[ig],0.0);
+           // AS: the next line is needed for correct stress and/or forces
+           rhogt[ig] = tmp;
+           hamil_rhogt[ig] = hamil_tmp;
+        }
+        ehsum = real(ehsum_cplx);     
+     }
+     else
+     {
+        for ( int ig = 0; ig < ngloc; ig++ ) {
+           const complex<double> tmp = rhoelg[ig] + rhopst[ig];
+           ehsum += norm(tmp) * g2i[ig];
+           rhogt[ig] = tmp;
+        }
+     }
+     
+     // factor 1/2 from definition of Ehart cancels with half sum over G
+     // Note: rhogt[ig] includes a factor 1/Omega
+     // Factor omega in next line yields prefactor 4 pi / omega in
+     
+     double vfact = vbasis_->real() ? 1.0 : 0.5;
+     tsum[1] = vfact * omega * fpi * ehsum;
+     // tsum[1] contains ehart
+  
+     vbasis_->context().dsum(2,1,&tsum[0],2);
+     eps_   = tsum[0];
+     ehart_ = tsum[1];
+  
+     // compute vlocal_g = vion_local_g + vhart_g
+     // where vhart_g = 4 * pi * (rhoelg + rhopst) * g2i  
+     if (s_.ctrl.tddft_involved)  // AS: the charge density based on hamil_wf has to be used
+        for ( int ig = 0; ig < ngloc; ig++ )
+           vlocal_g[ig] = vion_local_g[ig] + fpi * hamil_rhogt[ig] * g2i[ig];
+     else
+        for ( int ig = 0; ig < ngloc; ig++ )
+           vlocal_g[ig] = vion_local_g[ig] + fpi * rhogt[ig] * g2i[ig];
+
+  }
+  else
+  {
+    // else replace with ESM hartree energy and potential //
+     
+     assert(!s_.ctrl.tddft_involved);  // I haven't checked that this works with TDDFT
+
+     const string esm_bc = s_.ctrl.esm_bc; // boundary conditions (bc1, bc2, or bc3) ( default "" )
+     const double esm_w = s_.ctrl.esm_w;   // position offset of ESM region ( default 0.0 )
+     const int esm_nfit = 4;               // number of fitting parameters/points for smoothing
+                                          // shouldn't need to change; can probably hard-code
+     const Basis& basis = *vbasis_;
+     const int np2 = basis.np(2);
+     const double tpi = 2.0 * M_PI;
+     const complex<double> ci( 0.0, 1.0 );
+     const complex<double> c0( 0.0, 0.0 );
+     const double L = cell.amat(8);
+     const double z0 = L/2.0;
+     const double z1 = z0 + fabs(esm_w);
+     const int np2half = np2/2;
+     vector<complex<double> > vhart_g( ngloc, c0 );
+
+#pragma omp parallel for
+     for ( int irod = 0; irod < basis.nrod_loc(); irod++ )
+     {
+        vector<complex<double> > vg2 ( np2, c0 );
+        vector<complex<double> > vg2b( np2, c0 );
+
+        int k1 = basis.rod_h(irod);
+        int k2 = basis.rod_k(irod);
+//
+// if g_parallel != 0:
+//
+        if ( ( k1 != 0 ) || ( k2 != 0 ) ) 
+        {
+           complex<double> tmp = c0;
+           complex<double> tmp1 = c0;
+           complex<double> tmp2 = c0;
+           const double t0 = k1 * cell.bmat(0) + k2 * cell.bmat(1);
+           const double t1 = k1 * cell.bmat(3) + k2 * cell.bmat(4);
+           double gp = sqrt( t0*t0 + t1*t1 );
+           for ( int il = 0; il < basis.rod_size(irod); il++ )
+           {
+              int ig = basis.rod_first(irod) + il;
+              int k3 = basis.rod_lmin(irod) + il;  // gz index
+              int iz = ( k3 < 0 ) ? k3 + np2 : k3; // z index for vg2
+              double kn = double(k3) * tpi/L;
+              double cc = cos( kn * z0 );
+              double ss = sin( kn * z0 );
+              vg2[iz] = (fpi * rhogt[ig]) / (gp*gp + kn*kn);
+              // should we be using rhoelg or rhogt here? need to check...
+              if ( esm_bc == "bc1" ) 
+              {
+                 complex<double> ci( 2.0, 3.0 );
+                 tmp1 += rhogt[ig] * (cc + ci*ss) / (gp - ci*kn);
+                 tmp2 += rhogt[ig] * (cc - ci*ss) / (gp + ci*kn);
+              }
+              else if ( esm_bc == "bc2" ) 
+              {
+                 tmp = ((gp+ci*kn)*exp(gp*(z1-z0))+(gp-ci*kn)*exp(-gp*(z1-z0)))/(2.0*gp); 
+                 tmp1 += rhogt[ig] * (cc + ci*ss) / (gp*gp + kn*kn) * tmp;
+                 tmp = ((gp-ci*kn)*exp(gp*(z1-z0))+(gp+ci*kn)*exp(-gp*(z1-z0)))/(2.0*gp); 
+                 tmp2 += rhogt[ig] * (cc - ci*ss) / (gp*gp + kn*kn) * tmp;
+              }
+              else if ( esm_bc == "bc3" ) 
+              {
+                 tmp = ((gp+ci*kn)*exp(gp*(z1-z0))+(gp-ci*kn)*exp(-gp*(z1-z0)))/(2.0*gp); 
+                 tmp1 += rhogt[ig] * (cc + ci*ss) / (gp*gp + kn*kn) * tmp;
+                 tmp = (gp - ci*kn) / gp;
+                 tmp2 += rhogt[ig] * (cc - ci*ss) / (gp*gp + kn*kn) * tmp;
+              }
+           }
+
+           vft->backward_1z( vg2, vg2b ); 
+
+           for ( int iz = 0; iz < np2; iz++ )
+           {
+              double z;
+              if ( iz <= np2half ) 
+              {
+                 z = double(iz) / double(np2) * L;
+              }
+              else
+              {
+                 z = double(iz - np2) / double(np2) * L;
+              }
+              if ( esm_bc == "bc1" )
+              {
+                 vg2b[iz] += -tpi/gp*(exp(gp*(z-z0))*tmp1+exp(-gp*(z+z0))*tmp2);
+              }
+              else if ( esm_bc == "bc2" )
+              {
+                 vg2b[iz] += -fpi*(exp(gp*(z-z1))-exp(-gp*(z+3.0*z1)))*tmp1 
+                     /(1.0-exp(-4.0*gp*z1)) 
+                     +fpi*(exp(gp*(z-3.0*z1))-exp(-gp*(z+z1)))*tmp2 
+                     /(1.0-exp(-4.0*gp*z1));
+              }
+              else if ( esm_bc == "bc3" )
+              {
+                 vg2b[iz]+= -fpi*exp(gp*(z-z1))*tmp1 
+                     +tpi*(exp(gp*(z-z0-2.0*z1))-exp(-gp*(z+z0)))*tmp2;
+              }
+           }
+           
+           vft->forward_1z( vg2b, vg2 );
+           
+           for ( int il = 0; il < basis.rod_size(irod); il++ )
+           {
+              int ig = basis.rod_first(irod) + il;
+              int k3 = basis.rod_lmin(irod) + il;
+              int iz = ( k3 < 0 ) ? k3 + np2 : k3;
+              vhart_g[ig] = vg2[iz] * 2.0;
+           }
+        } 
+        //
+        // else g_parallel = 0:
+        //
+        else // if ( (k1 == 0) && (k2 == 0) )
+        {
+           complex<double> rhog0 = c0; // charge density for gamma
+           complex<double> tmp1 = c0;
+           complex<double> tmp2 = c0;
+           complex<double> tmp3 = c0;
+           complex<double> tmp4 = c0;
+           complex<double> f1 = c0;
+           complex<double> f2 = c0;
+           complex<double> f3 = c0;
+           complex<double> f4 = c0;
+           int nz_l = int(np2 / 2) + esm_nfit;
+           int nz_r = int(np2 / 2) - esm_nfit;
+           double z_l = double(nz_l) * L / double(np2) - L;
+           double z_r = double(nz_r) * L / double(np2);
+           assert( basis.rod_lmin(irod) == 0 );
+           
+           for ( int il = -basis.rod_size(irod)+1; il < basis.rod_size(irod); il++ )
+           {
+              complex<double> rhog = c0;
+              if ( il < 0 )
+              {
+                 int ig = basis.rod_first(irod) - il;
+                 rhog = conj( rhogt[ig] );
+              }
+              else
+              {
+                 int ig = basis.rod_first(irod) + il;
+                 rhog = rhogt[ig];
+              }
+              int k3 = basis.rod_lmin(irod) + il;
+              int iz = ( k3 < 0 ) ? k3 + np2 : k3;
+              
+              if ( k3 == 0 )
+              {
+                 rhog0 = rhog;
+                 if ( esm_bc == "bc1" )
+                 {
+                    vg2[iz] = -tpi * z0*z0 * rhog;
+                 }
+                 else if ( esm_bc == "bc2" )
+                 {
+                    vg2[iz] = tpi * (2.0*z1 - z0) * z0 * rhog;
+                 }
+                 else if ( esm_bc == "bc3" )
+                 {
+                    vg2[iz] = tpi * (4.0*z1 - z0) * z0 * rhog;
+                 }
+              }
+              else
+              {
+                 double kn = double(k3) * tpi/L;
+                 double cc = cos( kn * z0 );
+                 double ss = sin( kn * z0 );
+                 if ( esm_bc == "bc1" )
+                 {
+                    tmp1 += rhog * ci * (cc + ci*ss) / kn;
+                    tmp2 += rhog * ci * (cc - ci*ss) / kn;
+                    tmp3 += rhog * cc / (kn*kn);
+                 }
+                 else if ( esm_bc == "bc2" )
+                 {
+                    tmp1 += rhog * (cc + ci*ss) / (kn*kn);
+                    tmp2 += rhog * (cc - ci*ss) / (kn*kn);
+                    tmp3 += rhog * ci * cc / kn;
+                    tmp4 += rhog * ss / kn;
+                 }
+                 else if ( esm_bc == "bc3" )
+                 {
+                    tmp1 += rhog * (cc + ci*ss) / (kn*kn);
+                    tmp2 += rhog * (cc - ci*ss) / kn;
+                    tmp3 += rhog * (cc + ci*ss) / kn;
+                 }
+                 vg2[iz] = fpi * rhog / (kn*kn);
+                 // for smoothing
+                 double c_r = cos( kn * z_r );
+                 double s_r = sin( kn * z_r );
+                 double c_l = cos( kn * z_l );
+                 double s_l = sin( kn * z_l );
+                 f1 += fpi * rhog * (c_r + ci*s_r) / (kn*kn);
+                 f2 += fpi * rhog * (c_l + ci*s_l) / (kn*kn);
+                 f3 += fpi * ci * rhog * (c_r + ci*s_r) / kn;
+                 f4 += fpi * ci * rhog * (c_l + ci*s_l) / kn;
+              }
+           }
+
+           vft->backward_1z( vg2, vg2b );
+
+           for ( int iz = 0; iz < np2; iz++ )
+           {
+              double z = 0.0;
+              if ( iz <= np2half )
+              {
+                 z = double(iz) / double(np2) * L;
+              }
+              else
+              {
+                 z = double(iz - np2) / double(np2) * L;
+              }
+              if ( esm_bc == "bc1" )
+              {
+                 vg2b[iz] += (-tpi * z*z * rhog0) - (tpi * (z-z0) * tmp1) 
+                     - (tpi * (z+z0) * tmp2) - (fpi * tmp3);
+              }
+              else if ( esm_bc == "bc2" )
+              {
+                 vg2b[iz] += (-tpi * z*z * rhog0) - (tpi * (z+z1) * tmp1 / z1) 
+                     + (tpi * (z-z1) * tmp2 / z1) 
+                     - (fpi * z * (z1-z0) / z1 * tmp3) 
+                     + (fpi * (z1-z0) * tmp4);
+              }
+              else if ( esm_bc == "bc3" )
+              {
+                 vg2b[iz] += (-tpi * (z*z + 2.0*z*z0) * rhog0) - (fpi * tmp1) 
+                     - (fpi * ci * (z-z0) * tmp2) - (fpi * ci * (z1-z0) * tmp3);
+              }
+           }
+
+           // for smoothing
+           if ( esm_bc == "bc1" )
+           {
+              f1 += (-tpi * z_r*z_r * rhog0) - (tpi * (z_r-z0) * tmp1) 
+                  - (tpi * (z_r+z0) * tmp2) - (fpi * tmp3) - (tpi * z0*z0 * rhog0);
+              f2 += (-tpi * z_l*z_l * rhog0) - (tpi * (z_l-z0) * tmp1)
+                  - (tpi * (z_l+z0) * tmp2) - (fpi * tmp3) - (tpi * z0*z0 * rhog0);
+              f3 += (-tpi * tmp1) - (tpi * tmp2) - (fpi * z_r * rhog0);
+              f4 += (-tpi * tmp1) - (tpi * tmp2) - (fpi * z_l * rhog0);
+           }
+           else if ( esm_bc == "bc2" )
+           {
+              f1 += (-tpi * z_r*z_r * rhog0) - (tpi * (z_r+z1) * tmp1 / z1) 
+                  + (tpi * (z_r-z1) * tmp2 / z1) - (fpi * z_r * (z1-z0) / z1 * tmp3) 
+                  + (fpi * (z1-z0) * tmp4) + (tpi * (2.0*z1 - z0) * z0 * rhog0);
+              f2 += (-tpi * z_l*z_l * rhog0) - (tpi * (z_l+z1) * tmp1 / z1) 
+                  + (tpi * (z_l-z1) * tmp2 / z1) - (fpi * z_l * (z1-z0) / z1 * tmp3)
+                  + (fpi * (z1-z0) * tmp4) + (tpi * (2.0*z1 - z0) * z0 * rhog0);
+              f3 += (-fpi * z_r * rhog0) - (tpi * tmp1 / z1) + (tpi * tmp2 / z1)
+                  - (fpi * (z1-z0) / z1 * tmp3);
+              f4 += (-fpi * z_l * rhog0) - (tpi * tmp1 / z1) + (tpi * tmp2 / z1)
+                  - (fpi * (z1-z0) / z1 * tmp3);
+           }
+           else if ( esm_bc == "bc3" )
+           {
+              f1 += (-tpi * (z_r*z_r + 2.0*z_r*z0) * rhog0) - (fpi * tmp1)
+                  - (fpi * ci * (z_r-z1) * tmp2) - (fpi * ci * (z1-z0) * tmp3)
+                  + (tpi * (4.0*z1 - z0) * z0 * rhog0);
+              f2 += (-tpi * (z_l*z_l + 2.0*z_l*z0) * rhog0) - (fpi * tmp1) 
+                  - (fpi * ci * (z_l-z1) * tmp2) - (fpi * ci * (z1-z0) * tmp3)
+                  + (tpi * (4.0*z1 - z0) * z0 * rhog0);
+              f3 += (-tpi * (2.0*z_r + 2.0*z0) * rhog0) - (fpi * ci * tmp2);
+              f4 += (-tpi * (2.0*z_l + 2.0*z0) * rhog0) - (fpi * ci * tmp2);
+           }
+           // for smoothing
+           // factor 2 will be multiplied later (at vhart_g <= vg2)
+           z_l += L;
+           double z_l2 = z_l * z_l;
+           double z_r2 = z_r * z_r;
+           double z_t3 = z_l - z_r;
+           z_t3 = z_t3 * z_t3 * z_t3;
+           complex<double> a0 = (f1 * z_l2 * (z_l-3.0*z_r) + z_r * (f3 * z_l2 * (-z_l+z_r)
+                                                                    + z_r * (f2 * (3.0*z_l-z_r) + f4 * z_l * (-z_l+z_r)))) / z_t3;
+           complex<double> a1 = (f3 * z_l2*z_l + z_l * (6.0*f1 - 6.0*f2 + (f3 + 2.0*f4) * z_l) 
+                                 * z_r  - (2.0*f3 + f4) * z_l * z_r2 -f4 * z_r2*z_r)/ z_t3;
+           complex<double> a2 = (-3.0 * f1 * (z_l+z_r) + 3.0 * f2 * (z_l+z_r) - (z_l-z_r) 
+                                 * (2.0*f3*z_l + f4*z_l + f3*z_r + 2.0*f4*z_r)) / z_t3;
+           complex<double> a3 = (2.0*f1 - 2.0*f2 + (f3+f4) * (z_l-z_r)) / z_t3;
+
+           for ( int iz = nz_r; iz <= nz_l; iz++ )
+           {
+              double z = double(iz) / double(np2) * L;
+              vg2b[iz] = a0 + a1*z + a2*z*z + a3*z*z*z;
+           }
+
+           vft->forward_1z( vg2b, vg2 );
+
+           for ( int il = 0; il < basis.rod_size(irod); il++ )
+           {
+              int ig = basis.rod_first(irod) + il;
+              int k3 = basis.rod_lmin(irod) + il;
+              int iz = ( k3 < 0 ) ? k3 + np2 : k3;
+              vhart_g[ig] = vg2[iz] * 2.0;
+           }
+        }
+     } // irod loop
+
+     // ESM Hartree energy term
+
+     double eh = 0.0;
      for ( int ig = 0; ig < ngloc; ig++ )
      {
-        const complex<double> tmp = rhoelg[ig] + rhopst[ig];
-        const complex<double> hamil_tmp = hamil_rhoelg[ig] + rhopst[ig];
-        ehsum_cplx += tmp * conj(hamil_tmp) * complex<double>(g2i[ig],0.0);
-        // AS: the next line is needed for correct stress and/or forces
-        rhogt[ig] = tmp;
-        hamil_rhogt[ig] = hamil_tmp;
+        //
+        //  Add Hartree potential into local potential
+        //
+        vlocal_g[ig] = vion_local_g[ig] + vhart_g[ig];
+        //
+        //  Add contribution to Hartree energy
+        //
+        if ( vbasis_->context().mype() == 0 && ig == 0 ) // gamma only correction for G=0
+        {
+           eh += real( vhart_g[ig] * conj( rhogt[ig] ) ) * 0.5;
+        }
+        else
+        {
+           eh += real( vhart_g[ig] * conj( rhogt[ig] ) );
+        }
      }
-     ehsum = real(ehsum_cplx);     
-  }
-  else
-  {
-     for ( int ig = 0; ig < ngloc; ig++ ) {
-        const complex<double> tmp = rhoelg[ig] + rhopst[ig];
-        ehsum += norm(tmp) * g2i[ig];
-        rhogt[ig] = tmp;
-     }
-  }
-  
-  // factor 1/2 from definition of Ehart cancels with half sum over G
-  // Note: rhogt[ig] includes a factor 1/Omega
-  // Factor omega in next line yields prefactor 4 pi / omega in
 
-  double vfact = vbasis_->real() ? 1.0 : 0.5;
-  tsum[1] = vfact * omega * fpi * ehsum;
-  // tsum[1] contains ehart
-  
-  vbasis_->context().dsum(2,1,&tsum[0],2);
-  eps_   = tsum[0];
-  ehart_ = tsum[1];
-
-  // compute vlocal_g = vion_local_g + vhart_g
-  // where vhart_g = 4 * pi * (rhoelg + rhopst) * g2i  
-  if (s_.ctrl.tddft_involved)  // AS: the charge density based on hamil_wf has to be used
-     for ( int ig = 0; ig < ngloc; ig++ )
-        vlocal_g[ig] = vion_local_g[ig] + fpi * hamil_rhogt[ig] * g2i[ig];
-  else
-     for ( int ig = 0; ig < ngloc; ig++ )
-        vlocal_g[ig] = vion_local_g[ig] + fpi * rhogt[ig] * g2i[ig];
+     // factor 1/2 from definition of Ehart cancels with half sum over G
+     sum[1] = eh * omega;
+     MPI_Allreduce(sum,tsum,2,MPI_DOUBLE,MPI_SUM,vbasis_->context().comm());
+     eps_   = tsum[0];
+     ehart_ = tsum[1];
+     
+  }  // else if ESM
 
   // v_eff = vxc_g + vion_local_g + vhart_g
-
   if (s_.ctrl.ultrasoft)
-    for ( int ispin = 0; ispin < wf_.nspin(); ispin++ )
-      for ( int ig = 0; ig < ngloc; ig++ )
-        veff_g[ispin][ig] = vxc_g[ispin][ig] + vlocal_g[ig];
+     for ( int ispin = 0; ispin < wf_.nspin(); ispin++ )
+        for ( int ig = 0; ig < ngloc; ig++ )
+           veff_g[ispin][ig] = vxc_g[ispin][ig] + vlocal_g[ig];
 
         
   // FT to tmpr_r
@@ -490,16 +824,16 @@ void EnergyFunctional::update_vhxc(void) {
   // v_r contains the xc potential
   const int size = tmp_r.size();
   if ( wf_.nspin() == 1 ) {
-    for ( int i = 0; i < size; i++ ) {
-      v_r[0][i] += real(tmp_r[i]);
-    }
+     for ( int i = 0; i < size; i++ ) {
+        v_r[0][i] += real(tmp_r[i]);
+     }
   }
   else {
-    for ( int i = 0; i < size; i++ ) {
-      const double vloc = real(tmp_r[i]);
-      v_r[0][i] += vloc;
-      v_r[1][i] += vloc;
-    }
+     for ( int i = 0; i < size; i++ ) {
+        const double vloc = real(tmp_r[i]);
+        v_r[0][i] += vloc;
+        v_r[1][i] += vloc;
+     }
   }
 }
 
