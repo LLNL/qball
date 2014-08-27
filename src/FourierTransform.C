@@ -1191,12 +1191,15 @@ void FourierTransform::init_lib(void)
   naux1x = (int) (20000 + 2.28 * np0_);
   naux1y = (int) (20000 + 2.28 * np1_);
   naux1z = (int) (20000 + 2.28 * np2_);
+  naux1z1d = (int) (20000 + 2.28 * np2_);
   aux1xf.resize(naux1x);
   aux1yf.resize(naux1y);
   aux1zf.resize(naux1z);
+  aux1zf1d.resize(naux1z1d);
   aux1xb.resize(naux1x);
   aux1yb.resize(naux1y);
   aux1zb.resize(naux1z);
+  aux1zb1d.resize(naux1z1d);
 
   int naux2x = (int) (20000 + 2.28 * np0_ + (256 + 2*np0_)*min(64,ntrans0_));
   naux2 = naux2x;
@@ -1244,6 +1247,17 @@ void FourierTransform::init_lib(void)
   if (ntrans > 0)
      dcft_(&initflag,p,&inc1,&inc2,p,&inc1,&inc2,&np2_,&ntrans,
            &isign,&scale,&aux1zf[0],&naux1z,&aux2[0],&naux2);
+
+  // 1d z transforms
+  scale = 1.0;
+  inc1 = 1; inc2 = np2_; ntrans = 1;
+  isign = -1;
+  dcft_(&initflag,p,&inc1,&inc2,p,&inc1,&inc2,&np2_,&ntrans,
+        &isign,&scale,&aux1zb1d[0],&naux1z1d,&aux2[0],&naux2);
+  isign = 1;
+  //scale = 1.0 / np2_;  // ??
+  dcft_(&initflag,p,&inc1,&inc2,p,&inc1,&inc2,&np2_,&ntrans,
+        &isign,&scale,&aux1zf1d[0],&naux1z1d,&aux2[0],&naux2);
 
 #endif
 #elif USE_SPIRAL
@@ -1654,11 +1668,12 @@ void FourierTransform::fft_1z( vector<complex<double> >& val_in,
   int inc1 = 1, inc2 = np2_, ntrans = 1, initflag = 0;
   double scale = 1.0;
 
-  dcft_(&initflag,&val_in[0],&inc1,&inc2,&val_out[0],&inc1,&inc2,&np2_,&ntrans,
-       &isign,&scale,&aux1zb[0],&naux1z,&aux2[0],&naux2);
-
-  //  dcft_(&initflag,p,&inc1,&inc2,p,&inc1,&inc2,&np0_,&ntrans,
-  //         &isign,&scale,&aux1xb[0],&naux1x,&aux2[0],&naux2);
+  if (isign > 0)
+     dcft_(&initflag,&val_in[0],&inc1,&inc2,&val_out[0],&inc1,&inc2,&np2_,&ntrans,
+           &isign,&scale,&aux1zf1d[0],&naux1z1d,&aux2[0],&naux2);
+  else
+     dcft_(&initflag,&val_in[0],&inc1,&inc2,&val_out[0],&inc1,&inc2,&np2_,&ntrans,
+           &isign,&scale,&aux1zb1d[0],&naux1z1d,&aux2[0],&naux2);
 
 #elif USE_FFTW
    /*

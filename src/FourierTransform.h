@@ -77,10 +77,10 @@ class FourierTransform
   std::vector<double> aux1xyb;
   int naux1xy;
 #else
-  std::vector<double> aux1xf, aux1yf, aux1zf;
-  std::vector<double> aux1xb, aux1yb, aux1zb;
+  std::vector<double> aux1xf, aux1yf, aux1zf, aux1zf1d;
+  std::vector<double> aux1xb, aux1yb, aux1zb, aux1zb1d;
   std::vector<double> aux2;
-  int naux1x,naux1y,naux1z,naux2;
+  int naux1x,naux1y,naux1z,naux1z1d,naux2;
 #endif
 #elif USE_FFTW || USE_FFTW3 || USE_SPIRAL
   fftw_plan fwplan0,fwplan1,fwplan2,bwplan0,bwplan1,bwplan2;

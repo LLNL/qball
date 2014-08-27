@@ -324,7 +324,7 @@ void EnergyFunctional::update_vhxc(void) {
   const double *const g2i = vbasis_->g2i_ptr();
   const double fpi = 4.0 * M_PI;
   const int ngloc = vbasis_->localsize();
-  double sum[2], tsum[2];
+  double tsum[2];
   tsum[0] = 0.0;
   tsum[1] = 0.0;
   
@@ -490,41 +490,48 @@ void EnergyFunctional::update_vhxc(void) {
      const int esm_nfit = 4;               // number of fitting parameters/points for smoothing
                                           // shouldn't need to change; can probably hard-code
      const Basis& basis = *vbasis_;
-     const int np2 = basis.np(2);
+     const int np2v = vft->np2();
      const double tpi = 2.0 * M_PI;
      const complex<double> ci( 0.0, 1.0 );
      const complex<double> c0( 0.0, 0.0 );
      const double L = cell.amat(8);
      const double z0 = L/2.0;
      const double z1 = z0 + fabs(esm_w);
-     const int np2half = np2/2;
+     const int np2half = np2v/2;
      vector<complex<double> > vhart_g( ngloc, c0 );
 
+     for ( int ig = 0; ig < ngloc; ig++ )
+     {
+        rhogt[ig] = rhoelg[ig] + rhopst[ig];
+     }
+
+#if _OPENMP
 #pragma omp parallel for
+#endif     
      for ( int irod = 0; irod < basis.nrod_loc(); irod++ )
      {
-        vector<complex<double> > vg2 ( np2, c0 );
-        vector<complex<double> > vg2b( np2, c0 );
+        vector<complex<double> > vg2 ( np2v, c0 );
+        vector<complex<double> > vg2b( np2v, c0 );
 
-        int k1 = basis.rod_h(irod);
-        int k2 = basis.rod_k(irod);
+        int k0 = basis.rod_h(irod);
+        int k1 = basis.rod_k(irod);
 //
 // if g_parallel != 0:
 //
-        if ( ( k1 != 0 ) || ( k2 != 0 ) ) 
+        if ( ( k0 != 0 ) || ( k1 != 0 ) ) 
         {
            complex<double> tmp = c0;
            complex<double> tmp1 = c0;
            complex<double> tmp2 = c0;
-           const double t0 = k1 * cell.bmat(0) + k2 * cell.bmat(1);
-           const double t1 = k1 * cell.bmat(3) + k2 * cell.bmat(4);
+           const double t0 = k0 * cell.bmat(0) + k1 * cell.bmat(1);
+           const double t1 = k0 * cell.bmat(3) + k1 * cell.bmat(4);
            double gp = sqrt( t0*t0 + t1*t1 );
            for ( int il = 0; il < basis.rod_size(irod); il++ )
            {
               int ig = basis.rod_first(irod) + il;
-              int k3 = basis.rod_lmin(irod) + il;  // gz index
-              int iz = ( k3 < 0 ) ? k3 + np2 : k3; // z index for vg2
-              double kn = double(k3) * tpi/L;
+              int k2 = basis.rod_lmin(irod) + il;  // gz index
+              int iz = ( k2 < 0 ) ? k2 + np2v : k2; // z index for vg2
+              double kn = double(k2) * tpi/L;
               double cc = cos( kn * z0 );
               double ss = sin( kn * z0 );
               vg2[iz] = (fpi * rhogt[ig]) / (gp*gp + kn*kn);
@@ -553,16 +560,20 @@ void EnergyFunctional::update_vhxc(void) {
 
            vft->backward_1z( vg2, vg2b ); 
 
-           for ( int iz = 0; iz < np2; iz++ )
+           //ewd DEBUG
+           //cout << "DEBUG1, mype = " << s_.ctxt_.mype() << ", vg2b[0] = " << vg2b[0] << ", vg2b[1] = " << vg2b[1] << ", vg2b[2] = " << vg2b[2] << endl;
+
+           
+           for ( int iz = 0; iz < np2v; iz++ )
            {
               double z;
               if ( iz <= np2half ) 
               {
-                 z = double(iz) / double(np2) * L;
+                 z = double(iz) / double(np2v) * L;
               }
               else
               {
-                 z = double(iz - np2) / double(np2) * L;
+                 z = double(iz - np2v) / double(np2v) * L;
               }
               if ( esm_bc == "bc1" )
               {
@@ -584,18 +595,21 @@ void EnergyFunctional::update_vhxc(void) {
            
            vft->forward_1z( vg2b, vg2 );
            
+           //ewd DEBUG
+           //cout << "DEBUG2, mype = " << s_.ctxt_.mype() << ", vg2[0] = " << vg2[0] << ", vg2[1] = " << vg2[1] << ", vg2[2] = " << vg2[2] << endl;
+
            for ( int il = 0; il < basis.rod_size(irod); il++ )
            {
               int ig = basis.rod_first(irod) + il;
-              int k3 = basis.rod_lmin(irod) + il;
-              int iz = ( k3 < 0 ) ? k3 + np2 : k3;
+              int k2 = basis.rod_lmin(irod) + il;
+              int iz = ( k2 < 0 ) ? k2 + np2v : k2;
               vhart_g[ig] = vg2[iz] * 2.0;
            }
         } 
         //
         // else g_parallel = 0:
         //
-        else // if ( (k1 == 0) && (k2 == 0) )
+        else // if ( (k0 == 0) && (k1 == 0) )
         {
            complex<double> rhog0 = c0; // charge density for gamma
            complex<double> tmp1 = c0;
@@ -606,10 +620,10 @@ void EnergyFunctional::update_vhxc(void) {
            complex<double> f2 = c0;
            complex<double> f3 = c0;
            complex<double> f4 = c0;
-           int nz_l = int(np2 / 2) + esm_nfit;
-           int nz_r = int(np2 / 2) - esm_nfit;
-           double z_l = double(nz_l) * L / double(np2) - L;
-           double z_r = double(nz_r) * L / double(np2);
+           int nz_l = np2half + esm_nfit;
+           int nz_r = np2half - esm_nfit;
+           double z_l = double(nz_l) * L / double(np2v) - L;
+           double z_r = double(nz_r) * L / double(np2v);
            assert( basis.rod_lmin(irod) == 0 );
            
            for ( int il = -basis.rod_size(irod)+1; il < basis.rod_size(irod); il++ )
@@ -625,10 +639,10 @@ void EnergyFunctional::update_vhxc(void) {
                  int ig = basis.rod_first(irod) + il;
                  rhog = rhogt[ig];
               }
-              int k3 = basis.rod_lmin(irod) + il;
-              int iz = ( k3 < 0 ) ? k3 + np2 : k3;
+              int k2 = basis.rod_lmin(irod) + il;
+              int iz = ( k2 < 0 ) ? k2 + np2v : k2;
               
-              if ( k3 == 0 )
+              if ( k2 == 0 )
               {
                  rhog0 = rhog;
                  if ( esm_bc == "bc1" )
@@ -646,7 +660,7 @@ void EnergyFunctional::update_vhxc(void) {
               }
               else
               {
-                 double kn = double(k3) * tpi/L;
+                 double kn = double(k2) * tpi/L;
                  double cc = cos( kn * z0 );
                  double ss = sin( kn * z0 );
                  if ( esm_bc == "bc1" )
@@ -683,16 +697,19 @@ void EnergyFunctional::update_vhxc(void) {
 
            vft->backward_1z( vg2, vg2b );
 
-           for ( int iz = 0; iz < np2; iz++ )
+           //ewd DEBUG
+           //cout << "DEBUG3, mype = " << s_.ctxt_.mype() << ", vg2b[0] = " << vg2b[0] << ", vg2b[1] = " << vg2b[1] << ", vg2b[2] = " << vg2b[2] << endl;
+
+           for ( int iz = 0; iz < np2v; iz++ )
            {
               double z = 0.0;
               if ( iz <= np2half )
               {
-                 z = double(iz) / double(np2) * L;
+                 z = double(iz) / double(np2v) * L;
               }
               else
               {
-                 z = double(iz - np2) / double(np2) * L;
+                 z = double(iz - np2v) / double(np2v) * L;
               }
               if ( esm_bc == "bc1" )
               {
@@ -764,17 +781,20 @@ void EnergyFunctional::update_vhxc(void) {
 
            for ( int iz = nz_r; iz <= nz_l; iz++ )
            {
-              double z = double(iz) / double(np2) * L;
+              double z = double(iz) / double(np2v) * L;
               vg2b[iz] = a0 + a1*z + a2*z*z + a3*z*z*z;
            }
 
            vft->forward_1z( vg2b, vg2 );
 
+           //ewd DEBUG
+           //cout << "DEBUG4, mype = " << s_.ctxt_.mype() << ", vg2[0] = " << vg2[0] << ", vg2[1] = " << vg2[1] << ", vg2[2] = " << vg2[2] << endl;
+
            for ( int il = 0; il < basis.rod_size(irod); il++ )
            {
               int ig = basis.rod_first(irod) + il;
-              int k3 = basis.rod_lmin(irod) + il;
-              int iz = ( k3 < 0 ) ? k3 + np2 : k3;
+              int k2 = basis.rod_lmin(irod) + il;
+              int iz = ( k2 < 0 ) ? k2 + np2v : k2;
               vhart_g[ig] = vg2[iz] * 2.0;
            }
         }
@@ -803,12 +823,58 @@ void EnergyFunctional::update_vhxc(void) {
      }
 
      // factor 1/2 from definition of Ehart cancels with half sum over G
-     sum[1] = eh * omega;
-     MPI_Allreduce(sum,tsum,2,MPI_DOUBLE,MPI_SUM,vbasis_->context().comm());
+     tsum[1] = eh * omega;
+     vbasis_->context().dsum(2,1,&tsum[0],2);
      eps_   = tsum[0];
      ehart_ = tsum[1];
+
+     //ewd DEBUG
+     // print vhart for debug
+     if (false)
+     {
+        for ( int irod = 0; irod < basis.nrod_loc(); irod++ )
+        {
+           int k0 = basis.rod_h(irod);
+           int k1 = basis.rod_k(irod);
+           if( k0 != 0 || k1 != 0 ) continue;
+           
+           // g_parallel = 0
+           vector<complex<double> > vg2 ( np2v, c0 );
+           vector<complex<double> > vg2b( np2v, c0 );
+           
+           assert( basis.rod_lmin(irod) == 0 );
+           
+           for ( int il = -basis.rod_size(irod)+1; il < basis.rod_size(irod); il++ )
+           {
+              complex<double> v = 0.0;
+              if ( il < 0 )
+              {
+                 int ig = basis.rod_first(irod) - il;
+                 v = conj( vhart_g[ig] );
+              }
+              else
+              {
+                 int ig = basis.rod_first(irod) + il;
+                 v = vhart_g[ig];
+              }
+              int k2 = basis.rod_lmin(irod) + il;
+              int iz = ( k2 < 0 ) ? k2 + np2v : k2;
+              vg2[iz] = v;
+           }
+           
+           vft->backward_1z( vg2, vg2b );
+           
+           for( int k2 = np2half+1-np2v; k2 <= np2half; ++k2 ) {
+              double z = double(k2) / double(np2v) * L;
+              int iz = ( k2 < 0 ) ? k2 + np2v : k2;
+              cout << "ESM_debug " << z << " " << real(vg2b[iz]) << endl;
+           }
+           break;
+        } // print vhart for debug
+     }
+
      
-  }  // else if ESM
+  }  // end if ESM
 
   // v_eff = vxc_g + vion_local_g + vhart_g
   if (s_.ctrl.ultrasoft)
