@@ -1,4 +1,18 @@
 ------------------------------------------------------------------------
+r181 | draeger | 2014-08-27 13:04:05 -0700 (Wed, 27 Aug 2014) | 4 lines
+
+
+Fixed bugs in ESM implementation.
+
+
+------------------------------------------------------------------------
+r180 | draeger | 2014-08-22 16:50:48 -0700 (Fri, 22 Aug 2014) | 4 lines
+
+
+Fixed bug in SavedenCmd.C, where every task was trying to open the file.  This caused a hang on vulcan.
+
+
+------------------------------------------------------------------------
 r179 | draeger | 2014-08-07 15:07:21 -0700 (Thu, 07 Aug 2014) | 4 lines
 
 

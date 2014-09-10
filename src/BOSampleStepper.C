@@ -1732,6 +1732,51 @@ void BOSampleStepper::step(int niter)
       {
          if (s_.ctrl.savefreq == 1 || (s_.ctrl.mditer > 0 && s_.ctrl.mditer%s_.ctrl.savefreq == 0) )
          {
+            tmap["mdsave"].start();
+
+            // compute ionic forces at last position to update velocities
+            // consistently with last position
+            cd_.update_density();
+
+            ef_.update_vhxc();
+            const bool compute_forces = true;
+            double energy =
+                ef_.energy(false,dwf,compute_forces,fion,compute_stress,sigma_eks);
+
+            // average forces over symmetric atoms
+            if ( compute_forces && s_.symmetries.nsym() > 0) {
+               int nsym_ = s_.symmetries.nsym();
+               for ( int is = 0; is < atoms.atom_list.size(); is++ ) {
+                  for ( int ia = 0; ia < atoms.atom_list[is].size(); ia++ ) {
+                     // start with identity symmetry operation
+                     D3vector fsym(fion[is][3*ia],fion[is][3*ia+1],fion[is][3*ia+2]);
+                     for ( int isym = 0; isym < nsym_; isym++) {
+                        int ja = s_.atoms.symatomid(is,ia,isym);
+                        D3vector ftmp(fion[is][3*ja],fion[is][3*ja+1],fion[is][3*ja+2]);
+                        fsym = fsym + s_.symmetries.symlist[isym]->applyToVector(ftmp,false);
+                     }
+                     fion[is][3*ia] = fsym.x/(double)(nsym_+1);
+                     fion[is][3*ia+1] = fsym.y/(double)(nsym_+1);
+                     fion[is][3*ia+2] = fsym.z/(double)(nsym_+1);
+                  }
+               }       
+            }
+
+            if (compute_forces && s_.atoms.add_fion_ext()) {
+               for ( int is = 0; is < atoms.atom_list.size(); is++ ) {
+                  for ( int ia = 0; ia < atoms.atom_list[is].size(); ia++ ) {
+                     D3vector ftmp = s_.atoms.get_fion_ext(is,ia);
+                     fion[is][3*ia] += ftmp.x;
+                     fion[is][3*ia+1] += ftmp.y;
+                     fion[is][3*ia+2] += ftmp.z;
+                  }
+               }
+            }
+      
+            ionic_stepper->compute_v(energy,fion);
+            // positions r0 and velocities v0 are consistent
+
+
             // create output directory if it doesn't exist
             string dirbase = "md.";
             string filebase = "mdchk";
@@ -1790,18 +1835,7 @@ void BOSampleStepper::step(int niter)
                s_.atoms.printsys(os);
                os.close();
             }
-            
-            
-            //ewd DEBUG:  remove this after copied to EhrenStepper
-            if (s_.ctrl.tddft_involved)
-            {
-               // write s_.hamil_wf
-               string hamwffile = filestr + "hamwf";
-               if ( onpe0 )
-                  cout << "<!-- MDSaveCmd:  wf write finished, writing hamil_wf to " << hamwffile << "... -->" << endl;
-               s_.hamil_wf->write_states(hamwffile,format);
-            }
-
+            tmap["mdsave"].stop();
          }
       }
 
