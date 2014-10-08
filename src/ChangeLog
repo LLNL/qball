@@ -1,4 +1,11 @@
 ------------------------------------------------------------------------
+r182 | draeger | 2014-09-10 15:27:06 -0700 (Wed, 10 Sep 2014) | 4 lines
+
+
+Added extra calculations to sync up positions and velocities in MD save when savefreq variable used.
+
+
+------------------------------------------------------------------------
 r181 | draeger | 2014-08-27 13:04:05 -0700 (Wed, 27 Aug 2014) | 4 lines
 
 

@@ -603,7 +603,8 @@ void EnergyFunctional::update_vhxc(void) {
               int ig = basis.rod_first(irod) + il;
               int k2 = basis.rod_lmin(irod) + il;
               int iz = ( k2 < 0 ) ? k2 + np2v : k2;
-              vhart_g[ig] = vg2[iz] * 2.0;
+              //vhart_g[ig] = vg2[iz] * 2.0;
+              vhart_g[ig] = vg2[iz];
            }
         } 
         //
@@ -645,7 +646,11 @@ void EnergyFunctional::update_vhxc(void) {
               if ( k2 == 0 )
               {
                  rhog0 = rhog;
-                 if ( esm_bc == "bc1" )
+                 if ( esm_bc == "bc0" )
+                 {
+                    vg2[iz] = 0.0;
+                 }
+                 else if ( esm_bc == "bc1" )
                  {
                     vg2[iz] = -tpi * z0*z0 * rhog;
                  }
@@ -795,7 +800,8 @@ void EnergyFunctional::update_vhxc(void) {
               int ig = basis.rod_first(irod) + il;
               int k2 = basis.rod_lmin(irod) + il;
               int iz = ( k2 < 0 ) ? k2 + np2v : k2;
-              vhart_g[ig] = vg2[iz] * 2.0;
+              //vhart_g[ig] = vg2[iz] * 2.0;
+              vhart_g[ig] = vg2[iz];
            }
         }
      } // irod loop
@@ -1611,9 +1617,21 @@ double EnergyFunctional::energy(bool compute_hpsi, Wavefunction& dwf,
     const double* gx2 = vbasis_->gx_ptr(2);
     vector<complex<double> > trhog;
     for ( int is = 0; is < nsp_; is++ ) {
-       for ( int ig = 0; ig < ngloc; ig++ ) {
-          double tmp = fpi * rhops[is][ig] * g2i[ig];
-          vtemp[ig] =  tmp * conj(rhogt[ig]) + vps[is][ig] * conj(rhoelg[ig]);
+       if( s_.ctrl.esm_bc == "" )
+       {
+          for ( int ig = 0; ig < ngloc; ig++ )
+          {
+             double tmp = fpi * rhops[is][ig] * g2i[ig];
+             vtemp[ig] =  tmp * conj(rhogt[ig]) + vps[is][ig] * conj(rhoelg[ig]);
+          }
+       }
+       else  // ESM correction to forces
+       {
+          for ( int ig = 0; ig < ngloc; ig++ )
+          {
+             vtemp[ig] = rhops[is][ig] * conj(vlocal_g[ig]-vion_local_g[ig])
+                 + vps[is][ig] * conj(rhoelg[ig]);
+          }
        }
        Species *s = s_.atoms.species_list[is];
        if (s->nlcc())
