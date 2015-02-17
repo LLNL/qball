@@ -70,10 +70,22 @@ class NonLocalPotential
   vector<vector<complex<double> > > sfactcd_;  // structure factor of local atoms, cd basis
   vector<vector<complex<double> > > sfactwf_;  // structure factor of local atoms, wf basis
   
+  vector<vector<double> > skpgr_, ckpgr_;
+  vector<vector<double> > anl_loc_gamma;
+  vector<vector<double> > anl_buf_gamma;
+  vector<vector<double> > anl_fion_gamma;
+  vector<vector<double> > anl_sigma_gamma;
+  vector<vector<complex<double> > > anl_loc;
+  vector<vector<complex<double> > > anl_buf;
+  vector<vector<complex<double> > > anl_fion;
+  vector<vector<complex<double> > > anl_sigma;
+  vector<int> mynatloc_;
+  vector<int> natmaxloc_;
   
   mutable TimerMap tmap;
   void init(const bool compute_stress);
-   
+  void calc_anl_sigma(void);
+  
   public:
   
   NonLocalPotential(AtomSet& as, SlaterDet& sd, const bool compute_stress) :  
@@ -88,6 +100,7 @@ class NonLocalPotential
     bool compute_forces, vector<vector<double> >& fion, 
     bool compute_stress, valarray<double>& sigma_enl,
     vector<complex<double> >& veff);
+  void atoms_moved(void);
 
   void print_memory(ostream&os, int kmult, int kmultloc, double& totsum, double& locsum) const;
   void print_timing();
