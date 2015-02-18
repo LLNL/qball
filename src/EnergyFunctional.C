@@ -352,6 +352,8 @@ void EnergyFunctional::update_vhxc(void) {
   int mycol = wf_.wfcontext()->mycol();
 
   xcp->update(v_r,npcol,mycol);
+  tmap["exc"].stop();
+  tmap["exc_comm"].start();
   double tmpexc = xcp->exc();
   wf_.wfcontext()->dsum('r',1,1,&tmpexc,1);    // sum all contributions to exc
   int vrsize = vft->np012loc();
@@ -359,7 +361,7 @@ void EnergyFunctional::update_vhxc(void) {
   if (wf_.nspin() > 1)
      wf_.wfcontext()->dsum('r',vrsize,1,&v_r[1][0],vrsize);    // sum all contributions to v_r
   exc_ = tmpexc;
-  tmap["exc"].stop();
+  tmap["exc_comm"].stop();
 
 
   /*
