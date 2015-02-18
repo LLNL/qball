@@ -73,8 +73,8 @@ class XCPotential
   XCPotential(ChargeDensity& cd, const string functional_name);
   XCPotential(ChargeDensity& cd, const string functional_name, ChargeDensity& cd_ecalc);
   ~XCPotential();
-  void update(vector<vector<double> >& vr);
-  void update_exc(vector<vector<double> >& vr);
+  void update(vector<vector<double> >& vr, int npcol, int mycol);
+  void update_exc(vector<vector<double> >& vr, int npcol, int mycol);
   void compute_stress(valarray<double>& sigma_exc);
   double exc(void) { return exc_; }
 };

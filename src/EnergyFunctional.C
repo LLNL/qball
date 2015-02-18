@@ -348,8 +348,17 @@ void EnergyFunctional::update_vhxc(void) {
   
   //fill(v_r[ispin].begin(),v_r[ispin].end(),0.0);
 
-  xcp->update(v_r);
-  exc_ = xcp->exc();
+  int npcol = wf_.wfcontext()->npcol();
+  int mycol = wf_.wfcontext()->mycol();
+
+  xcp->update(v_r,npcol,mycol);
+  double tmpexc = xcp->exc();
+  wf_.wfcontext()->dsum('r',1,1,&tmpexc,1);    // sum all contributions to exc
+  int vrsize = vft->np012loc();
+  wf_.wfcontext()->dsum('r',vrsize,1,&v_r[0][0],vrsize);    // sum all contributions to v_r
+  if (wf_.nspin() > 1)
+     wf_.wfcontext()->dsum('r',vrsize,1,&v_r[1][0],vrsize);    // sum all contributions to v_r
+  exc_ = tmpexc;
   tmap["exc"].stop();
 
 
@@ -941,8 +950,21 @@ void EnergyFunctional::update_harris(void) {
    }
   
    // update XC energy and potential
-  xcp->update(v_r);
-  eharris_ = xcp->exc();
+
+   for ( int ispin = 0; ispin < wf_.nspin(); ispin++ )
+      for (int i=0; i<vft->np012loc(); i++)
+         v_r[ispin][i] = 0.0;
+   int npcol = wf_.wfcontext()->npcol();
+   int mycol = wf_.wfcontext()->mycol();
+   xcp->update(v_r,npcol,mycol);
+
+   double tmpexc = xcp->exc();
+   wf_.wfcontext()->dsum('r',1,1,&tmpexc,1);    // sum all contributions to exc
+   int vrsize = vft->np012loc();
+   wf_.wfcontext()->dsum('r',vrsize,1,&v_r[0][0],vrsize);    // sum all contributions to v_r
+   if (wf_.nspin() > 1)
+      wf_.wfcontext()->dsum('r',vrsize,1,&v_r[1][0],vrsize);    // sum all contributions to v_r
+   eharris_ = tmpexc;
 
   // compute local potential energy: 
   // integral of el. charge times ionic local pot.
@@ -1015,8 +1037,13 @@ void EnergyFunctional::update_exc_ehart_eps(void)
 
   // update XC energy and potential
   tmap["exc"].start();
-  xcp->update_exc(v_r);
-  exc_ = xcp->exc();
+  int npcol = wf_.wfcontext()->npcol();
+  int mycol = wf_.wfcontext()->mycol();
+
+  xcp->update_exc(v_r,npcol,mycol);
+  double tmpexc = xcp->exc();
+  wf_.wfcontext()->dsum('r',1,1,&tmpexc,1);    // sum all contributions to exc
+  exc_ = tmpexc;
   tmap["exc"].stop();
 
   // compute local potential energy:

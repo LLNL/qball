@@ -107,7 +107,7 @@ XCPotential::~XCPotential(void)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-void XCPotential::update(vector<vector<double> >& vr)
+void XCPotential::update(vector<vector<double> >& vr, int npcol, int mycol)
 {
   // compute exchange-correlation energy and add vxc potential to vr[ispin][ir]
   
@@ -136,298 +136,334 @@ void XCPotential::update(vector<vector<double> >& vr)
   
    if ( !xcf_->isGGA() )
    {
-    // LDA functional
+      // LDA functional
  
-    xcf_->setxc();
+      xcf_->setxc();
 
-    exc_ = 0.0;
-    const double *const e = xcf_->exc;
-    const int size = xcf_->np();
- 
-    if ( nspin_ == 1 ) {
-       // unpolarized
-       double* rh;
-       if (tddft_involved_)
-          rh = (double*)&(cd_ecalc_.rhor[0][0]);
-       else
-          rh = (double*)xcf_->rho;
-      const double *const v = xcf_->vxc1;
-      for ( int i = 0; i < size; i++ ) {
-        exc_ += rh[i] * e[i];
-        vr[0][i] += v[i];
+      exc_ = 0.0;
+      const int size = xcf_->np();
+
+      int locsize = size%npcol == 0 ? size/npcol : size/npcol + 1;
+      const int offset = mycol*locsize;
+      if (offset+locsize > size)
+         locsize = size-offset;
+         
+      const double *const e = &xcf_->exc[offset];
+
+      if ( nspin_ == 1 ) {
+         // unpolarized
+         double* rh;
+         if (tddft_involved_)
+            rh = (double*)&(cd_ecalc_.rhor[0][offset]);
+         else
+            rh = (double*)&xcf_->rho[offset];
+         const double *const v = &xcf_->vxc1[offset];
+         for ( int i = 0; i < locsize; i++ ) {
+            exc_ += rh[i] * e[i];
+            vr[0][offset+i] += v[i];
+         }
+
+         //ewd DEBUG
+         if (false && ctxt_.myrow() == 0)
+         {
+            double rh0 = (cd_ecalc_.rhor[0][offset+0]);
+            double rh1 = (cd_ecalc_.rhor[0][offset+1]);
+            double rh2 = (cd_ecalc_.rhor[0][offset+2]);
+
+            double vr0 = vr[0][offset+0];
+            double vr1 = vr[0][offset+1];
+            double vr2 = vr[0][offset+2];
+            
+            cout << "XCP.OPT.DEBUG1, mype = " << ctxt_.mype() << ", mycol = " << mycol << ", locsize = " << locsize << ", size = " << size << ", offset = " << offset << ", e[0] = " << e[0] << ", e[1] = " << e[1] << ", e[2] = " << e[2] << endl;
+            cout << "XCP.OPT.DEBUG2a, mype = " << ctxt_.mype() << ", mycol = " << mycol << ", offset = " << offset << ", rh[0] = " << rh[0] << ", rh[1] = " << rh[1] << ", rh[2] = " << rh[2] << endl;
+            cout << "XCP.OPT.DEBUG2b, mype = " << ctxt_.mype() << ", mycol = " << mycol << ", offset = " << offset << ", rh[0] = " << rh0 << ", rh[1] = " << rh1 << ", rh[2] = " << rh2 << endl;
+            cout << "XCP.OPT.DEBUG3a, mype = " << ctxt_.mype() << ", mycol = " << mycol << ", offset = " << offset << ", v[0] = " << v[0] << ", v[1] = " << v[1] << ", v[2] = " << v[2] << endl;
+            cout << "XCP.OPT.DEBUG3b, mype = " << ctxt_.mype() << ", mycol = " << mycol << ", offset = " << offset << ", vr[0] = " << vr0 << ", vr[1] = " << vr1 << ", vr[2] = " << vr2 << endl;
+         }      
+
+
       }
-    }
-    else {
-       // spin polarized
-       //const double *const rh_up = xcf_->rho_up;
-       //const double *const rh_dn = xcf_->rho_dn;
-       double* rh_up;
-       double* rh_dn;
-       if (tddft_involved_)
-       {
-          rh_up = &(cd_ecalc_.rhor[0][0]);
-          rh_dn = &(cd_ecalc_.rhor[1][0]);
-       }
-       else
-       {
-          rh_up = (double*)xcf_->rho_up;
-          rh_dn = (double*)xcf_->rho_dn;
-       }
-       const double *const v_up = xcf_->vxc1_up;
-       const double *const v_dn = xcf_->vxc1_dn;
-       for ( int i = 0; i < size; i++ ) {                                                         
-          exc_ += (rh_up[i] + rh_dn[i]) * e[i];
-          vr[0][i] += v_up[i];
-          vr[1][i] += v_dn[i];
-       }                                                         
-    }
-    double tsum = exc_ * vbasis_.cell().volume() / vft_.np012();
+      else {
+         // spin polarized
+         //const double *const rh_up = xcf_->rho_up;
+         //const double *const rh_dn = xcf_->rho_dn;
+         double* rh_up;
+         double* rh_dn;
+         if (tddft_involved_)
+         {
+            rh_up = &(cd_ecalc_.rhor[0][offset]);
+            rh_dn = &(cd_ecalc_.rhor[1][offset]);
+         }
+         else
+         {
+            rh_up = (double*)&xcf_->rho_up[offset];
+            rh_dn = (double*)&xcf_->rho_dn[offset];
+         }
+         const double *const v_up = &xcf_->vxc1_up[offset];
+         const double *const v_dn = &xcf_->vxc1_dn[offset];
+         for ( int i = 0; i < locsize; i++ ) {                                                         
+            exc_ += (rh_up[i] + rh_dn[i]) * e[i];
+            vr[0][offset+i] += v_up[i];
+            vr[1][offset+i] += v_dn[i];
+         }                                                         
+      }
+      double tsum = exc_ * vbasis_.cell().volume() / vft_.np012();
 
-    //ewd notes:  ctxt_ is a single-column context here
-    ctxt_.dsum(1,1,&tsum,1);
-    exc_ = tsum;
+      //ewd notes:  ctxt_ is a single-column context here
+      ctxt_.dsum(1,1,&tsum,1);
+      exc_ = tsum;
 
-  }
-  else {
-    // GGA functional
-    exc_ = 0.0;
-    int size = xcf_->np();
+   }
+   else {
+      // GGA functional
+      exc_ = 0.0;
+      int size = xcf_->np();
+      int locsize = np012loc_%npcol == 0 ? np012loc_/npcol : np012loc_/npcol + 1;
+      const int offset = mycol*locsize;
+      if (offset+locsize > np012loc_)
+         locsize = np012loc_-offset;
     
-    // compute grad_rho
-    const double omega_inv = 1.0 / vbasis_.cell().volume();
+      // compute grad_rho
+      const double omega_inv = 1.0 / vbasis_.cell().volume();
 
-    if ( nspin_ == 1 ) {
-       const complex<double>* rhogptr = (cd_.nlcc() ? &cd_.xcrhog[0][0] : &cd_.rhog[0][0]);
-       for ( int j = 0; j < 3; j++ ) {
-        const double *const gxj = vbasis_.gx_ptr(j);
-        for ( int ig = 0; ig < ngloc_; ig++ ) {
-          /* i*G_j*c(G) */
-           //tmp1[ig] = complex<double>(0.0,omega_inv*gxj[ig]) * cd_.rhog[0][ig];
-          tmp1[ig] = complex<double>(0.0,omega_inv*gxj[ig]) * rhogptr[ig];
-        }
-        vft_.backward(&tmp1[0],&tmpr[0]);
-        int inc2=2, inc1=1;
-        double *grj = xcf_->grad_rho[j];
-        dcopy(&np012loc_,(double*)&tmpr[0],&inc2,grj,&inc1);
-       }
-    }
-    else {
-      for ( int j = 0; j < 3; j++ ) {
-        const double *const gxj = vbasis_.gx_ptr(j);
-        //const complex<double>* rhg0 = &cd_.rhog[0][0];
-        //const complex<double>* rhg1 = &cd_.rhog[1][0];
-        const complex<double>* rhg0 = (cd_.nlcc() ? &cd_.xcrhog[0][0] : &cd_.rhog[0][0]);
-        const complex<double>* rhg1 = (cd_.nlcc() ? &cd_.xcrhog[1][0] : &cd_.rhog[1][0]);
+      if ( nspin_ == 1 )
+      {
+         const complex<double>* rhogptr = (cd_.nlcc() ? &cd_.xcrhog[0][0] : &cd_.rhog[0][0]);
+         for ( int j = 0; j < 3; j++ )
+         {
+            const double *const gxj = vbasis_.gx_ptr(j);
+            for ( int ig = 0; ig < ngloc_; ig++ )
+            {
+               /* i*G_j*c(G) */
+               tmp1[ig] = complex<double>(0.0,omega_inv*gxj[ig]) * rhogptr[ig];
+            }
+            vft_.backward(&tmp1[0],&tmpr[0]);
+            int inc2=2, inc1=1;
+            double *grj = xcf_->grad_rho[j];
+            dcopy(&np012loc_,(double*)&tmpr[0],&inc2,grj,&inc1);
+         }
+      }
+      else {
+         for ( int j = 0; j < 3; j++ )
+         {
+            const double *const gxj = vbasis_.gx_ptr(j);
+            const complex<double>* rhg0 = (cd_.nlcc() ? &cd_.xcrhog[0][0] : &cd_.rhog[0][0]);
+            const complex<double>* rhg1 = (cd_.nlcc() ? &cd_.xcrhog[1][0] : &cd_.rhog[1][0]);
         
-        for ( int ig = 0; ig < ngloc_; ig++ ) {
-          /* i*G_j*c(G) */
-          const complex<double> igxj(0.0,omega_inv*gxj[ig]);
-          const complex<double> c0 = *rhg0++;
-          const complex<double> c1 = *rhg1++;
-          tmp1[ig] = igxj * c0; 
-          tmp2[ig] = igxj * c1; 
-        }
-        if (vbasis_.real()) {
-          vft_.backward(&tmp1[0],&tmp2[0],&tmpr[0]);
-          double *grj_up = xcf_->grad_rho_up[j];
-          double *grj_dn = xcf_->grad_rho_dn[j];
-          int inc2=2, inc1=1;
-          double* p = (double*) &tmpr[0];
-          dcopy(&np012loc_,p,  &inc2,grj_up,&inc1);
-          dcopy(&np012loc_,p+1,&inc2,grj_dn,&inc1);
-        }
-        else {
-          vft_.backward(&tmp1[0],&tmpr[0]);
-          double *grj_up = xcf_->grad_rho_up[j];
-          int inc2=2, inc1=1;
-          dcopy(&np012loc_,(double*)&tmpr[0],  &inc2,grj_up,&inc1);
-
-          vft_.backward(&tmp2[0],&tmpr[0]);
-          double *grj_dn = xcf_->grad_rho_dn[j];
-          dcopy(&np012loc_,(double*)&tmpr[0],  &inc2,grj_dn,&inc1);
-        }
-      } // j
-    }
-    
-    xcf_->setxc();
-    
-    // compute xc potential
-    // take divergence of grad(rho)*vxc2
-
-    // compute components of grad(rho) * vxc2
-    if ( nspin_ == 1 )
-    {
-      for ( int j = 0; j < 3; j++ )
-      {
-        const double *const gxj = vbasis_.gx_ptr(j);
-        const double *const grj = xcf_->grad_rho[j];
-        const double *const v2 = xcf_->vxc2;
-        for ( int ir = 0; ir < np012loc_; ir++ )
-        {
-          tmpr[ir] = grj[ir] * v2[ir];
-        }
-        // derivative
-        vft_.forward(&tmpr[0],&tmp1[0]);
-        for ( int ig = 0; ig < ngloc_; ig++ )
-        {
-          // i*G_j*c(G)
-          tmp1[ig] *= complex<double>(0.0,gxj[ig]);
-        }
-        // back to real space
-        vft_.backward(&tmp1[0],&tmpr[0]);
-        // accumulate div(vxc2*grad_rho) in vxctmp
-        double one = 1.0;
-        int inc1 = 1, inc2 = 2;
-        if ( j == 0 )
-        {
-          dcopy(&np012loc_,(double*)&tmpr[0],&inc2,&vxctmp[0][0],&inc1);
-        }
-        else
-        {
-          daxpy(&np012loc_,&one,(double*)&tmpr[0],&inc2,&vxctmp[0][0],&inc1);
-        }
+            for ( int ig = 0; ig < ngloc_; ig++ )
+            {
+               /* i*G_j*c(G) */
+               const complex<double> igxj(0.0,omega_inv*gxj[ig]);
+               const complex<double> c0 = *rhg0++;
+               const complex<double> c1 = *rhg1++;
+               tmp1[ig] = igxj * c0; 
+               tmp2[ig] = igxj * c1; 
+            }
+            if (vbasis_.real())
+            {
+               vft_.backward(&tmp1[0],&tmp2[0],&tmpr[0]);
+               double *grj_up = xcf_->grad_rho_up[j];
+               double *grj_dn = xcf_->grad_rho_dn[j];
+               int inc2=2, inc1=1;
+               double* p = (double*) &tmpr[0];
+               dcopy(&np012loc_,p,  &inc2,grj_up,&inc1);
+               dcopy(&np012loc_,p+1,&inc2,grj_dn,&inc1);
+            }
+            else
+            {
+               vft_.backward(&tmp1[0],&tmpr[0]);
+               double *grj_up = xcf_->grad_rho_up[j];
+               int inc2=2, inc1=1;
+               dcopy(&np012loc_,(double*)&tmpr[0],  &inc2,grj_up,&inc1);
+             
+               vft_.backward(&tmp2[0],&tmpr[0]);
+               double *grj_dn = xcf_->grad_rho_dn[j];
+               dcopy(&np012loc_,(double*)&tmpr[0],  &inc2,grj_dn,&inc1);
+            }
+         } // j
       }
-    }
-    else
-    {
-      double *v2_upup = xcf_->vxc2_upup;
-      double *v2_updn = xcf_->vxc2_updn;
-      double *v2_dnup = xcf_->vxc2_dnup;
-      double *v2_dndn = xcf_->vxc2_dndn;
-      for ( int j = 0; j < 3; j++ )
-      {
-        const double *gxj = vbasis_.gx_ptr(j);
-        const double *grj_up = xcf_->grad_rho_up[j];
-        const double *grj_dn = xcf_->grad_rho_dn[j];
-        if (vbasis_.real()) {
-          for ( int ir = 0; ir < np012loc_; ir++ )
-          {
-            const double re = v2_upup[ir] * grj_up[ir] + v2_updn[ir] * grj_dn[ir];
-            const double im = v2_dnup[ir] * grj_up[ir] + v2_dndn[ir] * grj_dn[ir];
-            tmpr[ir] = complex<double>(re,im);
-          }
-          // derivative
-          vft_.forward(&tmpr[0],&tmp1[0],&tmp2[0]);
-        }
-        else {
-          for ( int ir = 0; ir < np012loc_; ir++ )
-            tmpr[ir] = complex<double>(v2_upup[ir] * grj_up[ir] + v2_updn[ir] * grj_dn[ir],0.0);
-          vft_.forward(&tmpr[0],&tmp1[0]);
-          for ( int ir = 0; ir < np012loc_; ir++ )
-            tmpr[ir] = complex<double>(v2_dnup[ir] * grj_up[ir] + v2_dndn[ir] * grj_dn[ir],0.0);
-          vft_.forward(&tmpr[0],&tmp2[0]);
-        }
-        
-        for ( int ig = 0; ig < ngloc_; ig++ )
-        {
-          // i*G_j*c(G)
-          const complex<double> igxj(0.0,gxj[ig]);
-          tmp1[ig] *= igxj;
-          tmp2[ig] *= igxj;
-        }
-
-        if (vbasis_.real()) {
-          vft_.backward(&tmp1[0],&tmp2[0],&tmpr[0]);
-          // accumulate div(vxc2*grad_rho) in vxctmp
-          double one = 1.0;
-          int inc1 = 1, inc2 = 2;
-          double* p = (double*) &tmpr[0];
-          if ( j == 0 )
-          {
-            dcopy(&np012loc_,p  ,&inc2,&vxctmp[0][0],&inc1);
-            dcopy(&np012loc_,p+1,&inc2,&vxctmp[1][0],&inc1);
-          }
-          else
-          {
-            daxpy(&np012loc_,&one,p  ,&inc2,&vxctmp[0][0],&inc1);
-            daxpy(&np012loc_,&one,p+1,&inc2,&vxctmp[1][0],&inc1);
-          }
-        }
-        else {
-          vft_.backward(&tmp1[0],&tmpr[0]);
-          // accumulate div(vxc2*grad_rho) in vxctmp
-          double one = 1.0;
-          int inc1 = 1, inc2 = 2;
-          if ( j == 0 )
-            dcopy(&np012loc_,(double*)&tmpr[0],&inc2,&vxctmp[0][0],&inc1);
-          else
-            daxpy(&np012loc_,&one,(double*)&tmpr[0],&inc2,&vxctmp[0][0],&inc1);
-          vft_.backward(&tmp2[0],&tmpr[0]);
-          if ( j == 0 )
-            dcopy(&np012loc_,(double*)&tmpr[0],&inc2,&vxctmp[1][0],&inc1);
-          else
-            daxpy(&np012loc_,&one,(double*)&tmpr[0],&inc2,&vxctmp[1][0],&inc1);
-        }
-      } // j
-    }
     
-    // add xc potential to local potential in vr[i]
-    // div(vxc2*grad_rho) is stored in vxctmp[ispin][ir]
+      xcf_->setxc();
+    
+      // compute xc potential
+      // take divergence of grad(rho)*vxc2
 
-    double esum=0.0;
-    if ( nspin_ == 1 )
-    {
-      const double *const e = xcf_->exc;
-      const double *const v1 = xcf_->vxc1;
-      const double *const v2 = xcf_->vxc2;
-      //const double *const rh = xcf_->rho;
-      double* rh;
-      if (tddft_involved_)
-         rh = &(cd_ecalc_.rhor[0][0]);
-      else
-         rh = (double*)xcf_->rho;
+      // compute components of grad(rho) * vxc2
+      if ( nspin_ == 1 )
       {
-        for ( int ir = 0; ir < np012loc_; ir++ )
-        {
-          esum += rh[ir] * e[ir];
-          vr[0][ir] += v1[ir] + vxctmp[0][ir];
-        }
-      }
-    }
-    else
-    {
-      const double *const v1_up = xcf_->vxc1_up;
-      const double *const v1_dn = xcf_->vxc1_dn;
-      const double *const v2_upup = xcf_->vxc2_upup;
-      const double *const v2_updn = xcf_->vxc2_updn;
-      const double *const v2_dnup = xcf_->vxc2_dnup;
-      const double *const v2_dndn = xcf_->vxc2_dndn;
-      const double *const eup = xcf_->exc_up;
-      const double *const edn = xcf_->exc_dn;
-      //const double *const rh_up = xcf_->rho_up;
-      //const double *const rh_dn = xcf_->rho_dn;
-      double* rh_up;
-      double* rh_dn;
-      if (tddft_involved_)
-      {
-         rh_up = &(cd_ecalc_.rhor[0][0]);
-         rh_dn = &(cd_ecalc_.rhor[1][0]);
+         for ( int j = 0; j < 3; j++ )
+         {
+            const double *const gxj = vbasis_.gx_ptr(j);
+            const double *const grj = xcf_->grad_rho[j];
+            const double *const v2 = xcf_->vxc2;
+            for ( int ir = 0; ir < np012loc_; ir++ )
+            {
+               tmpr[ir] = grj[ir] * v2[ir];
+            }
+            // derivative
+            vft_.forward(&tmpr[0],&tmp1[0]);
+            for ( int ig = 0; ig < ngloc_; ig++ )
+            {
+               // i*G_j*c(G)
+               tmp1[ig] *= complex<double>(0.0,gxj[ig]);
+            }
+            // back to real space
+            vft_.backward(&tmp1[0],&tmpr[0]);
+            // accumulate div(vxc2*grad_rho) in vxctmp
+            double one = 1.0;
+            int inc1 = 1, inc2 = 2;
+            if ( j == 0 )
+            {
+               dcopy(&np012loc_,(double*)&tmpr[0],&inc2,&vxctmp[0][0],&inc1);
+            }
+            else
+            {
+               daxpy(&np012loc_,&one,(double*)&tmpr[0],&inc2,&vxctmp[0][0],&inc1);
+            }
+         }
       }
       else
       {
-         rh_up = (double*)xcf_->rho_up;
-         rh_dn = (double*)xcf_->rho_dn;
+         double *v2_upup = xcf_->vxc2_upup;
+         double *v2_updn = xcf_->vxc2_updn;
+         double *v2_dnup = xcf_->vxc2_dnup;
+         double *v2_dndn = xcf_->vxc2_dndn;
+         for ( int j = 0; j < 3; j++ )
+         {
+            const double *gxj = vbasis_.gx_ptr(j);
+            const double *grj_up = xcf_->grad_rho_up[j];
+            const double *grj_dn = xcf_->grad_rho_dn[j];
+            if (vbasis_.real())
+            {
+               for ( int ir = 0; ir < np012loc_; ir++ )
+               {
+                  const double re = v2_upup[ir] * grj_up[ir] + v2_updn[ir] * grj_dn[ir];
+                  const double im = v2_dnup[ir] * grj_up[ir] + v2_dndn[ir] * grj_dn[ir];
+                  tmpr[ir] = complex<double>(re,im);
+               }
+               // derivative
+               vft_.forward(&tmpr[0],&tmp1[0],&tmp2[0]);
+            }
+            else
+            {
+               for ( int ir = 0; ir < np012loc_; ir++ )
+                  tmpr[ir] = complex<double>(v2_upup[ir] * grj_up[ir] + v2_updn[ir] * grj_dn[ir],0.0);
+               vft_.forward(&tmpr[0],&tmp1[0]);
+               for ( int ir = 0; ir < np012loc_; ir++ )
+                  tmpr[ir] = complex<double>(v2_dnup[ir] * grj_up[ir] + v2_dndn[ir] * grj_dn[ir],0.0);
+               vft_.forward(&tmpr[0],&tmp2[0]);
+            }
+          
+            for ( int ig = 0; ig < ngloc_; ig++ )
+            {
+               // i*G_j*c(G)
+               const complex<double> igxj(0.0,gxj[ig]);
+               tmp1[ig] *= igxj;
+               tmp2[ig] *= igxj;
+            }
+          
+            if (vbasis_.real()) {
+               vft_.backward(&tmp1[0],&tmp2[0],&tmpr[0]);
+               // accumulate div(vxc2*grad_rho) in vxctmp
+               double one = 1.0;
+               int inc1 = 1, inc2 = 2;
+               double* p = (double*) &tmpr[0];
+               if ( j == 0 )
+               {
+                  dcopy(&np012loc_,p  ,&inc2,&vxctmp[0][0],&inc1);
+                  dcopy(&np012loc_,p+1,&inc2,&vxctmp[1][0],&inc1);
+               }
+               else
+               {
+                  daxpy(&np012loc_,&one,p  ,&inc2,&vxctmp[0][0],&inc1);
+                  daxpy(&np012loc_,&one,p+1,&inc2,&vxctmp[1][0],&inc1);
+               }
+            }
+            else {
+               vft_.backward(&tmp1[0],&tmpr[0]);
+               // accumulate div(vxc2*grad_rho) in vxctmp
+               double one = 1.0;
+               int inc1 = 1, inc2 = 2;
+               if ( j == 0 )
+                  dcopy(&np012loc_,(double*)&tmpr[0],&inc2,&vxctmp[0][0],&inc1);
+               else
+                  daxpy(&np012loc_,&one,(double*)&tmpr[0],&inc2,&vxctmp[0][0],&inc1);
+               vft_.backward(&tmp2[0],&tmpr[0]);
+               if ( j == 0 )
+                  dcopy(&np012loc_,(double*)&tmpr[0],&inc2,&vxctmp[1][0],&inc1);
+               else
+                  daxpy(&np012loc_,&one,(double*)&tmpr[0],&inc2,&vxctmp[1][0],&inc1);
+            }
+         } // j
       }
-      for ( int ir = 0; ir < np012loc_; ir++ )
+    
+      // add xc potential to local potential in vr[i]
+      // div(vxc2*grad_rho) is stored in vxctmp[ispin][ir]
+
+      double esum=0.0;
+      if ( nspin_ == 1 )
       {
-        double r_up = rh_up[ir];
-        double r_dn = rh_dn[ir];
-        esum += r_up * eup[ir] + r_dn * edn[ir];
-        vr[0][ir] += v1_up[ir] + vxctmp[0][ir];
-        vr[1][ir] += v1_dn[ir] + vxctmp[1][ir];
+         const double *const e = xcf_->exc;
+         const double *const v1 = xcf_->vxc1;
+         const double *const v2 = xcf_->vxc2;
+         //const double *const rh = xcf_->rho;
+         double* rh;
+         if (tddft_involved_)
+            rh = &(cd_ecalc_.rhor[0][0]);
+         else
+            rh = (double*)xcf_->rho;
+         {
+            for ( int ir = 0; ir < np012loc_; ir++ )
+            {
+               esum += rh[ir] * e[ir];
+               vr[0][ir] += v1[ir] + vxctmp[0][ir];
+            }
+         }
       }
-    }
+      else
+      {
+         const double *const v1_up = xcf_->vxc1_up;
+         const double *const v1_dn = xcf_->vxc1_dn;
+         const double *const v2_upup = xcf_->vxc2_upup;
+         const double *const v2_updn = xcf_->vxc2_updn;
+         const double *const v2_dnup = xcf_->vxc2_dnup;
+         const double *const v2_dndn = xcf_->vxc2_dndn;
+         const double *const eup = xcf_->exc_up;
+         const double *const edn = xcf_->exc_dn;
+         //const double *const rh_up = xcf_->rho_up;
+         //const double *const rh_dn = xcf_->rho_dn;
+         double* rh_up;
+         double* rh_dn;
+         if (tddft_involved_)
+         {
+            rh_up = &(cd_ecalc_.rhor[0][0]);
+            rh_dn = &(cd_ecalc_.rhor[1][0]);
+         }
+         else
+         {
+            rh_up = (double*)xcf_->rho_up;
+            rh_dn = (double*)xcf_->rho_dn;
+         }
+         for ( int ir = 0; ir < np012loc_; ir++ )
+         {
+            double r_up = rh_up[ir];
+            double r_dn = rh_dn[ir];
+            esum += r_up * eup[ir] + r_dn * edn[ir];
+            vr[0][ir] += v1_up[ir] + vxctmp[0][ir];
+            vr[1][ir] += v1_dn[ir] + vxctmp[1][ir];
+         }
+      }
 
-    double tsum = esum * vbasis_.cell().volume() / vft_.np012();
-    ctxt_.dsum(1,1,&tsum,1);
-    exc_ = tsum;
+      double tsum = esum * vbasis_.cell().volume() / vft_.np012();
+      ctxt_.dsum(1,1,&tsum,1);
+      exc_ = tsum;
 
-  }
+   }
 }
 ////////////////////////////////////////////////////////////////////////////////
 // AS: modified version of XCPotential::update(vector<vector<double> >& vr) which
 // AS: leaves the potential untouched and only recalculates the energy term
-void XCPotential::update_exc(vector<vector<double> >& vr)
+void XCPotential::update_exc(vector<vector<double> >& vr, int npcol, int mycol)
 {
    assert(tddft_involved_);
 
@@ -436,16 +472,21 @@ void XCPotential::update_exc(vector<vector<double> >& vr)
       // LDA functional
       
       exc_ = 0.0;
-      const double *const e = xcf_->exc;
       const int size = xcf_->np();
 
+      int locsize = size%npcol == 0 ? size/npcol : size/npcol + 1;
+      const int offset = mycol*locsize;
+      if (offset+locsize > size)
+         locsize = size-offset;
+         
+      const double *const e = &xcf_->exc[offset];
       if ( nspin_ == 1 )
       {
          // unpolarized
          // AS: was previously const double *const rh = xcf_->rho;
          // AS: however, the energy has to be determined with the new wave function
-         const double *const rh = &(cd_ecalc_.rhor[0][0]);
-         for ( int i = 0; i < size; i++ )
+         const double *const rh = &(cd_ecalc_.rhor[0][offset]);
+         for ( int i = 0; i < locsize; i++ )
          {
             exc_ += rh[i] * e[i];
          }
@@ -453,9 +494,9 @@ void XCPotential::update_exc(vector<vector<double> >& vr)
       else
       {
          // spin polarized
-         const double *const rh_up = xcf_->rho_up;
-         const double *const rh_dn = xcf_->rho_dn;
-         for ( int i = 0; i < size; i++ )
+         const double *const rh_up = &xcf_->rho_up[offset];
+         const double *const rh_dn = &xcf_->rho_dn[offset];
+         for ( int i = 0; i < locsize; i++ )
          {
             exc_ += (rh_up[i] + rh_dn[i]) * e[i];
          }
@@ -469,19 +510,23 @@ void XCPotential::update_exc(vector<vector<double> >& vr)
       // GGA functional
       exc_ = 0.0;
       int size = xcf_->np();
+      int locsize = np012loc_%npcol == 0 ? np012loc_/npcol : np012loc_/npcol + 1;
+      const int offset = mycol*locsize;
+      if (offset+locsize > np012loc_)
+         locsize = np012loc_-offset;
 
       // div(vxc2*grad_rho) is stored in vxctmp[ispin][ir]
       
       double esum=0.0;
       if ( nspin_ == 1 )
       {
-         const double *const e = xcf_->exc;
+         const double *const e = &xcf_->exc[offset];
          // AS: was previously const double *const rh = xcf_->rho;
          // AS: however, the energy has to be determined with the new wave function
          // AS: untested so far!
-         const double *const rh = &(cd_ecalc_.rhor[0][0]);
+         const double *const rh = &(cd_ecalc_.rhor[0][offset]);
          {
-            for ( int ir = 0; ir < np012loc_; ir++ )
+            for ( int ir = 0; ir < locsize; ir++ )
             {
                esum += rh[ir] * e[ir];
             }
@@ -489,11 +534,11 @@ void XCPotential::update_exc(vector<vector<double> >& vr)
       }
       else
       {
-         const double *const eup = xcf_->exc_up;
-         const double *const edn = xcf_->exc_dn;
-         const double *const rh_up = xcf_->rho_up;
-         const double *const rh_dn = xcf_->rho_dn;
-         for ( int ir = 0; ir < np012loc_; ir++ )
+         const double *const eup = &xcf_->exc_up[offset];
+         const double *const edn = &xcf_->exc_dn[offset];
+         const double *const rh_up = &xcf_->rho_up[offset];
+         const double *const rh_dn = &xcf_->rho_dn[offset];
+         for ( int ir = 0; ir < locsize; ir++ )
          {
             const double r_up = rh_up[ir];
             const double r_dn = rh_dn[ir];
