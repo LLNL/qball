@@ -126,6 +126,8 @@ testMatrix-omp: $(OBJDIR)/Matrix.o $(OBJDIR)/Context.o
 	$(LD) $(DFLAGS) -o testMatrix-$(ARCH) $(OBJDIR)/testMatrix.o $^ $(LDFLAGS)
 testBasis: $(OBJDIR)/testBasis.o $(OBJDIR)/Basis.o $(OBJDIR)/UnitCell.o $(OBJDIR)/Context.o
 	$(LD) $(DFLAGS) -o $@ $^ $(LDFLAGS)
+testRowBcast: $(OBJDIR)/testRowBcast.o $(OBJDIR)/Context.o
+	$(LD) $(DFLAGS) -o $@ $^ $(LDFLAGS)
 testFourierTransform: $(OBJDIR)/testFourierTransform.o $(OBJDIR)/FourierTransform.o $(OBJDIR)/Basis.o \
 	$(OBJDIR)/UnitCell.o $(OBJDIR)/Context.o
 	$(LD) $(DFLAGS) -o $@ $^ $(LDFLAGS)

@@ -234,7 +234,37 @@ void MDIonicStepper::compute_v(double e0, const vector<vector< double> >& f0)
     //cout << " npairs: " << npairs << endl;
     compute_ekin();
   }
+  /*
+  else if ( thermostat_ == "NOSE" )
+  {
+     // Nose-Hoover Chain Parameters
+     int dof = 3*natoms;
+     double K = 0.;     // Kinetic Energy
+     double Efree = 0.;
+     double Ktot1 = 0.;   // Conserve Quantity of the first step
+     double Ktot2 = 0.;   // Conserve Quantity at current step
+     double Edrift = 0.0;
+     double xi1 = 0.;    // this needs to persist across MD steps, add to savesys?
+     double vxi1 = 0.0;  // this needs to persist across MD steps, add to savesys?
+     double G1;
+     double s; //scale factor
 
+     // chain 1
+     vxi1 = vxi1+(K*2-L*T)/Q1*dt/4.;
+     xi1 = xi1+vxi1*dt/2.;
+     s=exp(-vxi1*dt/2.);
+     for(Int i=0;i<numAtom;i++){
+        for(Int j=0;j<3;j++)
+           atomv[i][j]=s*atomv[i][j];
+     }
+     K *= s*s;
+     vxi1=vxi1+(2*K-L*T)/Q1*dt/4.;
+     
+
+     
+  }
+  */
+  
   constraints_.enforce_v(r0_,v0_);
   atoms_.set_velocities(v0_);
 

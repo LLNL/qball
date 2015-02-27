@@ -1097,110 +1097,111 @@ double EnergyFunctional::energy(bool compute_hpsi, Wavefunction& dwf,
   sigma_ekin = 0.0;
   sigma_econf = 0.0;
   valarray<double> sum(0.0,14), tsum(0.0,14);
-
   for ( int ispin = 0; ispin < wf_.nspin(); ispin++ ) {
-    if (wf_.spinactive(ispin)) {
-      for ( int ikp=0; ikp<wf_.nkp(); ikp++) {
-        if (wf_.kptactive(ikp)) {
-          assert(wf_.sd(ispin,ikp) != 0);
-          const double weight = wf_.weight(ikp);
-          const SlaterDet& sd = *(wf_.sd(ispin,ikp));
-          const Basis& wfbasis = wf_.sd(ispin,ikp)->basis();
+     if (wf_.spinactive(ispin)) {
+        for ( int ikp=0; ikp<wf_.nkp(); ikp++) {
+           if (wf_.kptactive(ikp)) {
+              assert(wf_.sd(ispin,ikp) != 0);
+              const double weight = wf_.weight(ikp);
+              const SlaterDet& sd = *(wf_.sd(ispin,ikp));
+              const Basis& wfbasis = wf_.sd(ispin,ikp)->basis();
 
-          // factor fac in next lines: 2.0 for G and -G (if basis is real) and
-          // 0.5 from 1/(2m)
-          // note: if basis is real, the factor of 2.0 for G=0 need not be
-          // corrected since G^2 = 0
-          // Note: the calculation of fac in next line is valid only for nkp=1
-          // If k!=0, kpg2(0) !=0 and the ig=0 coefficient must be dealt with 
-          // separately
-          const double fac = wfbasis.real() ? 1.0 : 0.5;
-          const ComplexMatrix& c = sd.c();
-          const Context& sdctxt = sd.context();
+              // factor fac in next lines: 2.0 for G and -G (if basis is real) and
+              // 0.5 from 1/(2m)
+              // note: if basis is real, the factor of 2.0 for G=0 need not be
+              // corrected since G^2 = 0
+              // Note: the calculation of fac in next line is valid only for nkp=1
+              // If k!=0, kpg2(0) !=0 and the ig=0 coefficient must be dealt with 
+              // separately
+              const double fac = wfbasis.real() ? 1.0 : 0.5;
+              const ComplexMatrix& c = sd.c();
+              const Context& sdctxt = sd.context();
               
-          // compute psi2sum(G) = fac * sum_G occ(n) psi2(n,G)
-          const int ngwloc = wfbasis.localsize();
-          valarray<double> psi2sum(ngwloc);
-          const complex<double>* p = c.cvalptr();
-          const int mloc = c.mloc();
-          const int nloc = c.nloc();
-          const double * const occ = sd.occ_ptr();
-          const double *const kpg2  = wfbasis.kpg2_ptr();
-          const double *const kpg_x = wfbasis.kpgx_ptr(0);
-          const double *const kpg_y = wfbasis.kpgx_ptr(1);
-          const double *const kpg_z = wfbasis.kpgx_ptr(2);
-          tsum = 0.0;
+              // compute psi2sum(G) = fac * sum_G occ(n) psi2(n,G)
+              const int ngwloc = wfbasis.localsize();
+              vector<double> psi2sum(ngwloc,0.0);
+              const complex<double>* p = c.cvalptr();
+              const int mloc = c.mloc();
+              const int nloc = c.nloc();
+              const double * const occ = sd.occ_ptr();
+              const double *const kpg2  = wfbasis.kpg2_ptr();
+              const double *const kpg_x = wfbasis.kpgx_ptr(0);
+              const double *const kpg_y = wfbasis.kpgx_ptr(1);
+              const double *const kpg_z = wfbasis.kpgx_ptr(2);
+              tsum = 0.0;
 
-          //ewd:  this pragma causes incorrect results
-          //#pragma omp parallel for
-          for ( int ig = 0; ig < ngwloc; ig++ ) {
-            double tmpsum = 0.0;
-            for ( int lj=0; lj < c.nblocks(); lj++ )
-            {
-               for ( int jj=0; jj < c.nbs(lj); jj++ )
-               {
-                  // global state index
-                  const int nglobal = c.j(lj,jj);
-                  const int norig = lj*c.nb()+jj;
-                  const double psi2 = norm(p[ig+norig*mloc]);
-                  tmpsum += fac * occ[nglobal] * psi2;
-               }
-            }
-            psi2sum[ig] = tmpsum;
-        
-            // accumulate contributions to ekin,econf,sigma_ekin,sigma_econf in tsum
-            const double psi2s = psi2sum[ig];
-            // tsum[0]: ekin partial sum
-            tsum[0] += psi2s * kpg2[ig];
-              
-            if ( compute_stress ) {
-              const double tkpgx = kpg_x[ig];
-              const double tkpgy = kpg_y[ig];
-              const double tkpgz = kpg_z[ig];
- 
-              const double fac_ekin = 2.0 * psi2s;
-                
-              tsum[1]  += fac_ekin * tkpgx * tkpgx;
-              tsum[2]  += fac_ekin * tkpgy * tkpgy;
-              tsum[3]  += fac_ekin * tkpgz * tkpgz;
-              tsum[4]  += fac_ekin * tkpgx * tkpgy;
-              tsum[5]  += fac_ekin * tkpgy * tkpgz;
-              tsum[6]  += fac_ekin * tkpgx * tkpgz;
-              
-            }
-            // tsum[0-6] contains the contributions to
-            // ekin, sigma_ekin, from vector ig
-          } // ig
-          
-          if ( use_confinement ) {
-            const valarray<double>& fstress = cfp[ispin][ikp]->fstress();
-            const valarray<double>& dfstress = cfp[ispin][ikp]->dfstress();
-            for ( int ig = 0; ig < ngwloc; ig++ ) {
-              const double psi2s = psi2sum[ig];
-              // tsum[7]: econf partial sum
-              tsum[7] += psi2s * fstress[ig];
-              
-              if ( compute_stress ) {
-                const double tkpgx = kpg_x[ig];
-                const double tkpgy = kpg_y[ig];
-                const double tkpgz = kpg_z[ig];
-              
-                const double fac_econf = psi2s * dfstress[ig];
-                tsum[8]  += fac_econf * tkpgx * tkpgx;
-                tsum[9]  += fac_econf * tkpgy * tkpgy;
-                tsum[10] += fac_econf * tkpgz * tkpgz;
-                tsum[11] += fac_econf * tkpgx * tkpgy;
-                tsum[12] += fac_econf * tkpgy * tkpgz;
-                tsum[13] += fac_econf * tkpgx * tkpgz;
+              for ( int lj=0; lj < c.nblocks(); lj++ )
+              {
+                 for ( int jj=0; jj < c.nbs(lj); jj++ )
+                 {
+                    // global state index
+                    const int nglobal = c.j(lj,jj);
+                    const int norig = lj*c.nb()+jj;
+                    for ( int ig = 0; ig < ngwloc; ig++ )
+                    {
+                       const complex<double> pval = p[ig+norig*mloc];
+                       const double psi2 = pval.real()*pval.real() + pval.imag()*pval.imag();
+                       //const double psi2 = norm(p[ig+norig*mloc]);
+                       psi2sum[ig] += fac * occ[nglobal] * psi2;
+                    }
+                 }
               }
-              // tsum[7-13] contains the contributions to
-              // econf,sigma_econf from vector ig
-            } // ig
-          }
-          sum += weight * tsum;
+          
+              for ( int ig = 0; ig < ngwloc; ig++ )
+              {
+                 // accumulate contributions to ekin,econf,sigma_ekin,sigma_econf in tsum
+                 const double psi2s = psi2sum[ig];
+                 // tsum[0]: ekin partial sum
+                 tsum[0] += psi2s * kpg2[ig];
+              
+                 if ( compute_stress ) {
+                    const double tkpgx = kpg_x[ig];
+                    const double tkpgy = kpg_y[ig];
+                    const double tkpgz = kpg_z[ig];
+ 
+                    const double fac_ekin = 2.0 * psi2s;
+                
+                    tsum[1]  += fac_ekin * tkpgx * tkpgx;
+                    tsum[2]  += fac_ekin * tkpgy * tkpgy;
+                    tsum[3]  += fac_ekin * tkpgz * tkpgz;
+                    tsum[4]  += fac_ekin * tkpgx * tkpgy;
+                    tsum[5]  += fac_ekin * tkpgy * tkpgz;
+                    tsum[6]  += fac_ekin * tkpgx * tkpgz;
+              
+                 }
+                 // tsum[0-6] contains the contributions to
+                 // ekin, sigma_ekin, from vector ig
+              } // ig
+          
+              if ( use_confinement ) {
+                 const valarray<double>& fstress = cfp[ispin][ikp]->fstress();
+                 const valarray<double>& dfstress = cfp[ispin][ikp]->dfstress();
+                 for ( int ig = 0; ig < ngwloc; ig++ ) {
+                    const double psi2s = psi2sum[ig];
+                    // tsum[7]: econf partial sum
+                    tsum[7] += psi2s * fstress[ig];
+              
+                    if ( compute_stress ) {
+                       const double tkpgx = kpg_x[ig];
+                       const double tkpgy = kpg_y[ig];
+                       const double tkpgz = kpg_z[ig];
+              
+                       const double fac_econf = psi2s * dfstress[ig];
+                       tsum[8]  += fac_econf * tkpgx * tkpgx;
+                       tsum[9]  += fac_econf * tkpgy * tkpgy;
+                       tsum[10] += fac_econf * tkpgz * tkpgz;
+                       tsum[11] += fac_econf * tkpgx * tkpgy;
+                       tsum[12] += fac_econf * tkpgy * tkpgz;
+                       tsum[13] += fac_econf * tkpgx * tkpgz;
+                    }
+                    // tsum[7-13] contains the contributions to
+                    // econf,sigma_econf from vector ig
+                 } // ig
+              }
+              sum += weight * tsum;
+           }
         }
-      }
-    }
+     }
   }
   assert(wf_.weightsum() > 0.0);
   sum /= wf_.weightsum();

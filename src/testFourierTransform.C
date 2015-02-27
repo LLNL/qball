@@ -32,8 +32,13 @@ using namespace std;
 #include "Basis.h"
 #include "FourierTransform.h"
 #include "Timer.h"
+#ifdef HPM
+#include <bgpm/include/bgpm.h>
+extern "C" void HPM_Start(char *);
+extern "C" void HPM_Stop(char *);
+#endif
 
-int fft_flops(int n)
+double fft_flops(int n)
 {
   return 5.0 * n * log((double) n) / log(2.0);
 }
@@ -46,6 +51,12 @@ int main(int argc, char **argv)
   MPI_Init(&argc,&argv);
   MPI_Comm_rank(MPI_COMM_WORLD, &mype);
 #endif
+#ifdef HPM  
+  HPM_Start("testFT");
+#endif
+
+  const int niter = 1;
+  
   // extra scope to ensure that Context objects get destructed before
   // the MPI_Finalize call
   {
@@ -119,6 +130,7 @@ int main(int argc, char **argv)
     cout << " zvec.size: " 
          << 2*basis.nrod_loc()*ft2.np2() * sizeof(complex<double>)
          << endl;
+    cout << " niter: " << niter << endl;
   }
 
   cout.setf(ios::fixed,ios::floatfield);
@@ -142,7 +154,7 @@ int main(int argc, char **argv)
   tm.reset();
   ft2.reset_timers();
   tm.start();
-  for (int ii=0; ii<100; ii++)
+  for (int ii=0; ii<niter; ii++)
      ft2.forward(&f2[0],&x[0]);
   tm.stop();
   if ( ctxt.oncoutpe() )
@@ -160,12 +172,12 @@ int main(int argc, char **argv)
                                     ft2.tm_f_zero.real() +
                                     ft2.tm_f_map.real() << endl;
      cout << " fwd1 time: " << tm.cpu() << " / " << tm.real()
-  << "    " << 1.e-9*flops/tm.real()/100.0 << " GFlops" << endl;
+          << "    " << 1.e-9*flops/tm.real()/(double)niter << " GFlops" << endl;
   }
   tm.reset();
   ft2.reset_timers();
   tm.start();
-  for (int ii=0; ii<100; ii++)
+  for (int ii=0; ii<niter; ii++)
      ft2.backward(&x[0],&f2[0]);
   tm.stop();
   if ( ctxt.oncoutpe() )
@@ -183,7 +195,7 @@ int main(int argc, char **argv)
                                     ft2.tm_b_zero.real() +
                                     ft2.tm_b_map.real() << endl;
      cout << " bwd1 time: " << tm.cpu() << " / " << tm.real()
-          << "    " << 1.e-9*flops/tm.real()/100.0 << " GFlops" << endl;
+          << "    " << 1.e-9*flops/tm.real()/(double)niter << " GFlops" << endl;
   }
   /*EWD DEBUG
   tm.reset();
@@ -353,12 +365,14 @@ int main(int argc, char **argv)
   EWD DEBUG  */
   
   // Define ft from vbasis
+  /*
   Basis vbasis(ctxt,kpoint);
   vbasis.resize(cell,cell,4.0*ecut);
   if ( ctxt.oncoutpe() )
      cout << " vbasis.np() = " << vbasis.np(0) << " " << vbasis.np(1)
           << " " << vbasis.np(2) << endl;
-
+  */
+  
   /* EWD DEBUG
   FourierTransform vft(basis,vbasis.np(0),vbasis.np(1),vbasis.np(2));
   vector<complex<double> > vf(vft.np012loc());
@@ -374,6 +388,9 @@ int main(int argc, char **argv)
   EWD DEBUG  */
 
   } // Context scope
+#ifdef HPM  
+  HPM_Stop("testFT");
+#endif
 #if USE_MPI
   MPI_Finalize();
 #endif

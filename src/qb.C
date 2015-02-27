@@ -156,12 +156,13 @@ using namespace std;
 #include "NetCharge.h"
 #include "EsmBC.h"
 #include "EsmW.h"
+#ifdef BGQ
+#include <spi/include/kernel/process.h>
+#include <spi/include/kernel/location.h>
+#endif
 
 #ifdef USE_OLD_CTF
 #include "cyclopstf.h"
-#endif
-#if BGLDEBUG
-#include <rts.h>
 #endif
 
 #ifdef USE_JAGGEMM
@@ -203,27 +204,13 @@ int main(int argc, char **argv, char **envp)
   TAU_PROFILE_SET_CONTEXT(0);
 #endif
 
-#if BGLDEBUG
-  {
-    int myrank,mysize;
-    BGLPersonality personality;
-    rts_get_personality (&personality, sizeof(personality));
-
-    MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
-    MPI_Comm_size(MPI_COMM_WORLD, &mysize);
-    cout << myrank << ": at "
-         << personality.xCoord << " "
-         << personality.yCoord << " "
-         << personality.zCoord << endl;
-  }
-#endif
-
   {
 
   Context ctxt;
   ctxt.set_coutpe(0);
   
-  if ( ctxt.oncoutpe() ) {
+  if ( ctxt.oncoutpe() )
+  {
     cout << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << endl;
     cout << "<!--\n\n";
     cout << "                   ===========================\n";
@@ -266,55 +253,33 @@ int main(int argc, char **argv, char **envp)
     }
 #endif
   
-  // Identify platform
-  {
-    struct utsname un;
-    uname (&un);
-    cout << "<sysname> " << un.sysname << " </sysname>" << endl;
-    cout << "<nodename> " << un.nodename << " </nodename>" << endl;
-  }
+    // Identify platform
+    {
+       struct utsname un;
+       uname (&un);
+       cout << "<sysname> " << un.sysname << " </sysname>" << endl;
+       cout << "<nodename> " << un.nodename << " </nodename>" << endl;
+    }
     
     cout << "<start_time> " << isodate() << " </start_time>" << endl;
 
   }
 
-#if USE_MPI
-#if BGLDEBUG
-  // Print list of node names  
-  char processor_name[MPI_MAX_PROCESSOR_NAME];
-  char buf[MPI_MAX_PROCESSOR_NAME];
-  int namelen;
-  PMPI_Get_processor_name(processor_name,&namelen);
+#ifdef BGQ
+  Personality_t pers;
+  Kernel_GetPersonality(&pers, sizeof(pers));
+  const int nTDim = 5;
+  vector<int> torusdim(nTDim);
+  torusdim[0] = pers.Network_Config.Anodes;
+  torusdim[1] = pers.Network_Config.Bnodes;
+  torusdim[2] = pers.Network_Config.Cnodes;
+  torusdim[3] = pers.Network_Config.Dnodes;
+  torusdim[4] = pers.Network_Config.Enodes;
   if ( ctxt.oncoutpe() )
-  {
-    cout << "<mpi_processes count=\"" << ctxt.size() << "\">" << endl;
-    cout << "<process id=\"" << ctxt.mype() << "\"> " << processor_name 
-         << " </process>" << endl;
-  }
-  for ( int ip = 1; ip < ctxt.size(); ip++ )
-  {
-    MPI_Barrier(ctxt.comm());
-    if ( ctxt.oncoutpe() )
-    {
-      MPI_Status status;
-      MPI_Recv(&buf[0],MPI_MAX_PROCESSOR_NAME,MPI_CHAR,
-                   ip,ip,ctxt.comm(),&status);
-    }
-    else if ( ip == ctxt.mype() )
-    {
-      // send processor name to pe0
-      MPI_Send(&processor_name[0],MPI_MAX_PROCESSOR_NAME,
-        MPI_CHAR,0,ctxt.mype(),ctxt.comm());
-    }
-  if ( ctxt.oncoutpe() )
-    cout << "<process id=\"" << ip << "\"> " << buf 
-         << " </process>" << endl;
-  }
-  if ( ctxt.oncoutpe() )
-    cout << "</mpi_processes>" << endl;
-#endif // BGLDEBUG
-#endif // USE_MPI
-
+     cout << "BG/Q torus dimensions:  " << torusdim[0] << " x " << torusdim[1] << " x " << torusdim[2]
+          << " x " << torusdim[3] << " x " << torusdim[4] << endl;
+#endif
+  
   Sample* s = new Sample(ctxt);
 
   //store timing for run_timer
