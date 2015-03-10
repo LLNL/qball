@@ -36,13 +36,22 @@
 
 void LDAFunctional::setxc(void) 
 {
+   setxc(0,_np);
+   return;
+}
+
+void LDAFunctional::setxc(int start, int end) 
+{
   if ( _np == 0 ) return;
+  if ( start < 0 ) return;
+  if ( end <= start) return;
+  if ( end > _np) return;
   if ( _nspin == 1 )
   {
     assert(rho != 0);
     assert(exc != 0);
     assert(vxc1 != 0);
-    for ( int ir = 0; ir < _np; ir++ )
+    for ( int ir = start; ir < end; ir++ )
     {
       xc_unpolarized(rho[ir],exc[ir],vxc1[ir]);
     }
@@ -57,7 +66,7 @@ void LDAFunctional::setxc(void)
     assert(vxc1_dn != 0);
     const double fz_prefac = 1.0 / ( cbrt(2.0)*2.0 - 2.0 );
     const double dfz_prefac = (4.0/3.0) * fz_prefac;
-    for ( int ir = 0; ir < _np; ir++ )
+    for ( int ir = start; ir < end; ir++ )
     {
       double excir = 0.0;
       double v_up = 0.0;

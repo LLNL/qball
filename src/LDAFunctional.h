@@ -72,5 +72,6 @@ class LDAFunctional : public XCFunctional {
   bool isGGA() { return false; };
   string name() { return "LDA"; };
   void setxc(void);
+  void setxc(int start, int end);
 };
 #endif

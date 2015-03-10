@@ -58,5 +58,6 @@ class BLYPFunctional : public XCFunctional
   bool isGGA() { return true; };
   string name() { return "BLYP"; };
   void setxc(void); 
+  void setxc(int start, int end) { setxc(); };  // not implemented
 };
 #endif

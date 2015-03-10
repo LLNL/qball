@@ -87,8 +87,18 @@ PBEFunctional::PBEFunctional(const vector<vector<double> > &rhoe) {
   }
 }
 
-void PBEFunctional::setxc(void) {
+void PBEFunctional::setxc(void)
+{
+   setxc(0,_np);
+   return;
+}
+
+void PBEFunctional::setxc(int start, int end)
+{
   if ( _np == 0 ) return;
+  if ( start < 0 ) return;
+  if ( end <= start) return;
+  if ( end > _np) return;
   if ( _nspin == 1 )
   {
     assert( rho != 0 );
@@ -96,7 +106,7 @@ void PBEFunctional::setxc(void) {
     assert( exc != 0 );
     assert( vxc1 != 0 );
     assert( vxc2 != 0 );
-    for ( int i = 0; i < _np; i++ )
+    for ( int i = start; i < end; i++ )
     {
       double grad = sqrt(grad_rho[0][i]*grad_rho[0][i] +
                          grad_rho[1][i]*grad_rho[1][i] +
@@ -119,7 +129,7 @@ void PBEFunctional::setxc(void) {
     assert( vxc2_dnup != 0 );
     assert( vxc2_dndn != 0 );
 
-    for ( int i = 0; i < _np; i++ )
+    for ( int i = start; i < end; i++ )
     {
       double grx_up = grad_rho_up[0][i];
       double gry_up = grad_rho_up[1][i];

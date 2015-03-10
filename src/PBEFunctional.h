@@ -62,5 +62,6 @@ class PBEFunctional : public XCFunctional
   bool isGGA() { return true; };
   string name() { return "PBE"; };
   void setxc(void); 
+  void setxc(int start, int end); 
 };
 #endif

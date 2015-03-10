@@ -99,5 +99,7 @@ class XCFunctional {
   virtual ~XCFunctional() {}
   
   virtual void setxc(void) = 0; 
+
+  virtual void setxc(int start, int end) = 0; 
 };
 #endif

@@ -137,8 +137,6 @@ void XCPotential::update(vector<vector<double> >& vr, int npcol, int mycol)
    if ( !xcf_->isGGA() )
    {
       // LDA functional
- 
-      xcf_->setxc();
 
       exc_ = 0.0;
       const int size = xcf_->np();
@@ -147,7 +145,10 @@ void XCPotential::update(vector<vector<double> >& vr, int npcol, int mycol)
       const int offset = mycol*locsize;
       if (offset+locsize > size)
          locsize = size-offset;
-         
+
+      int end = offset+locsize;
+      xcf_->setxc(offset,end);
+
       const double *const e = &xcf_->exc[offset];
 
       if ( nspin_ == 1 ) {
