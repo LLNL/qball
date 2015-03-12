@@ -2430,6 +2430,9 @@ void NonLocalPotential::update_usfns(Basis* cdbasis) {
 ////////////////////////////////////////////////////////////////////////////////
 void NonLocalPotential::atoms_moved(void)
 {
+   const int minBlocksize = 64;
+   const bool useminBlockSize = true;
+
    const int ngwl = basis_.localsize();
    const int mloc = sd_.c().mloc();
    vector<vector<double> > tau;
@@ -2447,6 +2450,12 @@ void NonLocalPotential::atoms_moved(void)
 
       // distribute atoms across process columns to parallelize comp_eigr, comp_anl
       natmaxloc_[is] = na[is]%ctxt_.npcol()==0 ? na[is]/ctxt_.npcol() : na[is]/ctxt_.npcol() + 1;
+      if (useminBlockSize)
+         if (natmaxloc_[is] < minBlocksize)
+            natmaxloc_[is] = minBlocksize;
+      if (natmaxloc_[is] > na[is])
+         natmaxloc_[is] = na[is];
+      
       int myatstart = natmaxloc_[is]*ctxt_.mycol() >= na[is] ? -1 : natmaxloc_[is]*ctxt_.mycol();
       int myatend = (myatstart + natmaxloc_[is]) > na[is] ? na[is] : myatstart + natmaxloc_[is];
       mynatloc_[is] = myatstart < 0 ? 0 : myatend - myatstart;

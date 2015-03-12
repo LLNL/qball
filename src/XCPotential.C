@@ -133,7 +133,9 @@ void XCPotential::update(vector<vector<double> >& vr, int npcol, int mycol)
   //                     xcf()->vxc1_up, xcf()->vxc1_dn
   //                     xcf()->vxc2_upup, xcf()->vxc2_dndn, 
   //                     xcf()->vxc2_updn, xcf()->vxc2_dnup
-  
+
+   const int minLocsize = 8;
+   
    if ( !xcf_->isGGA() )
    {
       // LDA functional
@@ -142,6 +144,7 @@ void XCPotential::update(vector<vector<double> >& vr, int npcol, int mycol)
       const int size = xcf_->np();
 
       int locsize = size%npcol == 0 ? size/npcol : size/npcol + 1;
+      if (locsize < minLocsize) locsize = minLocsize;
       const int offset = mycol*locsize;
       if (offset+locsize > size)
          locsize = size-offset;
@@ -220,6 +223,7 @@ void XCPotential::update(vector<vector<double> >& vr, int npcol, int mycol)
       exc_ = 0.0;
       int size = xcf_->np();
       int locsize = np012loc_%npcol == 0 ? np012loc_/npcol : np012loc_/npcol + 1;
+      if (locsize < minLocsize) locsize = minLocsize;
       const int offset = mycol*locsize;
       if (offset+locsize > np012loc_)
          locsize = np012loc_-offset;
