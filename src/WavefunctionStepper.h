@@ -45,6 +45,7 @@ class WavefunctionStepper
   
   public:
 
+  virtual void preupdate(void) {}
   virtual void update(Wavefunction& dwf) = 0;
   virtual void preprocess(void) {}
   virtual void postprocess(void) {}

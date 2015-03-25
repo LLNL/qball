@@ -35,6 +35,7 @@
 #include "SORKTDWavefunctionStepper.h"
 #include "FORKTDWavefunctionStepper.h"
 #include "TDEULERWavefunctionStepper.h"
+#include "ExponentialWavefunctionStepper.h"
 #include "SDIonicStepper.h"
 #include "SDAIonicStepper.h"
 #include "CGIonicStepper.h"
@@ -191,6 +192,10 @@ void EhrenSampleStepper::step(int niter)
      wf_stepper = new SORKTDWavefunctionStepper(wf,s_.ctrl.tddt,tmap,&wfdeque);
   else if ( wf_dyn == "FORKTD" )
      wf_stepper = new FORKTDWavefunctionStepper(wf,s_.ctrl.tddt,tmap,&wfdeque);
+  else if ( wf_dyn == "ETRS" )
+     wf_stepper = new ExponentialWavefunctionStepper(wf,s_.ctrl.tddt,tmap,ef_,s_,false);
+  else if ( wf_dyn == "AETRS" )
+     wf_stepper = new ExponentialWavefunctionStepper(wf,s_.ctrl.tddt,tmap,ef_,s_,true);
   else
   {
      if ( oncoutpe )

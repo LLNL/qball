@@ -28,6 +28,7 @@
 // $Id: ExponentialWavefunctionStepper.C,v 1.8 2011-06-02 15:56:19 schleife Exp $
 
 #include "ExponentialWavefunctionStepper.h"
+#include "SelfConsistentPotential.h"
 #include "SlaterDet.h"
 #include "Sample.h"
 #include <iostream>
@@ -129,7 +130,7 @@ void ExponentialWavefunctionStepper::preupdate()
   exponential(0.5*tddt_);
 
   if( approximated_ && stored_iter_ >= 3 ){
-    EnergyFunctional::SelfConsistentPotential future_potential;
+    SelfConsistentPotential future_potential;
     future_potential.extrapolate(potential_);
     ef_.set_self_consistent_potential(future_potential);
 

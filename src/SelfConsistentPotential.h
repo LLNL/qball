@@ -22,49 +22,42 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 //
-// ExponentialWavefunctionStepper.h
+// SelfConsistentPotential.h
 //
 ////////////////////////////////////////////////////////////////////////////////
-// $Id: ExponentialWavefunctionStepper.h,v 1.5 2011-06-02 15:56:19 schleife Exp $
 
-#ifndef EXPONENTIALWAVEFUNCTIONSTEPPER_H
-#define EXPONENTIALWAVEFUNCTIONSTEPPER_H
+#ifndef SELFCONSISTENTPOTENTIAL_H
+#define SELFCONSISTENTPOTENTIAL_H
 
-#include "EnergyFunctional.h"
-#include "SelfConsistentPotential.h"
-#include "Wavefunction.h"
-#include "WavefunctionStepper.h"
-
-#include <deque>
+#include <complex>
+#include <vector>
+#include <valarray>
+#include <map>
+#include <string>
 using namespace std;
 
-class ExponentialWavefunctionStepper : public WavefunctionStepper
+class EnergyFunctional;
+
+class SelfConsistentPotential
 {
+  public:
+
+   SelfConsistentPotential() {};
+   SelfConsistentPotential(const EnergyFunctional& ef);
+   ~SelfConsistentPotential() {};
+   void extrapolate(const std::vector<SelfConsistentPotential> & previous);
+   
   private:
 
-  double tddt_;
-  int order_;
-  int stored_iter_;
-  bool approximated_;
-  std::vector<SelfConsistentPotential> potential_;
+   std::vector<std::vector<double> > v_r;
+   std::vector<std::complex<double> > hamil_rhoelg;
+   std::vector<std::complex<double> > rhoelg;
+   double eps_;
+   double ehart_;
+   double exc_;
+   double esr_;
 
-  protected:
+   friend class EnergyFunctional;
 
-  EnergyFunctional & ef_;
-  Sample & s_;
-  void exponential(const double & dt, Wavefunction * dwf = 0);
-
-  public:
-  void preupdate();
-  void update(Wavefunction& dwf);
-
-  ExponentialWavefunctionStepper(Wavefunction& wf, double tddt, TimerMap& tmap, EnergyFunctional & ef, Sample & s, bool approximated);
-  ~ExponentialWavefunctionStepper() {};
 };
 #endif
-
-// Local Variables:
-// mode: c++
-// coding: utf-8
-// End:
-

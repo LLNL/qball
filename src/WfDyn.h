@@ -61,14 +61,14 @@ class WfDyn : public Var
     if ( !( v == "LOCKED" || v == "SD" || v == "PSD" ||
             v == "PSDA" || v == "JD" || v == "MD" || 
             v == "TDEULER" || v == "SOTD" || v == "SORKTD" ||
-            v == "FORKTD" ) )
+            v == "FORKTD" || v == "ETRS" || v == "AETRS" ) )
     {
        if ( ui->oncoutpe() )
-          cout << " wf_dyn must be in [LOCKED,SD,PSD,PSDA,JD,MD,TDEULER,SOTD,SORKTD,FORKTD]" << endl;
+          cout << " wf_dyn must be in [LOCKED,SD,PSD,PSDA,JD,MD,TDEULER,SOTD,SORKTD,FORKTD,ETRS,AETRS]" << endl;
        return 1;
     }
 
-    if (v == "TDEULER" || v == "SOTD" || v == "SORKTD" || v == "FORKTD") {
+    if (v == "TDEULER" || v == "SOTD" || v == "SORKTD" || v == "FORKTD" || v == "ETRS" || v == "AETRS") {
        s->ctrl.tddft_involved = true;
        if (!( s->wf.force_complex_set() )) {
           cout << "WfDyn::wave functions must be complex to propagate them in time" << endl
