@@ -53,11 +53,14 @@ void ExponentialWavefunctionStepper::exponential(const double & dt, Wavefunction
   bool delete_dwf;
   Wavefunction expwf(wf_);
   
-  if(dwf == 0){
+  if (dwf == 0)
+  {
     delete_dwf = true;
     dwf = new Wavefunction(wf_);
     ef_.energy(true, *dwf, false, fion, false, sigma);
-  } else {
+  }
+  else
+  {
     delete_dwf = false;
   }
 
@@ -65,43 +68,40 @@ void ExponentialWavefunctionStepper::exponential(const double & dt, Wavefunction
   //          = x + Ax + A(Ax)/2 + A(A^2x/2)/3 + A(A^3x/6)/4 
   
   // order 0
-  for ( int ispin = 0; ispin < wf_.nspin(); ispin++){
-    for ( int ikp = 0; ikp < wf_.nkp(); ikp++ ){
+  for ( int ispin = 0; ispin < wf_.nspin(); ispin++)
+    for ( int ikp = 0; ikp < wf_.nkp(); ikp++ )
       expwf.sd(ispin, ikp)->c() = wf_.sd(ispin, ikp)->c();
-    }
-  }
 
   complex<double> factor = 1.0;
  
   //order N:
-  for(int N = 1; N <= order_; N++){
+  for(int N = 1; N <= order_; N++)
+  {
     factor *= -complex<double>(0.0, 1.0)*dt/double(N);
 
-    if(N != 1) { // for N == 1 this is already done
-      //move dwf to wf
-      for ( int ispin = 0; ispin < wf_.nspin(); ispin++){
-	for ( int ikp = 0; ikp < wf_.nkp(); ikp++ ){
-	  wf_.sd(ispin, ikp)->c() = dwf->sd(ispin, ikp)->c();
-	}
-      }
+    if(N != 1)        // for N == 1 this is already done
+    {
+       //move dwf to wf
+       for ( int ispin = 0; ispin < wf_.nspin(); ispin++)
+          for ( int ikp = 0; ikp < wf_.nkp(); ikp++ )
+             wf_.sd(ispin, ikp)->c() = dwf->sd(ispin, ikp)->c();
       
-      // apply A
-      ef_.energy(true, *dwf, false, fion, false, sigma);
+       // apply A
+       ef_.energy(true, *dwf, false, fion, false, sigma);
     }
     
-    for ( int ispin = 0; ispin < wf_.nspin(); ispin++){
-      for ( int ikp = 0; ikp < wf_.nkp(); ikp++ ){
-	
-	//accumulate the result
-	expwf.sd(ispin, ikp)->c().axpy(factor, dwf->sd(ispin, ikp)->c());
-      }
-    }
+    //accumulate the result
+    for ( int ispin = 0; ispin < wf_.nspin(); ispin++)
+       for ( int ikp = 0; ikp < wf_.nkp(); ikp++ )
+          expwf.sd(ispin, ikp)->c().axpy(factor, dwf->sd(ispin, ikp)->c());
     
   }
   
   // copy the result back THE wavefunction
-  for ( int ispin = 0; ispin < wf_.nspin(); ispin++){
-    for ( int ikp = 0; ikp < wf_.nkp(); ikp++ ){
+  for ( int ispin = 0; ispin < wf_.nspin(); ispin++)
+  {
+    for ( int ikp = 0; ikp < wf_.nkp(); ikp++ )
+    {
       wf_.sd(ispin, ikp)->c() = expwf.sd(ispin, ikp)->c();
       s_.hamil_wf->sd(ispin, ikp)->c() = wf_.sd(ispin, ikp)->c();
     }
@@ -115,12 +115,12 @@ void ExponentialWavefunctionStepper::exponential(const double & dt, Wavefunction
 ////////////////////////////////////////////////////////////////////////////////
 void ExponentialWavefunctionStepper::preupdate()
 {
-  if(approximated_){
+  if (approximated_)
+  {
     // save the potential
     potential_[0] = potential_[1];
     potential_[1] = potential_[2];
     potential_[2] = ef_.get_self_consistent_potential();
-
     stored_iter_++;
   }
 
@@ -129,13 +129,14 @@ void ExponentialWavefunctionStepper::preupdate()
   // propagate to the half of the step with H(t)
   exponential(0.5*tddt_);
 
-  if( approximated_ && stored_iter_ >= 3 ){
-    SelfConsistentPotential future_potential;
-    future_potential.extrapolate(potential_);
-    ef_.set_self_consistent_potential(future_potential);
+  if( approximated_ && stored_iter_ >= 3 )
+  {
+     SelfConsistentPotential future_potential;
+     future_potential.extrapolate(potential_);
+     ef_.set_self_consistent_potential(future_potential);
 
-    // now do the other half of the propagation with H(t + dt)
-    exponential(0.5*tddt_);
+     // now do the other half of the propagation with H(t + dt)
+     exponential(0.5*tddt_);
   }
 
 }
@@ -144,40 +145,36 @@ void ExponentialWavefunctionStepper::preupdate()
 void ExponentialWavefunctionStepper::update(Wavefunction& dwf)
 {
 
-  // Now we need to get the Hamiltonian at time t + dt
-  //
-  // Here we consider that the atoms (and their potential) was
-  // propagated to t + dt by the calling routine
+   // Now we need to get the Hamiltonian at time t + dt
+   //
+   // Here we consider that the atoms (and their potential) was
+   // propagated to t + dt by the calling routine
 
-  if( !approximated_  || stored_iter_ < 3 ){
-
-    Wavefunction wf_half(wf_);
-
-    //save the current status
-    for ( int ispin = 0; ispin < wf_.nspin(); ispin++){
-      for ( int ikp = 0; ikp < wf_.nkp(); ikp++ ){
-	wf_half.sd(ispin, ikp)->c() = wf_.sd(ispin, ikp)->c();
-      }
-    }
+   if ( !approximated_  || stored_iter_ < 3 )
+   {
+      Wavefunction wf_half(wf_);
     
-    // do the rest of the propagation step with H(t)
-    exponential(0.5*tddt_, &dwf);
-
-    // get the approximated vhxc for the end of the step
-    ef_.hamil_cd()->update_density();
-    ef_.update_hamiltonian();
-    ef_.update_vhxc();
-
-    // restore the wf to the middle of the step
-    for ( int ispin = 0; ispin < wf_.nspin(); ispin++){
-      for ( int ikp = 0; ikp < wf_.nkp(); ikp++ ){
-	wf_.sd(ispin, ikp)->c() = wf_half.sd(ispin, ikp)->c();
-      }
-    }
-
-    // now do the other half of the propagation with H(t + dt)
-    exponential(0.5*tddt_);
+      //save the current status
+      for ( int ispin = 0; ispin < wf_.nspin(); ispin++)
+         for ( int ikp = 0; ikp < wf_.nkp(); ikp++ )
+            wf_half.sd(ispin, ikp)->c() = wf_.sd(ispin, ikp)->c();
     
-  }
-  
+      // do the rest of the propagation step with H(t)
+      exponential(0.5*tddt_, &dwf);
+
+      // get the approximated vhxc for the end of the step
+      ef_.hamil_cd()->update_density();
+      ef_.update_hamiltonian();
+      ef_.update_vhxc();
+
+      // restore the wf to the middle of the step
+      for ( int ispin = 0; ispin < wf_.nspin(); ispin++)
+         for ( int ikp = 0; ikp < wf_.nkp(); ikp++ )
+            wf_.sd(ispin, ikp)->c() = wf_half.sd(ispin, ikp)->c();
+
+      // now do the other half of the propagation with H(t + dt)
+      exponential(0.5*tddt_);
+    
+   }
+   
 }
