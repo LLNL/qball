@@ -22,11 +22,48 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 //
-// release.C
+// ExponentialWavefunctionStepper.h
 //
 ////////////////////////////////////////////////////////////////////////////////
+// $Id: ExponentialWavefunctionStepper.h,v 1.5 2011-06-02 15:56:19 schleife Exp $
 
-#include "release.h"
-std::string release(void) {
-  return std::string("qb@LL-r193-nlp-store-exp-td");
-}
+#ifndef EXPONENTIALWAVEFUNCTIONSTEPPER_H
+#define EXPONENTIALWAVEFUNCTIONSTEPPER_H
+
+#include "EnergyFunctional.h"
+#include "Wavefunction.h"
+#include "WavefunctionStepper.h"
+
+#include <deque>
+using namespace std;
+
+class ExponentialWavefunctionStepper : public WavefunctionStepper
+{
+  private:
+
+  double tddt_;
+  int order_;
+  int stored_iter_;
+  bool approximated_;
+  std::vector<EnergyFunctional::SelfConsistentPotential> potential_;
+
+  protected:
+
+  EnergyFunctional & ef_;
+  Sample & s_;
+  void exponential(const double & dt, Wavefunction * dwf = 0);
+
+  public:
+  void preupdate();
+  void update(Wavefunction& dwf);
+
+  ExponentialWavefunctionStepper(Wavefunction& wf, double tddt, TimerMap& tmap, EnergyFunctional & ef, Sample & s, bool approximated);
+  ~ExponentialWavefunctionStepper() {};
+};
+#endif
+
+// Local Variables:
+// mode: c++
+// coding: utf-8
+// End:
+
