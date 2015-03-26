@@ -456,7 +456,9 @@ void EhrenSampleStepper::step(int niter)
        cout << "  <temp_ion> " << temp_ion << " </temp_ion>\n";
     }
 
+    tmap["preupdate"].start();
     wf_stepper->preupdate();
+    tmap["preupdate"].stop();
     
     if ( atoms_move )
     {
@@ -881,9 +883,10 @@ void EhrenSampleStepper::step(int niter)
     //   cout << wf_dyn << " expectation value: " << wf_dyn_eigenvalue_sum << endl;
     // }
     // }    
-                
-    wf_stepper->update(dwf);
 
+    tmap["wfupdate"].start();
+    wf_stepper->update(dwf);
+    tmap["wfupdate"].stop();
 
 
     // update ultrasoft functions if needed, call gram

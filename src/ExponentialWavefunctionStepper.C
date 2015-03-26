@@ -57,7 +57,9 @@ void ExponentialWavefunctionStepper::exponential(const double & dt, Wavefunction
   {
     delete_dwf = true;
     dwf = new Wavefunction(wf_);
+    tmap_["expowf_ef"].start();
     ef_.energy(true, *dwf, false, fion, false, sigma);
+    tmap_["expowf_ef"].stop();
   }
   else
   {
@@ -87,7 +89,9 @@ void ExponentialWavefunctionStepper::exponential(const double & dt, Wavefunction
              wf_.sd(ispin, ikp)->c() = dwf->sd(ispin, ikp)->c();
       
        // apply A
+       tmap_["expowf_ef"].start();
        ef_.energy(true, *dwf, false, fion, false, sigma);
+       tmap_["expowf_ef"].stop();
     }
     
     //accumulate the result
