@@ -455,7 +455,9 @@ void EhrenSampleStepper::step(int niter)
        cout << "  <ekin_ion> " << ekin_ion << " </ekin_ion>\n";
        cout << "  <temp_ion> " << temp_ion << " </temp_ion>\n";
     }
-        
+
+    wf_stepper->preupdate();
+    
     if ( atoms_move )
     {
        if ( s_.constraints.size() > 0 )
