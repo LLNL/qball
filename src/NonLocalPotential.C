@@ -1974,6 +1974,7 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
               }
               tmap["fnl_allreduce"].stop();                                        
                       
+              tmap["enl_calc"].start();
               // factor 2.0 in next line is: counting G, -G                        
               if (basis_.real())
                  fnl_loc_gamma = 2.0 * fnl_buf_gamma;
@@ -2027,6 +2028,7 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
                     }
                  }
               }
+              tmap["enl_calc"].stop();
 
               if ( compute_hpsi ) {
                  tmap["enl_hpsi"].start();                                          
@@ -2431,7 +2433,7 @@ void NonLocalPotential::update_usfns(Basis* cdbasis) {
 void NonLocalPotential::atoms_moved(void)
 {
    const int minBlocksize = 64;
-   const bool useminBlockSize = true;
+   const bool useminBlockSize = false;
 
    const int ngwl = basis_.localsize();
    const int mloc = sd_.c().mloc();
