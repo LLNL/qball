@@ -985,7 +985,7 @@ void SlaterDet::rs_mul_add(FourierTransform& ft,
     // only one transform at a time
     for ( int n = 0; n < nstloc(); n++ ) {
       ft.backward(c_.cvalptr(n*mloc),&tmp[0]);
-      #pragma omp parallel for
+#pragma omp parallel for
       for ( int i = 0; i < np012loc; i++ )
         tmp[i] *= v[i];
       ft.forward(&tmp[0], &ctmp[0]);

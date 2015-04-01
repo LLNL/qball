@@ -59,6 +59,8 @@
 #include <bgpm/include/bgpm.h>
 extern "C" void HPM_Start(char *);
 extern "C" void HPM_Stop(char *);
+extern "C" void summary_start(void);
+extern "C" void summary_stop(void);
 #endif
 using namespace std;
 
@@ -260,10 +262,11 @@ void EhrenSampleStepper::step(int niter)
   }
 
 #ifdef HPM  
-       HPM_Start("iterloop");
+  HPM_Start("iterloop");
+  summary_start();
 #endif
 #ifdef TAU
-       QB_Pstart(14,scfloop);
+  QB_Pstart(14,scfloop);
 #endif
   tmap["total_niter"].start();
   for ( int iter = 0; iter < niter; iter++ )
@@ -1311,6 +1314,7 @@ void EhrenSampleStepper::step(int niter)
   QB_Pstop(scfloop);
 #endif
 #ifdef HPM
+  summary_stop();
   HPM_Stop("iterloop");
 #endif
 

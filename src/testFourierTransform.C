@@ -55,7 +55,7 @@ int main(int argc, char **argv)
   HPM_Start("testFT");
 #endif
 
-  const int niter = 1;
+  const int niter = 100;
   
   // extra scope to ensure that Context objects get destructed before
   // the MPI_Finalize call
@@ -172,7 +172,7 @@ int main(int argc, char **argv)
                                     ft2.tm_f_zero.real() +
                                     ft2.tm_f_map.real() << endl;
      cout << " fwd1 time: " << tm.cpu() << " / " << tm.real()
-          << "    " << 1.e-9*flops/tm.real()/(double)niter << " GFlops" << endl;
+          << "    " << 1.e-9*flops*(double)niter/tm.real() << " GFlops" << endl;
   }
   tm.reset();
   ft2.reset_timers();
@@ -195,7 +195,7 @@ int main(int argc, char **argv)
                                     ft2.tm_b_zero.real() +
                                     ft2.tm_b_map.real() << endl;
      cout << " bwd1 time: " << tm.cpu() << " / " << tm.real()
-          << "    " << 1.e-9*flops/tm.real()/(double)niter << " GFlops" << endl;
+          << "    " << 1.e-9*flops*(double)niter/tm.real() << " GFlops" << endl;
   }
   /*EWD DEBUG
   tm.reset();
