@@ -452,7 +452,8 @@ void EnergyFunctional::update_vhxc(void) {
      {
         for ( int ig = 0; ig < ngloc; ig++ ) {
            const complex<double> tmp = rhoelg[ig] + rhopst[ig];
-           ehsum += norm(tmp) * g2i[ig];
+           const double tnorm = tmp.real()*tmp.real() + tmp.imag()*tmp.imag();
+           ehsum += tnorm * g2i[ig];
            rhogt[ig] = tmp;
         }
      }
@@ -965,7 +966,8 @@ void EnergyFunctional::update_harris(void) {
   double ehsum = 0.0;
   for ( int ig = 0; ig < ngloc; ig++ ) {
     const complex<double> tmp = rhoelg[ig] + rhopst[ig];
-    ehsum += norm(tmp) * g2i[ig];
+    const double tnorm = tmp.real()*tmp.real() + tmp.imag()*tmp.imag();
+    ehsum += tnorm * g2i[ig];
   }
   double vfact = vbasis_->real() ? 1.0 : 0.5;
   tsum[1] = vfact * omega * fpi * ehsum;
@@ -1317,7 +1319,8 @@ double EnergyFunctional::energy(bool compute_hpsi, Wavefunction& dwf,
     const double *const g_z = vbasis_->gx_ptr(2);
   
     for ( int ig = 0; ig < ngloc; ig++ ) {
-      const double temp = norm(rhogt[ig]) * g2i[ig] * g2i[ig];
+       const double rgtnorm = rhogt[ig].real()*rhogt[ig].real() + rhogt[ig].imag()*rhogt[ig].imag();
+       const double temp = rgtnorm * g2i[ig] * g2i[ig];
       const double tgx = g_x[ig];
       const double tgy = g_y[ig];
       const double tgz = g_z[ig];
