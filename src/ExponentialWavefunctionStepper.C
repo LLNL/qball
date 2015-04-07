@@ -37,7 +37,7 @@ using namespace std;
 
 ////////////////////////////////////////////////////////////////////////////////
 ExponentialWavefunctionStepper::ExponentialWavefunctionStepper(Wavefunction& wf, double tddt, TimerMap& tmap, EnergyFunctional & ef, Sample & s, bool approximated)
-  : tddt_(tddt), WavefunctionStepper(wf,tmap), ef_(ef), s_(s), approximated_(approximated)
+    : tddt_(tddt), WavefunctionStepper(wf,tmap), ef_(ef), s_(s), approximated_(approximated), expwf_(s.wf), wfhalf_(s.wf)
 {
   order_ = 4;
   potential_.resize(3);
@@ -51,12 +51,13 @@ void ExponentialWavefunctionStepper::exponential(const double & dt, Wavefunction
   std::vector<std::vector<double> > fion;
   std::valarray<double> sigma;
   bool delete_dwf;
-  Wavefunction expwf(wf_);
   
   if (dwf == 0)
   {
     delete_dwf = true;
-    dwf = new Wavefunction(wf_);
+    //ewd:  don't want to keep calling Wavefunction constructor, should be able to use wfhalf_ for this call
+    //dwf = new Wavefunction(wf_);
+    dwf = &wfhalf_;
     tmap_["expowf_ef"].start();
     ef_.energy(true, *dwf, false, fion, false, sigma);
     tmap_["expowf_ef"].stop();
@@ -70,9 +71,11 @@ void ExponentialWavefunctionStepper::exponential(const double & dt, Wavefunction
   //          = x + Ax + A(Ax)/2 + A(A^2x/2)/3 + A(A^3x/6)/4 
   
   // order 0
+  tmap_["expowf_copy"].start();
   for ( int ispin = 0; ispin < wf_.nspin(); ispin++)
     for ( int ikp = 0; ikp < wf_.nkp(); ikp++ )
-      expwf.sd(ispin, ikp)->c() = wf_.sd(ispin, ikp)->c();
+      expwf_.sd(ispin, ikp)->c() = wf_.sd(ispin, ikp)->c();
+  tmap_["expowf_copy"].stop();
 
   complex<double> factor = 1.0;
  
@@ -83,10 +86,12 @@ void ExponentialWavefunctionStepper::exponential(const double & dt, Wavefunction
 
     if(N != 1)        // for N == 1 this is already done
     {
+       tmap_["expowf_copy"].start();
        //move dwf to wf
        for ( int ispin = 0; ispin < wf_.nspin(); ispin++)
           for ( int ikp = 0; ikp < wf_.nkp(); ikp++ )
              wf_.sd(ispin, ikp)->c() = dwf->sd(ispin, ikp)->c();
+       tmap_["expowf_copy"].stop();
       
        // apply A
        tmap_["expowf_ef"].start();
@@ -94,24 +99,28 @@ void ExponentialWavefunctionStepper::exponential(const double & dt, Wavefunction
        tmap_["expowf_ef"].stop();
     }
     
+    tmap_["expowf_axpy"].start();
     //accumulate the result
     for ( int ispin = 0; ispin < wf_.nspin(); ispin++)
        for ( int ikp = 0; ikp < wf_.nkp(); ikp++ )
-          expwf.sd(ispin, ikp)->c().axpy(factor, dwf->sd(ispin, ikp)->c());
+          expwf_.sd(ispin, ikp)->c().axpy(factor, dwf->sd(ispin, ikp)->c());
+    tmap_["expowf_axpy"].stop();
     
   }
   
+  tmap_["expowf_copy"].start();
   // copy the result back THE wavefunction
   for ( int ispin = 0; ispin < wf_.nspin(); ispin++)
   {
     for ( int ikp = 0; ikp < wf_.nkp(); ikp++ )
     {
-      wf_.sd(ispin, ikp)->c() = expwf.sd(ispin, ikp)->c();
+      wf_.sd(ispin, ikp)->c() = expwf_.sd(ispin, ikp)->c();
       s_.hamil_wf->sd(ispin, ikp)->c() = wf_.sd(ispin, ikp)->c();
     }
   }
+  tmap_["expowf_copy"].stop();
   
-  if(delete_dwf) delete dwf;
+  //if(delete_dwf) delete dwf;
   
 }
 
@@ -135,9 +144,11 @@ void ExponentialWavefunctionStepper::preupdate()
 
   if( approximated_ && stored_iter_ >= 3 )
   {
+     tmap_["expowf_copy"].start();
      SelfConsistentPotential future_potential;
      future_potential.extrapolate(potential_);
      ef_.set_self_consistent_potential(future_potential);
+     tmap_["expowf_copy"].stop();
 
      // now do the other half of the propagation with H(t + dt)
      exponential(0.5*tddt_);
@@ -156,25 +167,29 @@ void ExponentialWavefunctionStepper::update(Wavefunction& dwf)
 
    if ( !approximated_  || stored_iter_ < 3 )
    {
-      Wavefunction wf_half(wf_);
-    
+      tmap_["expowf_copy"].start();
       //save the current status
       for ( int ispin = 0; ispin < wf_.nspin(); ispin++)
          for ( int ikp = 0; ikp < wf_.nkp(); ikp++ )
-            wf_half.sd(ispin, ikp)->c() = wf_.sd(ispin, ikp)->c();
+            wfhalf_.sd(ispin, ikp)->c() = wf_.sd(ispin, ikp)->c();
+      tmap_["expowf_copy"].stop();
     
       // do the rest of the propagation step with H(t)
       exponential(0.5*tddt_, &dwf);
 
+      tmap_["expowf_ef"].start();
       // get the approximated vhxc for the end of the step
       ef_.hamil_cd()->update_density();
       ef_.update_hamiltonian();
       ef_.update_vhxc();
+      tmap_["expowf_ef"].stop();
 
+      tmap_["expowf_copy"].start();
       // restore the wf to the middle of the step
       for ( int ispin = 0; ispin < wf_.nspin(); ispin++)
          for ( int ikp = 0; ikp < wf_.nkp(); ikp++ )
-            wf_.sd(ispin, ikp)->c() = wf_half.sd(ispin, ikp)->c();
+            wf_.sd(ispin, ikp)->c() = wfhalf_.sd(ispin, ikp)->c();
+      tmap_["expowf_copy"].stop();
 
       // now do the other half of the propagation with H(t + dt)
       exponential(0.5*tddt_);

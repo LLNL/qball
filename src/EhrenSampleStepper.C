@@ -60,6 +60,8 @@
 #include <bgpm/include/bgpm.h>
 extern "C" void HPM_Start(char *);
 extern "C" void HPM_Stop(char *);
+extern "C" void summary_start(void);
+extern "C" void summary_stop(void);
 #endif
 using namespace std;
 
@@ -266,6 +268,7 @@ void EhrenSampleStepper::step(int niter)
 
 #ifdef HPM  
        HPM_Start("iterloop");
+       summary_start();
 #endif
 #ifdef TAU
        QB_Pstart(14,scfloop);
@@ -411,7 +414,7 @@ void EhrenSampleStepper::step(int niter)
        }
     }
         
-      
+    tmap["ionic"].start();      
     if ( iter > 0 && ionic_stepper )
     {
        ionic_stepper->compute_v(energy,fion);
@@ -455,11 +458,13 @@ void EhrenSampleStepper::step(int niter)
        cout << "  <ekin_ion> " << ekin_ion << " </ekin_ion>\n";
        cout << "  <temp_ion> " << temp_ion << " </temp_ion>\n";
     }
+    tmap["ionic"].stop();
 
     tmap["preupdate"].start();
     wf_stepper->preupdate();
     tmap["preupdate"].stop();
     
+    tmap["ionic"].start();
     if ( atoms_move )
     {
        if ( s_.constraints.size() > 0 )
@@ -486,6 +491,7 @@ void EhrenSampleStepper::step(int niter)
           cd_.update_nlcc();
        tmap["charge"].stop();
     }
+    tmap["ionic"].stop();
 
     if ( compute_stress )
     {
@@ -1321,6 +1327,7 @@ void EhrenSampleStepper::step(int niter)
   QB_Pstop(scfloop);
 #endif
 #ifdef HPM
+  summary_stop();
   HPM_Stop("iterloop");
 #endif
 
