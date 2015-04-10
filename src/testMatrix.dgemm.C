@@ -80,71 +80,55 @@ int main(int argc, char **argv)
    mype=0;
 #endif
 
-   char* infilename = argv[1];
-   ifstream infile(infilename);
-   assert(argc == 2);
+   assert(argc == 5);
    Timer tm;
-   int m_a, n_a, mb_a, nb_a;
-   int m_b, n_b, mb_b, nb_b;
-   int m_c, n_c, mb_c, nb_c;
-   char ta, tb;
-   if(mype == 0)
-   {
-      infile >> m_a >> n_a >> mb_a >> nb_a >> ta;
-      cout<<"m_a="<<m_a<<", n_a="<<n_a<<endl;
-      infile >> m_b >> n_b >> mb_b >> nb_b >> tb;
-      cout<<"m_b="<<m_b<<", n_b="<<n_a<<endl;
-      infile >> m_c >> n_c >> mb_c >> nb_c;
-      cout<<"m_c="<<m_c<<", n_c="<<n_c<<endl;
-   }
-#ifdef USE_MPI
-   MPI_Bcast(&m_a, 1, MPI_INT, 0, MPI_COMM_WORLD);    
-   MPI_Bcast(&n_a, 1, MPI_INT, 0, MPI_COMM_WORLD);    
-   MPI_Bcast(&mb_a, 1, MPI_INT, 0, MPI_COMM_WORLD);    
-   MPI_Bcast(&nb_a, 1, MPI_INT, 0, MPI_COMM_WORLD);    
-   MPI_Bcast(&m_b, 1, MPI_INT, 0, MPI_COMM_WORLD);    
-   MPI_Bcast(&n_b, 1, MPI_INT, 0, MPI_COMM_WORLD);    
-   MPI_Bcast(&mb_b, 1, MPI_INT, 0, MPI_COMM_WORLD);    
-   MPI_Bcast(&nb_b, 1, MPI_INT, 0, MPI_COMM_WORLD);    
-   MPI_Bcast(&m_c, 1, MPI_INT, 0, MPI_COMM_WORLD);    
-   MPI_Bcast(&n_c, 1, MPI_INT, 0, MPI_COMM_WORLD);    
-   MPI_Bcast(&mb_c, 1, MPI_INT, 0, MPI_COMM_WORLD);    
-   MPI_Bcast(&nb_c, 1, MPI_INT, 0, MPI_COMM_WORLD);    
-   MPI_Bcast(&ta, 1, MPI_CHAR, 0, MPI_COMM_WORLD);    
-   MPI_Bcast(&tb, 1, MPI_CHAR, 0, MPI_COMM_WORLD);    
-#endif
 
-   if ( ta == 'N' ) ta = 'n';
-   if ( tb == 'N' ) tb = 'n';
+   int mm = atoi(argv[1]);
+   int nn = atoi(argv[2]);
+   int kk = atoi(argv[3]);
+   int transpose = atoi(argv[4]);  // 1 = transpose, 0 = don't
+
+
+#ifdef USE_MPI
+   //MPI_Bcast(&mm, 1, MPI_INT, 0, MPI_COMM_WORLD);    
+   //MPI_Bcast(&nn, 1, MPI_INT, 0, MPI_COMM_WORLD);    
+   //MPI_Bcast(&kk, 1, MPI_INT, 0, MPI_COMM_WORLD);    
+#endif
 
    double dzero = 0.0;
    double done = 1.0;
-   char ct='t';
+   char cc='t';
+   if (!transpose)
+      cc = 'n';
    char cn='n';
 
-   int kk = m_a;
-   int mm = m_c;
-   int nn = n_c;
+   vector<double > avec(mm*kk);
+   vector<double > bvec(nn*kk);
+   vector<double > cvec(mm*nn);
+   for (int ii=0; ii<avec.size(); ii++) {
+      double drand1 =  rand()*nrandinv*maxrand;
+      avec[ii] = drand1;
+   }
+   for (int ii=0; ii<bvec.size(); ii++) {
+      double drand1 =  rand()*nrandinv*maxrand;
+      bvec[ii] = drand1;
+   }
+   for (int ii=0; ii<cvec.size(); ii++) {
+      double drand1 =  rand()*nrandinv*maxrand;
+      cvec[ii] = drand1;
+   }
 
-   vector<double> avec(mm*kk);
-   vector<double> bvec(nn*kk);
-   vector<double> cvec(mm*nn);
-   for (int ii=0; ii<avec.size(); ii++)
-      avec[ii] = rand()*nrandinv*maxrand;
-   for (int ii=0; ii<bvec.size(); ii++)
-      bvec[ii] = rand()*nrandinv*maxrand;
-   for (int ii=0; ii<cvec.size(); ii++)
-      cvec[ii] = rand()*nrandinv*maxrand;
-               
+   const int niter = 100;
    tm.start();
    HPM_Start("dgemm1");
-   dgemm(&ct,&cn,&mm,&nn,&kk,&done,&avec[0],&kk,&bvec[0],&kk,&dzero,&cvec[0],&mm);
+   for (int iter=0; iter<niter; iter++)
+      dgemm(&cc,&cn,&mm,&nn,&kk,&done,&avec[0],&kk,&bvec[0],&kk,&dzero,&cvec[0],&mm);
    HPM_Stop("dgemm1");
    tm.stop();
 
    int nthreads = omp_get_max_threads();
    if (mype == 0)
-      cout << "M = " << m_c << " N = " << n_c << " K = " << m_a << " dgemm time = " << setprecision(5) << setw(8) << tm.real()<< " sec, GFlops = " << (2.0e-9*m_c*n_c*m_a) / tm.real() << " on " << npes << " pes, " << nthreads << " threads" << endl;
+      cout << "M = " << mm << " N = " << nn << " K = " << kk << ", transpose = " << transpose << ", dgemm time = " << setprecision(5) << setw(8) << tm.real()<< " sec, GFlops = " << npes*niter*(2.0e-9*mm*nn*kk) / tm.real() << " on " << npes << " pes, " << nthreads << " threads, niter = " << niter << endl;
  
 #ifdef USE_MPI
    MPI_Finalize();
