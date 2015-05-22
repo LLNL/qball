@@ -88,49 +88,47 @@ int main(int argc, char **argv)
    int kk = atoi(argv[3]);
    int transpose = atoi(argv[4]);  // 1 = transpose, 0 = don't
 
+
 #ifdef USE_MPI
    //MPI_Bcast(&mm, 1, MPI_INT, 0, MPI_COMM_WORLD);    
    //MPI_Bcast(&nn, 1, MPI_INT, 0, MPI_COMM_WORLD);    
    //MPI_Bcast(&kk, 1, MPI_INT, 0, MPI_COMM_WORLD);    
 #endif
 
-   complex<double> zzero = complex<double>(0.0,0.0);
-   complex<double> zone = complex<double>(1.0,0.0);
-   char cc='c';
+   double dzero = 0.0;
+   double done = 1.0;
+   char cc='t';
    if (!transpose)
       cc = 'n';
    char cn='n';
 
-   vector<complex<double> > avec(mm*kk);
-   vector<complex<double> > bvec(nn*kk);
-   vector<complex<double> > cvec(mm*nn);
+   vector<double > avec(mm*kk);
+   vector<double > bvec(nn*kk);
+   vector<double > cvec(mm*nn);
    for (int ii=0; ii<avec.size(); ii++) {
       double drand1 =  rand()*nrandinv*maxrand;
-      double drand2 =  rand()*nrandinv*maxrand;
-      avec[ii] = complex<double>(drand1,drand2);
+      avec[ii] = drand1;
    }
    for (int ii=0; ii<bvec.size(); ii++) {
       double drand1 =  rand()*nrandinv*maxrand;
-      double drand2 =  rand()*nrandinv*maxrand;
-      bvec[ii] = complex<double>(drand1,drand2);
+      bvec[ii] = drand1;
    }
    for (int ii=0; ii<cvec.size(); ii++) {
       double drand1 =  rand()*nrandinv*maxrand;
-      double drand2 =  rand()*nrandinv*maxrand;
-      cvec[ii] = complex<double>(drand1,drand2);
+      cvec[ii] = drand1;
    }
 
    const int niter = 100;
    tm.start();
-   HPM_Start("zgemm1");
+   HPM_Start("dgemm1");
    for (int iter=0; iter<niter; iter++)
-      zgemm(&cc,&cn,&mm,&nn,&kk,&zone,&avec[0],&kk,&bvec[0],&kk,&zzero,&cvec[0],&mm);
-   HPM_Stop("zgemm1");
+      dgemm(&cc,&cn,&mm,&nn,&kk,&done,&avec[0],&kk,&bvec[0],&kk,&dzero,&cvec[0],&mm);
+   HPM_Stop("dgemm1");
    tm.stop();
 
    int nthreads = omp_get_max_threads();
    if (mype == 0)
-      cout << "M = " << mm << " N = " << nn << " K = " << kk << ", transpose = " << transpose << " zgemm time = " << setprecision(5) << setw(8) << tm.real()<< " sec, GFlops = " << npes*niter*(8.0e-9*mm*nn*kk) / tm.real() << " on " << npes << " pes, " << nthreads << " threads, niter = " << niter << endl;
+      cout << "M = " << mm << " N = " << nn << " K = " << kk << ", transpose = " << transpose << ", dgemm time = " << setprecision(5) << setw(8) << tm.real()<< " sec, GFlops = " << npes*niter*(2.0e-9*mm*nn*kk) / tm.real() << " on " << npes << " pes, " << nthreads << " threads, niter = " << niter << endl;
  
 #ifdef USE_MPI
    MPI_Finalize();

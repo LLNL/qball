@@ -20,6 +20,7 @@
  HPMLIBS = -L/usr/local/tools/mpitrace/lib -lmpihpm_smp -L/bgsys/drivers/ppcfloor/bgpm/lib -lbgpm
  ###JAGGEMMLIB = $(LIBHOME)/jaggemm_opt/libjaggemm.a
  JAGGEMMLIB = $(LIBHOME)/jaggemm_opt/tweak-040915/libjaggemm.a
+# JAGGEMMLIB = $(LIBHOME)/jaggemm_opt/flexi-042015/libjaggemm.a
  #CTFDIR = $(LIBHOME)/ctf-latest/cyclopstf
  #CTFLIB = -L$(LIBHOME)/lib -lcyclopstf.jag
  XERCESCDIR=$(HOME)/software/xml/xerces-c-3.1.1-bgq/src
