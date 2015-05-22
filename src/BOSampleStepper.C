@@ -41,6 +41,7 @@
 #include "MDIonicStepper.h"
 #include "BMDIonicStepper.h"
 #include "SDCellStepper.h"
+#include "FCPStepper.h"
 #include "Preconditioner.h"
 #include "AndersonMixer.h"
 #include "MLWFTransform.h"
@@ -299,6 +300,11 @@ void BOSampleStepper::step(int niter)
 
   if ( ionic_stepper )
     ionic_stepper->setup_constraints();
+
+  double fmu = 0.0;
+  FCPStepper* fcp_stepper = 0;
+  if ( s_.ctrl.fcp_thermostat == "SCALING" )
+     fcp_stepper = new FCPStepper(s_);
 
   CellStepper* cell_stepper = 0;
   if ( cell_dyn == "SD" )
@@ -623,6 +629,8 @@ void BOSampleStepper::step(int niter)
           }
         }
 
+        fmu = - s_.wf.mu() + s_.ctrl.fcp_mu;
+        
         if ( onpe0 )
         {
           cout.setf(ios::fixed,ios::floatfield);
@@ -700,6 +708,8 @@ void BOSampleStepper::step(int niter)
         if ( iter > 0 && ionic_stepper )
         {
           ionic_stepper->compute_v(energy,fion);
+          if ( fcp_stepper )
+             fcp_stepper->compute_v(fmu);
         }
         // at this point, positions r0, velocities v0 and forces fion are
         // consistent
@@ -795,6 +805,8 @@ void BOSampleStepper::step(int niter)
           // move atoms to new position: r0 <- r0 + v0*dt + dt2/m * fion
           ionic_stepper->compute_r(energy,fion);
           ef_.atoms_moved();
+          if ( fcp_stepper )
+             fcp_stepper->compute_r(fmu);
           if (ultrasoft) {
              tmap["usfns"].start();
              cd_.update_usfns();
@@ -1779,7 +1791,8 @@ void BOSampleStepper::step(int niter)
       
             ionic_stepper->compute_v(energy,fion);
             // positions r0 and velocities v0 are consistent
-
+            if ( fcp_stepper )
+               fcp_stepper->compute_v(fmu);
 
             // create output directory if it doesn't exist
             string dirbase = "md.";
@@ -1966,6 +1979,8 @@ void BOSampleStepper::step(int niter)
       
     ionic_stepper->compute_v(energy,fion);
     // positions r0 and velocities v0 are consistent
+    if ( fcp_stepper )
+       fcp_stepper->compute_v(fmu);
   }
 
   if ( atoms_move && extrapolate_wf )
@@ -2080,6 +2095,8 @@ void BOSampleStepper::step(int niter)
       
     ionic_stepper->compute_v(energy,fion);
     // positions r0 and velocities v0 are consistent
+    if ( fcp_stepper )
+       fcp_stepper->compute_v(fmu);
   }
   else
   {

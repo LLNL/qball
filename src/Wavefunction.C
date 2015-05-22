@@ -50,7 +50,8 @@ using namespace std;
 Wavefunction::Wavefunction(const Context& ctxt) : ctxt_(ctxt),nel_(0),nempty_(0),
                                                   nspin_(1), deltaspin_(0),
                                                   ecut_(0.0), nrowmax_(32),
-                                                  nparallelkpts_(0)
+                                                  nparallelkpts_(0), mu_(0.0),
+                                                  deltacharge_(0.0)
 {
   // create a default wavefunction: one k point, k=0
   kpoint_.resize(1);
@@ -85,7 +86,7 @@ cell_(wf.cell_), refcell_(wf.refcell_),
 ecut_(wf.ecut_), weightsum_(wf.weightsum_), 
 ultrasoft_(wf.ultrasoft_), force_complex_wf_(wf.force_complex_wf_),
 wf_phase_real_(wf.wf_phase_real_),mbset_(wf.mbset_),nbset_(wf.nbset_),
-mblks_(wf.mblks_),nblks_(wf.nblks_)
+mblks_(wf.mblks_),nblks_(wf.nblks_),mu_(wf.mu_),deltacharge_(wf.deltacharge_)
 {
   // Create a Wavefunction using the dimensions of the argument
   compute_nst();
@@ -523,7 +524,13 @@ int Wavefunction::nst(int ispin) const {
 int Wavefunction::nempty() const { return nempty_; } // number of empty states
 
 ////////////////////////////////////////////////////////////////////////////////
-int Wavefunction::nspin() const { return nspin_; } // number of empty states
+int Wavefunction::nspin() const { return nspin_; } // number of spin channels
+
+////////////////////////////////////////////////////////////////////////////////
+double Wavefunction::deltacharge() const { return deltacharge_; }
+
+////////////////////////////////////////////////////////////////////////////////
+double Wavefunction::mu() const { return mu_; }
 
 ////////////////////////////////////////////////////////////////////////////////
 bool Wavefunction::kptactive(int k) const {
@@ -712,6 +719,13 @@ void Wavefunction::set_deltaspin(int deltaspin) {
       reset();
     }
   }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+void Wavefunction::set_deltacharge(double deltacharge)
+{
+   if ( deltacharge == deltacharge_ ) return;
+   deltacharge_ = deltacharge;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1248,12 +1262,12 @@ void Wavefunction::update_occ(double temp, int ngauss) {
       if (spinactive(ispin)) {
 
         if (nspin_ == 1)
-          totalcharge[ispin] = (double) nel_;
+          totalcharge[ispin] = (double) nel_ + deltacharge_;
         else if ( nspin_ == 2 ) {
           if (ispin == 0)
-            totalcharge[ispin] = (nel_+1)/2+deltaspin_;
+             totalcharge[ispin] = (nel_+1)/2+deltaspin_ + deltacharge_;  // ewd:  need a factor of 0.5 in front of deltacharge??
           else if (ispin == 1)
-            totalcharge[ispin] = nel_/2 - deltaspin_;
+            totalcharge[ispin] = nel_/2 - deltaspin_ + deltacharge_;
         }
         
         int niter = 0;
@@ -1295,6 +1309,9 @@ void Wavefunction::update_occ(double temp, int ngauss) {
           //ewd DEBUG DEBUG DEBUG
           //ctxt_.abort(1);
         }
+
+        mu_ = mu[ispin];   //ewd:  should we store mu separately for each spin channel or not?
+
       }
     }
 

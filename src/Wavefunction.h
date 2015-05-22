@@ -54,6 +54,8 @@ class Wavefunction {
   int nempty_;        // number of empty states
   int nspin_;         // number of spins (1 or 2)
   int deltaspin_;     // number of spin excitations
+  double deltacharge_;// change of total charge from nel_
+  double mu_;         // chemical potential
   
   int nrowmax_;        // maximum number of rows of a spincontext
   int nparallelkpts_;  // maximum number of kpoints to run in parallel
@@ -126,6 +128,8 @@ class Wavefunction {
   int nempty(void) const;         // number of empty states
   int nspin(void) const;          // number of spins
   int deltaspin(void) const { return deltaspin_; } // number of spin excitations
+  double deltacharge(void) const; // change of total charge from nel_
+  double mu(void) const;          // chemical potential
   int nrowmax(void) const { return nrowmax_; }
   int nparallelkpts(void) const { return nparallelkpts_; }
   int sdcontextsize(int ispin) const { return sdcontext_[ispin].size(); }
@@ -155,6 +159,7 @@ class Wavefunction {
   void set_nempty(int nempty);
   void set_nspin(int nspin);
   void set_deltaspin(int deltaspin);
+  void set_deltacharge(double deltacharge);
   void set_nrowmax(int n);
   void set_nparallelkpts(int n);
   void add_kpoint(D3vector kpoint, double weight);

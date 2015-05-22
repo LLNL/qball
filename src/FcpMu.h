@@ -22,11 +22,54 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 //
-// release.C
+// FcpMu.h
 //
 ////////////////////////////////////////////////////////////////////////////////
+// $Id: FcpMu.h,v 1.4 2008-09-08 15:56:19 fgygi Exp $
 
-#include "release.h"
-std::string release(void) {
-  return std::string("qb@LL-r204");
-}
+#ifndef FCPMU_H
+#define FCPMU_H
+
+#include<iostream>
+#include<iomanip>
+#include<sstream>
+#include<stdlib.h>
+
+#include "Sample.h"
+
+class FcpMu : public Var
+{
+  Sample *s;
+
+  public:
+
+  char *name ( void ) const { return "fcp_mu"; };
+
+  int set ( int argc, char **argv )
+  {
+    if ( argc != 2 )
+    {
+      if ( ui->oncoutpe() )
+      cout << " fcp_mu takes only one value" << endl;
+      return 1;
+    }
+
+    double v = atof(argv[1]);
+
+    s->ctrl.fcp_mu = v;
+    return 0;
+  }
+
+  string print (void) const
+  {
+     ostringstream st;
+     st.setf(ios::left,ios::adjustfield);
+     st << setw(10) << name() << " = ";
+     st.setf(ios::right,ios::adjustfield);
+     st << setw(10) << s->ctrl.fcp_mu;
+     return st.str();
+  }
+
+  FcpMu(Sample *sample) : s(sample) { s->ctrl.fcp_mu = 0.0; }
+};
+#endif

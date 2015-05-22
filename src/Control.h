@@ -124,5 +124,11 @@ struct Control
   string esm_bc;
   double esm_w;
 
+  std::string fcp_thermostat;
+  double fcp_th_temp;
+  double fcp_th_time;
+  double fcp_th_width;
+  double fcp_pmass;
+  double fcp_mu;
 };
 #endif

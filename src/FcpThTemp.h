@@ -22,11 +22,61 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 //
-// release.C
+// FcpThTemp.h
 //
 ////////////////////////////////////////////////////////////////////////////////
+// $Id: FcpThTemp.h,v 1.4 2008-09-08 15:56:19 fgygi Exp $
 
-#include "release.h"
-std::string release(void) {
-  return std::string("qb@LL-r204");
-}
+#ifndef FCPTHTEMP_H
+#define FCPTHTEMP_H
+
+#include<iostream>
+#include<iomanip>
+#include<sstream>
+#include<stdlib.h>
+
+#include "Sample.h"
+
+class FcpThTemp : public Var
+{
+  Sample *s;
+
+  public:
+
+  char *name ( void ) const { return "fcp_th_temp"; };
+
+  int set ( int argc, char **argv )
+  {
+    if ( argc != 2 )
+    {
+      if ( ui->oncoutpe() )
+      cout << " fcp_th_temp takes only one value" << endl;
+      return 1;
+    }
+
+    double v = atof(argv[1]);
+    if ( v < 0.0 )
+    {
+      if ( ui->oncoutpe() )
+        cout << " fcp_th_temp must be non-negative" << endl;
+      return 1;
+    }
+
+    s->ctrl.fcp_th_temp = v;
+    return 0;
+  }
+
+  string print (void) const
+  {
+     ostringstream st;
+     st.setf(ios::left,ios::adjustfield);
+     st << setw(10) << name() << " = ";
+     st.setf(ios::right,ios::adjustfield);
+     st << setw(10) << s->ctrl.fcp_th_temp;
+     return st.str();
+  }
+
+  // Use same value of th_temp if not specified (implied as negative value).
+  FcpThTemp(Sample *sample) : s(sample) { s->ctrl.fcp_th_temp = -1.0; }
+};
+#endif

@@ -156,6 +156,12 @@ using namespace std;
 #include "NetCharge.h"
 #include "EsmBC.h"
 #include "EsmW.h"
+#include "FcpThermostat.h"
+#include "FcpThTemp.h"
+#include "FcpThTime.h"
+#include "FcpThWidth.h"
+#include "FcpPmass.h"
+#include "FcpMu.h"
 #ifdef BGQ
 #include <spi/include/kernel/process.h>
 #include <spi/include/kernel/location.h>
@@ -390,6 +396,12 @@ int main(int argc, char **argv, char **envp)
   ui->addVar(new NetCharge(s));
   ui->addVar(new EsmBC(s));
   ui->addVar(new EsmW(s));
+  ui->addVar(new FcpThermostat(s));
+  ui->addVar(new FcpThTemp(s));
+  ui->addVar(new FcpThTime(s));
+  ui->addVar(new FcpThWidth(s));
+  ui->addVar(new FcpPmass(s));
+  ui->addVar(new FcpMu(s));
   
 #ifdef USE_JAGGEMM
   setup_grid();
