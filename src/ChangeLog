@@ -1,4 +1,62 @@
 ------------------------------------------------------------------------
+r205 | draeger | 2015-05-26 13:06:02 -0700 (Tue, 26 May 2015) | 3 lines
+
+Updated FourierTransform with latest code from Davis version 1.61.0, which includes support for FFTW3.  Tested ESM code with water molecule and different FFT libraries and got identical results.
+
+
+------------------------------------------------------------------------
+r204 | draeger | 2015-05-22 16:02:41 -0700 (Fri, 22 May 2015) | 3 lines
+
+Added constant-mu ESM code.
+
+
+------------------------------------------------------------------------
+r203 | draeger | 2015-05-22 15:01:10 -0700 (Fri, 22 May 2015) | 1 line
+
+
+------------------------------------------------------------------------
+r202 | draeger | 2015-04-10 10:30:41 -0700 (Fri, 10 Apr 2015) | 4 lines
+
+
+Modified testMatrix to include transpose arguments.
+
+
+------------------------------------------------------------------------
+r200 | draeger | 2015-04-07 09:54:18 -0700 (Tue, 07 Apr 2015) | 4 lines
+
+
+Replaced a few more norm() calls w. manual calculations to get better performance.
+
+
+------------------------------------------------------------------------
+r199 | draeger | 2015-04-01 09:58:56 -0700 (Wed, 01 Apr 2015) | 4 lines
+
+
+Added summary_start/stop calls to limit MPI profiling to HPM region.
+
+
+------------------------------------------------------------------------
+r189 | draeger | 2015-02-26 16:41:23 -0800 (Thu, 26 Feb 2015) | 4 lines
+
+
+Wrote test code to measure performance of row broadcasts (task mapping makes a BIG difference on BG/Q, as it turns out).
+
+
+------------------------------------------------------------------------
+r188 | draeger | 2015-02-26 16:40:43 -0800 (Thu, 26 Feb 2015) | 4 lines
+
+
+Added BG/Q torus information to qb.C.
+
+
+------------------------------------------------------------------------
+r183 | draeger | 2014-10-08 14:24:11 -0700 (Wed, 08 Oct 2014) | 4 lines
+
+
+Bug fix for ESM code, provided by Minoru Otani.
+
+
+------------------------------------------------------------------------
 r182 | draeger | 2014-09-10 15:27:06 -0700 (Wed, 10 Sep 2014) | 4 lines
 
 
