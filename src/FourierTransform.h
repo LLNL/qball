@@ -25,7 +25,6 @@
 // FourierTransform.h
 //
 ////////////////////////////////////////////////////////////////////////////////
-// $Id: FourierTransform.h,v 1.13 2008-09-08 15:56:18 fgygi Exp $
 
 #ifndef FOURIERTRANSFORM_H
 #define FOURIERTRANSFORM_H
@@ -33,20 +32,42 @@
 #include <complex>
 #include <vector>
 
-#if USE_FFTW || USE_SPIRAL
+#if !( defined(USE_FFTW2) || defined(USE_FFTW3) || defined(USE_ESSL_FFT) || defined(FFT_NOLIB) )
+#error "Must define USE_FFTW2, USE_FFTW3, USE_ESSL_FFT or FFT_NOLIB"
+#endif
+
+#if defined(USE_FFTW2) && defined(USE_FFTW3)
+#error "Cannot define USE_FFTW2 and USE_FFTW3"
+#endif
+
+#if USE_FFTW2
+#if USE_DFFTW
+#include "dfftw.h"
+#else
 #include "fftw.h"
+#endif
+#endif
+
+#if USE_FFTW3
+#include "fftw3.h"
+#if USE_FFTW3MKL
+#include "fftw3_mkl.h"
+#endif
+#endif
+
+#if USE_MPI
+#include <mpi.h>
 #endif
 
 #include "Timer.h"
 
 class Basis;
-class Context;
 
 class FourierTransform
 {
   private:
 
-  const Context& ctxt_;
+  MPI_Comm comm_;
   const Basis& basis_;
   int nprocs_, myproc_;
 
@@ -58,11 +79,8 @@ class FourierTransform
   std::vector<int> np2_loc_; // np2_loc_[iproc], iproc=0, nprocs_-1
   std::vector<int> np2_first_; // np2_first_[iproc], iproc=0, nprocs_-1
   std::vector<std::complex<double> > zvec_;
-#ifdef USE_SPIRAL
-  std::vector<std::complex<double> > zout_;
-  std::vector<std::complex<double> > vin_;
-  std::vector<std::complex<double> > vout_;
-#endif
+  std::vector<std::complex<double> > zin_,zout_;  // 1D arrays for fft_1z w. FFTW3
+
   std::vector<int> scounts, sdispl, rcounts, rdispl;
   std::vector<std::complex<double> > sbuf, rbuf;
 
@@ -71,21 +89,32 @@ class FourierTransform
 
   void init_lib(void);
 
-#if USE_ESSL
+#if USE_ESSL_FFT
 #if USE_ESSL_2DFFT
-  std::vector<double> aux1xyf;
-  std::vector<double> aux1xyb;
-  int naux1xy;
+  std::vector<double> aux1xyf,aux1zf;
+  std::vector<double> aux1xyb,aux1zb;
+  std::vector<double> aux2;
+  int naux1xy,naux1z,naux2;
 #else
   std::vector<double> aux1xf, aux1yf, aux1zf, aux1zf1d;
   std::vector<double> aux1xb, aux1yb, aux1zb, aux1zb1d;
   std::vector<double> aux2;
   int naux1x,naux1y,naux1z,naux1z1d,naux2;
 #endif
-#elif USE_FFTW || USE_FFTW3 || USE_SPIRAL
+#elif USE_FFTW2
   fftw_plan fwplan0,fwplan1,fwplan2,bwplan0,bwplan1,bwplan2;
+#elif USE_FFTW3
+  //plans for np2_
+  fftw_plan fwplan, bwplan, fwplan1z, bwplan1z;
+#if defined(USE_FFTW3_2D) || defined(USE_FFTW3_THREADS)
+  fftw_plan fwplan2d, bwplan2d;
 #else
+  fftw_plan fwplanx, fwplany, bwplanx, bwplany;
+#endif
+#elif defined(FFT_NOLIB)
   // no library
+#else
+#error "Must define USE_FFTW2, USE_FFTW3, USE_ESSL_FFT or FFT_NOLIB"
 #endif
 
   void vector_to_zvec(const std::complex<double>* c);
@@ -100,7 +129,7 @@ class FourierTransform
 
   FourierTransform (const Basis &basis, int np0, int np1, int np2);
   ~FourierTransform ();
-  const Context& context(void) const { return ctxt_; }
+  MPI_Comm comm(void) const { return comm_; }
 
   // backward: Fourier synthesis, compute real-space function
   // forward:  Fourier analysis, compute Fourier coefficients
@@ -132,14 +161,18 @@ class FourierTransform
 
   void reset_timers(void);
   Timer tm_f_map, tm_f_fft, tm_f_pack, tm_f_mpi, tm_f_zero, tm_f_unpack,
-        tm_b_map, tm_b_fft, tm_b_pack, tm_b_mpi, tm_b_zero, tm_b_unpack;
+        tm_b_map, tm_b_fft, tm_b_pack, tm_b_mpi, tm_b_zero, tm_b_unpack,
+        tm_f_xy, tm_f_z, tm_f_x, tm_f_y,
+        tm_b_xy, tm_b_z, tm_b_x, tm_b_y,
+        tm_init, tm_b_com, tm_f_com;
 
+  // 1D calls for ESM
   void forward_1z( std::vector<std::complex<double> >& val_in,
                    std::vector<std::complex<double> >& val_out );
   void backward_1z( std::vector<std::complex<double> >& val_in,
                     std::vector<std::complex<double> >& val_out );
   void fft_1z( std::vector<std::complex<double> >& val_in,
                std::vector<std::complex<double> >& val_out, int isign );
-
+  
 };
 #endif

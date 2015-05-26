@@ -18,14 +18,14 @@
  SCALAPACKLIB  = $(SCALAPACK_DIR)/libscalapack.a
  ESSLDIR = /usr/local/tools/essl/5.1
  HPMLIBS = -L/usr/local/tools/mpitrace/lib -lmpihpm_smp -L/bgsys/drivers/ppcfloor/bgpm/lib -lbgpm
- ###JAGGEMMLIB = $(LIBHOME)/jaggemm_opt/libjaggemm.a
-# JAGGEMMLIB = $(LIBHOME)/jaggemm_opt/tweak-040915/libjaggemm.a
- JAGGEMMLIB = $(LIBHOME)/jaggemm_opt/flexiSafe-042115/libjaggemm.a
- #CTFDIR = $(LIBHOME)/ctf-latest/cyclopstf
- #CTFLIB = -L$(LIBHOME)/lib -lcyclopstf.jag
+ JAGGEMMLIB = $(LIBHOME)/jaggemm_opt/libjaggemm.a
  XERCESCDIR=$(HOME)/software/xml/xerces-c-3.1.1-bgq/src
  XERCESCLIBDIR=$(XERCESCDIR)/.libs
  XERCESLIB=$(XERCESCLIBDIR)/libxerces-c.a
+# FFTW3DIR = /usr/local/tools/fftw-3.3.3
+# FFTWLIB=$(FFTW3DIR)/lib/libfftw3.a
+ FFTW3DIR = /usr/local/tools/fftw-3.3.3
+ FFTWLIB=$(FFTW3DIR)/lib/libfftw3.a $(FFTW3DIR)/lib/libfftw3_threads.a
 
  BGQ_SDK_PATH = /bgsys/drivers/ppcfloor
  CXX=$(BGQ_SDK_PATH)/comm/xl/bin/mpixlcxx_r
@@ -35,26 +35,17 @@
 
  LD=$(CXX)
 
- DFLAGS += -DPRINTALL -DUSE_JAGGEMM -DUSE_ESSL_FFT -DUSE_CSTDIO_LFS \
+ DFLAGS += -DPRINTALL -DUSE_FFTW3 -DUSE_FFTW3_THREADS -DUSE_JAGGEMM -DUSE_CSTDIO_LFS \
 	-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DHPM -DUSE_XERCES -DXERCESC_3
  
- INCLUDE = -I$(ESSLDIR)/include -I$(XERCESCDIR)
+ INCLUDE = -I$(FFTW3DIR)/include -I$(ESSLDIR)/include -I$(XERCESCDIR)
  
  CXXFLAGS= -g -O3 -qarch=qp -DUSE_MPI -DSCALAPACK -D$(PLT) $(INCLUDE) $(DFLAGS)
  CFLAGS= -qhot=novector -qsimd=auto -g -O3 -DUSE_MPI -DSCALAPACK -D$(PLT) $(INCLUDE) $(DFLAGS)
 
  LIBPATH = -L$(LAPACKDIR) -L$(BLASDIR) -L$(ESSLDIR)/lib -L/opt/ibmcmp/xlsmp/bg/3.1/bglib64 \
 	-L/opt/ibmcmp/xlf/bg/14.1/bglib64 -L$(XERCESCLIBDIR)
- LIBS =  $(SCALAPACKLIB) $(JAGGEMMLIB) -lesslsmpbg -lblas -llapack -lxlf90_r -lxlsmp -lxlfmath $(HPMLIBS) -lxerces-c
+ LIBS =  $(SCALAPACKLIB) $(JAGGEMMLIB) $(FFTWLIB) -lesslsmpbg -lblas -llapack -lxlf90_r -lxlsmp -lxlfmath $(HPMLIBS) -lxerces-c
  LDFLAGS = $(LIBPATH) $(LIBS) -qarch=qp -lc -lnss_files -lnss_dns -lresolv
-
-#TAUROOTDIR = $(LIBHOME)/tau/tau-2.21.2
-#ifneq (,$(findstring DTAU,$(DFLAGS)))
-#        include  $(TAUROOTDIR)/include/Makefile
-#        CXXFLAGS+=$(TAU_INCLUDE) $(TAU_DEFS)
-#       LIBS+=$(TAU_MPI_LIBS) $(TAU_LIBS)                                                                      #            
-#        LDFLAGS+= $(TAU_LIBS)
-#endif
-
 
 #-------------------------------------------------------------------------------

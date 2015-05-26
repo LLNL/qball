@@ -18,11 +18,8 @@
  SCALAPACKLIB  = $(SCALAPACK_DIR)/libscalapack.a
  ESSLDIR = /usr/local/tools/essl/5.1
  HPMLIBS = -L/usr/local/tools/mpitrace/lib -lmpihpm_smp -L/bgsys/drivers/ppcfloor/bgpm/lib -lbgpm
- ###JAGGEMMLIB = $(LIBHOME)/jaggemm_opt/libjaggemm.a
-# JAGGEMMLIB = $(LIBHOME)/jaggemm_opt/tweak-040915/libjaggemm.a
+# JAGGEMMLIB = $(LIBHOME)/jaggemm_opt/libjaggemm.a
  JAGGEMMLIB = $(LIBHOME)/jaggemm_opt/flexiSafe-042115/libjaggemm.a
- #CTFDIR = $(LIBHOME)/ctf-latest/cyclopstf
- #CTFLIB = -L$(LIBHOME)/lib -lcyclopstf.jag
  XERCESCDIR=$(HOME)/software/xml/xerces-c-3.1.1-bgq/src
  XERCESCLIBDIR=$(XERCESCDIR)/.libs
  XERCESLIB=$(XERCESCLIBDIR)/libxerces-c.a
@@ -35,7 +32,7 @@
 
  LD=$(CXX)
 
- DFLAGS += -DPRINTALL -DUSE_JAGGEMM -DUSE_ESSL_FFT -DUSE_CSTDIO_LFS \
+ DFLAGS += -DPRINTALL -DUSE_ESSL_FFT -DUSE_JAGGEMM -DUSE_CSTDIO_LFS \
 	-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DHPM -DUSE_XERCES -DXERCESC_3
  
  INCLUDE = -I$(ESSLDIR)/include -I$(XERCESCDIR)
@@ -47,14 +44,5 @@
 	-L/opt/ibmcmp/xlf/bg/14.1/bglib64 -L$(XERCESCLIBDIR)
  LIBS =  $(SCALAPACKLIB) $(JAGGEMMLIB) -lesslsmpbg -lblas -llapack -lxlf90_r -lxlsmp -lxlfmath $(HPMLIBS) -lxerces-c
  LDFLAGS = $(LIBPATH) $(LIBS) -qarch=qp -lc -lnss_files -lnss_dns -lresolv
-
-#TAUROOTDIR = $(LIBHOME)/tau/tau-2.21.2
-#ifneq (,$(findstring DTAU,$(DFLAGS)))
-#        include  $(TAUROOTDIR)/include/Makefile
-#        CXXFLAGS+=$(TAU_INCLUDE) $(TAU_DEFS)
-#       LIBS+=$(TAU_MPI_LIBS) $(TAU_LIBS)                                                                      #            
-#        LDFLAGS+= $(TAU_LIBS)
-#endif
-
 
 #-------------------------------------------------------------------------------
