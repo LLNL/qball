@@ -1,4 +1,20 @@
 ------------------------------------------------------------------------
+r208 | draeger | 2016-02-26 14:09:16 -0800 (Fri, 26 Feb 2016) | 3 lines
+
+Removed some debugging code and disabled some ultrasoft debugging print statements.
+
+
+------------------------------------------------------------------------
+r207 | draeger | 2015-06-18 08:50:02 -0700 (Thu, 18 Jun 2015) | 3 lines
+
+Added Cray make files, used to build code on Cielito with both Cray and Intel compilers.
+
+
+------------------------------------------------------------------------
+r206 | draeger | 2015-05-26 13:06:21 -0700 (Tue, 26 May 2015) | 1 line
+
+
+------------------------------------------------------------------------
 r205 | draeger | 2015-05-26 13:06:02 -0700 (Tue, 26 May 2015) | 3 lines
 
 Updated FourierTransform with latest code from Davis version 1.61.0, which includes support for FFTW3.  Tested ESM code with water molecule and different FFT libraries and got identical results.
