@@ -1504,9 +1504,6 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
   const double omega_inv = 1.0 / omega;
 
   if (ultrasoft_) {
-    //ewd OPT
-    //sd_.calc_betapsi();  // update betapsi w. latest wf
-    //ewd NO-OPT
     tmap["usnl_calcbpsi"].start();
     sd_.calc_betapsi();  // update betapsi w. latest wf
     tmap["usnl_calcbpsi"].stop();
@@ -2006,10 +2003,6 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
           dgemm(&ct,&cn,&nprnaloc,(int*)&nstloc,&twongwl,&one,
                 &anl_loc_gamma[0],&twongwl, (double*)c, &c_lda,
                 &zero,&fnl_loc_gamma[0],&nprnaloc);
-          //ewd:  this was uncommented prior to 6/15/12, 2:49pm
-          //dgemm(&ct,&cn,&nprnaloc,(int*)&nstloc,&twomloc,&one,
-          //      &anl_loc_gamma[0],&twomloc, (double*)c, &c_lda,
-          //      &zero,&fnl_loc_gamma[0],&nprnaloc);
           tmap["fnl_gemm"].stop();
         }
         else {
@@ -2018,30 +2011,10 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
           complex<double> zone = complex<double>(1.0,0.0);
           char cc='c';
           tmap["fnl_gemm"].start();
-
-          //ewd DEBUG
-          //if (ctxt_.mype() == 0)
-          //   cout << "NLP.ZGEMM1, mype = " << ctxt_.mype() << ", c dims = " << sd_.c().m() << " " << sd_.c().n() << " " << sd_.c().mb() << " " << sd_.c().nb() << " " << sd_.c().mloc() << " " << sd_.c().nloc() << ", anl_loc.size = " << anl_loc.size() << ", fnl_loc.size = " << fnl_loc.size() << ", nstloc = " << nstloc << ", ngwl = " << ngwl << endl;
-          //if (c_lda < ngwl)
-          //   cout << "NLP.ZGEMM3, mype = " << ctxt_.mype() << ", c dims = " << sd_.c().m() << " " << sd_.c().n() << " " << sd_.c().mb() << " " << sd_.c().nb() << " " << sd_.c().mloc() << " " << sd_.c().nloc() << ", anl_loc.size = " << anl_loc.size() << ", fnl_loc.size = " << fnl_loc.size() << ", nstloc = " << nstloc << ", ngwl = " << ngwl << endl;
-             
-          //ewd DEBUG
-          
           zgemm(&cc,&cn,&nprnaloc,(int*)&nstloc,(int*)&ngwl,&zone,
                 &anl_loc[0],(int *)&ngwl, (complex<double> *)c, &c_lda,
                 &zzero,&fnl_loc[0],&nprnaloc);
-          //ewd:  this was uncommented prior to 6/15/12, 2:49pm
-          //zgemm(&cc,&cn,&nprnaloc,(int*)&nstloc,(int*)&mloc,&zone,
-          //      &anl_loc[0],(int *)&mloc, (complex<double> *)c, &c_lda,
-          //      &zzero,&fnl_loc[0],&nprnaloc);
           tmap["fnl_gemm"].stop();
-
-          //ewd DEBUG
-          //MPI_Barrier(MPI_COMM_WORLD);
-          //cout << "NLP.ZGEMM1 done, mype = " << ctxt_.mype() << endl;
-          //ewd DEBUG
-
-
         }
           
         // for k=(0,0,0):  need to correct for double counting of G=0, i.e. if ctxt_.myrow() == 0
@@ -2135,26 +2108,13 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
             dgemm(&cn,&cn,&twongwl,(int*)&nstloc,&nprnaloc,&one,
                   &anl_loc_gamma[0],&twongwl, &fnl_loc_gamma[0],&nprnaloc,
                   &one,(double*)cp, &cp_lda);
-            //ewd:  this was uncommented prior to 6/15/12, 2:49pm
-            //dgemm(&cn,&cn,&twomloc,(int*)&nstloc,&nprnaloc,&one,
-            //      &anl_loc_gamma[0],&twomloc, &fnl_loc_gamma[0],&nprnaloc,
-            //      &one,(double*)cp, &cp_lda);
           }
           else {
             int cp_lda = dsd.c().mloc();
             complex<double> zone = complex<double>(1.0,0.0);
-
-            //ewd DEBUG
-            //cout << "NLP.ZGEMM2, mype = " << ctxt_.mype() << ", c dims = " << dsd.c().m() << " " << dsd.c().n() << " " << dsd.c().mb() << " " << dsd.c().nb() << " " << dsd.c().mloc() << " " << dsd.c().nloc() << ", anl_loc.size = " << anl_loc.size() << ", fnl_loc.size = " << fnl_loc.size() << ", nstloc = " << nstloc << ", ngwl = " << ngwl << endl;
-            //ewd DEBUG
-          
             zgemm(&cn,&cn,(int*)&ngwl,(int*)&nstloc,&nprnaloc,&zone,
                     &anl_loc[0],(int*)&ngwl, &fnl_loc[0],&nprnaloc,
                     &zone,(complex<double>*)cp, &cp_lda);
-            //ewd:  this was uncommented prior to 6/15/12, 2:49pm
-            //zgemm(&cn,&cn,(int*)&mloc,(int*)&nstloc,&nprnaloc,&zone,
-            //      &anl_loc[0],(int*)&mloc, &fnl_loc[0],&nprnaloc,
-            //      &zone,(complex<double>*)cp, &cp_lda);
           }
 
           tmap["enl_hpsi"].stop();
@@ -2235,27 +2195,17 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
               double one=1.0;
               char ct='t';        
               const int twongwl = 2 * ngwl;                                    
-              //ewd:  original code
               dgemm(&ct,&cn,(int*)&nprnaloc,(int*)&nstloc,(int*)&twongwl,&one, 
                     &anl_loc_gamma[0],(int*)&twongwl, (double*)c,(int*)&c_lda,       
                     &zero,&dfnl_loc_gamma[0],(int*)&nprnaloc);
-              //ewd:  this "fix" may actually be a bug, comment it out (10/1/2012)
-              //dgemm(&ct,&cn,(int*)&nprnaloc,(int*)&nstloc,(int*)&twomloc,&one, 
-              //      &anl_loc_gamma[0],(int*)&twomloc, (double*)c,(int*)&c_lda,       
-              //      &zero,&dfnl_loc_gamma[0],(int*)&nprnaloc);
             }
             else {
               complex<double> zzero = complex<double>(0.0,0.0);
               complex<double> zone = complex<double>(1.0,0.0);
               char cc='c';
-              //ewd:  original code
               zgemm(&cc,&cn,(int*)&nprnaloc,(int*)&nstloc,(int*)&ngwl,&zone, 
                     &anl_loc[0],(int*)&ngwl, (complex<double> *)c,(int*)&c_lda,       
                     &zzero,&dfnl_loc[0],(int*)&nprnaloc);                       
-              //ewd:  this "fix" may actually be a bug, comment it out (10/1/2012)
-              //zgemm(&cc,&cn,(int*)&nprnaloc,(int*)&nstloc,(int*)&mloc,&zone, 
-              //      &anl_loc[0],(int*)&mloc, (complex<double> *)c,(int*)&c_lda,       
-              //      &zzero,&dfnl_loc[0],(int*)&nprnaloc);                       
             }
 
             // Note: no need to correct for double counting of the           
@@ -2550,10 +2500,6 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
               dgemm(&ct,&cn,(int*)&nprnaloc,(int*)&nstloc,(int*)&twongwl,&one,  
                     &anl_loc_gamma[0],(int*)&twongwl, (double*)c,(int*)&c_lda,        
                     &zero,&dfnl_loc_gamma[0],(int*)&nprnaloc);                        
-              //ewd:  this "fix" may actually be a bug, comment it out (10/1/2012)
-              //dgemm(&ct,&cn,(int*)&nprnaloc,(int*)&nstloc,(int*)&twomloc,&one,  
-              //      &anl_loc_gamma[0],(int*)&twomloc, (double*)c,(int*)&c_lda,        
-              //      &zero,&dfnl_loc_gamma[0],(int*)&nprnaloc);                        
             }
             else {
               complex<double> zzero = complex<double>(0.0,0.0);
@@ -2562,10 +2508,6 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
               zgemm(&cc,&cn,(int*)&nprnaloc,(int*)&nstloc,(int*)&ngwl,&zone, 
                     &anl_loc[0],(int*)&ngwl, (complex<double> *)c,(int*)&c_lda,       
                     &zzero,&dfnl_loc[0],(int*)&nprnaloc);                       
-              //ewd:  this "fix" may actually be a bug, comment it out (10/1/2012)
-              //zgemm(&cc,&cn,(int*)&nprnaloc,(int*)&nstloc,(int*)&mloc,&zone, 
-              //      &anl_loc[0],(int*)&mloc, (complex<double> *)c,(int*)&c_lda,       
-              //      &zzero,&dfnl_loc[0],(int*)&nprnaloc);                       
             }
 
             // Note: no need to correct for double counting of the            

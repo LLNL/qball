@@ -151,7 +151,7 @@ void SlaterDet::init_usfns(AtomSet* atoms) {
       atoms_->usloc_nat_t[is] = atoms_->usloc_atind_t[is].size();
 
       //ewd DEBUG
-#ifdef PRINTALL
+#if 0
       if (ctxt_.mype() == 0)
          cout << "SD.init_usfns, species " << is << ", nbetalm = " << nbetalm << ", naloc = " << atoms_->usloc_nat[is] << ", naloc_t = " << atoms_->usloc_nat_t[is] << endl;
 #endif
@@ -170,7 +170,7 @@ void SlaterDet::init_usfns(AtomSet* atoms) {
       betag_[is]->resize(m,ntot,mb,nloc);
 
       //ewd DEBUG
-#ifdef PRINTALL
+#if 0
       if (ctxt_.mype() == 0)
          cout << "SD.init_usfns, species " << is << " betag matrix size = " << m << " x " << ntot << ", local size = " << mb << " x " << nloc << endl;
 #endif
@@ -2093,7 +2093,7 @@ void SlaterDet::calc_betapsi(void) {
       betapsi_[is]->resize(bg->n(),c_.n(),bg->nb(),c_.nb());
 
       //ewd DEBUG
-#ifdef PRINTALL
+#if 0
       if (ctxt_.mype() == 0)
          cout << "SD.calc_betapsi, species " << is << " betapsi matrix size = " << betapsi_[is]->m() << " x " << betapsi_[is]->n() << ", local size = " << betapsi_[is]->mloc() << " x " << betapsi_[is]->nloc() << endl;
 #endif
@@ -2111,14 +2111,14 @@ void SlaterDet::calc_betapsi(void) {
         }
 
       //ewd DEBUG
-#ifdef PRINTALL
+#if 0
       if (ctxt_.mype() == 0)
          cout << "SD.calc_betapsi, species " << is << ", calling gemm of betag (" << bg->m() << " x " << bg->n() << ", " << bg->mloc() << " x " << bg->nloc() << ") and c (" << c_.m() << " x " << c_.n() << ", " << c_.mloc() << " x " << c_.nloc() << ")" << endl;
 #endif
 
 
         betapsi_[is]->gemm('c','n',2.0,*bg,c_,0.0);
-#ifdef PRINTALL
+#if 0
       if (ctxt_.mype() == 0)
          cout << "SD.calc_betapsi, species " << is << ", betapsi gemm finished." << endl;
 #endif
@@ -2132,13 +2132,13 @@ void SlaterDet::calc_betapsi(void) {
       }
       else {
       //ewd DEBUG
-#ifdef PRINTALL
+#if 0
       if (ctxt_.mype() == 0)
          cout << "SD.calc_betapsi, species " << is << ", calling gemm of betag (" << bg->m() << " x " << bg->n() << ", " << bg->mloc() << " x " << bg->nloc() << ") and c (" << c_.m() << " x " << c_.n() << ", " << c_.mloc() << " x " << c_.nloc() << ")" << endl;
 #endif
       
         betapsi_[is]->gemm('c','n',1.0,*bg,c_,0.0);
-#ifdef PRINTALL
+#if 0
       if (ctxt_.mype() == 0)
          cout << "SD.calc_betapsi, species " << is << ", betapsi gemm finished." << endl;
 #endif
@@ -2195,13 +2195,13 @@ void SlaterDet::calc_betapsi(void) {
                 bgsfp[lm*bg_mloc+ig] = bgp[lm*bg_mloc+ig]*complex<double>(ckpgr[ig],-skpgr[ig]);
           }
       //ewd DEBUG
-#ifdef PRINTALL
+#if 0
       if (ctxt_.mype() == 0)
          cout << "SD.calc_betapsi, species " << is << ", ibl = " << ibl << ", calling gemm of bgsf (" << bgsf.m() << " x " << bgsf.n() << ", " << bgsf.mloc() << " x " << bgsf.nloc() << ") and c (" << c_.m() << " x " << c_.n() << ", " << c_.mloc() << " x " << c_.nloc() << ")" << endl;
 #endif
       
           bptmp.gemm('c','n',1.0,bgsf,c_,0.0);
-#ifdef PRINTALL
+#if 0
       if (ctxt_.mype() == 0)
          cout << "SD.calc_betapsi, species " << is << ", bptmp gemm finished." << endl;
 #endif
@@ -2440,12 +2440,12 @@ void SlaterDet::calc_spsi() {
           for (int i=0; i<bpsize; i++)
             bpsp[i] = omega_inv*bpsum[i];
         }
-#ifdef PRINTALL
+#if 0
       if (ctxt_.mype() == 0)
          cout << "SD.calc_spsi, species " << is << ", calling gemm of betag (" << betag->m() << " x " << betag->n() << ", " << betag->mloc() << " x " << betag->nloc() << ") and bpsisum (" << bpsisum.m() << " x " << bpsisum.n() << ", " << bpsisum.mloc() << " x " << bpsisum.nloc() << ")" << endl;
 #endif
         spsi_.gemm('n','n',1.0,*betag,bpsisum,1.0);
-#ifdef PRINTALL
+#if 0
       if (ctxt_.mype() == 0)
          cout << "SD.calc_spsi, species " << is << ", spsi gemm finished." << endl;
 #endif
@@ -2513,12 +2513,12 @@ void SlaterDet::calc_spsi() {
             for (int i=0; i<nstloc*nbetalm; i++)
               tbpp[i] = omega_inv*bpsum[i];
           }
-#ifdef PRINTALL
+#if 0
       if (ctxt_.mype() == 0)
          cout << "SD.calc_spsi, species " << is << ", calling gemm of bgsf (" << bgsf.m() << " x " << bgsf.n() << ", " << bgsf.mloc() << " x " << bgsf.nloc() << ") and tbpsum (" << tbpsum.m() << " x " << tbpsum.n() << ", " << tbpsum.mloc() << " x " << tbpsum.nloc() << ")" << endl;
 #endif
           spsi_.gemm('n','n',1.0,bgsf,tbpsum,1.0);
-#ifdef PRINTALL
+#if 0
       if (ctxt_.mype() == 0)
          cout << "SD.calc_spsi, species " << is << ", spsi gemm finished." << endl;
 #endif
