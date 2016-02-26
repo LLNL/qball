@@ -49,7 +49,7 @@ class HubbardU : public Var
     if ( argc != 4 )
     {
       if ( ui->oncoutpe() )
-        cout << " <ERROR> use:  set hubbard_u [species] [U (eV)] [orbital l local] </ERROR>" << endl;
+        cout << " <ERROR> use:  set hubbard_u [species] [U (Ha)] [orbital l local] </ERROR>" << endl;
       return 1;
     }
 

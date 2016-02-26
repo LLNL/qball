@@ -551,7 +551,8 @@ double HubbardPotential::energy(bool compute_hpsi, Wavefunction& dwf)
 
             // compute DFT+U occupation numbers for localized Hubbard wf orbitals
             // n(m1,m2,I) = SUM_states occ(istate) conj(proj(istate,I,m1)) * proj(istate,I,m2)
-            for ( int ia_block = 0; ia_block < na_blocks; ia_block++ ) {
+            for ( int ia_block = 0; ia_block < na_blocks; ia_block++ )
+            {
               // process projectors of atoms in block ia_block             
 
               const int iastart = ia_block * na_block_size;                
@@ -697,7 +698,7 @@ double HubbardPotential::energy(bool compute_hpsi, Wavefunction& dwf)
                           const double sdocc = occ[n + nbase];
                           const int i1 = ia + m1*ia_block_size + n * nlmnaloc;           
                           const int i2 = ia + m2*ia_block_size + n * nlmnaloc;           
-                          hub_occ[ispin][is][ia][m1][m2] += wt * sdocc * hubproj_loc_gamma[kloc][i1] * hubproj_loc_gamma[kloc][i2];
+                          hub_occ[ispin][is][ia+iastart][m1][m2] += wt * sdocc * hubproj_loc_gamma[kloc][i1] * hubproj_loc_gamma[kloc][i2];
                         }
                       }
                       else {
@@ -705,7 +706,7 @@ double HubbardPotential::energy(bool compute_hpsi, Wavefunction& dwf)
                           const double sdocc = occ[n + nbase];                        
                           const int i1 = ia + m1*ia_block_size + n * nlmnaloc;
                           const int i2 = ia + m2*ia_block_size + n * nlmnaloc;
-                          hub_occ[ispin][is][ia][m1][m2] += wt * sdocc * real(conj(hubproj_loc[kloc][i1])*hubproj_loc[kloc][i2]);
+                          hub_occ[ispin][is][ia+iastart][m1][m2] += wt * sdocc * real(conj(hubproj_loc[kloc][i1])*hubproj_loc[kloc][i2]);
                         }
                       }
                     }
