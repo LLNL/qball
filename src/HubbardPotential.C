@@ -187,7 +187,8 @@ void HubbardPotential::update_phiylm(void) {
         for ( int is = 0; is < nsp; is++ ) {
           Species *s = atoms_.species_list[is];
 
-          if ( hub_l_[is] == 0 ) {
+          if ( hub_l_[is] == 0 )
+          {
             // fill phiylm with phi_g*Y_lm at basis set vectors
 
             double *p0 = &phiylm[ispin][kloc][is][0];
@@ -634,19 +635,11 @@ double HubbardPotential::energy(bool compute_hpsi, Wavefunction& dwf)
               int nlmnaloc = ia_block_size * lmsize_[is]; 
               int c_lda;
               const complex<double>* cp = c.cvalptr();
-        
               if (basis_.real()) {
                 c_lda = 2*c.mloc();                                        
                 dgemm(&ct,&cn,&nlmnaloc,(int*)&nstloc,&twongwl,&one,
                       &wfhubloc_gamma[kloc][0],&twongwl, (double*)cp, &c_lda,
                       &zero,&hubproj_loc_gamma[kloc][0],&nlmnaloc);
-
-
-                //ewd DEBUG
-                if (false && ctxt_.mype()==0)
-                   for (int ii=0; ii<100; ii++)
-                      cout << "HUBPROJ1, ii = " << ii << ", hubproj_loc_gamma = " << hubproj_loc_gamma[kloc][0] << endl;
-                
               }
               else {
                 c_lda = c.mloc();                                        
@@ -669,13 +662,6 @@ double HubbardPotential::energy(bool compute_hpsi, Wavefunction& dwf)
                   double alpha = -0.5;                                               
                   dger(&nlmnaloc,(int*)&nstloc,&alpha,&wfhubloc_gamma[kloc][0],&twongwl,
                        (double*)cp,&c_lda,&hubproj_loc_gamma[kloc][0],&nlmnaloc);
-
-                //ewd DEBUG
-                if (false && ctxt_.mype()==0)
-                   for (int ii=0; ii<100; ii++)
-                      cout << "HUBPROJ2, ii = " << ii << ", hubproj_loc_gamma = " << hubproj_loc_gamma[kloc][0] << endl;
-
-
                 }
               }
               
@@ -713,12 +699,6 @@ double HubbardPotential::energy(bool compute_hpsi, Wavefunction& dwf)
                           const int i1 = ia + m1*ia_block_size + n * nlmnaloc;           
                           const int i2 = ia + m2*ia_block_size + n * nlmnaloc;           
                           hub_occ[ispin][is][ia+iastart][m1][m2] += wt * sdocc * hubproj_loc_gamma[kloc][i1] * hubproj_loc_gamma[kloc][i2];
-
-                          //ewd DEBUG
-                          if (false && ctxt_.mype()==0)
-                             cout << "HUBLOC1, mype = " << ctxt_.mype() << ", wt = " << wt << ", ia = " << ia << ", m1 = " << m1 << ", m2 = " << m2 << ", n = " << n << ", nlmna = " << nlmnaloc << ", i1 = " << i1 << ", sdocc = " << sdocc << ", hubproj1 = " << hubproj_loc_gamma[kloc][i1] << ", hubproj2 = " << hubproj_loc_gamma[kloc][i2] << ", hub_occ = " << hub_occ[ispin][is][ia+iastart][m1][m2] << endl;
-
-                          
                         }
                       }
                       else {

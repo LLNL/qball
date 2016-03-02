@@ -1703,4 +1703,10 @@ void Species::set_hubbard_u(double uval, int lval)
     if (ctxt_.oncoutpe()) 
       cout << "<WARNING> Species::set_hubbard_u: hubbard_l > lmax for species " << name_ << "! </WARNING>" << endl;
     
+  if (lval == llocal_)
+  {
+    if (ctxt_.oncoutpe()) 
+      cout << "<ERROR> Species::set_hubbard_u: hubbard_l = llocal for species " << name_ << "! This is not currently supported.</ERROR>" << endl;
+    MPI_Abort(MPI_COMM_WORLD, 2);
+  }
 }
