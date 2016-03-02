@@ -7,4 +7,4 @@ set wf_dyn PSD
 set ecutprec 4
 set wf_diag T
 randomize_wf
-run 0 80
+run 0 200

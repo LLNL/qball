@@ -10,13 +10,14 @@ ExtraFile: H_HSCV_PBE-1.0.xml
 Input: hydrogen.inp
 
 
-match ; ekin    ; GREPFIELD(out, '<ekin>',   2) ;  0.37849725
+match ; ekin    ; GREPFIELD(out, '<ekin>',   2) ;  0.36677394
 match ; econf   ; GREPFIELD(out, '<econf>',  2) ;  0.00000000
-match ; eps     ; GREPFIELD(out, '<eps>',    2) ; -0.31677868
+match ; eps     ; GREPFIELD(out, '<eps>',    2) ; -0.33052529
 match ; enl     ; GREPFIELD(out, '<enl>',    2) ;  0.00000000
-match ; ecoul   ; GREPFIELD(out, '<ecoul>',  2) ; -0.26249982
-match ; exc     ; GREPFIELD(out, '<exc>',    2) ; -0.23793307
+match ; ecoul   ; GREPFIELD(out, '<ecoul>',  2) ; -0.23498029
+match ; exc     ; GREPFIELD(out, '<exc>',    2) ; -0.23536847
 match ; esr     ; GREPFIELD(out, '<esr>',    2) ;  0.00000000
-match ; eself   ; GREPFIELD(out, '<eself>',  2) ;  0.26596152
+match ; eself   ; GREPFIELD(out, '<eself>',  2) ;  0.24178320
 match ; ets     ; GREPFIELD(out, '<ets>',    2) ;  0.00000000
-match ; etotal  ; GREPFIELD(out, '<etotal>', 2) ; -0.43871432
+match ; etotal  ; GREPFIELD(out, '<etotal>', 2) ; -0.43410012
+
