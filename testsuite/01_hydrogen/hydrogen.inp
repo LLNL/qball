@@ -1,0 +1,10 @@
+set cell 20 0 0 0 20 0 0 0 20
+species hydrogen H_HSCV_PBE-1.0.xml
+atom H hydrogen 0.0 0.0 0.0
+set xc PBE
+set ecut 10
+set wf_dyn PSD
+set ecutprec 4
+set wf_diag T
+randomize_wf
+run 0 80
