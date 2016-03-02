@@ -63,7 +63,7 @@ class HubbardU : public Var
       int isp = s->atoms.isp(species);
       s->atoms.species_list[isp]->set_hubbard_u(uval,lval);
       if ( ui->oncoutpe() )
-        cout << "<!-- Hubbard U = " << uval << " Hartree, l = " << lval << " for species " << species << " -->" << endl;
+        cout << "<!-- Hubbard U = " << uval << " Hartree, l = " << lval << " for species " << isp << ", " << species << " -->" << endl;
 
       // reinitialize to force computation of hubbard terms
       double rcps = s->atoms.species_list[isp]->rcps();
