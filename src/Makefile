@@ -176,7 +176,7 @@ xmlextract: xmlextract.o
 	rm -f $(OBJDIR)/libqb.a
 	rm -f $(OBJDIR)/libqblink-$(ARCH).a
 	rm -rf $(OBJDIR)/qblink.tmp.*
-	rmdir $(OBJDIR)
+	-rmdir $(OBJDIR)
 	rm -f .depend_$(ARCH)
 
 #------------------------------------------------------------------------------
