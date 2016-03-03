@@ -413,6 +413,23 @@ while ($_ = <TESTSUITE>) {
       elsif ( $_ =~ /^ExtraFile\s*:\s*(.*)\s*$/) {
 	$file_cp = dirname($opt_f)."/".$1;
 	$cp_return = system("cp $file_cp $workdir/");
+      } 
+
+      elsif ( $_ =~ /^Reference\s*:\s*(.*)\s*$/) {
+	printf "%-40s%s", " Comparison with reference values", ":";
+	$reference_file = dirname($opt_f)."/".$1;
+	$diff_cmd = dirname($opt_f)."/../xmldiff.py";
+	$diff_return = system("$diff_cmd $reference_file $workdir/out > $workdir/diff.out");
+	if($diff_return == 0){
+	  printf "\t [ $color_start{green}  OK  $color_end{green} ] \n";
+	} else {
+	  printf "\t [ $color_start{red} FAIL $color_end{red} ] \n";
+	  $test_succeeded = 0;
+	  $failures++;
+	  print "This is the report:\n\n";
+	  system("cat $workdir/diff.out");
+	  
+	}
       }
 
       elsif ( $_ =~ /^match/ ) {

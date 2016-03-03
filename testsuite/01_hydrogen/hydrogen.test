@@ -6,9 +6,9 @@ Program    : qb
 TestGroups : short-run
 Enabled    : Yes
 
-ExtraFile: H_HSCV_PBE-1.0.xml
-Input: hydrogen.inp
-
+ExtraFile  : H_HSCV_PBE-1.0.xml
+Input      : hydrogen.inp
+Reference  : hydrogen.xml
 
 match ; ekin    ; GREPFIELD(out, '<ekin>',   2) ;  0.36677394
 match ; econf   ; GREPFIELD(out, '<econf>',  2) ;  0.00000000
