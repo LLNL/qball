@@ -1,0 +1,11 @@
+set cell 15 0 0 0 15 0 0 0 15
+species nitrogen N_HSCV_LDA-1.0.xml
+atom N1 nitrogen  3.0 0.0 0.0
+atom N1 nitrogen -3.0 0.0 0.0
+set ecut 12
+set atoms_dyn SDA
+set wf_dyn PSD
+set ecutprec 4
+set wf_diag T
+randomize_wf
+run 20 80

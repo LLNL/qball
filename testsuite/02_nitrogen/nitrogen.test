@@ -1,0 +1,11 @@
+# -*- coding: utf-8 mode: shell-script -*-
+# $Id: 01-carbon_atom.test 13244 2015-02-28 23:19:28Z dstrubbe $
+
+Test       : Nitrogen
+Program    : qb
+TestGroups : short-run
+Enabled    : Yes
+
+ExtraFile  : N_HSCV_LDA-1.0.xml
+Input      : nitrogen.inp
+Reference  : nitrogen.xml
