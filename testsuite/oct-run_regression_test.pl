@@ -418,8 +418,9 @@ while ($_ = <TESTSUITE>) {
       elsif ( $_ =~ /^Reference\s*:\s*(.*)\s*$/) {
 	printf "%-40s%s", " Comparison with reference values", ":";
 	$reference_file = dirname($opt_f)."/".$1;
-	$diff_cmd = dirname($opt_f)."/../xmldiff.py";
-	$diff_return = system("$diff_cmd $reference_file $workdir/out > $workdir/diff.out");
+	$diff_cmd = "$exec_directory/qbdiff"."-".$ENV{'ARCH'}." $reference_file $workdir/out";
+#	print "Executing: " . $diff_cmd . "\n";
+	$diff_return = system("$diff_cmd > $workdir/diff.out");
 	if($diff_return == 0){
 	  printf "\t [ $color_start{green}  OK  $color_end{green} ] \n";
 	} else {
