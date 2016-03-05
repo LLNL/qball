@@ -47,13 +47,15 @@ endif
 
 OBJDIR = objs-$(ARCH)
 EXENAME = qb-$(ARCH)
+QBDIFF = qbdiff-$(ARCH)
+
 CXXFLAGS += -DARCH='"$(ARCH)"'
 
 INSTALLDIR = /usr/apps/qbox
 EXEINSTALL = qb@ll-$(VERSION)
 NRUNSINSTALL = qb@ll-nruns-$(VERSION)
 
-DEFAULT: $(EXENAME)
+DEFAULT: $(EXENAME) $(QBDIFF)
 
 $(OBJDIR)/%.o: %.C
 	$(CXX) $(CXXFLAGS) -o $@ -c $^
@@ -108,6 +110,9 @@ endif
 
 lib:   $(OBJDIR)/qb.o $(QBOBJS)
 	$(AR) cr $(OBJDIR)/libqb.a $^
+
+qbdiff-$(ARCH): makedirs $(OBJDIR)/qbdiff.o
+	$(LD) -o qbdiff-$(ARCH) $(OBJDIR)/qbdiff.o $(LDFLAGS)
 
 qb-nruns: makedirs $(OBJDIR)/qb-nruns.o link
 	$(LD) -o qb-nruns-$(ARCH) $(OBJDIR)/qb-nruns.o $(OBJDIR)/libqblink-$(ARCH).a $(LDFLAGS)
