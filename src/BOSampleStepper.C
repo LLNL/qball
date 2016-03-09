@@ -1361,7 +1361,7 @@ void BOSampleStepper::step(int niter)
                {
                   cout.setf(ios::fixed,ios::floatfield);
                   cout.setf(ios::right,ios::adjustfield);
-                  cout << "  <etotal_int> " << setw(15) << setprecision(8)
+                  cout << "  <etotal_int scf_iter=\"" << itscf << "\"> " << setw(15) << setprecision(8)
                        << energy << " </etotal_int>\n";
                   if ( compute_stress )
                   {
