@@ -1,0 +1,22 @@
+# -*- coding: utf-8 mode: shell-script -*-
+# $Id: 01-carbon_atom.test 13244 2015-02-28 23:19:28Z dstrubbe $
+
+Test       : Fullerene
+Program    : qb
+TestGroups : long-run
+Enabled    : Yes
+
+ExtraFile  : C_HSCV_PBE-1.0.xml
+Input      : fullerene.inp
+Reference  : fullerene.xml
+
+match ; ekin    ; GREPFIELD(out, '<ekin>',   2) ;  207.46275991
+match ; econf   ; GREPFIELD(out, '<econf>',  2) ;    0.00000000
+match ; eps     ; GREPFIELD(out, '<eps>',    2) ; -266.13491757 
+match ; enl     ; GREPFIELD(out, '<enl>',    2) ;   50.10534798
+match ; ecoul   ; GREPFIELD(out, '<ecoul>',  2) ; -213.68728400 
+match ; exc     ; GREPFIELD(out, '<exc>',    2) ; -102.66414562
+match ; esr     ; GREPFIELD(out, '<esr>',    2) ;   39.60654236
+match ; eself   ; GREPFIELD(out, '<eself>',  2) ;  255.32305946
+match ; ets     ; GREPFIELD(out, '<ets>',    2) ;    0.00000000
+match ; etotal  ; GREPFIELD(out, '<etotal>', 2) ; -324.91823931
