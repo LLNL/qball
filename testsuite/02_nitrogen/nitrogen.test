@@ -6,6 +6,7 @@ Program    : qb
 TestGroups : short-run
 Enabled    : Yes
 
+Processors : 4
 ExtraFile  : N_HSCV_LDA-1.0.xml
 Input      : nitrogen.inp
 Reference  : nitrogen.xml
