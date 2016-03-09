@@ -1,10 +1,11 @@
-SUBDIRS = 01_hydrogen 02_nitrogen
-
-.PHONY: check all $(SUBDIRS)
+.PHONY: all check check-short check-long
 
 all:
-check: $(SUBDIRS)
+check:
+	local_run=yes ./oct-run_testsuite.sh -g short-run,long-run
 
-$(SUBDIRS):
-	$(MAKE) -C $@ check
+check-short:
+	local_run=yes ./oct-run_testsuite.sh -g short-run
 
+check-long:
+	local_run=yes ./oct-run_testsuite.sh -g long-run
