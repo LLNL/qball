@@ -97,7 +97,7 @@ char *UserInterface::readCmd(char *s, int max, istream &fp, bool echo)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-void UserInterface::processCmds ( istream &cmdstream, char *prompt, bool echo )
+void UserInterface::processCmds ( istream &cmdstream, char *prompt, bool echo, bool interactive)
 {
   // read and process commands from cmdstream until end of file is reached
 
@@ -207,7 +207,13 @@ void UserInterface::processCmds ( istream &cmdstream, char *prompt, bool echo )
         if ( cmdptr )
         {
           ctxt_.barrier();
-          cmdptr->action(ac,av);
+          int rv = cmdptr->action(ac,av);
+	  if(!interactive && rv != 0){
+#if USE_MPI
+	    MPI_Abort(ctxt_.comm(), rv);
+#endif
+	    exit(rv);
+	  }
           ctxt_.barrier();
         }
         else

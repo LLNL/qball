@@ -131,7 +131,7 @@ class UserInterface
     }
   };
 
-  void processCmds(istream &cmdstream, char *prompt, bool echo);
+  void processCmds(istream &cmdstream, char *prompt, bool echo, bool interactive = true);
   
   void terminate(void) { terminate_ = true; };
 

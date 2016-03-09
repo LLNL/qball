@@ -426,7 +426,7 @@ int main(int argc, char **argv, char **envp)
     {
       in.open(argv[1],ios::in);
     }
-    ui->processCmds(in, "[qbox]", echo);
+    ui->processCmds(in, "[qbox]", echo, /*interactive =*/ false);
   }
   else
   {
