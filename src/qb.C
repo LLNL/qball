@@ -177,6 +177,16 @@ extern "C" int setup_grid();
 
 int main(int argc, char **argv, char **envp)
 {
+  
+  //Check command line arguments for -c (print configuration options)
+  if ( argc == 2 && argv[1] == string("-c") ){
+#if USE_MPI
+    cout << "mpi ";
+#endif
+    cout << endl;
+    return 0;
+  }
+
   Timer tm;
   tm.start();
 
