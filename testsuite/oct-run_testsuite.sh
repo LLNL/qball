@@ -240,7 +240,7 @@ done
 shift $[ OPTIND - 1 ]
 
 echo "*****************************"
-echo "  Running octopus testsuite  "
+echo "  Running qb@ll testsuite  "
 echo "*****************************"
 echo
 echo " Note: Running the testsuite can take from several minutes"
@@ -260,7 +260,7 @@ fi
 if [ -z $OCT_TEST_NJOBS ] ; then
 
     echo
-    echo " The environment variable OCT_TEST_NJOBS is not set. Octopus"
+    echo " The environment variable OCT_TEST_NJOBS is not set. qb@ll"
     echo " will determine automatically an appropriate number of jobs:"
     echo
     
@@ -293,7 +293,7 @@ if [ -z $OCT_TEST_NJOBS ] ; then
 	fi
     fi
     
-    options=" "`$bin_directory/octopus -c`" "
+    options=" "`$bin_directory/qb-$ARCH -c`" "
     if [[ $options =~ " mpi " ]]; then
 	OCT_TEST_NJOBS=$(($OCT_TEST_NJOBS/4))
 	echo "  - This is an MPI run. Each job can use up to 4 processors."
