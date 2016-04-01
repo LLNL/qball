@@ -1,11 +1,13 @@
 ////////////////////////////////////////////////////////////////////////////////  
-// Copyright (c) 2013, Lawrence Livermore National Security, LLC. 
+// Copyright (c) 2013-2016, Lawrence Livermore National Security, LLC. 
 // qb@ll:  Qbox at Lawrence Livermore
 //
 // This file is part of qb@ll.
 //
 // Produced at the Lawrence Livermore National Laboratory. 
-// Written by Erik Draeger (draeger1@llnl.gov) and Francois Gygi (fgygi@ucdavis.edu).
+// Written by Erik Draeger (draeger1@llnl.gov) and Francois Gygi (fgygi@ucdavis.edu)
+// and Xavier Andrade (xavier@tddft.org).
+//
 // Based on the Qbox code by Francois Gygi Copyright (c) 2008 
 // LLNL-CODE-635376. All rights reserved. 
 //
@@ -50,6 +52,49 @@ using namespace xercesc;
 #include <sys/stat.h>
 #endif
 
+class Tag{
+
+public:
+  Tag(const string & tag){
+    tag_ = tag;
+  }
+
+  const string & name() const {
+    return tag_;
+  }
+  
+  string start() const {
+    return "<" + tag_ + ">";
+  }
+  
+  string end() const {
+    return "</" + tag_ + ">";
+  }
+
+  string get(const string & buf) const {
+
+    string::size_type pos = 0;
+
+    string::size_type start_pos = buf.find(start(), pos);
+
+    assert(start_pos != string::npos );
+    
+    start_pos = buf.find(">", start_pos)+1;
+
+    string::size_type end_pos = buf.find(end());
+
+    pos = buf.find(">", end_pos) + 1;
+
+    string::size_type len = end_pos - start_pos;
+    
+    return buf.substr(start_pos, len);
+  }
+  
+private:
+  string tag_;
+  
+};
+
 ////////////////////////////////////////////////////////////////////////////////
 SpeciesReader::SpeciesReader(const Context& ctxt) : ctxt_(ctxt) {}
 
@@ -88,32 +133,27 @@ void SpeciesReader::readSpecies (Species& sp, const string uri)
 
     //ewd:  determine type of pseudopotential
     bool ultrasoft = false;
-    tag = "ultrasoft_pseudopotential";
-    start_tag = string("<") + tag + string(">");
-    start = buf.find(start_tag,pos);
-    if (start != string::npos) 
-      ultrasoft = true;
-    sp.usoft_ = ultrasoft;
-    if (ultrasoft) 
-      cout << "  <!-- SpeciesReader::readSpecies: potential type:  ultrasoft -->" << endl;
-    else 
-      cout << "  <!-- SpeciesReader::readSpecies: potential type:  norm-conserving -->" << endl;
-    
-    tag = "description";
-    start_tag = string("<") + tag + string(">");
-    end_tag = string("</") + tag + string(">");
-    start = buf.find(start_tag,pos);
-    assert(start != string::npos );
-    start = buf.find(">",start)+1;
-    end = buf.find(end_tag);
-    pos = buf.find(">",end)+1;
-    len = end - start;
- 
-    sp.description_ = buf.substr(start,len);
-    cout << "  <!-- SpeciesReader::readSpecies: read " << tag << " "
-         << sp.description_
-         << " -->" << endl;
 
+    {
+      Tag tag("ultrasoft_pseudopotential");
+      start = buf.find(tag.start(), pos);
+      if (start != string::npos) 
+	ultrasoft = true;
+      sp.usoft_ = ultrasoft;
+      if (ultrasoft) 
+	cout << "  <!-- SpeciesReader::readSpecies: potential type:  ultrasoft -->" << endl;
+      else 
+	cout << "  <!-- SpeciesReader::readSpecies: potential type:  norm-conserving -->" << endl;
+    }
+
+    {
+      Tag tag("description");
+      sp.description_ = tag.get(buf);
+      cout << "  <!-- SpeciesReader::readSpecies: read " << tag.name() << " "
+	   << sp.description_
+	   << " -->" << endl;
+    }
+    
     tag = "symbol";
     start_tag = string("<") + tag + string(">");
     end_tag = string("</") + tag + string(">");
