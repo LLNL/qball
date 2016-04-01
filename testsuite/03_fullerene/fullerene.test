@@ -6,6 +6,8 @@ Program    : qb
 TestGroups : long-run
 Enabled    : Yes
 
+Processors : 4
+
 ExtraFile  : C_HSCV_PBE-1.0.xml
 Input      : fullerene.inp
 Reference  : fullerene.xml
