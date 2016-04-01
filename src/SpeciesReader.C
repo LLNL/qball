@@ -93,7 +93,7 @@ void SpeciesReader::readSpecies (Species& sp, const string uri)
     bool ultrasoft = false;
 
     {
-      Tag tag("ultrasoft_pseudopotential");
+      XMLFile::Tag tag("ultrasoft_pseudopotential");
       start = buf.find(tag.start(), pos);
       if (start != string::npos) 
 	ultrasoft = true;
@@ -105,7 +105,7 @@ void SpeciesReader::readSpecies (Species& sp, const string uri)
     }
 
     {
-      Tag tag("description");
+      XMLFile::Tag tag("description");
       sp.description_ = tag.text(buf);
       cout << "  <!-- SpeciesReader::readSpecies: read " << tag.name() << " "
 	   << sp.description_
@@ -113,7 +113,7 @@ void SpeciesReader::readSpecies (Species& sp, const string uri)
     }
 
     {
-      Tag tag("symbol");
+      XMLFile::Tag tag("symbol");
       tag.get_value(buf, sp.symbol_);
       cout << "  <!-- SpeciesReader::readSpecies: read " << tag.name() << " "
 	   << sp.symbol_
@@ -121,7 +121,7 @@ void SpeciesReader::readSpecies (Species& sp, const string uri)
     }
 
     {
-      Tag tag("atomic_number");
+      XMLFile::Tag tag("atomic_number");
       tag.get_value(buf, sp.atomic_number_);
       cout << "  <!-- SpeciesReader::readSpecies: read " << tag.name() << " "
 	   << sp.atomic_number_
@@ -129,7 +129,7 @@ void SpeciesReader::readSpecies (Species& sp, const string uri)
     }
 
     {
-      Tag tag("mass");
+      XMLFile::Tag tag("mass");
       tag.get_value(buf, sp.mass_);
       cout << "  <!-- SpeciesReader::readSpecies: read " << tag.name() << " "
 	   << sp.mass_
@@ -137,7 +137,7 @@ void SpeciesReader::readSpecies (Species& sp, const string uri)
     }
 
     {
-      Tag tag("valence_charge");
+      XMLFile::Tag tag("valence_charge");
       tag.get_value(buf, sp.zval_);
       cout << "  <!-- SpeciesReader::readSpecies: read " << tag.name() << " "
 	   << sp.zval_
@@ -145,7 +145,7 @@ void SpeciesReader::readSpecies (Species& sp, const string uri)
     }
 
     {
-      Tag tag("lmax");
+      XMLFile::Tag tag("lmax");
       tag.get_value(buf, sp.lmax_);
       cout << "  <!-- SpeciesReader::readSpecies: read " << tag.name() << " "
 	   << sp.lmax_

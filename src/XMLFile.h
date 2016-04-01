@@ -30,53 +30,62 @@
 #include <string>
 #include <iostream>
 
-class Tag{
+class XMLFile {
 
 public:
-  Tag(const std::string & tag){
-    tag_ = tag;
-  }
-
-  const std::string & name() const {
-    return tag_;
-  }
   
-  std::string start() const {
-    return "<" + tag_ + ">";
-  }
+  class Tag{
+
+  public:
+    Tag(const std::string & tag){
+      tag_ = tag;
+    }
+
+    const std::string & name() const {
+      return tag_;
+    }
   
-  std::string end() const {
-    return "</" + tag_ + ">";
-  }
+    std::string start() const {
+      return "<" + tag_ + ">";
+    }
+  
+    std::string end() const {
+      return "</" + tag_ + ">";
+    }
 
-  std::string text(const std::string & buf) const {
+    std::string text(const std::string & buf) const {
 
-    std::string::size_type pos = 0;
+      std::string::size_type pos = 0;
 
-    std::string::size_type start_pos = buf.find(start(), pos);
+      std::string::size_type start_pos = buf.find(start(), pos);
 
-    assert(start_pos != std::string::npos );
+      assert(start_pos != std::string::npos );
     
-    start_pos = buf.find(">", start_pos)+1;
+      start_pos = buf.find(">", start_pos)+1;
 
-    std::string::size_type end_pos = buf.find(end());
+      std::string::size_type end_pos = buf.find(end());
 
-    pos = buf.find(">", end_pos) + 1;
+      pos = buf.find(">", end_pos) + 1;
 
-    std::string::size_type len = end_pos - start_pos;
+      std::string::size_type len = end_pos - start_pos;
     
-    return buf.substr(start_pos, len);
-  }
+      return buf.substr(start_pos, len);
+    }
 
-  template <typename Type>
-  void get_value(const std::string & buf, Type & value) const {
-    istd::stringstream stst(text(buf));
-    stst >> value;
-  }
+    template <typename Type>
+    void get_value(const std::string & buf, Type & value) const {
+      std::istringstream stst(text(buf));
+      stst >> value;
+    }
   
+  private:
+    std::string tag_;
+  
+  };
+
 private:
-  std::string tag_;
   
+
 };
 
 // Local Variables:
