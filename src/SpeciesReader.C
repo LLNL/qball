@@ -71,7 +71,7 @@ public:
     return "</" + tag_ + ">";
   }
 
-  string get(const string & buf) const {
+  string text(const string & buf) const {
 
     string::size_type pos = 0;
 
@@ -88,6 +88,12 @@ public:
     string::size_type len = end_pos - start_pos;
     
     return buf.substr(start_pos, len);
+  }
+
+  template <typename Type>
+  void get_value(const string & buf, Type & value) const {
+    istringstream stst(text(buf));
+    stst >> value;
   }
   
 private:
@@ -148,97 +154,52 @@ void SpeciesReader::readSpecies (Species& sp, const string uri)
 
     {
       Tag tag("description");
-      sp.description_ = tag.get(buf);
+      sp.description_ = tag.text(buf);
       cout << "  <!-- SpeciesReader::readSpecies: read " << tag.name() << " "
 	   << sp.description_
 	   << " -->" << endl;
     }
-    
-    tag = "symbol";
-    start_tag = string("<") + tag + string(">");
-    end_tag = string("</") + tag + string(">");
-    start = buf.find(start_tag,pos);
-    assert(start != string::npos );
-    start = buf.find(">",start)+1;
-    end = buf.find(end_tag);
-    pos = buf.find(">",end)+1;
-    len = end - start;
-    {
-      istringstream stst(buf.substr(start,len));
-      stst >> sp.symbol_;
-    }
-    cout << "  <!-- SpeciesReader::readSpecies: read " << tag << " "
-         << sp.symbol_
-         << " -->" << endl;
- 
-    tag = "atomic_number";
-    start_tag = string("<") + tag + string(">");
-    end_tag = string("</") + tag + string(">");
-    start = buf.find(start_tag,pos);
-    assert(start != string::npos );
-    start = buf.find(">",start)+1;
-    end = buf.find(end_tag);
-    pos = buf.find(">",end)+1;
-    len = end - start;
-    {
-      istringstream stst(buf.substr(start,len));
-      stst >> sp.atomic_number_;
-    }
-    cout << "  <!-- SpeciesReader::readSpecies: read " << tag << " "
-         << sp.atomic_number_
-         << " -->" << endl;
- 
-    tag = "mass";
-    start_tag = string("<") + tag + string(">");
-    end_tag = string("</") + tag + string(">");
-    start = buf.find(start_tag,pos);
-    assert(start != string::npos );
-    start = buf.find(">",start)+1;
-    end = buf.find(end_tag);
-    pos = buf.find(">",end)+1;
-    len = end - start;
-    {
-      istringstream stst(buf.substr(start,len));
-      stst >> sp.mass_;
-    }
-    cout << "  <!-- SpeciesReader::readSpecies: read " << tag << " "
-         << sp.mass_
-         << " -->" << endl;
 
-    tag = "valence_charge";
-    start_tag = string("<") + tag + string(">");
-    end_tag = string("</") + tag + string(">");
-    start = buf.find(start_tag,pos);
-    assert(start != string::npos );
-    start = buf.find(">",start)+1;
-    end = buf.find(end_tag);
-    pos = buf.find(">",end)+1;
-    len = end - start;
     {
-      istringstream stst(buf.substr(start,len));
-      stst >> sp.zval_;
+      Tag tag("symbol");
+      tag.get_value(buf, sp.symbol_);
+      cout << "  <!-- SpeciesReader::readSpecies: read " << tag.name() << " "
+	   << sp.symbol_
+	   << " -->" << endl;
     }
-    cout << "  <!-- SpeciesReader::readSpecies: read " << tag << " "
-         << sp.zval_
-         << " -->" << endl;
- 
-    tag = "lmax";
-    start_tag = string("<") + tag + string(">");
-    end_tag = string("</") + tag + string(">");
-    start = buf.find(start_tag,pos);
-    assert(start != string::npos );
-    start = buf.find(">",start)+1;
-    end = buf.find(end_tag);
-    pos = buf.find(">",end)+1;
-    len = end - start;
+
     {
-      istringstream stst(buf.substr(start,len));
-      stst >> sp.lmax_;
+      Tag tag("atomic_number");
+      tag.get_value(buf, sp.atomic_number_);
+      cout << "  <!-- SpeciesReader::readSpecies: read " << tag.name() << " "
+	   << sp.atomic_number_
+	   << " -->" << endl;
     }
-    cout << "  <!-- SpeciesReader::readSpecies: read " << tag << " "
-         << sp.lmax_
-         << " -->" << endl;
- 
+
+    {
+      Tag tag("mass");
+      tag.get_value(buf, sp.mass_);
+      cout << "  <!-- SpeciesReader::readSpecies: read " << tag.name() << " "
+	   << sp.mass_
+	   << " -->" << endl;
+    }
+
+    {
+      Tag tag("valence_charge");
+      tag.get_value(buf, sp.zval_);
+      cout << "  <!-- SpeciesReader::readSpecies: read " << tag.name() << " "
+	   << sp.zval_
+	   << " -->" << endl;
+    }
+
+    {
+      Tag tag("lmax");
+      tag.get_value(buf, sp.lmax_);
+      cout << "  <!-- SpeciesReader::readSpecies: read " << tag.name() << " "
+	   << sp.lmax_
+	   << " -->" << endl;
+    }
+    
     if (!ultrasoft) { 
       tag = "llocal";
       start_tag = string("<") + tag + string(">");
