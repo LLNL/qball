@@ -1,0 +1,17 @@
+set cell 25 0 0 0 25 0 0 0 25
+species carbon carbon.xml
+atom H carbon 0.0 0.0 0.0
+set xc PBE
+set ecut 12
+set wf_dyn PSDA
+set ecutprec 4
+
+set nempty 4
+set fermi_temp 1000
+set threshold_scf 1.E-6 10
+set wf_diag T
+
+randomize_wf
+
+run 0 500 5
+
