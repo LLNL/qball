@@ -30,6 +30,7 @@
 
 #include "Species.h"
 #include "SpeciesReader.h"
+#include "XMLFile.h"
 #include <cassert>
 #include <string>
 #include <iostream>
@@ -51,55 +52,6 @@ using namespace xercesc;
 #include <cstdio>
 #include <sys/stat.h>
 #endif
-
-class Tag{
-
-public:
-  Tag(const string & tag){
-    tag_ = tag;
-  }
-
-  const string & name() const {
-    return tag_;
-  }
-  
-  string start() const {
-    return "<" + tag_ + ">";
-  }
-  
-  string end() const {
-    return "</" + tag_ + ">";
-  }
-
-  string text(const string & buf) const {
-
-    string::size_type pos = 0;
-
-    string::size_type start_pos = buf.find(start(), pos);
-
-    assert(start_pos != string::npos );
-    
-    start_pos = buf.find(">", start_pos)+1;
-
-    string::size_type end_pos = buf.find(end());
-
-    pos = buf.find(">", end_pos) + 1;
-
-    string::size_type len = end_pos - start_pos;
-    
-    return buf.substr(start_pos, len);
-  }
-
-  template <typename Type>
-  void get_value(const string & buf, Type & value) const {
-    istringstream stst(text(buf));
-    stst >> value;
-  }
-  
-private:
-  string tag_;
-  
-};
 
 ////////////////////////////////////////////////////////////////////////////////
 SpeciesReader::SpeciesReader(const Context& ctxt) : ctxt_(ctxt) {}
