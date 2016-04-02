@@ -56,7 +56,7 @@ public:
 
     std::string text() const {
 
-      assert(tag_pos_ != std::string::npos);
+      if(!exists()) error();
     
       std::string::size_type start_pos = xml_file_->buf_.find(">", tag_pos_) + 1;
       std::string::size_type end_pos = xml_file_->buf_.find(end());
@@ -85,10 +85,8 @@ public:
 
     template <typename Type>
     void get_attribute(const std::string & attribute, Type & value) const {
-      
-      assert(tag_pos_ != string::npos );
 
-      std::cout << "ATTT" <<  attribute + "=" << std::endl;
+      if(!exists()) error();
       
       std::string::size_type start_pos = xml_file_->buf_.find(attribute + "=", tag_pos_) + attribute.length() + 2;
       std::string::size_type end_pos = xml_file_->buf_.find("\"", start_pos);
@@ -102,9 +100,14 @@ public:
       //skip to the end of the tag, so we don't read it again
       if(exists()) xml_file_->pos_ = tag_pos_ + tag_.length() + 1;
     }
-    
+   
   private:
 
+    void error() const {
+      std::cerr << "Error: tag \"<" << name() << ">\" not found." << std::endl;
+      exit(1);
+    }
+    
     friend class XMLFile;
 
     Tag(XMLFile * xml_file, const std::string & tag)
