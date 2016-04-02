@@ -47,7 +47,7 @@ public:
     }
   
     std::string start() const {
-      return "<" + tag_ + ">";
+      return "<" + tag_;
     }
   
     std::string end() const {
@@ -56,16 +56,10 @@ public:
 
     std::string text() const {
 
-      std::string::size_type start_pos = xml_file_->buf_.find(start(), xml_file_->pos_);
-
-      assert(start_pos != std::string::npos );
+      assert(tag_pos_ != std::string::npos);
     
-      start_pos = xml_file_->buf_.find(">", start_pos)+1;
-
+      std::string::size_type start_pos = xml_file_->buf_.find(">", tag_pos_) + 1;
       std::string::size_type end_pos = xml_file_->buf_.find(end());
-
-      xml_file_->pos_ = xml_file_->buf_.find(">", end_pos) + 1;
-
       std::string::size_type len = end_pos - start_pos;
     
       return xml_file_->buf_.substr(start_pos, len);
@@ -78,8 +72,27 @@ public:
     }
 
     bool exists() const {
-      std::string::size_type start_pos = xml_file_->buf_.find(start(), xml_file_->pos_);
-      return (start_pos != std::string::npos);
+      return (tag_pos_ != std::string::npos);
+    }
+
+    template <typename Type>
+    void get_attribute(const std::string & attribute, Type & value) const {
+      
+      assert(tag_pos_ != string::npos );
+
+      std::cout << "ATTT" <<  attribute + "=" << std::endl;
+      
+      std::string::size_type start_pos = xml_file_->buf_.find(attribute + "=", tag_pos_) + attribute.length() + 2;
+      std::string::size_type end_pos = xml_file_->buf_.find("\"", start_pos);
+      std::string::size_type len = end_pos - start_pos;
+      
+      std::istringstream stst(xml_file_->buf_.substr(start_pos, len));
+      stst >> value;
+    }    
+
+    ~Tag(){
+      //skip to the end of the tag, so we don't read it again
+      if(exists()) xml_file_->pos_ = tag_pos_ + tag_.length() + 1;
     }
     
   private:
@@ -88,15 +101,21 @@ public:
 
     Tag(XMLFile * xml_file, const std::string & tag)
       : xml_file_(xml_file), tag_(tag){
+      tag_pos_ = xml_file_->buf_.find(start(), xml_file_->pos_);
     }
-    
+
     XMLFile * xml_file_;
     std::string tag_;
-  
+    std::string::size_type tag_pos_;
+ 
   };
 
   Tag next_tag(const std::string & tag) {
     return Tag(this, tag);
+  }
+
+  void reset() {
+    pos_ = 0.0;
   }
   
 private:

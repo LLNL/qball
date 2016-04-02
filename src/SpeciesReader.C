@@ -104,6 +104,8 @@ void SpeciesReader::readSpecies (Species& sp, const string uri)
 	cout << "  <!-- SpeciesReader::readSpecies: potential type:  norm-conserving -->" << endl;
     }
 
+    xml_file.reset();
+    
     {
       XMLFile::Tag tag = xml_file.next_tag("description");
       sp.description_ = tag.text();
@@ -153,131 +155,66 @@ void SpeciesReader::readSpecies (Species& sp, const string uri)
     }
     
     if (!ultrasoft) { 
-      tag = "llocal";
-      start_tag = string("<") + tag + string(">");
-      end_tag = string("</") + tag + string(">");
-      start = buf.find(start_tag,pos);
-      assert(start != string::npos );
-      start = buf.find(">",start)+1;
-      end = buf.find(end_tag);
-      pos = buf.find(">",end)+1;
-      len = end - start;
       {
-        istringstream stst(buf.substr(start,len));
-        stst >> sp.llocal_;
+	XMLFile::Tag tag = xml_file.next_tag("llocal");
+        tag.get_value(sp.llocal_);
+	cout << "  <!-- SpeciesReader::readSpecies: read " << tag.name() << " "
+	     << sp.llocal_
+	     << " -->" << endl;
       }
-      cout << "  <!-- SpeciesReader::readSpecies: read " << tag << " "
-           << sp.llocal_
-           << " -->" << endl;
- 
-      tag = "nquad";
-      start_tag = string("<") + tag + string(">");
-      end_tag = string("</") + tag + string(">");
-      start = buf.find(start_tag,pos);
-      assert(start != string::npos );
-      start = buf.find(">",start)+1;
-      end = buf.find(end_tag);
-      pos = buf.find(">",end)+1;
-      len = end - start;
+
       {
-        istringstream stst(buf.substr(start,len));
-        stst >> sp.nquad_;
+	XMLFile::Tag tag = xml_file.next_tag("nquad");
+	tag.get_value(sp.nquad_);
+	cout << "  <!-- SpeciesReader::readSpecies: read " << tag.name() << " "
+	     << sp.nquad_
+	     << " -->" << endl;
       }
-      cout << "  <!-- SpeciesReader::readSpecies: read " << tag << " "
-           << sp.nquad_
-           << " -->" << endl;
- 
-      tag = "rquad";
-      start_tag = string("<") + tag + string(">");
-      end_tag = string("</") + tag + string(">");
-      start = buf.find(start_tag,pos);
-      assert(start != string::npos );
-      start = buf.find(">",start)+1;
-      end = buf.find(end_tag);
-      pos = buf.find(">",end)+1;
-      len = end - start;
+
       {
-        istringstream stst(buf.substr(start,len));
-        stst >> sp.rquad_;
+	XMLFile::Tag tag = xml_file.next_tag("rquad");
+	tag.get_value(sp.rquad_);
+	cout << "  <!-- SpeciesReader::readSpecies: read " << tag.name() << " "
+	     << sp.rquad_
+	     << " -->" << endl;
       }
-      cout << "  <!-- SpeciesReader::readSpecies: read " << tag << " "
-           << sp.rquad_
-           << " -->" << endl;
+    }
+
+    {
+      XMLFile::Tag tag = xml_file.next_tag("mesh_spacing");
+      tag.get_value(sp.deltar_);
+      cout << "  <!-- SpeciesReader::readSpecies: read " << tag.name() << " "
+	   << sp.deltar_
+	   << " -->" << endl;
     }
     
-    tag = "mesh_spacing";
-    start_tag = string("<") + tag + string(">");
-    end_tag = string("</") + tag + string(">");
-    start = buf.find(start_tag,pos);
-    assert(start != string::npos );
-    start = buf.find(">",start)+1;
-    end = buf.find(end_tag);
-    pos = buf.find(">",end)+1;
-    len = end - start;
-    {
-      istringstream stst(buf.substr(start,len));
-      stst >> sp.deltar_;
-    }
-    cout << "  <!-- SpeciesReader::readSpecies: read " << tag << " "
-         << sp.deltar_
-         << " -->" << endl;
-
-    if (ultrasoft) { 
-      tag = "nbeta";
-      start_tag = string("<") + tag + string(">");
-      end_tag = string("</") + tag + string(">");
-      start = buf.find(start_tag,pos);
-      assert(start != string::npos );
-      start = buf.find(">",start)+1;
-      end = buf.find(end_tag);
-      pos = buf.find(">",end)+1;
-      len = end - start;
-      {
-        istringstream stst(buf.substr(start,len));
-        stst >> sp.nbeta_;
-      }
-      cout << "  <!-- SpeciesReader::readSpecies: read " << tag << " "
-           << sp.nbeta_
-           << " -->" << endl;
+    if (ultrasoft) {
+      XMLFile::Tag tag = xml_file.next_tag("nbeta");
+      tag.get_value(sp.nbeta_);
+      cout << "  <!-- SpeciesReader::readSpecies: read " << tag.name() << " "
+	   << sp.nbeta_
+	   << " -->" << endl;
     }
 
     if (!ultrasoft) { 
       for ( int l = 0; l < sp.lmax_ + 1; l++ )
       {
-        // read projector
-        int size;
-        tag = "projector";
-        start_tag = string("<") + tag;
-        start = buf.find(start_tag,pos);
-        assert(start != string::npos );
- 
-        pos = buf.find("l=",pos)+3;
-        start = pos;
-        end = buf.find("\"",start);
-        len = end - start;
-      
-        {
-          istringstream stst(buf.substr(start,len));
-          int lread;
-          stst >> lread;
-          //cout << " lread=" << lread << endl;
-          //cout << " l=" << l << endl;
-          assert(l==lread);
-        }
- 
-        pos = buf.find("size=",pos)+6;
-        start = pos;
-        end = buf.find("\"",start);
-        len = end - start;
-        {
-          istringstream stst(buf.substr(start,len));
-          stst >> size;
-          // cout << " size=" << size << endl;
-        }
-        // read radial potential
-        sp.vps_.resize(sp.vps_.size()+1);
-        sp.vps_[l].resize(size);
- 
+	std::cout << "L = " << l << std::endl;
+	int size;
+	{
+	  // read projector
+	  XMLFile::Tag tag = xml_file.next_tag("projector");
+	  int lread;
+	  tag.get_attribute("l", lread);
+	  assert(l == lread);
+
+	  tag.get_attribute("size", size);
+
+	  // read radial potential
+	  sp.vps_.resize(sp.vps_.size() + 1);
+	  sp.vps_[l].resize(size);
+	}
+	
         tag = "radial_potential";
         start_tag = string("<") + tag + string(">");
         end_tag = string("</") + tag + string(">");
