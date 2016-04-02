@@ -229,40 +229,17 @@ void SpeciesReader::readSpecies (Species& sp, const string uri)
  
         if ( l != sp.llocal_ )
         {
-           tag = "radial_function";
-           start_tag = string("<") + tag + string(">");
-           end_tag = string("</") + tag + string(">");
-           start = buf.find(start_tag,pos);
-
-        /*
-        if ( l != sp.llocal_ )
-        {
-          // if l is not the local potential, there must be a radial function
-          assert(start != string::npos );
-        }
-        */
-        
-           if ( start != string::npos )
-           {
-              start = buf.find(">",start)+1;
-              end = buf.find(end_tag,start);
-              pos = buf.find(">",end)+1;
-              len = end - start;
-              {
-                 istringstream stst(buf.substr(start,len));
-                 for ( int i = 0; i < size; i++ )
-                 {
-                    stst >> sp.phi_[l][i];
-                    //cout << sp.phi_[l][i] << endl;
-                 }
-              }
-              cout << "  <!-- SpeciesReader::readSpecies: read " << tag << " l="
+	  XMLFile::Tag tag = xml_file.next_tag("radial_function");
+	  if (tag.exists())
+	    {
+              tag.get_value(sp.phi_[l].begin(), sp.phi_[l].begin() + size);
+              cout << "  <!-- SpeciesReader::readSpecies: read " << tag.name() << " l="
                    << l << " size=" << size << " -->" << endl;
-           }
+	    }
         }
         
       }
-      
+
       // read rho_nlcc
       tag = "rho_nlcc";
       start_tag = string("<") + tag;
