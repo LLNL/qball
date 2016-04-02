@@ -240,23 +240,6 @@ void SpeciesReader::readSpecies (Species& sp, const string uri)
         
       }
 
-      {
-      // read rho_nlcc
-	XMLFile::Tag tag = xml_file.next_tag("rho_nlcc");
-	if (tag.exists()) {
-	  int size;
-	  tag.get_attribute("size", size);
-	  
-	  sp.rhor_nlcc_.resize(size);
-	  sp.nlcc_ = true;
-	  cout << "  <!-- SpeciesReader::readSpecies: nlcc found. -->" << endl;
-
-	  tag.get_value(sp.rhor_nlcc_.begin(), sp.rhor_nlcc_.begin() + size);
-
-	  cout << "  <!-- SpeciesReader::readSpecies: read " << tag.name() << " size=" << size << " -->" << endl;
-	}
-      }
-
     }
     else {   // read ultrasoft functions
 
@@ -582,44 +565,23 @@ void SpeciesReader::readSpecies (Species& sp, const string uri)
         }
       }
 
+    }
+
+    {
       // read rho_nlcc
-      tag = "rho_nlcc";
-      start_tag = string("<") + tag;
-      start = buf.find(start_tag,pos);
-      if (start != string::npos ) {
-         pos = buf.find("size=",pos)+6;
-         start = pos;
-         end = buf.find("\"",start);
-         len = end - start;
-         {
-            istringstream stst(buf.substr(start,len));
-            stst >> size;
-         }
-         sp.rhor_nlcc_.resize(size);
-         sp.nlcc_ = true;
-         cout << "  <!-- SpeciesReader::readSpecies: nlcc found. -->" << endl;
-         
-         start_tag = string("<") + tag + string(" size=\"") + oss.str() + string("\"") + string(">");
-         end_tag = string("</") + tag + string(">");
-         pos -= 128;  // back position index up a line or two
-         start = buf.find(start_tag,pos);
-         if ( start != string::npos )
-         {
-            start = buf.find(">",start)+1;
-            end = buf.find(end_tag,start);
-            pos = buf.find(">",end)+1;
-            len = end - start;
-            {
-               istringstream stst(buf.substr(start,len));
-               for ( int i = 0; i < size; i++ )
-               {
-                  stst >> sp.rhor_nlcc_[i];
-               }
-            }
-            cout << "  <!-- SpeciesReader::readSpecies: read " << tag << " size=" << size << " -->" << endl;
-         }
+      XMLFile::Tag tag = xml_file.next_tag("rho_nlcc");
+      if (tag.exists()) {
+	int size;
+	tag.get_attribute("size", size);
+	
+	sp.rhor_nlcc_.resize(size);
+	sp.nlcc_ = true;
+	cout << "  <!-- SpeciesReader::readSpecies: nlcc found. -->" << endl;
+	
+	tag.get_value(sp.rhor_nlcc_.begin(), sp.rhor_nlcc_.begin() + size);
+	
+	cout << "  <!-- SpeciesReader::readSpecies: read " << tag.name() << " size=" << size << " -->" << endl;
       }
-      
     }
     
     sp.uri_ = uri;
