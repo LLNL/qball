@@ -1,0 +1,2871 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+                   ===========================
+                   I qbox qb@LL-r213         I
+                   I                         I
+                   I                         I
+                   I                         I
+                   I                         I
+                   I                         I
+                   I                         I
+                   I                         I
+                   I                         I
+                   I                         I
+                   I                         I
+                   I                         I
+                   I  F.Gygi and E. Draeger  I
+                   I                  LLNL   I
+                   I Copyright (c) 2003-2013 I
+                   ===========================
+
+-->
+<qbox:simulation xmlns:qbox="http://www.quantum-simulation.org/ns/fpmd/fpmd-1.0">
+<release> qb@LL-r213 debian </release>
+<npes> 4 </npes>
+<nthreads> 1 </nthreads>
+<user> xavier </user>
+<sysname> Linux </sysname>
+<nodename> refri </nodename>
+<start_time> 2016-04-02T17:08:41Z </start_time>
+<!-- [qbox] set nrowmax 8 -->
+<WARNING> Wavefunction::set_nrowmax: nrowmax > ctxt_.size(). </WARNING>
+<WARNING> Wavefunction::set_nrowmax: nrowmax > ctxt_.size(). </WARNING>
+<WARNING> Wavefunction::set_nrowmax: nrowmax > ctxt_.size(). </WARNING>
+<WARNING> Wavefunction::set_nrowmax: nrowmax > ctxt_.size(). </WARNING>
+<!-- [qbox] sih4.nlcc.pbe.sys -->
+<!-- [qbox][sih4.nlcc.pbe.sys] set cell 14 0 0 0 14 0 0 0 14 -->
+  <unitcell>
+<unit_cell 
+    a="14.00000000  0.00000000   0.00000000  "
+    b="0.00000000   14.00000000  0.00000000  "
+    c="0.00000000   0.00000000   14.00000000 " />
+  </unitcell>
+<!-- [qbox][sih4.nlcc.pbe.sys] species silicon Si.pbe-n-van.xml 0.707106781188 -->
+  <!-- SpeciesCmd: defining species silicon as Si.pbe-n-van.xml -->
+  <!-- SpeciesReader opening file Si.pbe-n-van.xml size: 649684 -->
+  <!-- SpeciesReader::readSpecies: potential type:  ultrasoft -->
+  <!-- SpeciesReader::readSpecies: read description 
+Translated from UPF format by upf2qso
+Generated using Vanderbilt code, version   7  3  5                              
+Author: unknown    Generation date:   10    6 2004                              
+Automatically converted from original format                                    
+    1        The Pseudo was generated with a Scalar-Relativistic Calculation
+  1.70000000000E+00    Local Potential cutoff radius
+nl pn  l   occ               Rcut            Rcut US             E pseu
+3S  3  0  2.00     10.00000000000      1.70000000000     -0.79473140944
+3P  3  1  2.00     10.00000000000      1.70000000000     -0.29996198285
+SLA PW PBE PBE
+ -->
+  <!-- SpeciesReader::readSpecies: read symbol Si -->
+  <!-- SpeciesReader::readSpecies: read atomic_number 14 -->
+  <!-- SpeciesReader::readSpecies: read mass 28.08550000 -->
+  <!-- SpeciesReader::readSpecies: read valence_charge 4 -->
+  <!-- SpeciesReader::readSpecies: read lmax 2 -->
+  <!-- SpeciesReader::readSpecies: read mesh_spacing 0.00500000 -->
+  <!-- SpeciesReader::readSpecies: read nbeta 6 -->
+  <!-- SpeciesReader::readSpecies: read vlocal size=1401 -->
+  <!-- SpeciesReader::readSpecies: read beta b=0 size=1401 -->
+  <!-- SpeciesReader::readSpecies: read beta b=1 size=1401 -->
+  <!-- SpeciesReader::readSpecies: read beta b=2 size=1401 -->
+  <!-- SpeciesReader::readSpecies: read beta b=3 size=1401 -->
+  <!-- SpeciesReader::readSpecies: read beta b=4 size=1401 -->
+  <!-- SpeciesReader::readSpecies: read beta b=5 size=1401 -->
+  <!-- SpeciesReader::readSpecies: read dnm_zero -->
+  <!-- SpeciesReader::readSpecies: read rinner size=5 -->
+  <!-- SpeciesReader::readSpecies: read qnm q=0 l1=0 l2=0 size=1401 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=0 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=0 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=0 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=0 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=0 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qnm q=1 l1=0 l2=0 size=1401 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=1 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=1 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=1 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=1 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=1 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qnm q=2 l1=0 l2=1 size=1401 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=2 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=2 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=2 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=2 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=2 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qnm q=3 l1=0 l2=1 size=1401 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=3 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=3 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=3 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=3 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=3 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qnm q=4 l1=0 l2=2 size=1401 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=4 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=4 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=4 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=4 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=4 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qnm q=5 l1=0 l2=2 size=1401 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=5 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=5 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=5 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=5 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=5 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qnm q=6 l1=0 l2=0 size=1401 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=6 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=6 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=6 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=6 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=6 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qnm q=7 l1=0 l2=1 size=1401 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=7 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=7 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=7 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=7 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=7 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qnm q=8 l1=0 l2=1 size=1401 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=8 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=8 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=8 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=8 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=8 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qnm q=9 l1=0 l2=2 size=1401 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=9 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=9 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=9 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=9 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=9 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qnm q=10 l1=0 l2=2 size=1401 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=10 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=10 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=10 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=10 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=10 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qnm q=11 l1=1 l2=1 size=1401 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=11 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=11 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=11 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=11 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=11 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qnm q=12 l1=1 l2=1 size=1401 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=12 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=12 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=12 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=12 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=12 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qnm q=13 l1=1 l2=2 size=1401 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=13 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=13 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=13 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=13 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=13 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qnm q=14 l1=1 l2=2 size=1401 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=14 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=14 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=14 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=14 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=14 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qnm q=15 l1=1 l2=1 size=1401 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=15 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=15 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=15 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=15 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=15 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qnm q=16 l1=1 l2=2 size=1401 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=16 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=16 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=16 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=16 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=16 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qnm q=17 l1=1 l2=2 size=1401 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=17 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=17 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=17 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=17 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=17 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qnm q=18 l1=2 l2=2 size=1401 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=18 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=18 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=18 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=18 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=18 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qnm q=19 l1=2 l2=2 size=1401 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=19 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=19 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=19 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=19 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=19 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qnm q=20 l1=2 l2=2 size=1401 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=20 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=20 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=20 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=20 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: read qfcoeff q=20 ltot=0 size=8 -->
+  <!-- SpeciesReader::readSpecies: nlcc found. -->
+  <!-- SpeciesReader::readSpecies: read rho_nlcc size=1401 -->
+<!-- Species silicon:  extending grid to rmax = 40.00000000 to increase vnlg resolution (8192 pts) -->
+SPECIES.ndft = 8192, np = 1401, rmax = 40.96000000, gmax = 628.24183168, hubbard_l = -1
+<!-- [qbox][sih4.nlcc.pbe.sys] species hydrogen H.pbe-rrkjus.xml 0.707106781188 -->
+  <!-- SpeciesCmd: defining species hydrogen as H.pbe-rrkjus.xml -->
+  <!-- SpeciesReader opening file H.pbe-rrkjus.xml size: 66656 -->
+  <!-- SpeciesReader::readSpecies: potential type:  ultrasoft -->
+  <!-- SpeciesReader::readSpecies: read description 
+Translated from UPF format by upf2qso
+Generated using Andrea Dal Corso code (rrkj3)
+Author: Andrea Dal Corso   Generation date: unknown
+Info:   H LDA 1s1 RRKJ3 US
+    0        The Pseudo was generated with a Non-Relativistic Calculation
+  1.10000000000E+00    Local Potential cutoff radius
+nl pn  l   occ               Rcut            Rcut US             E pseu
+1S  1  0  1.00      1.10000000000      1.20000000000      0.00000000000
+1S  1  0  0.00      1.10000000000      1.20000000000      0.00000000000
+2P  2  1  0.00      1.10000000000      1.10000000000      0.00000000000
+SLA PW PBE PBE
+ -->
+  <!-- SpeciesReader::readSpecies: read symbol H -->
+  <!-- SpeciesReader::readSpecies: read atomic_number 1 -->
+  <!-- SpeciesReader::readSpecies: read mass 1.00794000 -->
+  <!-- SpeciesReader::readSpecies: read valence_charge 1 -->
+  <!-- SpeciesReader::readSpecies: read lmax 1 -->
+  <!-- SpeciesReader::readSpecies: read mesh_spacing 0.01000000 -->
+  <!-- SpeciesReader::readSpecies: read nbeta 2 -->
+  <!-- SpeciesReader::readSpecies: read vlocal size=701 -->
+  <!-- SpeciesReader::readSpecies: read beta b=0 size=701 -->
+  <!-- SpeciesReader::readSpecies: read beta b=1 size=701 -->
+  <!-- SpeciesReader::readSpecies: read dnm_zero -->
+  <!-- SpeciesReader::readSpecies: read qnm q=0 l1=0 l2=0 size=701 -->
+  <!-- SpeciesReader::readSpecies: read qnm q=1 l1=0 l2=0 size=701 -->
+  <!-- SpeciesReader::readSpecies: read qnm q=2 l1=0 l2=0 size=701 -->
+<!-- Species hydrogen:  extending grid to rmax = 40.00000000 to increase vnlg resolution (4096 pts) -->
+SPECIES.ndft = 4096, np = 701, rmax = 40.96000000, gmax = 314.08256632, hubbard_l = -1
+<!-- [qbox][sih4.nlcc.pbe.sys] atom Si   silicon      0.00000000   0.00000000   0.00000000  -->
+<!-- [qbox][sih4.nlcc.pbe.sys] atom H1   hydrogen     1.60000000   1.60000000   1.60000000  -->
+<!-- [qbox][sih4.nlcc.pbe.sys] atom H2   hydrogen     1.60000000  -1.60000000  -1.60000000  -->
+<!-- [qbox][sih4.nlcc.pbe.sys] atom H3   hydrogen    -1.60000000   1.60000000  -1.60000000  -->
+<!-- [qbox][sih4.nlcc.pbe.sys] atom H4   hydrogen    -1.60000000  -1.60000000   1.60000000  -->
+<!-- [qbox][sih4.nlcc.pbe.sys]  -->
+<!-- end of command stream -->
+<!-- [qbox] set ecut 30.0 -->
+<!-- [qbox] set wf_dyn PSDA -->
+<!-- [qbox] set xc PBE -->
+<!-- [qbox]  -->
+<!-- [qbox] set ecutprec 8.0 -->
+<!-- [qbox]  -->
+<!-- [qbox] set charge_mix_rcut 5.0 -->
+<!-- [qbox] set charge_mix_coeff 0.8 -->
+<!-- [qbox] #set charge_mixing off -->
+<!-- [qbox]   -->
+<!-- [qbox] randomize_wf -->
+<!-- Randomize_wf_us:  allocating wavefunction... -->
+<!-- Creating SlaterDet context 4x1 from spincontext, ispin = 0 -->
+SlaterDet.resize:  new c dimensions = 7596x4   (1899x4 blocks, local data size on pe 0 = 1899x4) -->
+<!-- Updated occupation of wf -->
+<!-- Randomize_wf_us:  highmem ON -->
+Calling cleanup()
+Calling init_usfns()
+Calling gram()
+<!-- [qbox] run 0 500 -->
+SlaterDet.resize:  new c dimensions = 7596x4   (1899x4 blocks, local data size on pe 0 = 1899x4) -->
+ChargeDensity:  vbasis = 56 56 56, resize to 60 60 60
+  <!-- EnergyFunctional: charge density basis: 61037 plane waves, ngloc = 15247 -->
+  <!-- EnergyFunctional: np0v,np1v,np2v: 60 60 60 -->
+  <!-- EnergyFunctional: vft->np012(): 216000 -->
+<!-- AtomSet.set_rcps:  Ewald width for species silicon = 0.70710678 -->
+<!-- AtomSet.set_rcps:  Ewald width for species hydrogen = 0.70710678 -->
+NonLocalPotential::update_usfns, qnmg_.size = 2607237, nqtot = 171, ngloc = 15247
+NonLocalPotential::update_usfns, qnmg_.size = 45741, nqtot = 3, ngloc = 15247
+<!-- EnergyFunctional:  number of images in real-space ewald sum = 0 for rckj = 1.00000000 -->
+<!-- EnergyFunctional:  number of images in real-space ewald sum = 0 for rckj = 1.00000000 -->
+<!-- EnergyFunctional:  number of images in real-space ewald sum = 0 for rckj = 1.00000000 -->
+NonLocalPotential::update_usfns, qnmg_.size = 2607237, nqtot = 171, ngloc = 15247
+NonLocalPotential::update_usfns, qnmg_.size = 45741, nqtot = 3, ngloc = 15247
+<run niter_ionic="0" niter_scf="500" niter_nonscf="0">
+<wavefunction ecut="15.00000000" nspin="1" nel="8" nempty="0">
+<cell a0="14.000000 0.000000 0.000000"
+      a1="0.000000 14.000000 0.000000"
+      a2="0.000000 0.000000 14.000000"/>
+<reciprocal_lattice b0="0.448799 0.000000 0.000000"
+      b1="0.000000 0.448799 0.000000"
+      b2="0.000000 0.000000 0.448799"/>
+<refcell a0="0.000000 0.000000 0.000000"
+         a1="0.000000 0.000000 0.000000"
+         a2="0.000000 0.000000 0.000000"/>
+<slater_determinant kpoint="0.000000 0.000000 0.000000"  weight="1.000000" size="4">
+ <!-- sdcontext: 4x1 -->
+<grid nx="28" ny="28" nz="28"/>
+ <!-- basis size: 7521 -->
+ <!-- c dimensions: 7596x4   (1899x4 blocks) -->
+ <density_matrix form="diagonal" size="4">
+ </density_matrix>
+</slater_determinant>
+</wavefunction>
+<!-- BOSampleStepper:  fractional occupation not detected. -->
+SlaterDet.resize:  new c dimensions = 7596x4   (1899x4 blocks, local data size on pe 0 = 1899x4) -->
+SlaterDet.resize:  new c dimensions = 7596x4   (1899x4 blocks, local data size on pe 0 = 1899x4) -->
+<iteration count="1">
+<!-- ultrasoft contribution to total charge = -0.603729 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> 33.40162447 </eigenvalue_sum>
+  <etotal_int scf_iter="0">     64.79852455 </etotal_int>
+<!-- ultrasoft contribution to total charge = -0.43150894 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> 24.44245715 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -0.77973870 ( using -0.77973870 ) -->
+  <etotal_int scf_iter="1">     46.68628479 </etotal_int>
+<!-- ultrasoft contribution to total charge = -0.38266782 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> 22.48192902 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 2.44356912 ( using 2.00000000 ) -->
+  <etotal_int scf_iter="2">     42.78760004 </etotal_int>
+<!-- ultrasoft contribution to total charge = -0.08195378 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> 11.23935495 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.24269495 ( using 0.24269495 ) -->
+  <etotal_int scf_iter="3">     20.79990844 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.04526878 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> 5.65837831 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.24386340 ( using 0.24386340 ) -->
+  <etotal_int scf_iter="4">     10.03202346 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.09509177 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> 3.11979241 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.42261849 ( using 0.42261849 ) -->
+  <etotal_int scf_iter="5">      5.05365207 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.13121160 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> 1.55441132 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.44656797 ( using 0.44656797 ) -->
+  <etotal_int scf_iter="6">      1.86110426 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.15973588 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> 0.59442935 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.50337147 ( using 0.50337147 ) -->
+  <etotal_int scf_iter="7">     -0.23646335 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.18234751 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.05028954 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.65165492 ( using 0.65165492 ) -->
+  <etotal_int scf_iter="8">     -1.78730156 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.19882456 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.52057689 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.69049505 ( using 0.69049505 ) -->
+  <etotal_int scf_iter="9">     -3.06567120 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.20602239 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.82370157 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.69248955 ( using 0.69248955 ) -->
+  <etotal_int scf_iter="10">     -4.03383699 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.20331410 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.99895248 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.71743947 ( using 0.71743947 ) -->
+  <etotal_int scf_iter="11">     -4.71106860 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.19205620 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.10091341 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.74421990 ( using 0.74421990 ) -->
+  <etotal_int scf_iter="12">     -5.18173286 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.17430159 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.16494083 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.75089314 ( using 0.75089314 ) -->
+  <etotal_int scf_iter="13">     -5.51211994 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.15299537 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.20946318 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.76934764 ( using 0.76934764 ) -->
+  <etotal_int scf_iter="14">     -5.74368221 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.13075002 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.24440923 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.78763574 ( using 0.78763574 ) -->
+  <etotal_int scf_iter="15">     -5.90941465 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10965870 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.27417611 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.79489039 ( using 0.79489039 ) -->
+  <etotal_int scf_iter="16">     -6.03039462 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.09145859 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.30011421 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.78421913 ( using 0.78421913 ) -->
+  <etotal_int scf_iter="17">     -6.11948890 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.07750609 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.32202129 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.76744994 ( using 0.76744994 ) -->
+  <etotal_int scf_iter="18">     -6.18531442 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.06832226 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.33951513 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.74468135 ( using 0.74468135 ) -->
+  <etotal_int scf_iter="19">     -6.23501820 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.06364289 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.35253301 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.71500229 ( using 0.71500229 ) -->
+  <etotal_int scf_iter="20">     -6.27415632 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.06263709 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.36145082 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.66077672 ( using 0.66077672 ) -->
+  <etotal_int scf_iter="21">     -6.30664134 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.06420602 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.36681956 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.55845256 ( using 0.55845256 ) -->
+  <etotal_int scf_iter="22">     -6.33449209 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.06709016 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.36928231 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.34723052 ( using 0.34723052 ) -->
+  <etotal_int scf_iter="23">     -6.35786773 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.06989820 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.36961533 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -0.15052199 ( using -0.15052199 ) -->
+  <etotal_int scf_iter="24">     -6.37473645 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.07120346 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.36904929 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -2.44690614 ( using 0.00000000 ) -->
+  <etotal_int scf_iter="25">     -6.38126774 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.07281226 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.36871157 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -3.23170365 ( using 0.00000000 ) -->
+  <etotal_int scf_iter="26">     -6.39039521 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.07431825 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.36851168 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -4.93257725 ( using 0.00000000 ) -->
+  <etotal_int scf_iter="27">     -6.39966441 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.07573365 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.36842697 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -6.56148567 ( using 0.00000000 ) -->
+  <etotal_int scf_iter="28">     -6.40913671 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.07706909 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.36843821 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -8.07173032 ( using 0.00000000 ) -->
+  <etotal_int scf_iter="29">     -6.41886553 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.07833385 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.36852898 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -9.43649090 ( using 0.00000000 ) -->
+  <etotal_int scf_iter="30">     -6.42889779 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.07953607 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.36868517 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -10.64419351 ( using 0.00000000 ) -->
+  <etotal_int scf_iter="31">     -6.43927486 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.08068287 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.36889454 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -11.69453017 ( using 0.00000000 ) -->
+  <etotal_int scf_iter="32">     -6.45003310 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.08178051 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.36914642 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -12.59277525 ( using 0.00000000 ) -->
+  <etotal_int scf_iter="33">     -6.46120409 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.08283443 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.36943144 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -13.34631222 ( using 0.00000000 ) -->
+  <etotal_int scf_iter="34">     -6.47281469 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.08384938 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.36974129 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -13.96188393 ( using 0.00000000 ) -->
+  <etotal_int scf_iter="35">     -6.48488689 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.08482943 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.37006855 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -14.44341127 ( using 0.00000000 ) -->
+  <etotal_int scf_iter="36">     -6.49743763 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.08577805 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.37040658 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -14.79214786 ( using 0.00000000 ) -->
+  <etotal_int scf_iter="37">     -6.51047846 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.08669814 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.37074939 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -15.00421260 ( using 0.00000000 ) -->
+  <etotal_int scf_iter="38">     -6.52401519 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.08759208 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.37109159 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -15.07197297 ( using 0.00000000 ) -->
+  <etotal_int scf_iter="39">     -6.53804760 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.08846175 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.37142837 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -14.98237527 ( using 0.00000000 ) -->
+  <etotal_int scf_iter="40">     -6.55256907 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.08930856 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.37175544 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -14.71823567 ( using 0.00000000 ) -->
+  <etotal_int scf_iter="41">     -6.56756635 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.09013353 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.37206907 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -14.25860270 ( using 0.00000000 ) -->
+  <etotal_int scf_iter="42">     -6.58301938 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.09093725 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.37236606 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -13.58083139 ( using 0.00000000 ) -->
+  <etotal_int scf_iter="43">     -6.59890127 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.09171998 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.37264385 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -12.66100563 ( using 0.00000000 ) -->
+  <etotal_int scf_iter="44">     -6.61517835 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.09248167 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.37290049 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -11.47817219 ( using 0.00000000 ) -->
+  <etotal_int scf_iter="45">     -6.63181044 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.09322202 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.37313468 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -10.01770521 ( using 0.00000000 ) -->
+  <etotal_int scf_iter="46">     -6.64875123 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.09394050 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.37334582 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -8.27538665 ( using 0.00000000 ) -->
+  <etotal_int scf_iter="47">     -6.66594887 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.09463643 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.37353402 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -6.26214165 ( using 0.00000000 ) -->
+  <etotal_int scf_iter="48">     -6.68334669 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.09530899 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.37370008 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -4.00707687 ( using 0.00000000 ) -->
+  <etotal_int scf_iter="49">     -6.70088403 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.09595734 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.37384552 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -1.55818058 ( using 0.00000000 ) -->
+  <etotal_int scf_iter="50">     -6.71849730 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.09658060 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.37397248 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 1.01882524 ( using 1.01882524 ) -->
+  <etotal_int scf_iter="51">     -6.73612093 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.09777855 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.37414152 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 2.23441702 ( using 2.00000000 ) -->
+  <etotal_int scf_iter="52">     -6.77150330 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10046084 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.37405080 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 2.10558611 ( using 2.00000000 ) -->
+  <etotal_int scf_iter="53">     -6.85647795 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10454820 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.37385430 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 1.02953080 ( using 1.02953080 ) -->
+  <etotal_int scf_iter="54">     -7.00729059 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10595101 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.38007556 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.27257175 ( using 0.27257175 ) -->
+  <etotal_int scf_iter="55">     -7.09434636 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10593545 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.38400086 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.66228653 ( using 0.66228653 ) -->
+  <etotal_int scf_iter="56">     -7.10541604 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10589253 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.38735975 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.83319522 ( using 0.83319522 ) -->
+  <etotal_int scf_iter="57">     -7.11068045 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10580698 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39062978 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.80053254 ( using 0.80053254 ) -->
+  <etotal_int scf_iter="58">     -7.11400703 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10568143 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39345009 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.87666977 ( using 0.87666977 ) -->
+  <etotal_int scf_iter="59">     -7.11611824 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10551316 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39594767 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.82125387 ( using 0.82125387 ) -->
+  <etotal_int scf_iter="60">     -7.11760021 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10533533 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39784553 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.89122109 ( using 0.89122109 ) -->
+  <etotal_int scf_iter="61">     -7.11864324 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10515273 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39929580 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.83272675 ( using 0.83272675 ) -->
+  <etotal_int scf_iter="62">     -7.11946264 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10499318 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.40018733 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.90509865 ( using 0.90509865 ) -->
+  <etotal_int scf_iter="63">     -7.12012527 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10484910 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.40067512 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.84679906 ( using 0.84679906 ) -->
+  <etotal_int scf_iter="64">     -7.12072236 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10473310 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.40077120 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.92811249 ( using 0.92811249 ) -->
+  <etotal_int scf_iter="65">     -7.12126472 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10463261 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.40059073 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.87575607 ( using 0.87575607 ) -->
+  <etotal_int scf_iter="66">     -7.12179664 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10455381 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.40020530 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.96194893 ( using 0.96194893 ) -->
+  <etotal_int scf_iter="67">     -7.12229863 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10448857 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39967076 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.90446715 ( using 0.90446715 ) -->
+  <etotal_int scf_iter="68">     -7.12279306 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10444324 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39907248 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.97483440 ( using 0.97483440 ) -->
+  <etotal_int scf_iter="69">     -7.12324383 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10441520 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39842802 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.90318744 ( using 0.90318744 ) -->
+  <etotal_int scf_iter="70">     -7.12366106 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10440912 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39781884 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.95499477 ( using 0.95499477 ) -->
+  <etotal_int scf_iter="71">     -7.12401136 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10442378 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39724170 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.87920712 ( using 0.87920712 ) -->
+  <etotal_int scf_iter="72">     -7.12430697 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10445808 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39675336 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.92506566 ( using 0.92506566 ) -->
+  <etotal_int scf_iter="73">     -7.12453522 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10450986 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39633337 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.85576737 ( using 0.85576737 ) -->
+  <etotal_int scf_iter="74">     -7.12471561 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10457250 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39600737 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.90781709 ( using 0.90781709 ) -->
+  <etotal_int scf_iter="75">     -7.12485168 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10464406 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39574786 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.84952087 ( using 0.84952087 ) -->
+  <etotal_int scf_iter="76">     -7.12496147 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10471593 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39556139 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.91304787 ( using 0.91304787 ) -->
+  <etotal_int scf_iter="77">     -7.12505034 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10478807 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39542552 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.86324911 ( using 0.86324911 ) -->
+  <etotal_int scf_iter="78">     -7.12512913 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10485288 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39533991 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.93553920 ( using 0.93553920 ) -->
+  <etotal_int scf_iter="79">     -7.12519906 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10491210 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39529115 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.88601412 ( using 0.88601412 ) -->
+  <etotal_int scf_iter="80">     -7.12526539 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10496019 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39527619 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.95646479 ( using 0.95646479 ) -->
+  <etotal_int scf_iter="81">     -7.12532602 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10499939 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39528832 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.89970056 ( using 0.89970056 ) -->
+  <etotal_int scf_iter="82">     -7.12538345 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10502652 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39532111 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.96007575 ( using 0.96007575 ) -->
+  <etotal_int scf_iter="83">     -7.12543439 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10504378 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39537064 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.89594461 ( using 0.89594461 ) -->
+  <etotal_int scf_iter="84">     -7.12548045 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10505064 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39542727 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.94714524 ( using 0.94714524 ) -->
+  <etotal_int scf_iter="85">     -7.12551907 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10504920 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39548851 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.88161958 ( using 0.88161958 ) -->
+  <etotal_int scf_iter="86">     -7.12555204 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10504111 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39554495 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.93006214 ( using 0.93006214 ) -->
+  <etotal_int scf_iter="87">     -7.12557842 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10502802 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39559653 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.86826801 ( using 0.86826801 ) -->
+  <etotal_int scf_iter="88">     -7.12560023 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10501240 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39563761 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.92052297 ( using 0.92052297 ) -->
+  <etotal_int scf_iter="89">     -7.12561764 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10499493 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39567074 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.86481848 ( using 0.86481848 ) -->
+  <etotal_int scf_iter="90">     -7.12563237 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10497775 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39569434 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.92484145 ( using 0.92484145 ) -->
+  <etotal_int scf_iter="91">     -7.12564472 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10496061 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39571196 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.87438130 ( using 0.87438130 ) -->
+  <etotal_int scf_iter="92">     -7.12565584 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10494500 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39572411 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.94021134 ( using 0.94021134 ) -->
+  <etotal_int scf_iter="93">     -7.12566572 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10493022 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39573376 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.89046961 ( using 0.89046961 ) -->
+  <etotal_int scf_iter="94">     -7.12567499 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10491736 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39574165 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.95542064 ( using 0.95542064 ) -->
+  <etotal_int scf_iter="95">     -7.12568337 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10490573 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39574957 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.90061099 ( using 0.90061099 ) -->
+  <etotal_int scf_iter="96">     -7.12569121 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10489624 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39575748 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.95842729 ( using 0.95842729 ) -->
+  <etotal_int scf_iter="97">     -7.12569812 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10488843 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39576603 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.89759938 ( using 0.89759938 ) -->
+  <etotal_int scf_iter="98">     -7.12570432 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10488299 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39577420 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.94751642 ( using 0.94751642 ) -->
+  <etotal_int scf_iter="99">     -7.12570953 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10487963 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39578180 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.88482047 ( using 0.88482047 ) -->
+  <etotal_int scf_iter="100">     -7.12571398 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10487863 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39578741 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.93220806 ( using 0.93220806 ) -->
+  <etotal_int scf_iter="101">     -7.12571756 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10487976 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39579066 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.87258285 ( using 0.87258285 ) -->
+  <etotal_int scf_iter="102">     -7.12572053 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10488280 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39579064 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.92377376 ( using 0.92377376 ) -->
+  <etotal_int scf_iter="103">     -7.12572293 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10488754 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39578722 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.86958876 ( using 0.86958876 ) -->
+  <etotal_int scf_iter="104">     -7.12572496 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10489339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39578049 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.92743520 ( using 0.92743520 ) -->
+  <etotal_int scf_iter="105">     -7.12572668 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10490023 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39577048 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.87766444 ( using 0.87766444 ) -->
+  <etotal_int scf_iter="106">     -7.12572822 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10490731 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39575812 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.94033727 ( using 0.94033727 ) -->
+  <etotal_int scf_iter="107">     -7.12572959 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10491464 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39574339 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.89070479 ( using 0.89070479 ) -->
+  <etotal_int scf_iter="108">     -7.12573088 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492144 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39572772 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.95319530 ( using 0.95319530 ) -->
+  <etotal_int scf_iter="109">     -7.12573205 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492782 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39571098 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.89982516 ( using 0.89982516 ) -->
+  <etotal_int scf_iter="110">     -7.12573314 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10493312 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39569487 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.95706962 ( using 0.95706962 ) -->
+  <etotal_int scf_iter="111">     -7.12573411 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10493746 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39567920 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.89929734 ( using 0.89929734 ) -->
+  <etotal_int scf_iter="112">     -7.12573500 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10494044 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39566556 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.95056599 ( using 0.95056599 ) -->
+  <etotal_int scf_iter="113">     -7.12573576 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10494221 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39565373 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.89102832 ( using 0.89102832 ) -->
+  <etotal_int scf_iter="114">     -7.12573642 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10494267 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39564482 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.94017982 ( using 0.94017982 ) -->
+  <etotal_int scf_iter="115">     -7.12573697 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10494203 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39563849 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.88230102 ( using 0.88230102 ) -->
+  <etotal_int scf_iter="116">     -7.12573744 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10494046 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39563521 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.93374310 ( using 0.93374310 ) -->
+  <etotal_int scf_iter="117">     -7.12573782 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10493812 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39563457 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.87907154 ( using 0.87907154 ) -->
+  <etotal_int scf_iter="118">     -7.12573815 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10493535 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39563644 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.93426257 ( using 0.93426257 ) -->
+  <etotal_int scf_iter="119">     -7.12573843 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10493222 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39564051 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.88167616 ( using 0.88167616 ) -->
+  <etotal_int scf_iter="120">     -7.12573867 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492911 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39564620 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.93898697 ( using 0.93898697 ) -->
+  <etotal_int scf_iter="121">     -7.12573887 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492600 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39565339 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.88605297 ( using 0.88605297 ) -->
+  <etotal_int scf_iter="122">     -7.12573906 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492323 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39566124 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.94312005 ( using 0.94312005 ) -->
+  <etotal_int scf_iter="123">     -7.12573922 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492075 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39566975 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.88867917 ( using 0.88867917 ) -->
+  <etotal_int scf_iter="124">     -7.12573937 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10491878 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39567802 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.94475615 ( using 0.94475615 ) -->
+  <etotal_int scf_iter="125">     -7.12573950 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10491726 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568614 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.88983728 ( using 0.88983728 ) -->
+  <etotal_int scf_iter="126">     -7.12573962 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10491629 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39569329 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.94595012 ( using 0.94595012 ) -->
+  <etotal_int scf_iter="127">     -7.12573972 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10491580 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39569964 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.89223105 ( using 0.89223105 ) -->
+  <etotal_int scf_iter="128">     -7.12573982 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10491579 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39570461 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.94930743 ( using 0.94930743 ) -->
+  <etotal_int scf_iter="129">     -7.12573990 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10491619 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39570839 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.89652489 ( using 0.89652489 ) -->
+  <etotal_int scf_iter="130">     -7.12573998 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10491692 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39571070 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.95327387 ( using 0.95327387 ) -->
+  <etotal_int scf_iter="131">     -7.12574004 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10491793 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39571171 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.89929401 ( using 0.89929401 ) -->
+  <etotal_int scf_iter="132">     -7.12574010 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10491910 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39571141 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.95270769 ( using 0.95270769 ) -->
+  <etotal_int scf_iter="133">     -7.12574015 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492038 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39570996 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.89572488 ( using 0.89572488 ) -->
+  <etotal_int scf_iter="134">     -7.12574020 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492165 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39570759 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.94462242 ( using 0.94462242 ) -->
+  <etotal_int scf_iter="135">     -7.12574023 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492288 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39570442 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.88559490 ( using 0.88559490 ) -->
+  <etotal_int scf_iter="136">     -7.12574027 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492394 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39570084 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.93247702 ( using 0.93247702 ) -->
+  <etotal_int scf_iter="137">     -7.12574029 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492486 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39569694 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.87523514 ( using 0.87523514 ) -->
+  <etotal_int scf_iter="138">     -7.12574031 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492555 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39569314 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.92530600 ( using 0.92530600 ) -->
+  <etotal_int scf_iter="139">     -7.12574033 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492603 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568944 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.87331986 ( using 0.87331986 ) -->
+  <etotal_int scf_iter="140">     -7.12574035 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492629 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568619 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.93065862 ( using 0.93065862 ) -->
+  <etotal_int scf_iter="141">     -7.12574036 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492637 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568331 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.88391106 ( using 0.88391106 ) -->
+  <etotal_int scf_iter="142">     -7.12574037 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492627 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568102 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.94774388 ( using 0.94774388 ) -->
+  <etotal_int scf_iter="143">     -7.12574038 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492602 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39567923 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.90246604 ( using 0.90246604 ) -->
+  <etotal_int scf_iter="144">     -7.12574039 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492567 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39567805 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.96622588 ( using 0.96622588 ) -->
+  <etotal_int scf_iter="145">     -7.12574041 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492522 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39567739 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.91631965 ( using 0.91631965 ) -->
+  <etotal_int scf_iter="146">     -7.12574042 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492473 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39567728 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.97247421 ( using 0.97247421 ) -->
+  <etotal_int scf_iter="147">     -7.12574042 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492421 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39567766 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.91453075 ( using 0.91453075 ) -->
+  <etotal_int scf_iter="148">     -7.12574043 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492371 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39567846 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.95982273 ( using 0.95982273 ) -->
+  <etotal_int scf_iter="149">     -7.12574044 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492324 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39567962 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.89696771 ( using 0.89696771 ) -->
+  <etotal_int scf_iter="150">     -7.12574045 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492284 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568100 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.93628469 ( using 0.93628469 ) -->
+  <etotal_int scf_iter="151">     -7.12574045 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492252 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568253 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.87532550 ( using 0.87532550 ) -->
+  <etotal_int scf_iter="152">     -7.12574045 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492230 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568405 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.91776956 ( using 0.91776956 ) -->
+  <etotal_int scf_iter="153">     -7.12574046 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492217 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568554 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.86396396 ( using 0.86396396 ) -->
+  <etotal_int scf_iter="154">     -7.12574046 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492212 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568685 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.91651564 ( using 0.91651564 ) -->
+  <etotal_int scf_iter="155">     -7.12574046 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492215 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568801 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.87050598 ( using 0.87050598 ) -->
+  <etotal_int scf_iter="156">     -7.12574046 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492224 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568893 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.93394466 ( using 0.93394466 ) -->
+  <etotal_int scf_iter="157">     -7.12574047 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492238 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568966 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.89160955 ( using 0.89160955 ) -->
+  <etotal_int scf_iter="158">     -7.12574047 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492256 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39569015 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.95989052 ( using 0.95989052 ) -->
+  <etotal_int scf_iter="159">     -7.12574047 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492275 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39569044 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.91455332 ( using 0.91455332 ) -->
+  <etotal_int scf_iter="160">     -7.12574047 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492296 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39569052 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.97758760 ( using 0.97758760 ) -->
+  <etotal_int scf_iter="161">     -7.12574047 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492317 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39569041 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.92401938 ( using 0.92401938 ) -->
+  <etotal_int scf_iter="162">     -7.12574047 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492337 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39569014 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.97482313 ( using 0.97482313 ) -->
+  <etotal_int scf_iter="163">     -7.12574047 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492355 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568973 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.91378539 ( using 0.91378539 ) -->
+  <etotal_int scf_iter="164">     -7.12574047 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492369 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568923 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.95402799 ( using 0.95402799 ) -->
+  <etotal_int scf_iter="165">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492381 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568867 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.89127134 ( using 0.89127134 ) -->
+  <etotal_int scf_iter="166">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492388 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568810 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.92966016 ( using 0.92966016 ) -->
+  <etotal_int scf_iter="167">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492392 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568753 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.87161200 ( using 0.87161200 ) -->
+  <etotal_int scf_iter="168">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492393 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568704 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.91643470 ( using 0.91643470 ) -->
+  <etotal_int scf_iter="169">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492390 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568661 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.86635860 ( using 0.86635860 ) -->
+  <etotal_int scf_iter="170">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492385 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568627 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.92081709 ( using 0.92081709 ) -->
+  <etotal_int scf_iter="171">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492379 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568601 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.87821881 ( using 0.87821881 ) -->
+  <etotal_int scf_iter="172">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492372 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568584 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.93994050 ( using 0.93994050 ) -->
+  <etotal_int scf_iter="173">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492363 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568575 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.89900919 ( using 0.89900919 ) -->
+  <etotal_int scf_iter="174">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492355 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568574 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.96185364 ( using 0.96185364 ) -->
+  <etotal_int scf_iter="175">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492347 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568579 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.91730853 ( using 0.91730853 ) -->
+  <etotal_int scf_iter="176">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492340 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568590 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.97216174 ( using 0.97216174 ) -->
+  <etotal_int scf_iter="177">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492333 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568606 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.92168819 ( using 0.92168819 ) -->
+  <etotal_int scf_iter="178">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492327 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568624 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.96607809 ( using 0.96607809 ) -->
+  <etotal_int scf_iter="179">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492323 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568644 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.91079180 ( using 0.91079180 ) -->
+  <etotal_int scf_iter="180">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492319 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568664 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.94835485 ( using 0.94835485 ) -->
+  <etotal_int scf_iter="181">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492318 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568684 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.89302295 ( using 0.89302295 ) -->
+  <etotal_int scf_iter="182">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492317 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568702 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.93072660 ( using 0.93072660 ) -->
+  <etotal_int scf_iter="183">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492318 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568717 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.87997247 ( using 0.87997247 ) -->
+  <etotal_int scf_iter="184">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492319 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568728 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.92279665 ( using 0.92279665 ) -->
+  <etotal_int scf_iter="185">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492322 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568737 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.87796649 ( using 0.87796649 ) -->
+  <etotal_int scf_iter="186">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492324 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568742 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.92774762 ( using 0.92774762 ) -->
+  <etotal_int scf_iter="187">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492327 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568744 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.88678520 ( using 0.88678520 ) -->
+  <etotal_int scf_iter="188">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492330 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568743 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.94103909 ( using 0.94103909 ) -->
+  <etotal_int scf_iter="189">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492333 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568740 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.90010731 ( using 0.90010731 ) -->
+  <etotal_int scf_iter="190">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492336 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568736 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.95495346 ( using 0.95495346 ) -->
+  <etotal_int scf_iter="191">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568730 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.91039271 ( using 0.91039271 ) -->
+  <etotal_int scf_iter="192">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492341 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568723 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.96136443 ( using 0.96136443 ) -->
+  <etotal_int scf_iter="193">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492343 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568716 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.91277902 ( using 0.91277902 ) -->
+  <etotal_int scf_iter="194">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492345 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568709 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.95848577 ( using 0.95848577 ) -->
+  <etotal_int scf_iter="195">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492346 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568702 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.90760664 ( using 0.90760664 ) -->
+  <etotal_int scf_iter="196">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492346 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568696 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.94970829 ( using 0.94970829 ) -->
+  <etotal_int scf_iter="197">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492347 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568690 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.89903491 ( using 0.89903491 ) -->
+  <etotal_int scf_iter="198">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492346 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568687 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.94081196 ( using 0.94081196 ) -->
+  <etotal_int scf_iter="199">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492346 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568684 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.89207725 ( using 0.89207725 ) -->
+  <etotal_int scf_iter="200">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492345 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568682 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.93571466 ( using 0.93571466 ) -->
+  <etotal_int scf_iter="201">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492344 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568682 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.88926395 ( using 0.88926395 ) -->
+  <etotal_int scf_iter="202">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492343 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568682 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.93547598 ( using 0.93547598 ) -->
+  <etotal_int scf_iter="203">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492342 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568683 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.89061362 ( using 0.89061362 ) -->
+  <etotal_int scf_iter="204">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492341 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568685 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.93892336 ( using 0.93892336 ) -->
+  <etotal_int scf_iter="205">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568687 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.89467217 ( using 0.89467217 ) -->
+  <etotal_int scf_iter="206">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492338 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568690 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.94414804 ( using 0.94414804 ) -->
+  <etotal_int scf_iter="207">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492338 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568692 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.89979137 ( using 0.89979137 ) -->
+  <etotal_int scf_iter="208">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492337 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568695 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.94947272 ( using 0.94947272 ) -->
+  <etotal_int scf_iter="209">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492336 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568697 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.90458299 ( using 0.90458299 ) -->
+  <etotal_int scf_iter="210">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492336 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568699 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.95352203 ( using 0.95352203 ) -->
+  <etotal_int scf_iter="211">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492336 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568701 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.90773658 ( using 0.90773658 ) -->
+  <etotal_int scf_iter="212">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492336 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568702 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.95497117 ( using 0.95497117 ) -->
+  <etotal_int scf_iter="213">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492336 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568703 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.90795035 ( using 0.90795035 ) -->
+  <etotal_int scf_iter="214">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492336 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568704 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.95279813 ( using 0.95279813 ) -->
+  <etotal_int scf_iter="215">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492336 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568704 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.90453267 ( using 0.90453267 ) -->
+  <etotal_int scf_iter="216">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492337 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568704 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.94715945 ( using 0.94715945 ) -->
+  <etotal_int scf_iter="217">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492337 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568704 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.89832224 ( using 0.89832224 ) -->
+  <etotal_int scf_iter="218">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492337 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568703 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.94006399 ( using 0.94006399 ) -->
+  <etotal_int scf_iter="219">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492338 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568702 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.89193745 ( using 0.89193745 ) -->
+  <etotal_int scf_iter="220">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492338 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568702 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.93490631 ( using 0.93490631 ) -->
+  <etotal_int scf_iter="221">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568701 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.88877219 ( using 0.88877219 ) -->
+  <etotal_int scf_iter="222">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568700 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.93483036 ( using 0.93483036 ) -->
+  <etotal_int scf_iter="223">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568699 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.89118192 ( using 0.89118192 ) -->
+  <etotal_int scf_iter="224">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492340 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.94082264 ( using 0.94082264 ) -->
+  <etotal_int scf_iter="225">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492340 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.89887597 ( using 0.89887597 ) -->
+  <etotal_int scf_iter="226">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492340 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568697 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.95062030 ( using 0.95062030 ) -->
+  <etotal_int scf_iter="227">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492340 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568697 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.90845793 ( using 0.90845793 ) -->
+  <etotal_int scf_iter="228">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492340 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568697 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.95927745 ( using 0.95927745 ) -->
+  <etotal_int scf_iter="229">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492340 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568697 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.91475905 ( using 0.91475905 ) -->
+  <etotal_int scf_iter="230">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568697 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.96165447 ( using 0.96165447 ) -->
+  <etotal_int scf_iter="231">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568697 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.91376771 ( using 0.91376771 ) -->
+  <etotal_int scf_iter="232">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568697 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.95571239 ( using 0.95571239 ) -->
+  <etotal_int scf_iter="233">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568697 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.90542865 ( using 0.90542865 ) -->
+  <etotal_int scf_iter="234">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568697 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.94421656 ( using 0.94421656 ) -->
+  <etotal_int scf_iter="235">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.89404501 ( using 0.89404501 ) -->
+  <etotal_int scf_iter="236">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492338 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.93332095 ( using 0.93332095 ) -->
+  <etotal_int scf_iter="237">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492338 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.88584396 ( using 0.88584396 ) -->
+  <etotal_int scf_iter="238">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492338 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.92909373 ( using 0.92909373 ) -->
+  <etotal_int scf_iter="239">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492338 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.88555628 ( using 0.88555628 ) -->
+  <etotal_int scf_iter="240">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492338 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568699 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.93431465 ( using 0.93431465 ) -->
+  <etotal_int scf_iter="241">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492338 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568699 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.89397458 ( using 0.89397458 ) -->
+  <etotal_int scf_iter="242">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492338 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568699 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.94691153 ( using 0.94691153 ) -->
+  <etotal_int scf_iter="243">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492338 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568699 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.90724326 ( using 0.90724326 ) -->
+  <etotal_int scf_iter="244">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492338 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568699 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.96048420 ( using 0.96048420 ) -->
+  <etotal_int scf_iter="245">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492338 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568699 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.91828674 ( using 0.91828674 ) -->
+  <etotal_int scf_iter="246">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492338 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568699 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.96729749 ( using 0.96729749 ) -->
+  <etotal_int scf_iter="247">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492338 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568699 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.92053569 ( using 0.92053569 ) -->
+  <etotal_int scf_iter="248">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568699 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.96291978 ( using 0.96291978 ) -->
+  <etotal_int scf_iter="249">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568699 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.91221017 ( using 0.91221017 ) -->
+  <etotal_int scf_iter="250">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568699 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.94940766 ( using 0.94940766 ) -->
+  <etotal_int scf_iter="251">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568699 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.89779474 ( using 0.89779474 ) -->
+  <etotal_int scf_iter="252">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.93421957 ( using 0.93421957 ) -->
+  <etotal_int scf_iter="253">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.88530135 ( using 0.88530135 ) -->
+  <etotal_int scf_iter="254">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.92574014 ( using 0.92574014 ) -->
+  <etotal_int scf_iter="255">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.88165659 ( using 0.88165659 ) -->
+  <etotal_int scf_iter="256">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.92882315 ( using 0.92882315 ) -->
+  <etotal_int scf_iter="257">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.88925897 ( using 0.88925897 ) -->
+  <etotal_int scf_iter="258">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.94243927 ( using 0.94243927 ) -->
+  <etotal_int scf_iter="259">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.90468561 ( using 0.90468561 ) -->
+  <etotal_int scf_iter="260">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.95971542 ( using 0.95971542 ) -->
+  <etotal_int scf_iter="261">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.91975805 ( using 0.91975805 ) -->
+  <etotal_int scf_iter="262">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.97087930 ( using 0.97087930 ) -->
+  <etotal_int scf_iter="263">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.92558977 ( using 0.92558977 ) -->
+  <etotal_int scf_iter="264">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.96893885 ( using 0.96893885 ) -->
+  <etotal_int scf_iter="265">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.91829249 ( using 0.91829249 ) -->
+  <etotal_int scf_iter="266">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492338 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.95463294 ( using 0.95463294 ) -->
+  <etotal_int scf_iter="267">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492338 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.90195648 ( using 0.90195648 ) -->
+  <etotal_int scf_iter="268">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492338 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.93619068 ( using 0.93619068 ) -->
+  <etotal_int scf_iter="269">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492338 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.88599015 ( using 0.88599015 ) -->
+  <etotal_int scf_iter="270">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492338 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.92402158 ( using 0.92402158 ) -->
+  <etotal_int scf_iter="271">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492338 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.87929514 ( using 0.87929514 ) -->
+  <etotal_int scf_iter="272">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492338 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.92486610 ( using 0.92486610 ) -->
+  <etotal_int scf_iter="273">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.88570461 ( using 0.88570461 ) -->
+  <etotal_int scf_iter="274">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.93864670 ( using 0.93864670 ) -->
+  <etotal_int scf_iter="275">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.90222348 ( using 0.90222348 ) -->
+  <etotal_int scf_iter="276">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.95823992 ( using 0.95823992 ) -->
+  <etotal_int scf_iter="277">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.91995844 ( using 0.91995844 ) -->
+  <etotal_int scf_iter="278">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.97249098 ( using 0.97249098 ) -->
+  <etotal_int scf_iter="279">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.92845439 ( using 0.92845439 ) -->
+  <etotal_int scf_iter="280">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.97264691 ( using 0.97264691 ) -->
+  <etotal_int scf_iter="281">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.92237953 ( using 0.92237953 ) -->
+  <etotal_int scf_iter="282">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.95849880 ( using 0.95849880 ) -->
+  <etotal_int scf_iter="283">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.90547385 ( using 0.90547385 ) -->
+  <etotal_int scf_iter="284">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.93862886 ( using 0.93862886 ) -->
+  <etotal_int scf_iter="285">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.88784994 ( using 0.88784994 ) -->
+  <etotal_int scf_iter="286">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.92446950 ( using 0.92446950 ) -->
+  <etotal_int scf_iter="287">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.87934941 ( using 0.87934941 ) -->
+  <etotal_int scf_iter="288">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.92361188 ( using 0.92361188 ) -->
+  <etotal_int scf_iter="289">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.88440936 ( using 0.88440936 ) -->
+  <etotal_int scf_iter="290">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.93641411 ( using 0.93641411 ) -->
+  <etotal_int scf_iter="291">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.90032721 ( using 0.90032721 ) -->
+  <etotal_int scf_iter="292">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.95596396 ( using 0.95596396 ) -->
+  <etotal_int scf_iter="293">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.91838712 ( using 0.91838712 ) -->
+  <etotal_int scf_iter="294">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.97119472 ( using 0.97119472 ) -->
+  <etotal_int scf_iter="295">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.92816476 ( using 0.92816476 ) -->
+  <etotal_int scf_iter="296">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.97316079 ( using 0.97316079 ) -->
+  <etotal_int scf_iter="297">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.92398207 ( using 0.92398207 ) -->
+  <etotal_int scf_iter="298">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.96100753 ( using 0.96100753 ) -->
+  <etotal_int scf_iter="299">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.90879649 ( using 0.90879649 ) -->
+  <etotal_int scf_iter="300">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.94238066 ( using 0.94238066 ) -->
+  <etotal_int scf_iter="301">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.89182811 ( using 0.89182811 ) -->
+  <etotal_int scf_iter="302">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.92795422 ( using 0.92795422 ) -->
+  <etotal_int scf_iter="303">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.88238856 ( using 0.88238856 ) -->
+  <etotal_int scf_iter="304">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.92514248 ( using 0.92514248 ) -->
+  <etotal_int scf_iter="305">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.88504404 ( using 0.88504404 ) -->
+  <etotal_int scf_iter="306">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.93493132 ( using 0.93493132 ) -->
+  <etotal_int scf_iter="307">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.89804705 ( using 0.89804705 ) -->
+  <etotal_int scf_iter="308">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.95189506 ( using 0.95189506 ) -->
+  <etotal_int scf_iter="309">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.91435386 ( using 0.91435386 ) -->
+  <etotal_int scf_iter="310">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.96677031 ( using 0.96677031 ) -->
+  <etotal_int scf_iter="311">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.92502081 ( using 0.92502081 ) -->
+  <etotal_int scf_iter="312">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.97136399 ( using 0.97136399 ) -->
+  <etotal_int scf_iter="313">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.92427490 ( using 0.92427490 ) -->
+  <etotal_int scf_iter="314">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.96349616 ( using 0.96349616 ) -->
+  <etotal_int scf_iter="315">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.91306738 ( using 0.91306738 ) -->
+  <etotal_int scf_iter="316">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.94814957 ( using 0.94814957 ) -->
+  <etotal_int scf_iter="317">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.89810667 ( using 0.89810667 ) -->
+  <etotal_int scf_iter="318">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.93392410 ( using 0.93392410 ) -->
+  <etotal_int scf_iter="319">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.88742681 ( using 0.88742681 ) -->
+  <etotal_int scf_iter="320">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.92799671 ( using 0.92799671 ) -->
+  <etotal_int scf_iter="321">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.88617206 ( using 0.88617206 ) -->
+  <etotal_int scf_iter="322">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.93294851 ( using 0.93294851 ) -->
+  <etotal_int scf_iter="323">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.89466709 ( using 0.89466709 ) -->
+  <etotal_int scf_iter="324">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.94607961 ( using 0.94607961 ) -->
+  <etotal_int scf_iter="325">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.90855964 ( using 0.90855964 ) -->
+  <etotal_int scf_iter="326">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.96066020 ( using 0.96066020 ) -->
+  <etotal_int scf_iter="327">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.92069601 ( using 0.92069601 ) -->
+  <etotal_int scf_iter="328">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.96902844 ( using 0.96902844 ) -->
+  <etotal_int scf_iter="329">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.92463745 ( using 0.92463745 ) -->
+  <etotal_int scf_iter="330">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.96672923 ( using 0.96672923 ) -->
+  <etotal_int scf_iter="331">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.91834937 ( using 0.91834937 ) -->
+  <etotal_int scf_iter="332">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.95515587 ( using 0.95515587 ) -->
+  <etotal_int scf_iter="333">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.90541550 ( using 0.90541550 ) -->
+  <etotal_int scf_iter="334">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.94064109 ( using 0.94064109 ) -->
+  <etotal_int scf_iter="335">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.89277225 ( using 0.89277225 ) -->
+  <etotal_int scf_iter="336">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.93071666 ( using 0.93071666 ) -->
+  <etotal_int scf_iter="337">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.88687190 ( using 0.88687190 ) -->
+  <etotal_int scf_iter="338">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.93035679 ( using 0.93035679 ) -->
+  <etotal_int scf_iter="339">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.89071072 ( using 0.89071072 ) -->
+  <etotal_int scf_iter="340">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.93987774 ( using 0.93987774 ) -->
+  <etotal_int scf_iter="341">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.90261214 ( using 0.90261214 ) -->
+  <etotal_int scf_iter="342">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.95471549 ( using 0.95471549 ) -->
+  <etotal_int scf_iter="343">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.91669209 ( using 0.91669209 ) -->
+  <etotal_int scf_iter="344">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.96715929 ( using 0.96715929 ) -->
+  <etotal_int scf_iter="345">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.92537615 ( using 0.92537615 ) -->
+  <etotal_int scf_iter="346">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.97020283 ( using 0.97020283 ) -->
+  <etotal_int scf_iter="347">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.92360108 ( using 0.92360108 ) -->
+  <etotal_int scf_iter="348">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.96185789 ( using 0.96185789 ) -->
+  <etotal_int scf_iter="349">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.91216532 ( using 0.91216532 ) -->
+  <etotal_int scf_iter="350">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.94664495 ( using 0.94664495 ) -->
+  <etotal_int scf_iter="351">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.89738290 ( using 0.89738290 ) -->
+  <etotal_int scf_iter="352">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.93288733 ( using 0.93288733 ) -->
+  <etotal_int scf_iter="353">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.88726353 ( using 0.88726353 ) -->
+  <etotal_int scf_iter="354">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.92795210 ( using 0.92795210 ) -->
+  <etotal_int scf_iter="355">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.88725928 ( using 0.88725928 ) -->
+  <etotal_int scf_iter="356">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.93465362 ( using 0.93465362 ) -->
+  <etotal_int scf_iter="357">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.89773119 ( using 0.89773119 ) -->
+  <etotal_int scf_iter="358">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.94989610 ( using 0.94989610 ) -->
+  <etotal_int scf_iter="359">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.91353464 ( using 0.91353464 ) -->
+  <etotal_int scf_iter="360">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.96570162 ( using 0.96570162 ) -->
+  <etotal_int scf_iter="361">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.92603223 ( using 0.92603223 ) -->
+  <etotal_int scf_iter="362">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.97300047 ( using 0.97300047 ) -->
+  <etotal_int scf_iter="363">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.92779684 ( using 0.92779684 ) -->
+  <etotal_int scf_iter="364">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.96717804 ( using 0.96717804 ) -->
+  <etotal_int scf_iter="365">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.91753074 ( using 0.91753074 ) -->
+  <etotal_int scf_iter="366">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.95143948 ( using 0.95143948 ) -->
+  <etotal_int scf_iter="367">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.90111212 ( using 0.90111212 ) -->
+  <etotal_int scf_iter="368">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.93481618 ( using 0.93481618 ) -->
+  <etotal_int scf_iter="369">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.88780973 ( using 0.88780973 ) -->
+  <etotal_int scf_iter="370">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.92646656 ( using 0.92646656 ) -->
+  <etotal_int scf_iter="371">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.88493828 ( using 0.88493828 ) -->
+  <etotal_int scf_iter="372">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.93098906 ( using 0.93098906 ) -->
+  <etotal_int scf_iter="373">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.89422891 ( using 0.89422891 ) -->
+  <etotal_int scf_iter="374">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.94632424 ( using 0.94632424 ) -->
+  <etotal_int scf_iter="375">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.91105638 ( using 0.91105638 ) -->
+  <etotal_int scf_iter="376">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.96434620 ( using 0.96434620 ) -->
+  <etotal_int scf_iter="377">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.92618311 ( using 0.92618311 ) -->
+  <etotal_int scf_iter="378">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.97463924 ( using 0.97463924 ) -->
+  <etotal_int scf_iter="379">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.93061804 ( using 0.93061804 ) -->
+  <etotal_int scf_iter="380">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.97081320 ( using 0.97081320 ) -->
+  <etotal_int scf_iter="381">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.92147163 ( using 0.92147163 ) -->
+  <etotal_int scf_iter="382">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.95507479 ( using 0.95507479 ) -->
+  <etotal_int scf_iter="383">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.90421800 ( using 0.90421800 ) -->
+  <etotal_int scf_iter="384">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.93663018 ( using 0.93663018 ) -->
+  <etotal_int scf_iter="385">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.88889676 ( using 0.88889676 ) -->
+  <etotal_int scf_iter="386">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.92597556 ( using 0.92597556 ) -->
+  <etotal_int scf_iter="387">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.88384697 ( using 0.88384697 ) -->
+  <etotal_int scf_iter="388">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.92887270 ( using 0.92887270 ) -->
+  <etotal_int scf_iter="389">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.89195289 ( using 0.89195289 ) -->
+  <etotal_int scf_iter="390">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.94384402 ( using 0.94384402 ) -->
+  <etotal_int scf_iter="391">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.90906183 ( using 0.90906183 ) -->
+  <etotal_int scf_iter="392">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.96306048 ( using 0.96306048 ) -->
+  <etotal_int scf_iter="393">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.92563362 ( using 0.92563362 ) -->
+  <etotal_int scf_iter="394">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.97528376 ( using 0.97528376 ) -->
+  <etotal_int scf_iter="395">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.93197113 ( using 0.93197113 ) -->
+  <etotal_int scf_iter="396">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.97308149 ( using 0.97308149 ) -->
+  <etotal_int scf_iter="397">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.92399578 ( using 0.92399578 ) -->
+  <etotal_int scf_iter="398">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.95779390 ( using 0.95779390 ) -->
+  <etotal_int scf_iter="399">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.90664507 ( using 0.90664507 ) -->
+  <etotal_int scf_iter="400">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.93874402 ( using 0.93874402 ) -->
+  <etotal_int scf_iter="401">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.89018813 ( using 0.89018813 ) -->
+  <etotal_int scf_iter="402">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.92659052 ( using 0.92659052 ) -->
+  <etotal_int scf_iter="403">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.88395933 ( using 0.88395933 ) -->
+  <etotal_int scf_iter="404">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.92782883 ( using 0.92782883 ) -->
+  <etotal_int scf_iter="405">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.89112795 ( using 0.89112795 ) -->
+  <etotal_int scf_iter="406">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.94193606 ( using 0.94193606 ) -->
+  <etotal_int scf_iter="407">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.90789726 ( using 0.90789726 ) -->
+  <etotal_int scf_iter="408">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.96118110 ( using 0.96118110 ) -->
+  <etotal_int scf_iter="409">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.92513421 ( using 0.92513421 ) -->
+  <etotal_int scf_iter="410">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.97428530 ( using 0.97428530 ) -->
+  <etotal_int scf_iter="411">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.93274363 ( using 0.93274363 ) -->
+  <etotal_int scf_iter="412">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.97335341 ( using 0.97335341 ) -->
+  <etotal_int scf_iter="413">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.92597275 ( using 0.92597275 ) -->
+  <etotal_int scf_iter="414">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.95920774 ( using 0.95920774 ) -->
+  <etotal_int scf_iter="415">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.90914806 ( using 0.90914806 ) -->
+  <etotal_int scf_iter="416">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.94041912 ( using 0.94041912 ) -->
+  <etotal_int scf_iter="417">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.89251219 ( using 0.89251219 ) -->
+  <etotal_int scf_iter="418">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.92762618 ( using 0.92762618 ) -->
+  <etotal_int scf_iter="419">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.88537876 ( using 0.88537876 ) -->
+  <etotal_int scf_iter="420">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.92787831 ( using 0.92787831 ) -->
+  <etotal_int scf_iter="421">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.89099257 ( using 0.89099257 ) -->
+  <etotal_int scf_iter="422">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.94119590 ( using 0.94119590 ) -->
+  <etotal_int scf_iter="423">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.90621062 ( using 0.90621062 ) -->
+  <etotal_int scf_iter="424">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.96039697 ( using 0.96039697 ) -->
+  <etotal_int scf_iter="425">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.92263311 ( using 0.92263311 ) -->
+  <etotal_int scf_iter="426">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.97391563 ( using 0.97391563 ) -->
+  <etotal_int scf_iter="427">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.93101397 ( using 0.93101397 ) -->
+  <etotal_int scf_iter="428">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.97436207 ( using 0.97436207 ) -->
+  <etotal_int scf_iter="429">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.92530845 ( using 0.92530845 ) -->
+  <etotal_int scf_iter="430">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.96204456 ( using 0.96204456 ) -->
+  <etotal_int scf_iter="431">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.90940250 ( using 0.90940250 ) -->
+  <etotal_int scf_iter="432">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.94483838 ( using 0.94483838 ) -->
+  <etotal_int scf_iter="433">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.89284289 ( using 0.89284289 ) -->
+  <etotal_int scf_iter="434">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.93227362 ( using 0.93227362 ) -->
+  <etotal_int scf_iter="435">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.88449626 ( using 0.88449626 ) -->
+  <etotal_int scf_iter="436">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.93166580 ( using 0.93166580 ) -->
+  <etotal_int scf_iter="437">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.88940815 ( using 0.88940815 ) -->
+  <etotal_int scf_iter="438">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.94196305 ( using 0.94196305 ) -->
+  <etotal_int scf_iter="439">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.90429697 ( using 0.90429697 ) -->
+  <etotal_int scf_iter="440">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.95880471 ( using 0.95880471 ) -->
+  <etotal_int scf_iter="441">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.91998820 ( using 0.91998820 ) -->
+  <etotal_int scf_iter="442">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.97359548 ( using 0.97359548 ) -->
+  <etotal_int scf_iter="443">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.92760466 ( using 0.92760466 ) -->
+  <etotal_int scf_iter="444">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.97572557 ( using 0.97572557 ) -->
+  <etotal_int scf_iter="445">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.92282375 ( using 0.92282375 ) -->
+  <etotal_int scf_iter="446">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.96658337 ( using 0.96658337 ) -->
+  <etotal_int scf_iter="447">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.90870439 ( using 0.90870439 ) -->
+  <etotal_int scf_iter="448">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.94967160 ( using 0.94967160 ) -->
+  <etotal_int scf_iter="449">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.89359703 ( using 0.89359703 ) -->
+  <etotal_int scf_iter="450">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.93586733 ( using 0.93586733 ) -->
+  <etotal_int scf_iter="451">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.88740973 ( using 0.88740973 ) -->
+  <etotal_int scf_iter="452">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.93151692 ( using 0.93151692 ) -->
+  <etotal_int scf_iter="453">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.89122261 ( using 0.89122261 ) -->
+  <etotal_int scf_iter="454">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.93986734 ( using 0.93986734 ) -->
+  <etotal_int scf_iter="455">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.90576047 ( using 0.90576047 ) -->
+  <etotal_int scf_iter="456">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.95237129 ( using 0.95237129 ) -->
+  <etotal_int scf_iter="457">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.92245445 ( using 0.92245445 ) -->
+  <etotal_int scf_iter="458">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.96668912 ( using 0.96668912 ) -->
+  <etotal_int scf_iter="459">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.93103160 ( using 0.93103160 ) -->
+  <etotal_int scf_iter="460">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.96836462 ( using 0.96836462 ) -->
+  <etotal_int scf_iter="461">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.92998254 ( using 0.92998254 ) -->
+  <etotal_int scf_iter="462">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.95982178 ( using 0.95982178 ) -->
+  <etotal_int scf_iter="463">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.91751193 ( using 0.91751193 ) -->
+  <etotal_int scf_iter="464">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.94347226 ( using 0.94347226 ) -->
+  <etotal_int scf_iter="465">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.90566200 ( using 0.90566200 ) -->
+  <etotal_int scf_iter="466">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.93254616 ( using 0.93254616 ) -->
+  <etotal_int scf_iter="467">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.89251281 ( using 0.89251281 ) -->
+  <etotal_int scf_iter="468">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.92897500 ( using 0.92897500 ) -->
+  <etotal_int scf_iter="469">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.89424247 ( using 0.89424247 ) -->
+  <etotal_int scf_iter="470">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.93131711 ( using 0.93131711 ) -->
+  <etotal_int scf_iter="471">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.92548731 ( using 0.92548731 ) -->
+  <etotal_int scf_iter="472">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.91752205 ( using 0.91752205 ) -->
+  <etotal_int scf_iter="473">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.96061877 ( using 0.96061877 ) -->
+  <etotal_int scf_iter="474">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.91961022 ( using 0.91961022 ) -->
+  <etotal_int scf_iter="475">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.97340589 ( using 0.97340589 ) -->
+  <etotal_int scf_iter="476">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.92562376 ( using 0.92562376 ) -->
+  <etotal_int scf_iter="477">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.95541282 ( using 0.95541282 ) -->
+  <etotal_int scf_iter="478">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.96404135 ( using 0.96404135 ) -->
+  <etotal_int scf_iter="479">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.90178036 ( using 0.90178036 ) -->
+  <etotal_int scf_iter="480">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.96406510 ( using 0.96406510 ) -->
+  <etotal_int scf_iter="481">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.88239404 ( using 0.88239404 ) -->
+  <etotal_int scf_iter="482">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.96960693 ( using 0.96960693 ) -->
+  <etotal_int scf_iter="483">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.86674306 ( using 0.86674306 ) -->
+  <etotal_int scf_iter="484">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.94854373 ( using 0.94854373 ) -->
+  <etotal_int scf_iter="485">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.88143391 ( using 0.88143391 ) -->
+  <etotal_int scf_iter="486">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.95363766 ( using 0.95363766 ) -->
+  <etotal_int scf_iter="487">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.86813489 ( using 0.86813489 ) -->
+  <etotal_int scf_iter="488">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.99751658 ( using 0.99751658 ) -->
+  <etotal_int scf_iter="489">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.87890755 ( using 0.87890755 ) -->
+  <etotal_int scf_iter="490">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 1.02594696 ( using 1.02594696 ) -->
+  <etotal_int scf_iter="491">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.83853051 ( using 0.83853051 ) -->
+  <etotal_int scf_iter="492">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 1.03278279 ( using 1.03278279 ) -->
+  <etotal_int scf_iter="493">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.89611103 ( using 0.89611103 ) -->
+  <etotal_int scf_iter="494">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.99783119 ( using 0.99783119 ) -->
+  <etotal_int scf_iter="495">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.91604484 ( using 0.91604484 ) -->
+  <etotal_int scf_iter="496">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.91813232 ( using 0.91813232 ) -->
+  <etotal_int scf_iter="497">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.94030512 ( using 0.94030512 ) -->
+  <etotal_int scf_iter="498">     -7.12574048 </etotal_int>
+<!-- ultrasoft contribution to total charge = 0.10492339 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.39568698 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.87514878 ( using 0.87514878 ) -->
+  <etotal_int scf_iter="499">     -7.12574048 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="4">
+   -12.94884    -7.94488    -7.94484    -7.94482
+  </eigenvalues>
+<!-- ultrasoft contribution to total charge = 0.10492 -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <ekin>        3.52988984 </ekin>
+  <econf>       0.00000000 </econf>
+  <eps>        -0.65553649 </eps>
+  <enl>         0.69379071 </enl>
+  <ecoul>      -7.15249213 </ecoul>
+  <exc>        -3.54139241 </exc>
+  <esr>         0.00051297 </esr>
+  <eself>      11.28379167 </eself>
+  <ets>         0.00000000 </ets>
+  <etotal>     -7.12574048 </etotal>
+<atomset>
+<unit_cell 
+    a=" 14.00000000   0.00000000   0.00000000"
+    b="  0.00000000  14.00000000   0.00000000"
+    c="  0.00000000   0.00000000  14.00000000" />
+  <atom name="Si" species="silicon">
+    <position> 0.00000000 0.00000000 0.00000000 </position>
+    <velocity> 0.00000000 0.00000000 0.00000000 </velocity>
+    <force> 0.00234956 -0.00174460 -0.00298201 </force>
+  </atom>
+  <atom name="H1" species="hydrogen">
+    <position> 1.60000000 1.60000000 1.60000000 </position>
+    <velocity> 0.00000000 0.00000000 0.00000000 </velocity>
+    <force> 0.00494826 0.00513594 0.00499950 </force>
+  </atom>
+  <atom name="H2" species="hydrogen">
+    <position> 1.60000000 -1.60000000 -1.60000000 </position>
+    <velocity> 0.00000000 0.00000000 0.00000000 </velocity>
+    <force> 0.00527310 -0.00530308 -0.00536312 </force>
+  </atom>
+  <atom name="H3" species="hydrogen">
+    <position> -1.60000000 1.60000000 -1.60000000 </position>
+    <velocity> 0.00000000 0.00000000 0.00000000 </velocity>
+    <force> -0.00536279 0.00543347 -0.00533582 </force>
+  </atom>
+  <atom name="H4" species="hydrogen">
+    <position> -1.60000000 -1.60000000 1.60000000 </position>
+    <velocity> 0.00000000 0.00000000 0.00000000 </velocity>
+    <force> -0.00494095 -0.00485392 0.00487518 </force>
+  </atom>
+</atomset>
+<timing where="run"                name=" iteration"       min="66.995   " max="66.995   " count="1        "/>
+</iteration>
+<!-- memory nlp.qnmg    :   19.968 MB  (4.976 MB local) -->
+<!-- memory sd.psi      :    0.459 MB  (0.114 MB local) -->
+<!-- memory sd.hpsi     :    0.459 MB  (0.114 MB local) -->
+<!-- memory sd.spsi     :    0.459 MB  (0.114 MB local) -->
+<!-- memory sd.betag    :    3.014 MB  (0.753 MB local) -->
+<!-- memory sd.betapsi  :    0.002 MB  (0.002 MB local) -->
+<!-- memory cd.rhor     :    1.648 MB  (0.412 MB local) -->
+<!-- memory cd.rhog     :    0.931 MB  (0.233 MB local) -->
+<!-- memory cd.nlccrhor :    1.648 MB  (0.412 MB local) -->
+<!-- memory cd.nlccrhog :    0.931 MB  (0.233 MB local) -->
+<!-- memory cd.qnmg     :  162.055 MB  (40.481 MB local) -->
+<!-- memory total       :  191.574 MB  (47.844 MB local) -->
+</run>
+<!-- [qbox] #save -states wfsave/ch4 -->
+<!-- [qbox]  -->
+<!-- [qbox] quit -->
+<!-- [qbox]  -->
+<!-- end of command stream -->
+<real_time> 70.065 </real_time>
+<end_time> 2016-04-02T17:09:52Z </end_time>
+</qbox:simulation>

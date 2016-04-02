@@ -1,0 +1,25 @@
+Test       : NLCC SiH4
+Program    : qb
+TestGroups : short-run
+Enabled    : Yes
+
+Processors : 4
+
+ExtraFile  : H.pbe-rrkjus.xml
+ExtraFile  : Si.pbe-n-van.xml
+ExtraFile  : sih4.nlcc.pbe.sys
+Input      : sih4.nlcc.pbe.inp
+Reference  : sih4.nlcc.pbe.reference.xml
+
+match ; ekin    ; GREPFIELD(out, '<ekin>',   2) ;  3.52988984
+match ; econf   ; GREPFIELD(out, '<econf>',  2) ;  0.00000000
+match ; eps     ; GREPFIELD(out, '<eps>',    2) ; -0.65553649
+match ; enl     ; GREPFIELD(out, '<enl>',    2) ;  0.69379071
+match ; ecoul   ; GREPFIELD(out, '<ecoul>',  2) ; -7.15249213
+match ; exc     ; GREPFIELD(out, '<exc>',    2) ; -3.54139241
+match ; esr     ; GREPFIELD(out, '<esr>',    2) ;  0.00051297
+match ; eself   ; GREPFIELD(out, '<eself>',  2) ; 11.28379167
+match ; ets     ; GREPFIELD(out, '<ets>',    2) ;  0.00000000
+match ; etotal  ; GREPFIELD(out, '<etotal>', 2) ; -7.12574048
+
+
