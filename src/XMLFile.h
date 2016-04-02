@@ -33,13 +33,14 @@
 class XMLFile {
 
 public:
+
+  XMLFile(const std::string & buf)
+    :buf_(buf), pos_(0) {
+  }
   
   class Tag{
 
   public:
-    Tag(const std::string & tag){
-      tag_ = tag;
-    }
 
     const std::string & name() const {
       return tag_;
@@ -53,38 +54,57 @@ public:
       return "</" + tag_ + ">";
     }
 
-    std::string text(const std::string & buf) const {
+    std::string text() const {
 
-      std::string::size_type pos = 0;
-
-      std::string::size_type start_pos = buf.find(start(), pos);
+      std::string::size_type start_pos = xml_file_->buf_.find(start(), xml_file_->pos_);
 
       assert(start_pos != std::string::npos );
     
-      start_pos = buf.find(">", start_pos)+1;
+      start_pos = xml_file_->buf_.find(">", start_pos)+1;
 
-      std::string::size_type end_pos = buf.find(end());
+      std::string::size_type end_pos = xml_file_->buf_.find(end());
 
-      pos = buf.find(">", end_pos) + 1;
+      xml_file_->pos_ = xml_file_->buf_.find(">", end_pos) + 1;
 
       std::string::size_type len = end_pos - start_pos;
     
-      return buf.substr(start_pos, len);
+      return xml_file_->buf_.substr(start_pos, len);
     }
 
     template <typename Type>
-    void get_value(const std::string & buf, Type & value) const {
-      std::istringstream stst(text(buf));
+    void get_value(Type & value) const {
+      std::istringstream stst(text());
       stst >> value;
     }
-  
+
+    bool exists() const {
+      std::string::size_type start_pos = xml_file_->buf_.find(start(), xml_file_->pos_);
+      return (start_pos != std::string::npos);
+    }
+    
   private:
+
+    friend class XMLFile;
+
+    Tag(XMLFile * xml_file, const std::string & tag)
+      : xml_file_(xml_file), tag_(tag){
+    }
+    
+    XMLFile * xml_file_;
     std::string tag_;
   
   };
 
-private:
+  Tag next_tag(const std::string & tag) {
+    return Tag(this, tag);
+  }
   
+private:
+
+  friend class Tag;
+  
+  std::string::size_type pos_;
+  std::string buf_;
 
 };
 

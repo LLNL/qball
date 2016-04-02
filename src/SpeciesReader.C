@@ -84,6 +84,8 @@ void SpeciesReader::readSpecies (Species& sp, const string uri)
     buf.resize(sz);
     fread(&buf[0],sizeof(char),sz,infile);
 
+    XMLFile xml_file(buf);
+    
     string::size_type pos = 0;
 
     string tag, start_tag, end_tag;
@@ -93,10 +95,8 @@ void SpeciesReader::readSpecies (Species& sp, const string uri)
     bool ultrasoft = false;
 
     {
-      XMLFile::Tag tag("ultrasoft_pseudopotential");
-      start = buf.find(tag.start(), pos);
-      if (start != string::npos) 
-	ultrasoft = true;
+      XMLFile::Tag tag = xml_file.next_tag("ultrasoft_pseudopotential");
+      ultrasoft = tag.exists();
       sp.usoft_ = ultrasoft;
       if (ultrasoft) 
 	cout << "  <!-- SpeciesReader::readSpecies: potential type:  ultrasoft -->" << endl;
@@ -105,48 +105,48 @@ void SpeciesReader::readSpecies (Species& sp, const string uri)
     }
 
     {
-      XMLFile::Tag tag("description");
-      sp.description_ = tag.text(buf);
+      XMLFile::Tag tag = xml_file.next_tag("description");
+      sp.description_ = tag.text();
       cout << "  <!-- SpeciesReader::readSpecies: read " << tag.name() << " "
 	   << sp.description_
 	   << " -->" << endl;
     }
 
     {
-      XMLFile::Tag tag("symbol");
-      tag.get_value(buf, sp.symbol_);
+      XMLFile::Tag tag = xml_file.next_tag("symbol");
+      tag.get_value(sp.symbol_);
       cout << "  <!-- SpeciesReader::readSpecies: read " << tag.name() << " "
 	   << sp.symbol_
 	   << " -->" << endl;
     }
 
     {
-      XMLFile::Tag tag("atomic_number");
-      tag.get_value(buf, sp.atomic_number_);
+      XMLFile::Tag tag = xml_file.next_tag("atomic_number");
+      tag.get_value(sp.atomic_number_);
       cout << "  <!-- SpeciesReader::readSpecies: read " << tag.name() << " "
 	   << sp.atomic_number_
 	   << " -->" << endl;
     }
 
     {
-      XMLFile::Tag tag("mass");
-      tag.get_value(buf, sp.mass_);
+      XMLFile::Tag tag = xml_file.next_tag("mass");
+      tag.get_value(sp.mass_);
       cout << "  <!-- SpeciesReader::readSpecies: read " << tag.name() << " "
 	   << sp.mass_
 	   << " -->" << endl;
     }
 
     {
-      XMLFile::Tag tag("valence_charge");
-      tag.get_value(buf, sp.zval_);
+      XMLFile::Tag tag = xml_file.next_tag("valence_charge");
+      tag.get_value(sp.zval_);
       cout << "  <!-- SpeciesReader::readSpecies: read " << tag.name() << " "
 	   << sp.zval_
 	   << " -->" << endl;
     }
 
     {
-      XMLFile::Tag tag("lmax");
-      tag.get_value(buf, sp.lmax_);
+      XMLFile::Tag tag = xml_file.next_tag("lmax");
+      tag.get_value(sp.lmax_);
       cout << "  <!-- SpeciesReader::readSpecies: read " << tag.name() << " "
 	   << sp.lmax_
 	   << " -->" << endl;
