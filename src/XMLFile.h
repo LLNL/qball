@@ -71,6 +71,14 @@ public:
       stst >> value;
     }
 
+    template <class Iterator>
+    void get_value(Iterator first, Iterator last){
+      std::istringstream stst(text());
+      for(Iterator it = first; it != last; ++it){
+	stst >> *it;
+      }
+    }  
+
     bool exists() const {
       return (tag_pos_ != std::string::npos);
     }

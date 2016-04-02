@@ -209,32 +209,19 @@ void SpeciesReader::readSpecies (Species& sp, const string uri)
 	  assert(l == lread);
 
 	  tag.get_attribute("size", size);
-
-	  // read radial potential
-	  sp.vps_.resize(sp.vps_.size() + 1);
-	  sp.vps_[l].resize(size);
 	}
 	
-        tag = "radial_potential";
-        start_tag = string("<") + tag + string(">");
-        end_tag = string("</") + tag + string(">");
-        start = buf.find(start_tag,pos);
-        assert(start != string::npos );
-        start = buf.find(">",start)+1;
-        end = buf.find(end_tag,start);
-        pos = buf.find(">",end)+1;
-        len = end - start;
-        {
-          istringstream stst(buf.substr(start,len));
-          for ( int i = 0; i < size; i++ )
-          {
-            stst >> sp.vps_[l][i];
-            //cout << sp.vps_[l][i] << endl;
-          }
-        }
-        cout << "  <!-- SpeciesReader::readSpecies: read " << tag << " l="
-             << l << " size=" << size << " -->" << endl;
- 
+	// read radial potential
+	sp.vps_.resize(sp.vps_.size() + 1);
+	sp.vps_[l].resize(size);
+
+	{
+	  XMLFile::Tag tag = xml_file.next_tag("radial_potential");
+	  tag.get_value(sp.vps_[l].begin(), sp.vps_[l].begin() + size);
+	  cout << "  <!-- SpeciesReader::readSpecies: read " << tag.name() << " l="
+	       << l << " size=" << size << " -->" << endl;
+	}
+	
         sp.phi_.resize(sp.phi_.size()+1);
         sp.phi_[l].resize(size);
  
