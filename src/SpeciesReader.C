@@ -163,8 +163,10 @@ void SpeciesReader::readSpecies (Species& sp, const string uri)
       cout << "  <!-- SpeciesReader::readSpecies: read " << tag.name() << " "
 	   << sp.lmax_
 	   << " -->" << endl;
+    } else {
+      sp.lmax_ = 3; // for the moment we assume is 3, we might have to decrease it later
     }
-    
+        
     if (!ultrasoft && !oncv) { 
       {
 	XMLFile::Tag tag = xml_file.next_tag("llocal");
@@ -207,7 +209,22 @@ void SpeciesReader::readSpecies (Species& sp, const string uri)
 	   << " -->" << endl;
     }
 
-    if (!ultrasoft) { 
+    sp.nchannels_ = 1;
+    if (oncv) sp.nchannels_ = 2;
+    
+    if (!ultrasoft) {
+
+      // read the local potential
+      if(oncv){
+	XMLFile::Tag tag = xml_file.next_tag("local_potential");
+	int size;
+	tag.get_attribute("size", size);
+	sp.vloc_.resize(size);
+	tag.get_value(sp.vloc_.begin(), sp.vloc_.begin() + size);
+	cout << "  <!-- SpeciesReader::readSpecies: read " << tag.name()
+	     << " size=" << size << " -->" << endl;
+      }
+      
       for ( int l = 0; l < sp.lmax_ + 1; l++ )
       {
 	std::cout << "L = " << l << std::endl;
@@ -216,39 +233,65 @@ void SpeciesReader::readSpecies (Species& sp, const string uri)
 	  // read projector
 	  XMLFile::Tag tag = xml_file.next_tag("projector");
 	  int lread;
+
+	  // for ONCV we don't know lmax
+	  if(oncv && !tag.exists()){
+	    sp.lmax_ = l - 1;
+	    break;
+	  }
+	  
 	  tag.get_attribute("l", lread);
 	  assert(l == lread);
 
 	  tag.get_attribute("size", size);
-	}
-	
-	// read radial potential
-	sp.vps_.resize(sp.vps_.size() + 1);
-	sp.vps_[l].resize(size);
 
-	{
-	  XMLFile::Tag tag = xml_file.next_tag("radial_potential");
-	  tag.get_value(sp.vps_[l].begin(), sp.vps_[l].begin() + size);
+	  if(oncv){
+	    sp.vnlr_.resize(sp.vnlr_.size() + 1);
+	    sp.vnlr_[l].resize(sp.nchannels_);
+	    sp.vnlr_[l][0].resize(size);
+	    tag.get_value(sp.vnlr_[l][0].begin(), sp.vnlr_[l][0].begin() + size);
+	    cout << "  <!-- SpeciesReader::readSpecies: read " << tag.name() << " l="
+		 << l << " i=0 size=" << size << " -->" << endl;
+	  }
+	  
+	}
+
+	if(oncv){
+	  XMLFile::Tag tag = xml_file.next_tag("projector");
+	  sp.vnlr_[l][1].resize(size);
+	  tag.get_value(sp.vnlr_[l][1].begin(), sp.vnlr_[l][1].begin() + size);
 	  cout << "  <!-- SpeciesReader::readSpecies: read " << tag.name() << " l="
-	       << l << " size=" << size << " -->" << endl;
+	       << l << " i=1 size=" << size << " -->" << endl;
 	}
 	
-        sp.phi_.resize(sp.phi_.size()+1);
-        sp.phi_[l].resize(size);
+	if(!oncv){
+	  // read radial potential
+	  sp.vps_.resize(sp.vps_.size() + 1);
+	  sp.vps_[l].resize(size);
+
+	  {
+	    XMLFile::Tag tag = xml_file.next_tag("radial_potential");
+	    tag.get_value(sp.vps_[l].begin(), sp.vps_[l].begin() + size);
+	    cout << "  <!-- SpeciesReader::readSpecies: read " << tag.name() << " l="
+		 << l << " size=" << size << " -->" << endl;
+	  }
+	
+	  sp.phi_.resize(sp.phi_.size()+1);
+	  sp.phi_[l].resize(size);
  
-        // read radial function only if the radial_function tag was found, for nonlocal potentials
+	  // read radial function only if the radial_function tag was found, for nonlocal potentials
  
-        if ( l != sp.llocal_ )
-        {
-	  XMLFile::Tag tag = xml_file.next_tag("radial_function");
-	  if (tag.exists())
-	    {
-              tag.get_value(sp.phi_[l].begin(), sp.phi_[l].begin() + size);
-              cout << "  <!-- SpeciesReader::readSpecies: read " << tag.name() << " l="
-                   << l << " size=" << size << " -->" << endl;
+	  if ( l != sp.llocal_ ){
+	    XMLFile::Tag tag = xml_file.next_tag("radial_function");
+	    if (tag.exists()){
+	      tag.get_value(sp.phi_[l].begin(), sp.phi_[l].begin() + size);
+	      cout << "  <!-- SpeciesReader::readSpecies: read " << tag.name() << " l="
+		   << l << " size=" << size << " -->" << endl;
 	    }
-        }
-        
+	  }
+	  
+	}
+
       }
 
     }
