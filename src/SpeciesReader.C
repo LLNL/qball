@@ -106,6 +106,8 @@ void SpeciesReader::readSpecies (Species& sp, const string uri)
       XMLFile::Tag tag = xml_file.next_tag("norm_conserving_semilocal_pseudopotential");
       oncv = tag.exists();
     }
+
+    sp.oncv_ = oncv;
     
     if (ultrasoft) {
       cout << "  <!-- SpeciesReader::readSpecies: potential type:  ultrasoft -->" << endl;
@@ -635,6 +637,29 @@ void SpeciesReader::readSpecies (Species& sp, const string uri)
 	tag.get_value(sp.rhor_nlcc_.begin(), sp.rhor_nlcc_.begin() + size);
 	
 	cout << "  <!-- SpeciesReader::readSpecies: read " << tag.name() << " size=" << size << " -->" << endl;
+      }
+    }
+
+    if(oncv){
+      // the oncv weights
+      sp.dij_.resize(sp.lmax_ + 1);
+      for(int l = 0; l < sp.lmax_ + 1; l++){
+	sp.dij_[l].resize(sp.nchannels_);
+	for(int ii = 0; ii < sp.nchannels_; ii++){
+	  sp.dij_[l][ii].resize(sp.nchannels_);
+	  for(int jj = 0; jj < sp.nchannels_; jj++){
+	    XMLFile::Tag tag = xml_file.next_tag("d_ij");
+	    int read_i, read_j;
+	    tag.get_attribute("i", read_i);
+	    tag.get_attribute("j", read_j);
+	    assert(ii + 1 == read_i);
+	    assert(jj + 1 == read_j);
+	    tag.get_value(sp.dij_[l][ii][jj]);
+	  }
+	}
+
+	cout << "  <!-- SpeciesReader::readSpecies: read d_ij l=" << l << " -->" << endl;
+
       }
     }
     

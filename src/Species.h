@@ -64,13 +64,10 @@ class Species {
   int lmax_;           // largest angular momentum
   int llocal_;         // angular momentum taken as local
   int nquad_;          // number of semi-local quadrature points
-  int nchannels_;        // number of channels for ONCV pseudos
   double rquad_;       // end of semi-local quadrature interval
   double deltar_;      // mesh spacing for potentials and wavefunctions
   vector<vector<double> > vps_;  // potentials for each l
   vector<vector<double> > phi_;  // atomic wavefunctions for each l
-  vector<vector<vector<double> > > vnlr_;  // projectors for each l and channel
-  vector<double> vloc_;  // local potential for oncv
   double rcps_;        // cutoff radius of gaussian pseudocharge
   int initsize_;       // potential grid size read from file
   double hubbard_u_;   // Hubbard U for DFT+U
@@ -79,6 +76,13 @@ class Species {
   vector<double> phig_, phig_spl_;  // atomic orbitals of Hubbard l in reciprocal space
   vector<double> phir_;  // temporary storage array for Hubbard orbitals
   bool nlcc_;            // true if potential has non-linear core correction
+
+  // oncv specific
+  bool oncv_;            // true for oncv pseudos
+  int nchannels_;        // number of channels, for the moment we assume this is always 2
+  vector<vector<vector<double> > > vnlr_;  // projectors for each l and channel
+  vector<double> vloc_;  // local potential for oncv
+  vector<vector<vector<double> > > dij_; // the weight matrix
   
   // ultrasoft potential terms
   bool usoft_;                             // true if potential is ultrasoft
