@@ -167,8 +167,9 @@ void SpeciesReader::readSpecies (Species& sp, const string uri)
 	   << " -->" << endl;
     } else {
       sp.lmax_ = 3; // for the moment we assume is 3, we might have to decrease it later
+      sp.llocal_ = -1; // no local component for ONCV
     }
-        
+    
     if (!ultrasoft && !oncv) { 
       {
 	XMLFile::Tag tag = xml_file.next_tag("llocal");
@@ -679,8 +680,11 @@ void SpeciesReader::bcastSpecies(Species& sp)
     ctxt_.ibcast_send(1,1,&sp.lmax_,1);
     ctxt_.ibcast_send(1,1,&sp.llocal_,1);
     ctxt_.dbcast_send(1,1,&sp.deltar_,1);
+    ctxt_.ibcast_send(1,1,&sp.nchannels_,1);
     int iusoft = (sp.ultrasoft() ? 1 : 0 );
     ctxt_.ibcast_send(1,1,&iusoft,1);
+    int oncv = (sp.oncv_ ? 1:0);
+    ctxt_.ibcast_send(1,1,&oncv,1);
     if (!sp.ultrasoft()) {
       ctxt_.ibcast_send(1,1,&sp.nquad_,1);
       ctxt_.dbcast_send(1,1,&sp.rquad_,1);
@@ -707,9 +711,16 @@ void SpeciesReader::bcastSpecies(Species& sp)
     ctxt_.ibcast_recv(1,1,&sp.lmax_,1,irow,icol);
     ctxt_.ibcast_recv(1,1,&sp.llocal_,1,irow,icol);
     ctxt_.dbcast_recv(1,1,&sp.deltar_,1,irow,icol);
+    ctxt_.ibcast_recv(1,1,&sp.nchannels_,1,irow,icol);
+
     int iusoft;
     ctxt_.ibcast_recv(1,1,&iusoft,1,irow,icol);
     sp.usoft_ = ( iusoft == 1 ? true : false );
+
+    int oncv;
+    ctxt_.ibcast_recv(1,1,&oncv,1,irow,icol);
+    sp.oncv_ = ( oncv == 1);
+    
     if (!sp.ultrasoft()) {
       ctxt_.ibcast_recv(1,1,&sp.nquad_,1,irow,icol);
       ctxt_.dbcast_recv(1,1,&sp.rquad_,1,irow,icol);
@@ -738,9 +749,65 @@ void SpeciesReader::bcastSpecies(Species& sp)
   ctxt_.string_bcast(sp.symbol_,ctxt_.coutpe());
   ctxt_.string_bcast(sp.description_,ctxt_.coutpe());
   ctxt_.string_bcast(sp.uri_,ctxt_.coutpe());
-  
-  if (!sp.ultrasoft()) {
-  
+
+  if (sp.oncv_) {
+    // calculate row and col indices of process oncoutpe
+    int irow = ctxt_.coutpe();
+    while (irow >= ctxt_.nprow()) irow -= ctxt_.nprow();
+    int icol = int (ctxt_.coutpe()/ctxt_.nprow());
+    assert(ctxt_.pmap(irow,icol) == ctxt_.coutpe());
+
+    int np;
+
+    // the local potential
+    if ( ctxt_.oncoutpe() ) {
+      np = sp.vloc_.size();
+      ctxt_.ibcast_send(1, 1, &np, 1);
+      ctxt_.dbcast_send(np, 1, &sp.vloc_[0], np);
+    } else {
+      ctxt_.ibcast_recv(1, 1, &np, 1, irow, icol);
+      sp.vloc_.resize(np);
+      ctxt_.dbcast_recv(np, 1, &sp.vloc_[0], np, irow, icol);
+    }
+
+    if(!ctxt_.oncoutpe()){
+      sp.vnlr_.resize(sp.lmax_ + 1);
+      sp.dij_.resize(sp.lmax_ + 1);
+    }
+    
+    for(int ll = 0; ll <= sp.lmax_; ll++ ){
+
+      if(!ctxt_.oncoutpe()){
+	sp.vnlr_[ll].resize(sp.nchannels_);
+	sp.dij_[ll].resize(sp.nchannels_);
+      }
+    
+      for(int ii = 0; ii < sp.nchannels_; ii++){
+
+	// the projectors
+	if ( ctxt_.oncoutpe() ) {
+	  np = sp.vnlr_[ll][ii].size();
+	  ctxt_.ibcast_send(1, 1, &np, 1);
+	  ctxt_.dbcast_send(np, 1, &sp.vnlr_[ll][ii][0], np);
+	} else {
+	  ctxt_.ibcast_recv(1, 1, &np, 1, irow, icol);
+	  sp.vnlr_[ll][ii].resize(np);
+	  ctxt_.dbcast_recv(np, 1, &sp.vnlr_[ll][ii][0], np, irow, icol);
+	}
+
+	// the weights
+	if ( ctxt_.oncoutpe() ) {
+	  ctxt_.dbcast_send(sp.nchannels_, 1, &sp.dij_[ll][ii][0], sp.nchannels_);
+	} else {
+	  sp.dij_[ll][ii].resize(sp.nchannels_);
+	  ctxt_.dbcast_recv(sp.nchannels_, 1, &sp.dij_[ll][ii][0], sp.nchannels_, irow, icol);
+	}
+
+      }
+    }
+    
+  } else if (!sp.ultrasoft()) {
+
     for ( int l = 0; l <= sp.lmax_; l++ )
     {
       int np_vps;
