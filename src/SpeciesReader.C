@@ -93,17 +93,28 @@ void SpeciesReader::readSpecies (Species& sp, const string uri)
 
     //ewd:  determine type of pseudopotential
     bool ultrasoft = false;
+    bool oncv = false;
 
     {
       XMLFile::Tag tag = xml_file.next_tag("ultrasoft_pseudopotential");
       ultrasoft = tag.exists();
-      sp.usoft_ = ultrasoft;
-      if (ultrasoft) 
-	cout << "  <!-- SpeciesReader::readSpecies: potential type:  ultrasoft -->" << endl;
-      else 
-	cout << "  <!-- SpeciesReader::readSpecies: potential type:  norm-conserving -->" << endl;
     }
 
+    sp.usoft_ = ultrasoft;
+
+    if(!ultrasoft){
+      XMLFile::Tag tag = xml_file.next_tag("norm_conserving_semilocal_pseudopotential");
+      oncv = tag.exists();
+    }
+    
+    if (ultrasoft) {
+      cout << "  <!-- SpeciesReader::readSpecies: potential type:  ultrasoft -->" << endl;
+    } else if(oncv) {
+      cout << "  <!-- SpeciesReader::readSpecies: potential type:  ONCV norm-conserving -->" << endl;
+    } else {
+      cout << "  <!-- SpeciesReader::readSpecies: potential type:  norm-conserving -->" << endl;
+    }
+    
     xml_file.reset();
     
     {
@@ -146,7 +157,7 @@ void SpeciesReader::readSpecies (Species& sp, const string uri)
 	   << " -->" << endl;
     }
 
-    {
+    if(!oncv){
       XMLFile::Tag tag = xml_file.next_tag("lmax");
       tag.get_value(sp.lmax_);
       cout << "  <!-- SpeciesReader::readSpecies: read " << tag.name() << " "
@@ -154,7 +165,7 @@ void SpeciesReader::readSpecies (Species& sp, const string uri)
 	   << " -->" << endl;
     }
     
-    if (!ultrasoft) { 
+    if (!ultrasoft && !oncv) { 
       {
 	XMLFile::Tag tag = xml_file.next_tag("llocal");
         tag.get_value(sp.llocal_);
