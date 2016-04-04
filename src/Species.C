@@ -203,8 +203,20 @@ bool Species::initialize(double rcpsval)
     // spline vlocal
     spline(&rps_[0],&vps_[0][0],ndft_,
            SPLINE_FLAT_BC,SPLINE_NATURAL_BC,&vps_spl_[0][0]);
-  }
-  else {
+
+  } else if(oncv_){
+
+    vloc_.resize(ndft_);
+    for (int ip = np; ip < ndft_; ip++ ) vloc_[ip] = - zval_/rps_[ip];
+
+    for(int ll = 0; ll <= lmax_; ll++ ){
+      for(int ii = 0; ii < nchannels_; ii++){
+	vnlr_[ll][ii].resize(ndft_);
+	for (int ip = np; ip < ndft_; ip++ ) vnlr_[ll][ii][ip] = 0.0;
+      }
+    }
+    
+  } else {
     vnlr.resize(lmax_+1);
     //  vnlg_ is dimensioned ndft_+1 since it is passed to cosft1
     //  See Numerical Recipes 2nd edition for an explanation.
@@ -242,10 +254,10 @@ bool Species::initialize(double rcpsval)
   // local potential: subtract the long range part due to the smeared charge
   // Next line: constant is 2/sqrt(pi)
   // math.h: # define M_2_SQRTPI     1.12837916709551257390  /* 2/sqrt(pi) */
-  vlocr[0] = vps_[llocal_][0] + (zval_/rcps_) * M_2_SQRTPI;
-  for ( int i = 1; i < ndft_; i++ )
-  {
-    vlocr[i] = vps_[llocal_][i] + (zval_/rps_[i]) * erf( rps_[i]/rcps_ );
+  if(!oncv_) {
+    substract_long_range_part(vps_[llocal_], vlocr);
+  } else {
+    substract_long_range_part(vloc_, vlocr);
   }
   
   //  Prepare the function vlocr to be used later in the Bessel transforms:
@@ -1722,7 +1734,7 @@ void Species::set_hubbard_u(double uval, int lval)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void Species::substract_long_range_part(const vector<double> & vloc, vector<double> vloc_sr) const {
+void Species::substract_long_range_part(const vector<double> & vloc, vector<double> & vloc_sr) const {
   // local potential: subtract the long range part due to the smeared charge
   // Next line: constant is 2/sqrt(pi)
   // math.h: # define M_2_SQRTPI     1.12837916709551257390  /* 2/sqrt(pi) */

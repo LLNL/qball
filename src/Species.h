@@ -123,7 +123,7 @@ class Species {
   vector<double> rhog_nlcc_; // non-linear core correction, radial fn. in reciprocal space
   vector<double> rhog_nlcc_spl_;
 
-  void substract_long_range_part(const vector<double> & vloc, vector<double> vloc_sr) const;
+  void substract_long_range_part(const vector<double> & vloc, vector<double> & vloc_sr) const;
   
   public:
 
