@@ -79,7 +79,7 @@ class Species {
 
   // oncv specific
   bool oncv_;            // true for oncv pseudos
-  int nchannels_;        // number of channels, for the moment we assume this is always 2
+  int nchannels_;        // number of channels, for the moment we assume this is always 2 (1 for other pseudos)
   vector<vector<vector<double> > > vnlr_;  // projectors for each l and channel
   vector<double> vloc_;  // local potential for oncv
   vector<vector<vector<double> > > dij_; // the weight matrix
@@ -122,6 +122,8 @@ class Species {
   vector<double> rhor_nlcc_; // non-linear core correction, radial fn. in real space
   vector<double> rhog_nlcc_; // non-linear core correction, radial fn. in reciprocal space
   vector<double> rhog_nlcc_spl_;
+
+  void substract_long_range_part(const vector<double> & vloc, vector<double> vloc_sr) const;
   
   public:
 

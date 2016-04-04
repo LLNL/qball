@@ -80,7 +80,14 @@ bool Species::initialize(double rcpsval)
 
   //const int np = vps_[0].size();
   //ewd store initsize to keep ndft_ from growing too large on subsequent calls
-  if (initsize_ == -1) initsize_ = vps_[0].size();
+  if (initsize_ == -1) {
+    if(!oncv_) {
+      initsize_ = vps_[0].size();
+    } else {
+      initsize_ = vnlr_[0].size();
+    }
+  }
+  
   const int np = initsize_;
 
   if (zval_ < 0) throw SpeciesInitException("zval_ < 0");
@@ -88,13 +95,15 @@ bool Species::initialize(double rcpsval)
   if (mass_ < 0.0) throw SpeciesInitException("mass_ < 0");
   if (lmax_ < 0 || lmax_ > 3) throw SpeciesInitException("lmax_ <0 or lmax_ >3");
 
-  if (!usoft_)
+  if (!usoft_ && !oncv_){
     if (vps_.size() < lmax_+1) throw SpeciesInitException("vps_.size < lmax_+1");
+  }
 
-  if (llocal_ < 0 || llocal_ > lmax_) 
-      throw SpeciesInitException("llocal_ < 0 || llocal_ > lmax_");
-      
-  if (!usoft_) {
+  if(!oncv_){
+    if (llocal_ < 0 || llocal_ > lmax_) throw SpeciesInitException("llocal_ < 0 || llocal_ > lmax_");
+  }
+  
+  if (!usoft_ && !oncv_) {
     if ( nquad_ == 0 ) // KB potential
     {
       for ( int l = 0; l <= lmax_; l++ )
@@ -113,7 +122,7 @@ bool Species::initialize(double rcpsval)
   {
     if ( l != llocal_ )
     {
-       nlm_ += 2 * l + 1;
+      nlm_ += nchannels_*(2*l + 1);
     }
   }
   
@@ -1709,4 +1718,18 @@ void Species::set_hubbard_u(double uval, int lval)
       cout << "<ERROR> Species::set_hubbard_u: hubbard_l = llocal for species " << name_ << "! This is not currently supported.</ERROR>" << endl;
     MPI_Abort(MPI_COMM_WORLD, 2);
   }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void Species::substract_long_range_part(const vector<double> & vloc, vector<double> vloc_sr) const {
+  // local potential: subtract the long range part due to the smeared charge
+  // Next line: constant is 2/sqrt(pi)
+  // math.h: # define M_2_SQRTPI     1.12837916709551257390  /* 2/sqrt(pi) */
+  
+  vloc_sr[0] = vloc[0] + (zval_/rcps_)*M_2_SQRTPI;
+  for (int ip = 1; ip < ndft_; ip++){
+    vloc_sr[ip] = vloc[ip] + (zval_/rps_[ip]) * erf( rps_[ip]/rcps_ );
+  }
+  
 }
