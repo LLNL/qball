@@ -168,6 +168,7 @@ void SpeciesReader::readSpecies (Species& sp, const string uri)
     } else {
       sp.lmax_ = 3; // for the moment we assume is 3, we might have to decrease it later
       sp.llocal_ = -1; // no local component for ONCV
+      sp.nquad_ = 0;
     }
     
     if (!ultrasoft && !oncv) { 

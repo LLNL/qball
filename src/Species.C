@@ -163,7 +163,7 @@ bool Species::initialize(double rcpsval)
     vps_[0].resize(ndft_);
     vps_spl_[0].resize(ndft_);
   }
-  else {
+  else if(!oncv_){
     vps_spl_.resize(lmax_+1);
     phi_spl_.resize(lmax_+1);
   
@@ -320,54 +320,63 @@ bool Species::initialize(double rcpsval)
          SPLINE_FLAT_BC,SPLINE_NATURAL_BC,&vlocg_spl[0]);
 
   // Non-local KB projectors
-  if ( !usoft_ && nquad_ == 0 && lmax_ > 0)
-  {
-    for ( int l = 0; l <= lmax_; l++ )
-    {
-      wsg_[l] = 0.0;
+  if ( !usoft_ && nquad_ == 0 && lmax_ > 0){
 
-      if ( l != llocal_ )
-      {
-        // for KB potentials, compute weights wsg[l]
-        //  Compute weight wsg_[l] by integration on the linear mesh
-        for ( int i = 0; i < ndft_; i++ )
-        {
-          double tmp = phi_[l][i] * rps_[i];
-          fint[i] = ( vps_[l][i] - vps_[llocal_][i] ) * tmp * tmp;
-        }
-        double tmp = simpsn(ndft_,&fint[0]);
-        assert(tmp != 0.0);
-        // Next lines: store 1/<phi|delta_v| phi > in wsg[is][l]
-        wsg_[l] = 1.0 / ( deltar_ * tmp );
+    if(!oncv_){
+    
+      for ( int l = 0; l <= lmax_; l++ ){
+	wsg_[l] = 0.0;
 
-        if (ctxt_.oncoutpe()) 
-          cout << "<!-- Kleinman-Bylander normalization term wsg[" << l << "] = " << wsg_[l] << " -->" << endl;
+	if ( l != llocal_ ){
+	  // for KB potentials, compute weights wsg[l]
+	  //  Compute weight wsg_[l] by integration on the linear mesh
+	  for ( int i = 0; i < ndft_; i++ )
+	    {
+	      double tmp = phi_[l][i] * rps_[i];
+	      fint[i] = ( vps_[l][i] - vps_[llocal_][i] ) * tmp * tmp;
+	    }
+	  double tmp = simpsn(ndft_,&fint[0]);
+	  assert(tmp != 0.0);
+	  // Next lines: store 1/<phi|delta_v| phi > in wsg[is][l]
+	  wsg_[l] = 1.0 / ( deltar_ * tmp );
 
-        //   compute non-local projectors:
-        //   w(G) = Ylm(G) i^l 4 pi \int r^2 phi_l(r) j_l(Gr) v_l(r) dr
-        //   -> store 4 pi v_l(r) phi_l(r) dr in vnlr[l][i]
-        //   the Bessel transform is then done by
-        //   l=0: j_0(Gr) = sin(Gr)/(Gr)
-        //        w_0(G) = Ylm(G)  1/G \sum_r sin(Gr) r vnlr
-        //   l=1: j_1(Gr) = sin(Gr)/(Gr)^2 - cos(Gr)/Gr
-        //        w_1(G) = Ylm(G) i^-1 1/G^2 \sum_r sin(Gr) vnlr -
-        //                 Ylm(G) i^-1 1/G   \sum_r cos(Gr) r vnlr
-        //   l=2: j_2(Gr) = sin(Gr)*(3/(Gr)^3 -1/(Gr)) - 3*cos(Gr)/(Gr)^2
-        //        w_2(G) = Ylm(G) i^-2 (  3/G^3 \sum_r sin(Gr)/r  vnlr -
-        //                                1/G   \sum_r sin(Gr)*r  vnlr -
-        //                                3/G^2 \sum_r cos(Gr)    vnlr )
-        //   l=3: j_3(Gr) = sin(Gr)*(15/(Gr)^3-6/Gr) - cos(Gr)*(15/(Gr)^2 - 1)
-        //        w_3(G) = Ylm(G) i^-3 (  15/G^3 \sum_r sin(Gr)/r vnlr -
-        //                                 6/G   \sum_r sin(Gr)*r vnlr -
-        //                                15/G^2 \sum_r cos(Gr)   vnlr + 
-        //                                       \sum_r cos(Gr)*r^2 vnlr )
+	  if (ctxt_.oncoutpe()) 
+	    cout << "<!-- Kleinman-Bylander normalization term wsg[" << l << "] = " << wsg_[l] << " -->" << endl;
+
+	  //   compute non-local projectors:
+	  //   w(G) = Ylm(G) i^l 4 pi \int r^2 phi_l(r) j_l(Gr) v_l(r) dr
+	  //   -> store 4 pi v_l(r) phi_l(r) dr in vnlr[l][i]
+	  //   the Bessel transform is then done by
+	  //   l=0: j_0(Gr) = sin(Gr)/(Gr)
+	  //        w_0(G) = Ylm(G)  1/G \sum_r sin(Gr) r vnlr
+	  //   l=1: j_1(Gr) = sin(Gr)/(Gr)^2 - cos(Gr)/Gr
+	  //        w_1(G) = Ylm(G) i^-1 1/G^2 \sum_r sin(Gr) vnlr -
+	  //                 Ylm(G) i^-1 1/G   \sum_r cos(Gr) r vnlr
+	  //   l=2: j_2(Gr) = sin(Gr)*(3/(Gr)^3 -1/(Gr)) - 3*cos(Gr)/(Gr)^2
+	  //        w_2(G) = Ylm(G) i^-2 (  3/G^3 \sum_r sin(Gr)/r  vnlr -
+	  //                                1/G   \sum_r sin(Gr)*r  vnlr -
+	  //                                3/G^2 \sum_r cos(Gr)    vnlr )
+	  //   l=3: j_3(Gr) = sin(Gr)*(15/(Gr)^3-6/Gr) - cos(Gr)*(15/(Gr)^2 - 1)
+	  //        w_3(G) = Ylm(G) i^-3 (  15/G^3 \sum_r sin(Gr)/r vnlr -
+	  //                                 6/G   \sum_r sin(Gr)*r vnlr -
+	  //                                15/G^2 \sum_r cos(Gr)   vnlr + 
+	  //                                       \sum_r cos(Gr)*r^2 vnlr )
  
-        for ( int i = 0; i < ndft_; i++ )
-        {
-          vnlr[l][i] = fpi * deltar_ *
-                       ( vps_[l][i] - vps_[llocal_][i] ) * phi_[l][i];
-        }
+	  for ( int i = 0; i < ndft_; i++ )
+	    {
+	      vnlr[l][i] = fpi * deltar_ *
+		( vps_[l][i] - vps_[llocal_][i] ) * phi_[l][i];
+	    }
+	}
       }
+
+    } else {
+
+      for ( int l = 0; l <= lmax_; l++ ){
+	wsg_[l] = dij_[0][l][l];
+	for ( int i = 0; i < ndft_; i++ ) vnlr[l][i] = vnlr_[l][0][i];
+      }
+      
     }
 
     //  compute radial Fourier transforms of vnlr
@@ -400,7 +409,8 @@ bool Species::initialize(double rcpsval)
   if (hubbard_l_ > -1)
   {
     assert(!usoft_); //ewd:  DFT+U not implemented for ultrasoft
-
+    assert(!oncv_);  //We don't have orbitals for ONCV
+    
     phir_.resize(ndft_+1);
     phig_.resize(ndft_+1);
     phig_spl_.resize(ndft_+1);
