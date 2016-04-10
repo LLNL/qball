@@ -181,6 +181,7 @@ bool Species::initialize(double rcpsval)
   vector<double> fint(ndft_);
   
   wsg_.resize(lmax_+1);
+  for(int ll = 0; ll < lmax_ + 1; ll++) wsg_[ll].resize(nchannels_);
   gspl_.resize(ndft_);
   vlocg_.resize(ndft_);
   vlocg_spl.resize(ndft_);
@@ -325,7 +326,7 @@ bool Species::initialize(double rcpsval)
     if(!oncv_){
     
       for ( int l = 0; l <= lmax_; l++ ){
-	wsg_[l] = 0.0;
+	wsg_[l][0] = 0.0;
 
 	if ( l != llocal_ ){
 	  // for KB potentials, compute weights wsg[l]
@@ -338,10 +339,10 @@ bool Species::initialize(double rcpsval)
 	  double tmp = simpsn(ndft_,&fint[0]);
 	  assert(tmp != 0.0);
 	  // Next lines: store 1/<phi|delta_v| phi > in wsg[is][l]
-	  wsg_[l] = 1.0 / ( deltar_ * tmp );
+	  wsg_[l][0] = 1.0 / ( deltar_ * tmp );
 
 	  if (ctxt_.oncoutpe()) 
-	    cout << "<!-- Kleinman-Bylander normalization term wsg[" << l << "] = " << wsg_[l] << " -->" << endl;
+	    cout << "<!-- Kleinman-Bylander normalization term wsg[" << l << "] = " << wsg_[l][0] << " -->" << endl;
 
 	  //   compute non-local projectors:
 	  //   w(G) = Ylm(G) i^l 4 pi \int r^2 phi_l(r) j_l(Gr) v_l(r) dr
@@ -372,8 +373,10 @@ bool Species::initialize(double rcpsval)
 
     } else {
 
-      for ( int l = 0; l <= lmax_; l++ ){
-	wsg_[l] = dij_[0][l][l];
+      for ( int l = 0; l < lmax_ + 1; l++ ){
+	for (int ic = 0; ic < nchannels_; ic++){
+	  wsg_[l][ic] = dij_[l][ic][ic];
+	}
 	for ( int i = 0; i < ndft_; i++ ) vnlr[l][i] = vnlr_[l][0][i];
       }
       
