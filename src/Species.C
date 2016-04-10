@@ -228,8 +228,6 @@ bool Species::initialize(double rcpsval)
     {
       vnlr_[l].resize(nchannels_);
       vnlr_[l][0].resize(ndft_);
-      vnlg_[l][0].resize(ndft_+1);
-      vnlg_spl[l][0].resize(ndft_+1);
     }
   
     // Extend vps_[l][i] up to ndft_ using -zv/r
@@ -325,7 +323,7 @@ bool Species::initialize(double rcpsval)
          SPLINE_FLAT_BC,SPLINE_NATURAL_BC,&vlocg_spl[0]);
 
   // Non-local KB projectors
-  if ( !usoft_ && nquad_ == 0 && lmax_ > 0){
+  if ( !usoft_ && nquad_ == 0 && non_local()){
 
     if(!oncv_){
     
@@ -390,6 +388,9 @@ bool Species::initialize(double rcpsval)
       for(int ic = 0; ic < nchannels_; ic++){
 
 	if ( l != llocal_ ){
+	  vnlg_[l][ic].resize(ndft_ + 1);
+	  vnlg_spl[l][ic].resize(ndft_ + 1);
+
 	  bessel_trans(l, vnlr_[l][ic], vnlg_[l][ic]);
 	  if ( l == 0 || l == 2 || l == 3){
 	    
@@ -407,7 +408,7 @@ bool Species::initialize(double rcpsval)
 	
       }
     } // l
-  } // nquad_ == 0 && lmax_ > 0 (KB projectors)
+  } // nquad_ == 0 && non_local() (KB projectors)
 
   // calculate radial Fourier transforms of atomic orbitals for DFT+U
   if (hubbard_l_ > -1)
