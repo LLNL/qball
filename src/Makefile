@@ -164,7 +164,7 @@ xmlextract: xmlextract.o
 # generate dependencies in makefile: use -Y to avoid library header files
 # that are likely to be different on other platforms.
  depend :
-	@makedepend -f .depend_$(ARCH) -p'($(OBJDIR)/' -o '.o)' -Y -D$(PLT) *.[cCh] 2> /dev/null
+	makedepend -f .depend_$(ARCH) -p'($(OBJDIR)/' -o '.o)' -Y -D$(PLT) *.[cCh] 2> /dev/null
 
 .depend_$(ARCH): $(QBSRC)
 	@touch .depend_$(ARCH)
