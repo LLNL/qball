@@ -150,7 +150,7 @@ class Species {
   // number of non-local projectors sum_(l!=llocal) (2*l+1)
   int nlm(void) { return nlm_; }
   
-  bool non_local(void) { return lmax_ > 0; };
+  bool non_local(void) { return lmax_ > 0 || oncv_; };
   double eself(void)
   { return zval_ * zval_ / ( sqrt ( 2.0 * M_PI ) * rcps_ ); };
 
