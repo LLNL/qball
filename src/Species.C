@@ -1477,9 +1477,8 @@ void Species::dvlocg(double g, double &v, double &dv)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-void Species::vnlg(int l, double g, double &v)
+void Species::vnlg(int l, int ic, double g, double &v)
 {
-  int ic = 0;
   assert ( l >= 0 && l <= lmax_ );
   if ( l == llocal_ || g > gspl_[ndft_-1] )
   {
@@ -1492,9 +1491,8 @@ void Species::vnlg(int l, double g, double &v)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-void Species::dvnlg(int l, double g, double &v, double &dv)
+void Species::dvnlg(int l, int ic, double g, double &v, double &dv)
 {
-  int ic = 0;
   assert ( l >= 0 && l <= lmax_ );
   if ( l == llocal_ || g > gspl_[ndft_-1] )
   {

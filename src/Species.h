@@ -158,8 +158,8 @@ class Species {
   void dvpsr(int l, double r, double &v, double &dv);  // Vps and dVps/dr 
   void vlocg(double q, double &v);                     // Vloc(g)
   void dvlocg(double q, double &v, double &dv);        // Vloc(g) and dVloc/dg
-  void vnlg(int l, double q, double &v);               // Vnl(l,g)
-  void dvnlg(int l, double q, double &v, double &dv);  // Vnl(l,g) and dVnl/dg
+  void vnlg(int l, int ic, double q, double &v);               // Vnl(l,g)
+  void dvnlg(int l, int ic, double q, double &v, double &dv);  // Vnl(l,g) and dVnl/dg
   void phig(double q, double &v);                      // phi(g) at hubbard_l
   void dphig(double q, double &v, double &dv);         // phi(g), dphi/dg at hubbard_l
   int nbeta(void) { return nbeta_; }                   // nbeta for this species
@@ -174,7 +174,7 @@ class Species {
   double qfung(int q, int ltot, double g);             // Q_nm^L(g)
   double rhog_nlcc(double g);
   double rhopsg(double q);        // pseudocharge in g space
-  double wsg(int l) { return wsg_[l][0]; };
+  double wsg(int l, int ic) { return wsg_[l][ic]; };
   double rcut_loc(double epsilon); // radius beyond which potential is local
   void set_hubbard_u(double uval, int lval);
   double hubbard_u(void) { return hubbard_u_; }
@@ -189,7 +189,7 @@ class Species {
   double ylm(int l, int m, double gx, double gy, double gz);  // spherical harmonics
   bool ultrasoft(void) { return usoft_; }
   bool nlcc(void) { return nlcc_; }
-  
+  int nchannels() const { return nchannels_; }
   const vector<vector<double> >& vps(void) const { return vps_; }
   const vector<vector<double> >& phi(void) const { return phi_; }
   

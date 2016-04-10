@@ -58,6 +58,8 @@ class NonLocalPotential
   vector<int>             npr;      // npr[is]
   vector<int>             nprna;    // nprna[is]
   vector<vector<int> >    lproj;    // lproj[is][ipr]
+  vector<vector<int> >    icproj;   // icproj[is][ipr]
+  vector<vector<vector<vector<int> > > > iprojlm; // iprojlm[is][ic][l][m]
   vector<vector<double> > wt;       // wt[is][ipr]
   vector<vector<double> > twnl;     // twnl[is][npr*ngwl]
   vector<vector<double> > dtwnl;    // dtwnl[is][6*npr*ngwl], ij=0,..,5
