@@ -189,6 +189,10 @@ bool Species::initialize(double rcpsval)
   if (!usoft_) {
     vnlg_.resize(lmax_+1);
     vnlg_spl.resize(lmax_+1);
+    for(int ll = 0; ll < lmax_ + 1; ll++){
+      vnlg_[ll].resize(nchannels_);
+      vnlg_spl[ll].resize(nchannels_);
+    }
   }
   
   vector<double> vlocr(ndft_);
@@ -224,8 +228,8 @@ bool Species::initialize(double rcpsval)
     {
       vnlr_[l].resize(nchannels_);
       vnlr_[l][0].resize(ndft_);
-      vnlg_[l].resize(ndft_+1);
-      vnlg_spl[l].resize(ndft_+1);
+      vnlg_[l][0].resize(ndft_+1);
+      vnlg_spl[l][0].resize(ndft_+1);
     }
   
     // Extend vps_[l][i] up to ndft_ using -zv/r
@@ -383,26 +387,25 @@ bool Species::initialize(double rcpsval)
     //  compute radial Fourier transforms of vnlr
     for ( int l = 0; l <= lmax_; l++ )
     {
-      if ( l != llocal_ )
-      {
-        bessel_trans(l,vnlr_[l][0], vnlg_[l]);
-        if ( l == 0 || l == 2 || l == 3)
-        {
-          //  Initialize cubic spline interpolation
-          //  Use zero first derivative at G=0 and natural (y"=0) at Gmax
+      for(int ic = 0; ic < nchannels_; ic++){
 
-          spline(&gspl_[0],&vnlg_[l][0],ndft_,SPLINE_FLAT_BC,SPLINE_NATURAL_BC,
-                 &vnlg_spl[l][0]);
-        }
-        else if ( l == 1 )
-        {
-          // Initialize spline interpolation
-          // Use natural first derivative at G=0 and natural (y"=0) at Gmax
-
-          spline(&gspl_[0],&vnlg_[l][0],ndft_,
-                 SPLINE_NATURAL_BC,SPLINE_NATURAL_BC,&vnlg_spl[l][0]);
-        }
-      } // l != llocal_
+	if ( l != llocal_ ){
+	  bessel_trans(l, vnlr_[l][ic], vnlg_[l][ic]);
+	  if ( l == 0 || l == 2 || l == 3){
+	    
+	    //  Initialize cubic spline interpolation
+	    //  Use zero first derivative at G=0 and natural (y"=0) at Gmax
+	    spline(&gspl_[0], &vnlg_[l][ic][0], ndft_, SPLINE_FLAT_BC, SPLINE_NATURAL_BC, &vnlg_spl[l][ic][0]);
+	    
+	  } else if ( l == 1 ){
+	    // Initialize spline interpolation
+	    // Use natural first derivative at G=0 and natural (y"=0) at Gmax
+	    
+	    spline(&gspl_[0], &vnlg_[l][ic][0], ndft_, SPLINE_NATURAL_BC, SPLINE_NATURAL_BC, &vnlg_spl[l][ic][0]);
+	  }
+	} // l != llocal_
+	
+      }
     } // l
   } // nquad_ == 0 && lmax_ > 0 (KB projectors)
 
@@ -1476,6 +1479,7 @@ void Species::dvlocg(double g, double &v, double &dv)
 ////////////////////////////////////////////////////////////////////////////////
 void Species::vnlg(int l, double g, double &v)
 {
+  int ic = 0;
   assert ( l >= 0 && l <= lmax_ );
   if ( l == llocal_ || g > gspl_[ndft_-1] )
   {
@@ -1483,13 +1487,14 @@ void Species::vnlg(int l, double g, double &v)
   }
   else
   {
-    splint(&gspl_[0],&vnlg_[l][0],&vnlg_spl[l][0],ndft_,g,&v);
+    splint(&gspl_[0], &vnlg_[l][ic][0], &vnlg_spl[l][ic][0], ndft_, g, &v);
   }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 void Species::dvnlg(int l, double g, double &v, double &dv)
 {
+  int ic = 0;
   assert ( l >= 0 && l <= lmax_ );
   if ( l == llocal_ || g > gspl_[ndft_-1] )
   {
@@ -1498,7 +1503,7 @@ void Species::dvnlg(int l, double g, double &v, double &dv)
   }
   else
   {
-    splintd(&gspl_[0],&vnlg_[l][0],&vnlg_spl[l][0],ndft_,g,&v,&dv);
+    splintd(&gspl_[0], &vnlg_[l][ic][0], &vnlg_spl[l][ic][0], ndft_, g, &v, &dv);
   }
 }
 
