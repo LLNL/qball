@@ -84,7 +84,7 @@ bool Species::initialize(double rcpsval)
     if(!oncv_) {
       initsize_ = vps_[0].size();
     } else {
-      initsize_ = vnlr_[0].size();
+      initsize_ = vnlr_[0][0].size();
     }
   }
   
