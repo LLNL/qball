@@ -192,7 +192,6 @@ bool Species::initialize(double rcpsval)
   }
   
   vector<double> vlocr(ndft_);
-  vector<vector<double> > vnlr;
 
   if (usoft_) {
     assert(llocal_ == 0); // SpeciesReader currently assumes this for ultrasoft
@@ -218,12 +217,13 @@ bool Species::initialize(double rcpsval)
     }
     
   } else {
-    vnlr.resize(lmax_+1);
+    vnlr_.resize(lmax_+1);
     //  vnlg_ is dimensioned ndft_+1 since it is passed to cosft1
     //  See Numerical Recipes 2nd edition for an explanation.
     for ( int l = 0; l <= lmax_; l++ )
     {
-      vnlr[l].resize(ndft_);
+      vnlr_[l].resize(nchannels_);
+      vnlr_[l][0].resize(ndft_);
       vnlg_[l].resize(ndft_+1);
       vnlg_spl[l].resize(ndft_+1);
     }
@@ -365,8 +365,7 @@ bool Species::initialize(double rcpsval)
  
 	  for ( int i = 0; i < ndft_; i++ )
 	    {
-	      vnlr[l][i] = fpi * deltar_ *
-		( vps_[l][i] - vps_[llocal_][i] ) * phi_[l][i];
+	      vnlr_[l][0][i] = fpi*deltar_*( vps_[l][i] - vps_[llocal_][i] )*phi_[l][i];
 	    }
 	}
       }
@@ -377,7 +376,6 @@ bool Species::initialize(double rcpsval)
 	for (int ic = 0; ic < nchannels_; ic++){
 	  wsg_[l][ic] = dij_[l][ic][ic];
 	}
-	for ( int i = 0; i < ndft_; i++ ) vnlr[l][i] = vnlr_[l][0][i];
       }
       
     }
@@ -387,7 +385,7 @@ bool Species::initialize(double rcpsval)
     {
       if ( l != llocal_ )
       {
-        bessel_trans(l,vnlr[l],vnlg_[l]);
+        bessel_trans(l,vnlr_[l][0], vnlg_[l]);
         if ( l == 0 || l == 2 || l == 3)
         {
           //  Initialize cubic spline interpolation
