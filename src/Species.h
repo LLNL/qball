@@ -80,7 +80,7 @@ class Species {
   // oncv specific
   bool oncv_;            // true for oncv pseudos
   int nchannels_;        // number of channels, for the moment we assume this is always 2 (1 for other pseudos)
-  vector<vector<vector<double> > > vnlr_;  // projectors for each l and channel
+  vector<vector<vector<double> > > projectors_;  // projectors for each l and channel
   vector<double> vloc_;  // local potential for oncv
   vector<vector<vector<double> > > dij_; // the weight matrix
   

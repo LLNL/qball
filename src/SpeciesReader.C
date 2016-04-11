@@ -250,10 +250,10 @@ void SpeciesReader::readSpecies (Species& sp, const string uri)
 	  tag.get_attribute("size", size);
 
 	  if(oncv){
-	    sp.vnlr_.resize(sp.vnlr_.size() + 1);
-	    sp.vnlr_[l].resize(sp.nchannels_);
-	    sp.vnlr_[l][0].resize(size);
-	    tag.get_value(sp.vnlr_[l][0].begin(), sp.vnlr_[l][0].begin() + size);
+	    sp.projectors_.resize(sp.projectors_.size() + 1);
+	    sp.projectors_[l].resize(sp.nchannels_);
+	    sp.projectors_[l][0].resize(size);
+	    tag.get_value(sp.projectors_[l][0].begin(), sp.projectors_[l][0].begin() + size);
 	    cout << "  <!-- SpeciesReader::readSpecies: read " << tag.name() << " l="
 		 << l << " i=0 size=" << size << " -->" << endl;
 	  }
@@ -262,8 +262,8 @@ void SpeciesReader::readSpecies (Species& sp, const string uri)
 
 	if(oncv){
 	  XMLFile::Tag tag = xml_file.next_tag("projector");
-	  sp.vnlr_[l][1].resize(size);
-	  tag.get_value(sp.vnlr_[l][1].begin(), sp.vnlr_[l][1].begin() + size);
+	  sp.projectors_[l][1].resize(size);
+	  tag.get_value(sp.projectors_[l][1].begin(), sp.projectors_[l][1].begin() + size);
 	  cout << "  <!-- SpeciesReader::readSpecies: read " << tag.name() << " l="
 	       << l << " i=1 size=" << size << " -->" << endl;
 	}
@@ -772,14 +772,14 @@ void SpeciesReader::bcastSpecies(Species& sp)
     }
 
     if(!ctxt_.oncoutpe()){
-      sp.vnlr_.resize(sp.lmax_ + 1);
+      sp.projectors_.resize(sp.lmax_ + 1);
       sp.dij_.resize(sp.lmax_ + 1);
     }
     
     for(int ll = 0; ll <= sp.lmax_; ll++ ){
 
       if(!ctxt_.oncoutpe()){
-	sp.vnlr_[ll].resize(sp.nchannels_);
+	sp.projectors_[ll].resize(sp.nchannels_);
 	sp.dij_[ll].resize(sp.nchannels_);
       }
     
@@ -787,13 +787,13 @@ void SpeciesReader::bcastSpecies(Species& sp)
 
 	// the projectors
 	if ( ctxt_.oncoutpe() ) {
-	  np = sp.vnlr_[ll][ii].size();
+	  np = sp.projectors_[ll][ii].size();
 	  ctxt_.ibcast_send(1, 1, &np, 1);
-	  ctxt_.dbcast_send(np, 1, &sp.vnlr_[ll][ii][0], np);
+	  ctxt_.dbcast_send(np, 1, &sp.projectors_[ll][ii][0], np);
 	} else {
 	  ctxt_.ibcast_recv(1, 1, &np, 1, irow, icol);
-	  sp.vnlr_[ll][ii].resize(np);
-	  ctxt_.dbcast_recv(np, 1, &sp.vnlr_[ll][ii][0], np, irow, icol);
+	  sp.projectors_[ll][ii].resize(np);
+	  ctxt_.dbcast_recv(np, 1, &sp.projectors_[ll][ii][0], np, irow, icol);
 	}
 
 	// the weights

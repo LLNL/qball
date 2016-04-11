@@ -77,14 +77,15 @@ bool Species::initialize(double rcpsval)
   assert(description_ != "undefined");
   
   const double fpi = 4.0 * M_PI;
-
+  vector<vector<vector<double> > > vnlr;
+  
   //const int np = vps_[0].size();
   //ewd store initsize to keep ndft_ from growing too large on subsequent calls
   if (initsize_ == -1) {
     if(!oncv_) {
       initsize_ = vps_[0].size();
     } else {
-      initsize_ = vnlr_[0][0].size();
+      initsize_ = projectors_[0][0].size();
     }
   }
   
@@ -215,21 +216,12 @@ bool Species::initialize(double rcpsval)
 
     for(int ll = 0; ll <= lmax_; ll++ ){
       for(int ii = 0; ii < nchannels_; ii++){
-	vnlr_[ll][ii].resize(ndft_);
-	for (int ip = np; ip < ndft_; ip++ ) vnlr_[ll][ii][ip] = 0.0;
+	projectors_[ll][ii].resize(ndft_);
+	for (int ip = np; ip < ndft_; ip++ ) projectors_[ll][ii][ip] = 0.0;
       }
     }
     
   } else {
-    vnlr_.resize(lmax_+1);
-    //  vnlg_ is dimensioned ndft_+1 since it is passed to cosft1
-    //  See Numerical Recipes 2nd edition for an explanation.
-    for ( int l = 0; l <= lmax_; l++ )
-    {
-      vnlr_[l].resize(nchannels_);
-      vnlr_[l][0].resize(ndft_);
-    }
-  
     // Extend vps_[l][i] up to ndft_ using -zv/r
     for ( int l = 0; l <= lmax_; l++ )
     {
@@ -251,6 +243,16 @@ bool Species::initialize(double rcpsval)
       if ( l != llocal_ )
         spline(&rps_[0],&phi_[l][0],ndft_,
                SPLINE_FLAT_BC,SPLINE_NATURAL_BC,&phi_spl_[l][0]);
+    }
+  }
+
+  if(!usoft_){
+    vnlr.resize(lmax_ + 1);
+    //  vnlg_ is dimensioned ndft_+1 since it is passed to cosft1
+    //  See Numerical Recipes 2nd edition for an explanation.
+    for ( int l = 0; l <= lmax_; l++ ){
+      vnlr[l].resize(nchannels_);
+      for(int ic = 0; ic < nchannels_; ic++) vnlr[l][ic].resize(ndft_);
     }
   }
   
@@ -367,7 +369,7 @@ bool Species::initialize(double rcpsval)
  
 	  for ( int i = 0; i < ndft_; i++ )
 	    {
-	      vnlr_[l][0][i] = fpi*deltar_*( vps_[l][i] - vps_[llocal_][i] )*phi_[l][i];
+	      vnlr[l][0][i] = fpi*deltar_*( vps_[l][i] - vps_[llocal_][i] )*phi_[l][i];
 	    }
 	}
       }
@@ -377,6 +379,7 @@ bool Species::initialize(double rcpsval)
       for ( int l = 0; l < lmax_ + 1; l++ ){
 	for (int ic = 0; ic < nchannels_; ic++){
 	  wsg_[l][ic] = dij_[l][ic][ic];
+	  for (int ip = 0; ip < ndft_; ip++) vnlr[l][ic][ip] = fpi*deltar_*projectors_[l][ic][ip];
 	}
       }
       
@@ -391,7 +394,7 @@ bool Species::initialize(double rcpsval)
 	  vnlg_[l][ic].resize(ndft_ + 1);
 	  vnlg_spl[l][ic].resize(ndft_ + 1);
 
-	  bessel_trans(l, vnlr_[l][ic], vnlg_[l][ic]);
+	  bessel_trans(l, vnlr[l][ic], vnlg_[l][ic]);
 	  if ( l == 0 || l == 2 || l == 3){
 	    
 	    //  Initialize cubic spline interpolation
