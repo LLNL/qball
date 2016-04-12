@@ -300,7 +300,7 @@ void NonLocalPotential::update_twnl(const bool compute_stress) {
 		// twnl[is][ipr][ig]
 		// ipr = ilm = 0
 		// index = ig + ngwl*ipr, i.e. index = ig
-		double *t0  = &twnl[is][iprojlm[is][l][0][ic]];
+		double *t0  = &twnl[is][iprojlm[is][l][0][ic]*ngwl];
             
 		// dtwnl[is][ipr][ij][ngwl]
 		// index = ig + ngwl * ( ij + 6 * ipr ), ipr = 0
