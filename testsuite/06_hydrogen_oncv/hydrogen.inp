@@ -1,6 +1,5 @@
 set cell 20 0 0 0 20 0 0 0 20
 species hydrogen H_ONCV_PBE-1.0.xml
-#species hydrogen mod.xml
 atom H hydrogen 0.0 0.0 0.0
 set xc PBE
 set ecut 20

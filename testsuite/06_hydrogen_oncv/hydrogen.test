@@ -1,6 +1,3 @@
-# -*- coding: utf-8 mode: shell-script -*-
-# $Id: 01-carbon_atom.test 13244 2015-02-28 23:19:28Z dstrubbe $
-
 Test       : ONCV Hydrogen
 Program    : qb
 TestGroups : short-run
