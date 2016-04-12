@@ -1,0 +1,11 @@
+set cell 20 0 0 0 20 0 0 0 20
+species argon Ar_ONCV_PBE-1.1.xml
+atom Ar argon 0.0 0.0 0.0
+set xc PBE
+set ecut 15
+set wf_dyn PSD
+set ecutprec 4
+set threshold_scf 1.E-6 10
+randomize_wf
+run 0 200
+

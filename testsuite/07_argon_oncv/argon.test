@@ -1,0 +1,20 @@
+Test       : ONCV Argon
+Program    : qb
+TestGroups : short-run
+Enabled    : Yes
+
+ExtraFile  : Ar_ONCV_PBE-1.1.xml
+Input      : argon.inp
+Reference  : argon.reference.xml
+
+match ; ekin    ; GREPFIELD(out, '<ekin>',   2) ;   7.41686092
+match ; econf   ; GREPFIELD(out, '<econf>',  2) ;   0.00000000
+match ; eps     ; GREPFIELD(out, '<eps>',    2) ; -11.63366941
+match ; enl     ; GREPFIELD(out, '<enl>',    2) ;   2.99275598
+match ; ecoul   ; GREPFIELD(out, '<ecoul>',  2) ; -16.31836927
+match ; exc     ; GREPFIELD(out, '<exc>',    2) ;  -3.61764670
+match ; esr     ; GREPFIELD(out, '<esr>',    2) ;   0.00000000
+match ; eself   ; GREPFIELD(out, '<eself>',  2) ;  16.47245545
+match ; ets     ; GREPFIELD(out, '<ets>',    2) ;   0.00000000 
+match ; etotal  ; GREPFIELD(out, '<etotal>', 2) ; -21.16006848
+

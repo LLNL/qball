@@ -1,0 +1,577 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+                   ===========================
+                   I qbox qb@LL-r213         I
+                   I                         I
+                   I                         I
+                   I                         I
+                   I                         I
+                   I                         I
+                   I                         I
+                   I                         I
+                   I                         I
+                   I                         I
+                   I                         I
+                   I                         I
+                   I  F.Gygi and E. Draeger  I
+                   I                  LLNL   I
+                   I Copyright (c) 2003-2013 I
+                   ===========================
+
+-->
+<qbox:simulation xmlns:qbox="http://www.quantum-simulation.org/ns/fpmd/fpmd-1.0">
+<release> qb@LL-r213 debian </release>
+<npes> 4 </npes>
+<nthreads> 1 </nthreads>
+<user> xavier </user>
+<sysname> Linux </sysname>
+<nodename> refri </nodename>
+<start_time> 2016-04-12T06:23:37Z </start_time>
+<!-- [qbox] set cell 20 0 0 0 20 0 0 0 20 -->
+  <unitcell>
+<unit_cell 
+    a="20.00000000  0.00000000   0.00000000  "
+    b="0.00000000   20.00000000  0.00000000  "
+    c="0.00000000   0.00000000   20.00000000 " />
+  </unitcell>
+<!-- [qbox] species argon Ar_ONCV_PBE-1.1.xml -->
+  <!-- SpeciesCmd: defining species argon as Ar_ONCV_PBE-1.1.xml -->
+  <!-- SpeciesReader opening file Ar_ONCV_PBE-1.1.xml size: 64470 -->
+  <!-- SpeciesReader::readSpecies: potential type:  ONCV norm-conserving -->
+  <!-- SpeciesReader::readSpecies: read description 
+
+
+ This pseudopotential file has been produced using the code
+ ONCVPSP  (Optimized Norm-Conservinng Vanderbilt PSeudopotential)
+ scalar-relativistic version 2.1.1, 03/26/2014 by D. R. Hamann
+ The code is available through a link at URL www.mat-simresearch.com.
+ Documentation with the package provides a full discription of the
+ input data below.
+
+
+ While it is not required under the terms of the GNU GPL, it is
+ suggested that you cite D. R. Hamann, Phys. Rev. B 88, 085117 (2013)
+ in any publication using these pseudopotentials.
+
+
+ Copyright 2015 The Regents of the University of California
+ 
+ This work is licensed under the Creative Commons Attribution-ShareAlike 
+ 4.0 International License. To view a copy of this license, visit 
+ http://creativecommons.org/licenses/by-sa/4.0/ or send a letter to 
+ Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
+ 
+ This pseudopotential is part of the Schlipf-Gygi norm-conserving 
+ pseudopotential library. Its construction parameters were tuned to 
+ reproduce materials of a training set with very high accuracy and 
+ should be suitable as a general purpose pseudopotential to treat a 
+ variety of different compounds. For details of the construction and 
+ testing of the pseudopotential please refer to:
+ 
+ [insert reference to paper here]
+ 
+ We kindly ask that you include this reference in all publications 
+ associated to this pseudopotential.
+
+
+Input file for PP generation:
+
+# ATOM AND REFERENCE CONFIGURATION
+# atsym  z    nc    nv    iexc   psfile
+  Ar 18.00     3     2     4      fpmd
+#
+#   n    l    f        energy (Ha)
+    1    0    2.00
+    2    0    2.00
+    2    1    6.00
+    3    0    2.00
+    3    1    6.00
+#
+# PSEUDOPOTENTIAL AND OPTIMIZATION
+# lmax
+    1
+#
+#   l,   rc,     ep,   ncon, nbas, qcut
+    0   2.67516  -0.89253    5    8   7.97831
+    1   1.78325  -0.37741    5    8   7.45116
+#
+# LOCAL POTENTIAL
+# lloc, lpopt,  rc(5),   dvloc0
+    4    5   1.40476      0.00000
+#
+# VANDERBILT-KLEINMAN-BYLANDER PROJECTORs
+# l, nproj, debl
+    0    2   0.88095
+    1    2   3.20739
+#
+# MODEL CORE CHARGE
+# icmod, fcfact
+    0   0.00000
+#
+# LOG DERIVATIVE ANALYSIS
+# epsh1, epsh2, depsh
+   -5.00    3.00    0.02
+#
+# OUTPUT GRID
+# rlmax, drl
+    6.00    0.01
+#
+# TEST CONFIGURATIONS
+# ncnf
+    0
+# nvcnf
+#   n    l    f
+ -->
+  <!-- SpeciesReader::readSpecies: read symbol Ar -->
+  <!-- SpeciesReader::readSpecies: read atomic_number 18 -->
+  <!-- SpeciesReader::readSpecies: read mass 39.94800186 -->
+  <!-- SpeciesReader::readSpecies: read valence_charge 8 -->
+  <!-- SpeciesReader::readSpecies: read mesh_spacing 0.01000000 -->
+  <!-- SpeciesReader::readSpecies: read local_potential size=602 -->
+L = 0
+  <!-- SpeciesReader::readSpecies: read projector l=0 i=1 size=602 -->
+  <!-- SpeciesReader::readSpecies: read projector l=0 i=2 size=602 -->
+L = 1
+  <!-- SpeciesReader::readSpecies: read projector l=1 i=1 size=602 -->
+  <!-- SpeciesReader::readSpecies: read projector l=1 i=2 size=602 -->
+L = 2
+  <!-- SpeciesReader::readSpecies: read d_ij l=0 -->
+  <!-- SpeciesReader::readSpecies: read d_ij l=1 -->
+<!-- Species argon:  extending grid to rmax = 40.00000000 to increase vnlg resolution (4096 pts) -->
+SPECIES.ndft = 4096, np = 602, rmax = 40.96000000, gmax = 314.08256632, hubbard_l = -1
+
+ species argon:
+ name_ = argon
+ description_ = 
+
+
+ This pseudopotential file has been produced using the code
+ ONCVPSP  (Optimized Norm-Conservinng Vanderbilt PSeudopotential)
+ scalar-relativistic version 2.1.1, 03/26/2014 by D. R. Hamann
+ The code is available through a link at URL www.mat-simresearch.com.
+ Documentation with the package provides a full discription of the
+ input data below.
+
+
+ While it is not required under the terms of the GNU GPL, it is
+ suggested that you cite D. R. Hamann, Phys. Rev. B 88, 085117 (2013)
+ in any publication using these pseudopotentials.
+
+
+ Copyright 2015 The Regents of the University of California
+ 
+ This work is licensed under the Creative Commons Attribution-ShareAlike 
+ 4.0 International License. To view a copy of this license, visit 
+ http://creativecommons.org/licenses/by-sa/4.0/ or send a letter to 
+ Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
+ 
+ This pseudopotential is part of the Schlipf-Gygi norm-conserving 
+ pseudopotential library. Its construction parameters were tuned to 
+ reproduce materials of a training set with very high accuracy and 
+ should be suitable as a general purpose pseudopotential to treat a 
+ variety of different compounds. For details of the construction and 
+ testing of the pseudopotential please refer to:
+ 
+ [insert reference to paper here]
+ 
+ We kindly ask that you include this reference in all publications 
+ associated to this pseudopotential.
+
+
+Input file for PP generation:
+
+# ATOM AND REFERENCE CONFIGURATION
+# atsym  z    nc    nv    iexc   psfile
+  Ar 18.00     3     2     4      fpmd
+#
+#   n    l    f        energy (Ha)
+    1    0    2.00
+    2    0    2.00
+    2    1    6.00
+    3    0    2.00
+    3    1    6.00
+#
+# PSEUDOPOTENTIAL AND OPTIMIZATION
+# lmax
+    1
+#
+#   l,   rc,     ep,   ncon, nbas, qcut
+    0   2.67516  -0.89253    5    8   7.97831
+    1   1.78325  -0.37741    5    8   7.45116
+#
+# LOCAL POTENTIAL
+# lloc, lpopt,  rc(5),   dvloc0
+    4    5   1.40476      0.00000
+#
+# VANDERBILT-KLEINMAN-BYLANDER PROJECTORs
+# l, nproj, debl
+    0    2   0.88095
+    1    2   3.20739
+#
+# MODEL CORE CHARGE
+# icmod, fcfact
+    0   0.00000
+#
+# LOG DERIVATIVE ANALYSIS
+# epsh1, epsh2, depsh
+   -5.00    3.00    0.02
+#
+# OUTPUT GRID
+# rlmax, drl
+    6.00    0.01
+#
+# TEST CONFIGURATIONS
+# ncnf
+    0
+# nvcnf
+#   n    l    f
+
+ uri_ = Ar_ONCV_PBE-1.1.xml
+ symbol_ = Ar
+ atomic_number_ = 18
+ Kleinman-Bylander potential
+ valence charge = 8 / ionic mass_ = 39.94800186 (amu)
+ lmax_ =   1
+ llocal_ = -1
+ rcps_ =   1.50000000
+<!-- [qbox] atom Ar argon 0.0 0.0 0.0 -->
+<!-- [qbox] set xc PBE -->
+<!-- [qbox] set ecut 15 -->
+<!-- [qbox] set wf_dyn PSD -->
+<!-- [qbox] set ecutprec 4 -->
+<!-- [qbox] set threshold_scf 1.E-6 10 -->
+<!-- [qbox] randomize_wf -->
+<!-- Randomize_wf:  allocating wavefunction... -->
+<!-- Creating SlaterDet context 4x1 from spincontext, ispin = 0 -->
+SlaterDet.resize:  new c dimensions = 3948x4   (987x4 blocks, local data size on pe 0 = 987x4) -->
+<!-- Updated occupation of wf -->
+<!-- [qbox] run 0 200 -->
+SlaterDet.resize:  new c dimensions = 3948x4   (987x4 blocks, local data size on pe 0 = 987x4) -->
+ChargeDensity:  vbasis = 56 56 56, resize to 60 60 60
+  <!-- EnergyFunctional: charge density basis: 31335 plane waves, ngloc = 7846 -->
+  <!-- EnergyFunctional: np0v,np1v,np2v: 60 60 60 -->
+  <!-- EnergyFunctional: vft->np012(): 216000 -->
+<!-- AtomSet.set_rcps:  Ewald width for species argon is too small for reciprocal sum convergence, increasing rcps from 1.50000000 to 1.55000000 -->
+<!-- Species argon:  extending grid to rmax = 40.00000000 to increase vnlg resolution (4096 pts) -->
+SPECIES.ndft = 4096, np = 602, rmax = 40.96000000, gmax = 314.08256632, hubbard_l = -1
+<!-- AtomSet.set_rcps:  Ewald width for species argon = 1.55000000 -->
+<!-- EnergyFunctional:  number of images in real-space ewald sum = 0 for rckj = 2.19203102 -->
+<run niter_ionic="0" niter_scf="200" niter_nonscf="0">
+<wavefunction ecut="7.50000000" nspin="1" nel="8" nempty="0">
+<cell a0="20.000000 0.000000 0.000000"
+      a1="0.000000 20.000000 0.000000"
+      a2="0.000000 0.000000 20.000000"/>
+<reciprocal_lattice b0="0.314159 0.000000 0.000000"
+      b1="0.000000 0.314159 0.000000"
+      b2="0.000000 0.000000 0.314159"/>
+<refcell a0="0.000000 0.000000 0.000000"
+         a1="0.000000 0.000000 0.000000"
+         a2="0.000000 0.000000 0.000000"/>
+<slater_determinant kpoint="0.000000 0.000000 0.000000"  weight="1.000000" size="4">
+ <!-- sdcontext: 4x1 -->
+<grid nx="28" ny="28" nz="28"/>
+ <!-- basis size: 3905 -->
+ <!-- c dimensions: 3948x4   (987x4 blocks) -->
+ <density_matrix form="diagonal" size="4">
+ </density_matrix>
+</slater_determinant>
+</wavefunction>
+<!-- BOSampleStepper:  fractional occupation not detected. -->
+<iteration count="1">
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> 5.01522444 </eigenvalue_sum>
+  <etotal_int scf_iter="0">      4.98942306 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> 0.18769615 </eigenvalue_sum>
+  <etotal_int scf_iter="1">     -5.00708230 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -1.91159226 </eigenvalue_sum>
+  <etotal_int scf_iter="2">     -9.39591818 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -2.72647872 </eigenvalue_sum>
+  <etotal_int scf_iter="3">    -11.05885231 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -3.11213007 </eigenvalue_sum>
+  <etotal_int scf_iter="4">    -11.85098577 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -3.45164409 </eigenvalue_sum>
+  <etotal_int scf_iter="5">    -12.67577867 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -3.87153252 </eigenvalue_sum>
+  <etotal_int scf_iter="6">    -13.97566212 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -4.21638266 </eigenvalue_sum>
+  <etotal_int scf_iter="7">    -15.67941645 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -4.26121050 </eigenvalue_sum>
+  <etotal_int scf_iter="8">    -17.15894835 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -4.09996705 </eigenvalue_sum>
+  <etotal_int scf_iter="9">    -18.20263011 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -3.83671545 </eigenvalue_sum>
+  <etotal_int scf_iter="10">    -18.98128161 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -3.52014049 </eigenvalue_sum>
+  <etotal_int scf_iter="11">    -19.57063354 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -3.20667523 </eigenvalue_sum>
+  <etotal_int scf_iter="12">    -19.99785114 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -2.93516654 </eigenvalue_sum>
+  <etotal_int scf_iter="13">    -20.29957945 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -2.71705693 </eigenvalue_sum>
+  <etotal_int scf_iter="14">    -20.51299437 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -2.54823515 </eigenvalue_sum>
+  <etotal_int scf_iter="15">    -20.66623924 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -2.41966807 </eigenvalue_sum>
+  <etotal_int scf_iter="16">    -20.77835439 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -2.32229954 </eigenvalue_sum>
+  <etotal_int scf_iter="17">    -20.86187269 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -2.24860000 </eigenvalue_sum>
+  <etotal_int scf_iter="18">    -20.92509449 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -2.19274509 </eigenvalue_sum>
+  <etotal_int scf_iter="19">    -20.97361586 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -2.15035792 </eigenvalue_sum>
+  <etotal_int scf_iter="20">    -21.01129025 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -2.11817910 </eigenvalue_sum>
+  <etotal_int scf_iter="21">    -21.04082778 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -2.09377848 </eigenvalue_sum>
+  <etotal_int scf_iter="22">    -21.06417251 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -2.07533329 </eigenvalue_sum>
+  <etotal_int scf_iter="23">    -21.08274398 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -2.06146484 </eigenvalue_sum>
+  <etotal_int scf_iter="24">    -21.09759652 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -2.05112148 </eigenvalue_sum>
+  <etotal_int scf_iter="25">    -21.10952461 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -2.04349468 </eigenvalue_sum>
+  <etotal_int scf_iter="26">    -21.11913493 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -2.03795866 </eigenvalue_sum>
+  <etotal_int scf_iter="27">    -21.12689668 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -2.03402670 </eigenvalue_sum>
+  <etotal_int scf_iter="28">    -21.13317668 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -2.03131930 </eigenvalue_sum>
+  <etotal_int scf_iter="29">    -21.13826428 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -2.02954018 </eigenvalue_sum>
+  <etotal_int scf_iter="30">    -21.14238934 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -2.02845803 </eigenvalue_sum>
+  <etotal_int scf_iter="31">    -21.14573558 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -2.02789270 </eigenvalue_sum>
+  <etotal_int scf_iter="32">    -21.14845072 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -2.02770443 </eigenvalue_sum>
+  <etotal_int scf_iter="33">    -21.15065394 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -2.02778530 </eigenvalue_sum>
+  <etotal_int scf_iter="34">    -21.15244164 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -2.02805263 </eigenvalue_sum>
+  <etotal_int scf_iter="35">    -21.15389195 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -2.02844358 </eigenvalue_sum>
+  <etotal_int scf_iter="36">    -21.15506827 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -2.02891092 </eigenvalue_sum>
+  <etotal_int scf_iter="37">    -21.15602208 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -2.02941962 </eigenvalue_sum>
+  <etotal_int scf_iter="38">    -21.15679522 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -2.02994407 </eigenvalue_sum>
+  <etotal_int scf_iter="39">    -21.15742167 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -2.03046597 </eigenvalue_sum>
+  <etotal_int scf_iter="40">    -21.15792907 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -2.03097261 </eigenvalue_sum>
+  <etotal_int scf_iter="41">    -21.15833985 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -2.03145548 </eigenvalue_sum>
+  <etotal_int scf_iter="42">    -21.15867227 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -2.03190930 </eigenvalue_sum>
+  <etotal_int scf_iter="43">    -21.15894116 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -2.03233110 </eigenvalue_sum>
+  <etotal_int scf_iter="44">    -21.15915855 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -2.03271968 </eigenvalue_sum>
+  <etotal_int scf_iter="45">    -21.15933424 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -2.03307506 </eigenvalue_sum>
+  <etotal_int scf_iter="46">    -21.15947617 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -2.03339811 </eigenvalue_sum>
+  <etotal_int scf_iter="47">    -21.15959077 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -2.03369030 </eigenvalue_sum>
+  <etotal_int scf_iter="48">    -21.15968328 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -2.03395347 </eigenvalue_sum>
+  <etotal_int scf_iter="49">    -21.15975793 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -2.03418963 </eigenvalue_sum>
+  <etotal_int scf_iter="50">    -21.15981815 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -2.03440090 </eigenvalue_sum>
+  <etotal_int scf_iter="51">    -21.15986672 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -2.03458942 </eigenvalue_sum>
+  <etotal_int scf_iter="52">    -21.15990588 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -2.03475726 </eigenvalue_sum>
+  <etotal_int scf_iter="53">    -21.15993745 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -2.03490640 </eigenvalue_sum>
+  <etotal_int scf_iter="54">    -21.15996290 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -2.03503870 </eigenvalue_sum>
+  <etotal_int scf_iter="55">    -21.15998341 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -2.03515590 </eigenvalue_sum>
+  <etotal_int scf_iter="56">    -21.15999994 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -2.03525961 </eigenvalue_sum>
+  <etotal_int scf_iter="57">    -21.16001326 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -2.03535127 </eigenvalue_sum>
+  <etotal_int scf_iter="58">    -21.16002399 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -2.03543223 </eigenvalue_sum>
+  <etotal_int scf_iter="59">    -21.16003264 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -2.03550368 </eigenvalue_sum>
+  <etotal_int scf_iter="60">    -21.16003961 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -2.03556670 </eigenvalue_sum>
+  <etotal_int scf_iter="61">    -21.16004523 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -2.03562227 </eigenvalue_sum>
+  <etotal_int scf_iter="62">    -21.16004975 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -2.03567124 </eigenvalue_sum>
+  <etotal_int scf_iter="63">    -21.16005340 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -2.03571438 </eigenvalue_sum>
+  <etotal_int scf_iter="64">    -21.16005634 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -2.03575238 </eigenvalue_sum>
+  <etotal_int scf_iter="65">    -21.16005871 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -2.03578586 </eigenvalue_sum>
+  <etotal_int scf_iter="66">    -21.16006062 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -2.03581533 </eigenvalue_sum>
+  <etotal_int scf_iter="67">    -21.16006216 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -2.03584129 </eigenvalue_sum>
+  <etotal_int scf_iter="68">    -21.16006341 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -2.03586415 </eigenvalue_sum>
+  <etotal_int scf_iter="69">    -21.16006441 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -2.03588429 </eigenvalue_sum>
+  <etotal_int scf_iter="70">    -21.16006521 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -2.03590202 </eigenvalue_sum>
+  <etotal_int scf_iter="71">    -21.16006587 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -2.03591764 </eigenvalue_sum>
+  <etotal_int scf_iter="72">    -21.16006639 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -2.03593140 </eigenvalue_sum>
+  <etotal_int scf_iter="73">    -21.16006682 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -2.03594352 </eigenvalue_sum>
+  <etotal_int scf_iter="74">    -21.16006716 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -2.03595421 </eigenvalue_sum>
+  <etotal_int scf_iter="75">    -21.16006743 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -2.03596363 </eigenvalue_sum>
+  <etotal_int scf_iter="76">    -21.16006766 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -2.03597193 </eigenvalue_sum>
+  <etotal_int scf_iter="77">    -21.16006784 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -2.03597925 </eigenvalue_sum>
+  <etotal_int scf_iter="78">    -21.16006798 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -2.03598571 </eigenvalue_sum>
+  <etotal_int scf_iter="79">    -21.16006810 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -2.03599141 </eigenvalue_sum>
+  <etotal_int scf_iter="80">    -21.16006819 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -2.03599643 </eigenvalue_sum>
+  <etotal_int scf_iter="81">    -21.16006827 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -2.03600087 </eigenvalue_sum>
+  <etotal_int scf_iter="82">    -21.16006833 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -2.03600479 </eigenvalue_sum>
+  <etotal_int scf_iter="83">    -21.16006838 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -2.03600825 </eigenvalue_sum>
+  <etotal_int scf_iter="84">    -21.16006842 </etotal_int>
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <eigenvalue_sum> -2.03601130 </eigenvalue_sum>
+  <etotal_int scf_iter="85">    -21.16006845 </etotal_int>
+  <!-- BOSampleStepper: scf convergence at itscf = 86, scf energy varied by less than 1.00e-06 a.u. over 10 scf steps. -->
+  <!-- total_electronic_charge: 8.00000000, spin = 0 -->
+  <ekin>        7.41686156 </ekin>
+  <econf>       0.00000000 </econf>
+  <eps>       -11.63366987 </eps>
+  <enl>         2.99275593 </enl>
+  <ecoul>     -16.31836917 </ecoul>
+  <exc>        -3.61764693 </exc>
+  <esr>         0.00000000 </esr>
+  <eself>      16.47245545 </eself>
+  <ets>         0.00000000 </ets>
+  <etotal>    -21.16006848 </etotal>
+<atomset>
+<unit_cell 
+    a=" 20.00000000   0.00000000   0.00000000"
+    b="  0.00000000  20.00000000   0.00000000"
+    c="  0.00000000   0.00000000  20.00000000" />
+  <atom name="Ar" species="argon">
+    <position> 0.00000000 0.00000000 0.00000000 </position>
+    <velocity> 0.00000000 0.00000000 0.00000000 </velocity>
+    <force> 0.00000007 0.00000839 0.00002156 </force>
+  </atom>
+</atomset>
+<timing where="run"                name=" iteration"       min="5.336    " max="5.337    " count="1        "/>
+</iteration>
+<!-- memory nlp.twnl    :    0.238 MB  (0.059 MB local) -->
+<!-- memory sd.psi      :    0.238 MB  (0.059 MB local) -->
+<!-- memory sd.hpsi     :    0.238 MB  (0.059 MB local) -->
+<!-- memory cd.rhor     :    1.648 MB  (0.412 MB local) -->
+<!-- memory cd.rhog     :    0.478 MB  (0.120 MB local) -->
+<!-- memory total       :    2.841 MB  (0.710 MB local) -->
+</run>
+<!-- [qbox]  -->
+<!-- [qbox]  -->
+<!-- end of command stream -->
+<real_time> 5.400 </real_time>
+<end_time> 2016-04-12T06:23:42Z </end_time>
+</qbox:simulation>
