@@ -255,7 +255,7 @@ void SpeciesReader::readSpecies (Species& sp, const string uri)
 	    sp.projectors_[l][0].resize(size);
 	    tag.get_value(sp.projectors_[l][0].begin(), sp.projectors_[l][0].begin() + size);
 	    cout << "  <!-- SpeciesReader::readSpecies: read " << tag.name() << " l="
-		 << l << " i=0 size=" << size << " -->" << endl;
+		 << l << " i=1 size=" << size << " -->" << endl;
 	  }
 	  
 	}
@@ -265,7 +265,7 @@ void SpeciesReader::readSpecies (Species& sp, const string uri)
 	  sp.projectors_[l][1].resize(size);
 	  tag.get_value(sp.projectors_[l][1].begin(), sp.projectors_[l][1].begin() + size);
 	  cout << "  <!-- SpeciesReader::readSpecies: read " << tag.name() << " l="
-	       << l << " i=1 size=" << size << " -->" << endl;
+	       << l << " i=2 size=" << size << " -->" << endl;
 	}
 	
 	if(!oncv){

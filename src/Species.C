@@ -210,7 +210,8 @@ bool Species::initialize(double rcpsval)
            SPLINE_FLAT_BC,SPLINE_NATURAL_BC,&vps_spl_[0][0]);
 
   } else if(oncv_){
-
+    assert(llocal_ == -1);
+    
     vloc_.resize(ndft_);
     for (int ip = np; ip < ndft_; ip++ ) vloc_[ip] = - zval_/rps_[ip];
 
