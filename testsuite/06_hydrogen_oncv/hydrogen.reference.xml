@@ -1,0 +1,1504 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+                   ===========================
+                   I qbox qb@LL-r213         I
+                   I                         I
+                   I                         I
+                   I                         I
+                   I                         I
+                   I                         I
+                   I                         I
+                   I                         I
+                   I                         I
+                   I                         I
+                   I                         I
+                   I                         I
+                   I  F.Gygi and E. Draeger  I
+                   I                  LLNL   I
+                   I Copyright (c) 2003-2013 I
+                   ===========================
+
+-->
+<qbox:simulation xmlns:qbox="http://www.quantum-simulation.org/ns/fpmd/fpmd-1.0">
+<release> qb@LL-r213 debian </release>
+<npes> 4 </npes>
+<nthreads> 1 </nthreads>
+<user> xavier </user>
+<sysname> Linux </sysname>
+<nodename> refri </nodename>
+<start_time> 2016-04-12T05:56:32Z </start_time>
+<!-- [qbox] set cell 20 0 0 0 20 0 0 0 20 -->
+  <unitcell>
+<unit_cell 
+    a="20.00000000  0.00000000   0.00000000  "
+    b="0.00000000   20.00000000  0.00000000  "
+    c="0.00000000   0.00000000   20.00000000 " />
+  </unitcell>
+<!-- [qbox] species hydrogen H_ONCV_PBE-1.0.xml -->
+  <!-- SpeciesCmd: defining species hydrogen as H_ONCV_PBE-1.0.xml -->
+  <!-- SpeciesReader opening file H_ONCV_PBE-1.0.xml size: 39704 -->
+  <!-- SpeciesReader::readSpecies: potential type:  ONCV norm-conserving -->
+  <!-- SpeciesReader::readSpecies: read description 
+
+
+ This pseudopotential file has been produced using the code
+ ONCVPSP  (Optimized Norm-Conservinng Vanderbilt PSeudopotential)
+ scalar-relativistic version 2.1.1, 03/26/2014 by D. R. Hamann
+ The code is available through a link at URL www.mat-simresearch.com.
+ Documentation with the package provides a full discription of the
+ input data below.
+
+
+ While it is not required under the terms of the GNU GPL, it is
+ suggested that you cite D. R. Hamann, Phys. Rev. B 88, 085117 (2013)
+ in any publication using these pseudopotentials.
+
+
+ Copyright 2015 The Regents of the University of California
+ 
+ This work is licensed under the Creative Commons Attribution-ShareAlike 
+ 4.0 International License. To view a copy of this license, visit 
+ http://creativecommons.org/licenses/by-sa/4.0/ or send a letter to 
+ Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
+ 
+ This pseudopotential is part of the Schlipf-Gygi norm-conserving 
+ pseudopotential library. Its construction parameters were tuned to 
+ reproduce materials of a training set with very high accuracy and 
+ should be suitable as a general purpose pseudopotential to treat a 
+ variety of different compounds. For details of the construction and 
+ testing of the pseudopotential please refer to:
+ 
+ M. Schlipf, F. Gygi, Comp. Phys. Comm. 196, 36 (2015)
+ http://dx.doi.org/10.1016/j.cpc.2015.05.011
+ 
+ We kindly ask that you include this reference in all publications 
+ associated to this pseudopotential.
+
+
+Input file for PP generation:
+
+# ATOM AND REFERENCE CONFIGURATION
+# atsym  z    nc    nv    iexc   psfile
+  H  1.00     0     1     4      fpmd
+#
+#   n    l    f        energy (Ha)
+    1    0    1.00
+#
+# PSEUDOPOTENTIAL AND OPTIMIZATION
+# lmax
+    0
+#
+#   l,   rc,     ep,   ncon, nbas, qcut
+    0   1.13748  -0.23860    5    8   9.72141
+#
+# LOCAL POTENTIAL
+# lloc, lpopt,  rc(5),   dvloc0
+    4    5   0.49352      0.00000
+#
+# VANDERBILT-KLEINMAN-BYLANDER PROJECTORs
+# l, nproj, debl
+    0    2   1.27464
+#
+# MODEL CORE CHARGE
+# icmod, fcfact
+    0   0.00000
+#
+# LOG DERIVATIVE ANALYSIS
+# epsh1, epsh2, depsh
+   -5.00    3.00    0.02
+#
+# OUTPUT GRID
+# rlmax, drl
+    6.00    0.01
+#
+# TEST CONFIGURATIONS
+# ncnf
+    0
+# nvcnf
+#   n    l    f
+ -->
+  <!-- SpeciesReader::readSpecies: read symbol H -->
+  <!-- SpeciesReader::readSpecies: read atomic_number 1 -->
+  <!-- SpeciesReader::readSpecies: read mass 1.00800002 -->
+  <!-- SpeciesReader::readSpecies: read valence_charge 1 -->
+  <!-- SpeciesReader::readSpecies: read mesh_spacing 0.01000000 -->
+  <!-- SpeciesReader::readSpecies: read local_potential size=602 -->
+L = 0
+  <!-- SpeciesReader::readSpecies: read projector l=0 i=1 size=602 -->
+  <!-- SpeciesReader::readSpecies: read projector l=0 i=2 size=602 -->
+L = 1
+  <!-- SpeciesReader::readSpecies: read d_ij l=0 -->
+<!-- Species hydrogen:  extending grid to rmax = 40.00000000 to increase vnlg resolution (4096 pts) -->
+SPECIES.ndft = 4096, np = 602, rmax = 40.96000000, gmax = 314.08256632, hubbard_l = -1
+
+ species hydrogen:
+ name_ = hydrogen
+ description_ = 
+
+
+ This pseudopotential file has been produced using the code
+ ONCVPSP  (Optimized Norm-Conservinng Vanderbilt PSeudopotential)
+ scalar-relativistic version 2.1.1, 03/26/2014 by D. R. Hamann
+ The code is available through a link at URL www.mat-simresearch.com.
+ Documentation with the package provides a full discription of the
+ input data below.
+
+
+ While it is not required under the terms of the GNU GPL, it is
+ suggested that you cite D. R. Hamann, Phys. Rev. B 88, 085117 (2013)
+ in any publication using these pseudopotentials.
+
+
+ Copyright 2015 The Regents of the University of California
+ 
+ This work is licensed under the Creative Commons Attribution-ShareAlike 
+ 4.0 International License. To view a copy of this license, visit 
+ http://creativecommons.org/licenses/by-sa/4.0/ or send a letter to 
+ Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
+ 
+ This pseudopotential is part of the Schlipf-Gygi norm-conserving 
+ pseudopotential library. Its construction parameters were tuned to 
+ reproduce materials of a training set with very high accuracy and 
+ should be suitable as a general purpose pseudopotential to treat a 
+ variety of different compounds. For details of the construction and 
+ testing of the pseudopotential please refer to:
+ 
+ M. Schlipf, F. Gygi, Comp. Phys. Comm. 196, 36 (2015)
+ http://dx.doi.org/10.1016/j.cpc.2015.05.011
+ 
+ We kindly ask that you include this reference in all publications 
+ associated to this pseudopotential.
+
+
+Input file for PP generation:
+
+# ATOM AND REFERENCE CONFIGURATION
+# atsym  z    nc    nv    iexc   psfile
+  H  1.00     0     1     4      fpmd
+#
+#   n    l    f        energy (Ha)
+    1    0    1.00
+#
+# PSEUDOPOTENTIAL AND OPTIMIZATION
+# lmax
+    0
+#
+#   l,   rc,     ep,   ncon, nbas, qcut
+    0   1.13748  -0.23860    5    8   9.72141
+#
+# LOCAL POTENTIAL
+# lloc, lpopt,  rc(5),   dvloc0
+    4    5   0.49352      0.00000
+#
+# VANDERBILT-KLEINMAN-BYLANDER PROJECTORs
+# l, nproj, debl
+    0    2   1.27464
+#
+# MODEL CORE CHARGE
+# icmod, fcfact
+    0   0.00000
+#
+# LOG DERIVATIVE ANALYSIS
+# epsh1, epsh2, depsh
+   -5.00    3.00    0.02
+#
+# OUTPUT GRID
+# rlmax, drl
+    6.00    0.01
+#
+# TEST CONFIGURATIONS
+# ncnf
+    0
+# nvcnf
+#   n    l    f
+
+ uri_ = H_ONCV_PBE-1.0.xml
+ symbol_ = H
+ atomic_number_ = 1
+ local potential
+ valence charge = 1 / ionic mass_ = 1.00800002 (amu)
+ lmax_ =   0
+ llocal_ = -1
+ rcps_ =   1.50000000
+<!-- [qbox] #species hydrogen mod.xml -->
+<!-- [qbox] atom H hydrogen 0.0 0.0 0.0 -->
+<!-- [qbox] set xc PBE -->
+<!-- [qbox] set ecut 20 -->
+<!-- [qbox] set wf_dyn PSD -->
+<!-- [qbox] set ecutprec 4 -->
+<!-- [qbox] set wf_diag T -->
+<!-- [qbox] randomize_wf -->
+<!-- Randomize_wf:  allocating wavefunction... -->
+<!-- Creating SlaterDet context 4x1 from spincontext, ispin = 0 -->
+SlaterDet.resize:  new c dimensions = 6084x1   (1521x1 blocks, local data size on pe 0 = 1521x1) -->
+<!-- Updated occupation of wf -->
+<!-- [qbox] run 0 200 -->
+SlaterDet.resize:  new c dimensions = 6084x1   (1521x1 blocks, local data size on pe 0 = 1521x1) -->
+ChargeDensity:  vbasis = 60 60 60, resize to 64 64 64
+  <!-- EnergyFunctional: charge density basis: 48485 plane waves, ngloc = 12110 -->
+  <!-- EnergyFunctional: np0v,np1v,np2v: 64 64 64 -->
+  <!-- EnergyFunctional: vft->np012(): 262144 -->
+<!-- AtomSet.set_rcps:  Ewald width for species hydrogen is too small for reciprocal sum convergence, increasing rcps from 1.50000000 to 1.20000000 -->
+<!-- Species hydrogen:  extending grid to rmax = 40.00000000 to increase vnlg resolution (4096 pts) -->
+SPECIES.ndft = 4096, np = 602, rmax = 40.96000000, gmax = 314.08256632, hubbard_l = -1
+<!-- AtomSet.set_rcps:  Ewald width for species hydrogen = 1.20000000 -->
+<!-- EnergyFunctional:  number of images in real-space ewald sum = 0 for rckj = 1.69705627 -->
+<run niter_ionic="0" niter_scf="200" niter_nonscf="0">
+<wavefunction ecut="10.00000000" nspin="1" nel="1" nempty="0">
+<cell a0="20.000000 0.000000 0.000000"
+      a1="0.000000 20.000000 0.000000"
+      a2="0.000000 0.000000 20.000000"/>
+<reciprocal_lattice b0="0.314159 0.000000 0.000000"
+      b1="0.000000 0.314159 0.000000"
+      b2="0.000000 0.000000 0.314159"/>
+<refcell a0="0.000000 0.000000 0.000000"
+         a1="0.000000 0.000000 0.000000"
+         a2="0.000000 0.000000 0.000000"/>
+<slater_determinant kpoint="0.000000 0.000000 0.000000"  weight="1.000000" size="1">
+ <!-- sdcontext: 4x1 -->
+<grid nx="30" ny="30" nz="30"/>
+ <!-- basis size: 6027 -->
+ <!-- c dimensions: 6084x1   (1521x1 blocks) -->
+ <density_matrix form="diagonal" size="1">
+ </density_matrix>
+</slater_determinant>
+</wavefunction>
+<!-- BOSampleStepper:  fractional occupation not detected. -->
+<iteration count="1">
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> 3.67381776 </eigenvalue_sum>
+  <etotal_int scf_iter="0">      3.52598071 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    38.36918
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> 1.36892853 </eigenvalue_sum>
+  <etotal_int scf_iter="1">      1.26040733 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    11.31521
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> 0.39457797 </eigenvalue_sum>
+  <etotal_int scf_iter="2">      0.30756860 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+     1.79000
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> 0.05923725 </eigenvalue_sum>
+  <etotal_int scf_iter="3">     -0.02177070 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -1.94281
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.07224113 </eigenvalue_sum>
+  <etotal_int scf_iter="4">     -0.15289957 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -3.70901
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.13430060 </eigenvalue_sum>
+  <etotal_int scf_iter="5">     -0.21738041 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -4.72004
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.16934297 </eigenvalue_sum>
+  <etotal_int scf_iter="6">     -0.25668863 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -5.37344
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.19190415 </eigenvalue_sum>
+  <etotal_int scf_iter="7">     -0.28479637 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -5.82949
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.20769025 </eigenvalue_sum>
+  <etotal_int scf_iter="8">     -0.30702077 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.16020
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.21921354 </eigenvalue_sum>
+  <etotal_int scf_iter="9">     -0.32557602 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.40154
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.22773382 </eigenvalue_sum>
+  <etotal_int scf_iter="10">     -0.34146643 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.57508
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23399877 </eigenvalue_sum>
+  <etotal_int scf_iter="11">     -0.35521935 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.69614
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23852798 </eigenvalue_sum>
+  <etotal_int scf_iter="12">     -0.36717033 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.77666
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.24171598 </eigenvalue_sum>
+  <etotal_int scf_iter="13">     -0.37756850 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.82622
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.24387357 </eigenvalue_sum>
+  <etotal_int scf_iter="14">     -0.38661764 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.85257
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.24524849 </eigenvalue_sum>
+  <etotal_int scf_iter="15">     -0.39449364 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.86187
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.24603755 </eigenvalue_sum>
+  <etotal_int scf_iter="16">     -0.40135133 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.85900
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.24639524 </eigenvalue_sum>
+  <etotal_int scf_iter="17">     -0.40732664 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.84767
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.24644097 </eigenvalue_sum>
+  <etotal_int scf_iter="18">     -0.41253825 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.83072
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.24626637 </eigenvalue_sum>
+  <etotal_int scf_iter="19">     -0.41708978 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.81026
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.24594133 </eigenvalue_sum>
+  <etotal_int scf_iter="20">     -0.42107122 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.78786
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.24551840 </eigenvalue_sum>
+  <etotal_int scf_iter="21">     -0.42456008 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.76463
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.24503657 </eigenvalue_sum>
+  <etotal_int scf_iter="22">     -0.42762276 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.74137
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.24452430 </eigenvalue_sum>
+  <etotal_int scf_iter="23">     -0.43031606 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.71863
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.24400201 </eigenvalue_sum>
+  <etotal_int scf_iter="24">     -0.43268851 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.69676
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.24348404 </eigenvalue_sum>
+  <etotal_int scf_iter="25">     -0.43478164 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.67599
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.24298014 </eigenvalue_sum>
+  <etotal_int scf_iter="26">     -0.43663097 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.65643
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.24249663 </eigenvalue_sum>
+  <etotal_int scf_iter="27">     -0.43826695 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.63816
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.24203726 </eigenvalue_sum>
+  <etotal_int scf_iter="28">     -0.43971573 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.62116
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.24160396 </eigenvalue_sum>
+  <etotal_int scf_iter="29">     -0.44099986 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.60541
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.24119739 </eigenvalue_sum>
+  <etotal_int scf_iter="30">     -0.44213890 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.59085
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.24081735 </eigenvalue_sum>
+  <etotal_int scf_iter="31">     -0.44314986 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.57742
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.24046305 </eigenvalue_sum>
+  <etotal_int scf_iter="32">     -0.44404759 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.56505
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.24013336 </eigenvalue_sum>
+  <etotal_int scf_iter="33">     -0.44484510 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.55365
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23982688 </eigenvalue_sum>
+  <etotal_int scf_iter="34">     -0.44555381 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.54317
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23954213 </eigenvalue_sum>
+  <etotal_int scf_iter="35">     -0.44618378 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.53352
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23927756 </eigenvalue_sum>
+  <etotal_int scf_iter="36">     -0.44674389 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.52463
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23903165 </eigenvalue_sum>
+  <etotal_int scf_iter="37">     -0.44724201 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.51644
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23880292 </eigenvalue_sum>
+  <etotal_int scf_iter="38">     -0.44768507 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.50888
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23858999 </eigenvalue_sum>
+  <etotal_int scf_iter="39">     -0.44807925 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.50191
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23839155 </eigenvalue_sum>
+  <etotal_int scf_iter="40">     -0.44843000 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.49546
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23820640 </eigenvalue_sum>
+  <etotal_int scf_iter="41">     -0.44874217 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.48949
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23803342 </eigenvalue_sum>
+  <etotal_int scf_iter="42">     -0.44902006 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.48395
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23787160 </eigenvalue_sum>
+  <etotal_int scf_iter="43">     -0.44926747 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.47881
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23772002 </eigenvalue_sum>
+  <etotal_int scf_iter="44">     -0.44948780 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.47403
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23757784 </eigenvalue_sum>
+  <etotal_int scf_iter="45">     -0.44968402 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.46958
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23744430 </eigenvalue_sum>
+  <etotal_int scf_iter="46">     -0.44985882 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.46542
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23731872 </eigenvalue_sum>
+  <etotal_int scf_iter="47">     -0.45001455 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.46154
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23720047 </eigenvalue_sum>
+  <etotal_int scf_iter="48">     -0.45015330 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.45792
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23708899 </eigenvalue_sum>
+  <etotal_int scf_iter="49">     -0.45027695 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.45452
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23698379 </eigenvalue_sum>
+  <etotal_int scf_iter="50">     -0.45038714 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.45133
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23688439 </eigenvalue_sum>
+  <etotal_int scf_iter="51">     -0.45048535 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.44833
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23679039 </eigenvalue_sum>
+  <etotal_int scf_iter="52">     -0.45057288 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.44552
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23670141 </eigenvalue_sum>
+  <etotal_int scf_iter="53">     -0.45065089 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.44286
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23661712 </eigenvalue_sum>
+  <etotal_int scf_iter="54">     -0.45072043 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.44036
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23653720 </eigenvalue_sum>
+  <etotal_int scf_iter="55">     -0.45078240 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.43801
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23646139 </eigenvalue_sum>
+  <etotal_int scf_iter="56">     -0.45083764 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.43578
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23638941 </eigenvalue_sum>
+  <etotal_int scf_iter="57">     -0.45088687 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.43368
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23632105 </eigenvalue_sum>
+  <etotal_int scf_iter="58">     -0.45093075 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.43169
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23625609 </eigenvalue_sum>
+  <etotal_int scf_iter="59">     -0.45096985 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.42980
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23619433 </eigenvalue_sum>
+  <etotal_int scf_iter="60">     -0.45100469 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.42802
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23613559 </eigenvalue_sum>
+  <etotal_int scf_iter="61">     -0.45103574 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.42633
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23607971 </eigenvalue_sum>
+  <etotal_int scf_iter="62">     -0.45106340 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.42473
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23602653 </eigenvalue_sum>
+  <etotal_int scf_iter="63">     -0.45108805 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.42321
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23597592 </eigenvalue_sum>
+  <etotal_int scf_iter="64">     -0.45111000 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.42176
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23592773 </eigenvalue_sum>
+  <etotal_int scf_iter="65">     -0.45112956 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.42039
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23588185 </eigenvalue_sum>
+  <etotal_int scf_iter="66">     -0.45114698 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.41909
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23583817 </eigenvalue_sum>
+  <etotal_int scf_iter="67">     -0.45116249 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.41786
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23579656 </eigenvalue_sum>
+  <etotal_int scf_iter="68">     -0.45117631 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.41669
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23575694 </eigenvalue_sum>
+  <etotal_int scf_iter="69">     -0.45118861 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.41557
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23571921 </eigenvalue_sum>
+  <etotal_int scf_iter="70">     -0.45119956 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.41451
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23568327 </eigenvalue_sum>
+  <etotal_int scf_iter="71">     -0.45120932 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.41350
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23564905 </eigenvalue_sum>
+  <etotal_int scf_iter="72">     -0.45121800 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.41255
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23561646 </eigenvalue_sum>
+  <etotal_int scf_iter="73">     -0.45122573 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.41164
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23558542 </eigenvalue_sum>
+  <etotal_int scf_iter="74">     -0.45123261 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.41077
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23555587 </eigenvalue_sum>
+  <etotal_int scf_iter="75">     -0.45123873 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.40995
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23552774 </eigenvalue_sum>
+  <etotal_int scf_iter="76">     -0.45124418 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.40917
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23550095 </eigenvalue_sum>
+  <etotal_int scf_iter="77">     -0.45124903 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.40842
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23547546 </eigenvalue_sum>
+  <etotal_int scf_iter="78">     -0.45125335 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.40772
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23545120 </eigenvalue_sum>
+  <etotal_int scf_iter="79">     -0.45125719 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.40705
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23542811 </eigenvalue_sum>
+  <etotal_int scf_iter="80">     -0.45126061 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.40641
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23540614 </eigenvalue_sum>
+  <etotal_int scf_iter="81">     -0.45126365 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.40580
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23538524 </eigenvalue_sum>
+  <etotal_int scf_iter="82">     -0.45126636 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.40522
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23536536 </eigenvalue_sum>
+  <etotal_int scf_iter="83">     -0.45126876 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.40468
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23534645 </eigenvalue_sum>
+  <etotal_int scf_iter="84">     -0.45127091 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.40415
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23532847 </eigenvalue_sum>
+  <etotal_int scf_iter="85">     -0.45127281 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.40366
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23531137 </eigenvalue_sum>
+  <etotal_int scf_iter="86">     -0.45127451 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.40319
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23529512 </eigenvalue_sum>
+  <etotal_int scf_iter="87">     -0.45127601 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.40274
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23527967 </eigenvalue_sum>
+  <etotal_int scf_iter="88">     -0.45127735 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.40232
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23526499 </eigenvalue_sum>
+  <etotal_int scf_iter="89">     -0.45127855 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.40191
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23525104 </eigenvalue_sum>
+  <etotal_int scf_iter="90">     -0.45127961 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.40153
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23523779 </eigenvalue_sum>
+  <etotal_int scf_iter="91">     -0.45128055 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.40117
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23522520 </eigenvalue_sum>
+  <etotal_int scf_iter="92">     -0.45128139 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.40082
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23521325 </eigenvalue_sum>
+  <etotal_int scf_iter="93">     -0.45128213 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.40050
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23520189 </eigenvalue_sum>
+  <etotal_int scf_iter="94">     -0.45128280 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.40019
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23519112 </eigenvalue_sum>
+  <etotal_int scf_iter="95">     -0.45128339 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39989
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23518088 </eigenvalue_sum>
+  <etotal_int scf_iter="96">     -0.45128391 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39961
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23517117 </eigenvalue_sum>
+  <etotal_int scf_iter="97">     -0.45128438 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39934
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23516196 </eigenvalue_sum>
+  <etotal_int scf_iter="98">     -0.45128479 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39909
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23515321 </eigenvalue_sum>
+  <etotal_int scf_iter="99">     -0.45128516 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39885
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23514491 </eigenvalue_sum>
+  <etotal_int scf_iter="100">     -0.45128549 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39863
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23513704 </eigenvalue_sum>
+  <etotal_int scf_iter="101">     -0.45128578 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39841
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23512958 </eigenvalue_sum>
+  <etotal_int scf_iter="102">     -0.45128604 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39821
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23512250 </eigenvalue_sum>
+  <etotal_int scf_iter="103">     -0.45128627 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39801
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23511578 </eigenvalue_sum>
+  <etotal_int scf_iter="104">     -0.45128648 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39783
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23510942 </eigenvalue_sum>
+  <etotal_int scf_iter="105">     -0.45128666 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39766
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23510338 </eigenvalue_sum>
+  <etotal_int scf_iter="106">     -0.45128682 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39749
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23509766 </eigenvalue_sum>
+  <etotal_int scf_iter="107">     -0.45128697 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39734
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23509224 </eigenvalue_sum>
+  <etotal_int scf_iter="108">     -0.45128710 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39719
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23508710 </eigenvalue_sum>
+  <etotal_int scf_iter="109">     -0.45128721 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39705
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23508224 </eigenvalue_sum>
+  <etotal_int scf_iter="110">     -0.45128731 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39692
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23507762 </eigenvalue_sum>
+  <etotal_int scf_iter="111">     -0.45128740 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39679
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23507325 </eigenvalue_sum>
+  <etotal_int scf_iter="112">     -0.45128748 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39667
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23506912 </eigenvalue_sum>
+  <etotal_int scf_iter="113">     -0.45128755 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39656
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23506520 </eigenvalue_sum>
+  <etotal_int scf_iter="114">     -0.45128762 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39645
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23506148 </eigenvalue_sum>
+  <etotal_int scf_iter="115">     -0.45128767 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39635
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23505797 </eigenvalue_sum>
+  <etotal_int scf_iter="116">     -0.45128772 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39625
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23505464 </eigenvalue_sum>
+  <etotal_int scf_iter="117">     -0.45128777 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39616
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23505149 </eigenvalue_sum>
+  <etotal_int scf_iter="118">     -0.45128781 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39608
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23504851 </eigenvalue_sum>
+  <etotal_int scf_iter="119">     -0.45128784 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39600
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23504568 </eigenvalue_sum>
+  <etotal_int scf_iter="120">     -0.45128787 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39592
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23504301 </eigenvalue_sum>
+  <etotal_int scf_iter="121">     -0.45128790 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39585
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23504048 </eigenvalue_sum>
+  <etotal_int scf_iter="122">     -0.45128793 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39578
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23503809 </eigenvalue_sum>
+  <etotal_int scf_iter="123">     -0.45128795 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39571
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23503582 </eigenvalue_sum>
+  <etotal_int scf_iter="124">     -0.45128797 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39565
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23503368 </eigenvalue_sum>
+  <etotal_int scf_iter="125">     -0.45128799 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39559
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23503165 </eigenvalue_sum>
+  <etotal_int scf_iter="126">     -0.45128800 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39554
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23502973 </eigenvalue_sum>
+  <etotal_int scf_iter="127">     -0.45128802 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39548
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23502792 </eigenvalue_sum>
+  <etotal_int scf_iter="128">     -0.45128803 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39544
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23502620 </eigenvalue_sum>
+  <etotal_int scf_iter="129">     -0.45128804 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39539
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23502458 </eigenvalue_sum>
+  <etotal_int scf_iter="130">     -0.45128805 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39534
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23502304 </eigenvalue_sum>
+  <etotal_int scf_iter="131">     -0.45128806 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39530
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23502159 </eigenvalue_sum>
+  <etotal_int scf_iter="132">     -0.45128806 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39526
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23502022 </eigenvalue_sum>
+  <etotal_int scf_iter="133">     -0.45128807 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39523
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23501892 </eigenvalue_sum>
+  <etotal_int scf_iter="134">     -0.45128808 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39519
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23501769 </eigenvalue_sum>
+  <etotal_int scf_iter="135">     -0.45128808 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39516
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23501653 </eigenvalue_sum>
+  <etotal_int scf_iter="136">     -0.45128809 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39513
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23501543 </eigenvalue_sum>
+  <etotal_int scf_iter="137">     -0.45128809 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39510
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23501440 </eigenvalue_sum>
+  <etotal_int scf_iter="138">     -0.45128810 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39507
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23501342 </eigenvalue_sum>
+  <etotal_int scf_iter="139">     -0.45128810 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39504
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23501249 </eigenvalue_sum>
+  <etotal_int scf_iter="140">     -0.45128810 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39502
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23501161 </eigenvalue_sum>
+  <etotal_int scf_iter="141">     -0.45128810 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39499
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23501078 </eigenvalue_sum>
+  <etotal_int scf_iter="142">     -0.45128811 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39497
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23501000 </eigenvalue_sum>
+  <etotal_int scf_iter="143">     -0.45128811 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39495
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23500926 </eigenvalue_sum>
+  <etotal_int scf_iter="144">     -0.45128811 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39493
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23500856 </eigenvalue_sum>
+  <etotal_int scf_iter="145">     -0.45128811 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39491
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23500790 </eigenvalue_sum>
+  <etotal_int scf_iter="146">     -0.45128811 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39489
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23500728 </eigenvalue_sum>
+  <etotal_int scf_iter="147">     -0.45128812 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39487
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23500669 </eigenvalue_sum>
+  <etotal_int scf_iter="148">     -0.45128812 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39486
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23500613 </eigenvalue_sum>
+  <etotal_int scf_iter="149">     -0.45128812 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39484
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23500560 </eigenvalue_sum>
+  <etotal_int scf_iter="150">     -0.45128812 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39483
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23500511 </eigenvalue_sum>
+  <etotal_int scf_iter="151">     -0.45128812 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39481
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23500464 </eigenvalue_sum>
+  <etotal_int scf_iter="152">     -0.45128812 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39480
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23500419 </eigenvalue_sum>
+  <etotal_int scf_iter="153">     -0.45128812 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39479
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23500377 </eigenvalue_sum>
+  <etotal_int scf_iter="154">     -0.45128812 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39478
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23500338 </eigenvalue_sum>
+  <etotal_int scf_iter="155">     -0.45128812 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39477
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23500300 </eigenvalue_sum>
+  <etotal_int scf_iter="156">     -0.45128812 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39476
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23500265 </eigenvalue_sum>
+  <etotal_int scf_iter="157">     -0.45128812 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39475
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23500232 </eigenvalue_sum>
+  <etotal_int scf_iter="158">     -0.45128812 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39474
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23500200 </eigenvalue_sum>
+  <etotal_int scf_iter="159">     -0.45128812 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39473
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23500170 </eigenvalue_sum>
+  <etotal_int scf_iter="160">     -0.45128812 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39472
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23500142 </eigenvalue_sum>
+  <etotal_int scf_iter="161">     -0.45128812 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39471
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23500116 </eigenvalue_sum>
+  <etotal_int scf_iter="162">     -0.45128812 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39471
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23500091 </eigenvalue_sum>
+  <etotal_int scf_iter="163">     -0.45128812 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39470
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23500067 </eigenvalue_sum>
+  <etotal_int scf_iter="164">     -0.45128812 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39469
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23500044 </eigenvalue_sum>
+  <etotal_int scf_iter="165">     -0.45128812 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39469
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23500023 </eigenvalue_sum>
+  <etotal_int scf_iter="166">     -0.45128812 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39468
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23500003 </eigenvalue_sum>
+  <etotal_int scf_iter="167">     -0.45128813 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39468
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23499985 </eigenvalue_sum>
+  <etotal_int scf_iter="168">     -0.45128813 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39467
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23499967 </eigenvalue_sum>
+  <etotal_int scf_iter="169">     -0.45128813 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39467
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23499950 </eigenvalue_sum>
+  <etotal_int scf_iter="170">     -0.45128813 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39466
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23499934 </eigenvalue_sum>
+  <etotal_int scf_iter="171">     -0.45128813 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39466
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23499919 </eigenvalue_sum>
+  <etotal_int scf_iter="172">     -0.45128813 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39465
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23499905 </eigenvalue_sum>
+  <etotal_int scf_iter="173">     -0.45128813 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39465
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23499892 </eigenvalue_sum>
+  <etotal_int scf_iter="174">     -0.45128813 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39465
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23499879 </eigenvalue_sum>
+  <etotal_int scf_iter="175">     -0.45128813 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39464
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23499867 </eigenvalue_sum>
+  <etotal_int scf_iter="176">     -0.45128813 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39464
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23499856 </eigenvalue_sum>
+  <etotal_int scf_iter="177">     -0.45128813 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39464
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23499845 </eigenvalue_sum>
+  <etotal_int scf_iter="178">     -0.45128813 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39463
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23499835 </eigenvalue_sum>
+  <etotal_int scf_iter="179">     -0.45128813 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39463
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23499826 </eigenvalue_sum>
+  <etotal_int scf_iter="180">     -0.45128813 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39463
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23499817 </eigenvalue_sum>
+  <etotal_int scf_iter="181">     -0.45128813 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39463
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23499809 </eigenvalue_sum>
+  <etotal_int scf_iter="182">     -0.45128813 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39462
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23499801 </eigenvalue_sum>
+  <etotal_int scf_iter="183">     -0.45128813 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39462
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23499793 </eigenvalue_sum>
+  <etotal_int scf_iter="184">     -0.45128813 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39462
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23499786 </eigenvalue_sum>
+  <etotal_int scf_iter="185">     -0.45128813 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39462
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23499779 </eigenvalue_sum>
+  <etotal_int scf_iter="186">     -0.45128813 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39462
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23499773 </eigenvalue_sum>
+  <etotal_int scf_iter="187">     -0.45128813 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39461
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23499767 </eigenvalue_sum>
+  <etotal_int scf_iter="188">     -0.45128813 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39461
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23499761 </eigenvalue_sum>
+  <etotal_int scf_iter="189">     -0.45128813 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39461
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23499756 </eigenvalue_sum>
+  <etotal_int scf_iter="190">     -0.45128813 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39461
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23499751 </eigenvalue_sum>
+  <etotal_int scf_iter="191">     -0.45128813 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39461
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23499746 </eigenvalue_sum>
+  <etotal_int scf_iter="192">     -0.45128813 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39461
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23499742 </eigenvalue_sum>
+  <etotal_int scf_iter="193">     -0.45128813 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39461
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23499738 </eigenvalue_sum>
+  <etotal_int scf_iter="194">     -0.45128813 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39460
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23499734 </eigenvalue_sum>
+  <etotal_int scf_iter="195">     -0.45128813 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39460
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23499730 </eigenvalue_sum>
+  <etotal_int scf_iter="196">     -0.45128813 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39460
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23499726 </eigenvalue_sum>
+  <etotal_int scf_iter="197">     -0.45128813 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39460
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23499723 </eigenvalue_sum>
+  <etotal_int scf_iter="198">     -0.45128813 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39460
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.23499720 </eigenvalue_sum>
+  <etotal_int scf_iter="199">     -0.45128813 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="1">
+    -6.39460
+  </eigenvalues>
+  <!-- total_electronic_charge: 1.00000000, spin = 0 -->
+  <ekin>        0.41372925 </ekin>
+  <econf>       0.00000000 </econf>
+  <eps>        -0.26220828 </eps>
+  <enl>        -0.02846235 </enl>
+  <ecoul>      -0.32821225 </ecoul>
+  <exc>        -0.24613449 </exc>
+  <esr>         0.00000000 </esr>
+  <eself>       0.33245190 </eself>
+  <ets>         0.00000000 </ets>
+  <etotal>     -0.45128813 </etotal>
+<atomset>
+<unit_cell 
+    a=" 20.00000000   0.00000000   0.00000000"
+    b="  0.00000000  20.00000000   0.00000000"
+    c="  0.00000000   0.00000000  20.00000000" />
+  <atom name="H" species="hydrogen">
+    <position> 0.00000000 0.00000000 0.00000000 </position>
+    <velocity> 0.00000000 0.00000000 0.00000000 </velocity>
+    <force> -0.00000001 -0.00000001 -0.00000001 </force>
+  </atom>
+</atomset>
+<timing where="run"                name=" iteration"       min="20.323   " max="20.324   " count="1        "/>
+</iteration>
+<!-- memory nlp.twnl    :    0.092 MB  (0.023 MB local) -->
+<!-- memory sd.psi      :    0.092 MB  (0.023 MB local) -->
+<!-- memory sd.hpsi     :    0.092 MB  (0.023 MB local) -->
+<!-- memory cd.rhor     :    2.000 MB  (0.500 MB local) -->
+<!-- memory cd.rhog     :    0.740 MB  (0.185 MB local) -->
+<!-- memory total       :    3.016 MB  (0.754 MB local) -->
+</run>
+<!-- [qbox]  -->
+<!-- end of command stream -->
+<real_time> 20.391 </real_time>
+<end_time> 2016-04-12T05:56:52Z </end_time>
+</qbox:simulation>
