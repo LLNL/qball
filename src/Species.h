@@ -48,8 +48,8 @@ class Species {
   
   vector<vector<double> > vps_spl_, phi_spl_;
   vector<double>          gspl_;
-  Spline                  local_potential;
-  vector<vector<vector<double> > > vnlg_, vnlg_spl;
+  Spline                  local_potential_g_;
+  vector<vector<Spline> > projectors_g_;
   vector<vector<double> > wsg_;  // wsg_[l][ic] Kleinman-Bylander weight 1/<phi|delta_V|phi>
   
   vector<double> rps_;  // radial linear mesh (same for all l)

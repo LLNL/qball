@@ -79,6 +79,7 @@ bool Species::initialize(double rcpsval)
   const double fpi = 4.0 * M_PI;
   vector<double> vlocg;
   vector<vector<vector<double> > > vnlr;
+  vector<vector<vector<double> > > vnlg;
   
   //const int np = vps_[0].size();
   //ewd store initsize to keep ndft_ from growing too large on subsequent calls
@@ -188,11 +189,11 @@ bool Species::initialize(double rcpsval)
   vlocg.resize(ndft_);
   
   if (!usoft_) {
-    vnlg_.resize(lmax_+1);
-    vnlg_spl.resize(lmax_+1);
+    vnlg.resize(lmax_+1);
+    projectors_g_.resize(lmax_+1);
     for(int ll = 0; ll < lmax_ + 1; ll++){
-      vnlg_[ll].resize(nchannels_);
-      vnlg_spl[ll].resize(nchannels_);
+      vnlg[ll].resize(nchannels_);
+      projectors_g_[ll].resize(nchannels_);
     }
   }
   
@@ -249,7 +250,7 @@ bool Species::initialize(double rcpsval)
 
   if(!usoft_){
     vnlr.resize(lmax_ + 1);
-    //  vnlg_ is dimensioned ndft_+1 since it is passed to cosft1
+    //  vnlg is dimensioned ndft_+1 since it is passed to cosft1
     //  See Numerical Recipes 2nd edition for an explanation.
     for ( int l = 0; l <= lmax_; l++ ){
       vnlr[l].resize(nchannels_);
@@ -321,7 +322,7 @@ bool Species::initialize(double rcpsval)
 
   //  Initialize cubic spline interpolation for local potential Vloc(G)
   //  Use zero first derivative at G=0 and natural (y"=0) at Gmax
-  local_potential.fit(&gspl_[0], &vlocg[0], ndft_, SPLINE_FLAT_BC, SPLINE_NATURAL_BC);
+  local_potential_g_.fit(&gspl_[0], &vlocg[0], ndft_, SPLINE_FLAT_BC, SPLINE_NATURAL_BC);
 
   // Non-local KB projectors
   if ( !usoft_ && nquad_ == 0 && non_local()){
@@ -384,27 +385,28 @@ bool Species::initialize(double rcpsval)
       
     }
 
+    cout << "SIZE " << projectors_g_.size() << endl;
+    
     //  compute radial Fourier transforms of vnlr
     for ( int l = 0; l <= lmax_; l++ )
     {
       for(int ic = 0; ic < nchannels_; ic++){
 
 	if ( l != llocal_ ){
-	  vnlg_[l][ic].resize(ndft_ + 1);
-	  vnlg_spl[l][ic].resize(ndft_ + 1);
+	  vnlg[l][ic].resize(ndft_ + 1);
 
-	  bessel_trans(l, vnlr[l][ic], vnlg_[l][ic]);
+	  bessel_trans(l, vnlr[l][ic], vnlg[l][ic]);
 	  if ( l == 0 || l == 2 || l == 3){
 	    
 	    //  Initialize cubic spline interpolation
 	    //  Use zero first derivative at G=0 and natural (y"=0) at Gmax
-	    spline(&gspl_[0], &vnlg_[l][ic][0], ndft_, SPLINE_FLAT_BC, SPLINE_NATURAL_BC, &vnlg_spl[l][ic][0]);
+	    projectors_g_[l][ic].fit(&gspl_[0], &vnlg[l][ic][0], ndft_, SPLINE_FLAT_BC, SPLINE_NATURAL_BC);
 	    
 	  } else if ( l == 1 ){
 	    // Initialize spline interpolation
 	    // Use natural first derivative at G=0 and natural (y"=0) at Gmax
 	    
-	    spline(&gspl_[0], &vnlg_[l][ic][0], ndft_, SPLINE_NATURAL_BC, SPLINE_NATURAL_BC, &vnlg_spl[l][ic][0]);
+	    projectors_g_[l][ic].fit(&gspl_[0], &vnlg[l][ic][0], ndft_, SPLINE_NATURAL_BC, SPLINE_NATURAL_BC);
 	  }
 	} // l != llocal_
 	
@@ -1461,7 +1463,7 @@ void Species::vlocg(double g, double &v)
   }
   else
   {
-    v = local_potential.value(g);
+    v = local_potential_g_.value(g);
   }
 }
 
@@ -1475,7 +1477,7 @@ void Species::dvlocg(double g, double &v, double &dv)
   }
   else
   {
-    local_potential.derivative(g, v, dv);
+    local_potential_g_.derivative(g, v, dv);
   }
 }
 
@@ -1489,7 +1491,7 @@ void Species::vnlg(int l, int ic, double g, double &v)
   }
   else
   {
-    splint(&gspl_[0], &vnlg_[l][ic][0], &vnlg_spl[l][ic][0], ndft_, g, &v);
+    v = projectors_g_[l][ic].value(g);
   }
 }
 
@@ -1504,7 +1506,7 @@ void Species::dvnlg(int l, int ic, double g, double &v, double &dv)
   }
   else
   {
-    splintd(&gspl_[0], &vnlg_[l][ic][0], &vnlg_spl[l][ic][0], ndft_, g, &v, &dv);
+    projectors_g_[l][ic].derivative(g, v, dv);
   }
 }
 
