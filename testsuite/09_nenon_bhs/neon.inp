@@ -1,0 +1,11 @@
+set cell 20 0 0 0 20 0 0 0 20
+species neon Ne_BHS_LDA-1.0.xml
+atom Ne neon 0.0 0.0 0.0
+set xc PBE
+set ecut 13
+set wf_dyn PSDA
+set ecutprec 4
+set threshold_scf 1.E-7 10
+randomize_wf
+run 0 200
+

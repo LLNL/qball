@@ -1,0 +1,19 @@
+Test       : Neon BHS
+Program    : qb
+TestGroups : short-run
+Enabled    : Yes
+
+ExtraFile  : Ne_BHS_LDA-1.0.xml
+Input      : neon.inp
+Reference  : neon.reference.xml
+
+match ; ekin    ; GREPFIELD(out, '<ekin>',   2) ;  12.09685276
+match ; econf   ; GREPFIELD(out, '<econf>',  2) ;   0.00000000
+match ; eps     ; GREPFIELD(out, '<eps>',    2) ; -22.52514617
+match ; enl     ; GREPFIELD(out, '<enl>',    2) ;  -0.64689760
+match ; ecoul   ; GREPFIELD(out, '<ecoul>',  2) ; -13.22393479
+match ; exc     ; GREPFIELD(out, '<exc>',    2) ;  -4.48349072
+match ; esr     ; GREPFIELD(out, '<esr>',    2) ;   0.00000000
+match ; eself   ; GREPFIELD(out, '<eself>',  2) ;  15.47412482
+match ; ets     ; GREPFIELD(out, '<ets>',    2) ;   0.00000000
+match ; etotal  ; GREPFIELD(out, '<etotal>', 2) ; -28.78261652
