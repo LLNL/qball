@@ -168,14 +168,13 @@ bool Species::initialize(double rcpsval)
   }
   else if(!oncv_){
     vps_spl_.resize(lmax_+1);
-    phi_spl_.resize(lmax_+1);
+    orbitals_r_.resize(lmax_ + 1);
   
     for ( int l = 0; l <= lmax_; l++ )
     {
       vps_[l].resize(ndft_);
       phi_[l].resize(ndft_);
       vps_spl_[l].resize(ndft_);
-      phi_spl_[l].resize(ndft_);
     }
   }
   
@@ -242,9 +241,7 @@ bool Species::initialize(double rcpsval)
     }
     for ( int l = 0; l <= lmax_; l++ )
     {
-      if ( l != llocal_ )
-        spline(&rps_[0],&phi_[l][0],ndft_,
-               SPLINE_FLAT_BC,SPLINE_NATURAL_BC,&phi_spl_[l][0]);
+      if ( l != llocal_ ) orbitals_r_[l].fit(&rps_[0], &phi_[l][0], ndft_, SPLINE_FLAT_BC, SPLINE_NATURAL_BC);
     }
   }
 
