@@ -657,11 +657,17 @@ void SpeciesReader::readSpecies (Species& sp, const string uri)
 	    assert(ii + 1 == read_i);
 	    assert(jj + 1 == read_j);
 	    tag.get_value(sp.dij_[l][ii][jj]);
+
+	    if(fabs(sp.dij_[l][ii][jj]) > 1.0e-6 && ii != jj){
+	      cerr << endl << "Error:" << endl;
+	      cerr << "       Unsupported pseudopotential file (non-diagonal ONCV)." << endl << endl;
+	      exit(1);
+	    }
 	  }
 	}
 
 	cout << "  <!-- SpeciesReader::readSpecies: read d_ij l=" << l << " -->" << endl;
-
+	
       }
     }
     
