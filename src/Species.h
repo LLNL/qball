@@ -37,6 +37,7 @@
 using namespace std;
 #include "Context.h"
 #include "Basis.h"
+#include "Spline.h"
 
 class Species {
   private:
@@ -46,7 +47,8 @@ class Species {
   int ndft_;
   
   vector<vector<double> > vps_spl_, phi_spl_;
-  vector<double>          gspl_, vlocg_, vlocg_spl;
+  vector<double>          gspl_;
+  Spline                  local_potential;
   vector<vector<vector<double> > > vnlg_, vnlg_spl;
   vector<vector<double> > wsg_;  // wsg_[l][ic] Kleinman-Bylander weight 1/<phi|delta_V|phi>
   

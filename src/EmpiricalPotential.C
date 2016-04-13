@@ -27,7 +27,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "Context.h"
-#include "spline.h"
+#include "Spline.h"
 #include "EmpiricalPotential.h"
 #include <iostream>
 #include <iomanip>

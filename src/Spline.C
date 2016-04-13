@@ -26,12 +26,12 @@
  *
  ******************************************************************************/
 
-#include "spline.h"
+#include "Spline.h"
 #include <assert.h>
 //ewd DEBUG
 #include <iostream>
 
-void spline(double *x, double *y, int n, double yp1, double ypn, double *y2)
+void spline(const double *x, const double *y, int n, double yp1, double ypn, double *y2)
 {
 
   int i,k;
@@ -82,7 +82,7 @@ void spline(double *x, double *y, int n, double yp1, double ypn, double *y2)
   delete [] u;
 }
 
-void splint (double *xa, double *ya, double *y2a, int n, double x, double *y)
+void splint (const double *xa, const double *ya, const double *y2a, int n, double x, double *y)
 {
   int k,khi,klo;
   double a,b,h;
@@ -120,7 +120,7 @@ void splint (double *xa, double *ya, double *y2a, int n, double x, double *y)
 
 }
 
-void splintd (double *xa, double *ya, double *y2a,
+void splintd (const double *xa, const double *ya, const double *y2a,
  int n, double x, double *y, double *dy)
 {
   int k,khi,klo;

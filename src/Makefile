@@ -17,7 +17,7 @@ testEigenSolvers
 
 QBSRC=AtomSet.C Atom.C SymmetrySet.C Symmetry.C Species.C Wavefunction.C SlaterDet.C \
       EnergyFunctional.C SampleStepper.C Basis.C FourierTransform.C Matrix.C Context.C \
-      sinft.C spline.C UnitCell.C StructureFactor.C ChargeDensity.C UserInterface.C RunCmd.C \
+      sinft.C Spline.C UnitCell.C StructureFactor.C ChargeDensity.C UserInterface.C RunCmd.C \
       LoadCmd.C SaveCmd.C SavesysCmd.C SavedenCmd.C SpeciesCmd.C SpeciesReader.C \
       SpeciesHandler.C XCPotential.C LDAFunctional.C PBEFunctional.C PBESolFunctional.C \
       PBERevFunctional.C BLYPFunctional.C NonLocalPotential.C SampleReader.C SampleWriter.C \

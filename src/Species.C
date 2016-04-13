@@ -27,7 +27,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "Species.h"
-#include "spline.h"
+#include "Spline.h"
 #include "sinft.h"
 #include "SphericalIntegration.h"
 #include <cmath>
@@ -77,6 +77,7 @@ bool Species::initialize(double rcpsval)
   assert(description_ != "undefined");
   
   const double fpi = 4.0 * M_PI;
+  vector<double> vlocg;
   vector<vector<vector<double> > > vnlr;
   
   //const int np = vps_[0].size();
@@ -184,8 +185,7 @@ bool Species::initialize(double rcpsval)
   wsg_.resize(lmax_+1);
   for(int ll = 0; ll < lmax_ + 1; ll++) wsg_[ll].resize(nchannels_);
   gspl_.resize(ndft_);
-  vlocg_.resize(ndft_);
-  vlocg_spl.resize(ndft_);
+  vlocg.resize(ndft_);
   
   if (!usoft_) {
     vnlg_.resize(lmax_+1);
@@ -300,19 +300,19 @@ bool Species::initialize(double rcpsval)
 
   for ( int i = 0; i < ndft_; i++ )
   {
-    vlocg_[i] = vlocr[i];
+    vlocg[i] = vlocr[i];
   }
 
-  sinft(&vlocg_[0],ndft_);
+  sinft(&vlocg[0],ndft_);
 
   //  Divide by g's
   gspl_[0] = 0.0;
-  vlocg_[0] = v0;
+  vlocg[0] = v0;
   double fac = M_PI/(ndft_*deltar_);
   for ( int i = 1; i < ndft_; i++ )
   {
     gspl_[i] = i * fac;
-    vlocg_[i] /= gspl_[i];
+    vlocg[i] /= gspl_[i];
   }
 
   //ewd DEBUG  
@@ -321,9 +321,7 @@ bool Species::initialize(double rcpsval)
 
   //  Initialize cubic spline interpolation for local potential Vloc(G)
   //  Use zero first derivative at G=0 and natural (y"=0) at Gmax
-
-  spline(&gspl_[0],&vlocg_[0],ndft_,
-         SPLINE_FLAT_BC,SPLINE_NATURAL_BC,&vlocg_spl[0]);
+  local_potential.fit(&gspl_[0], &vlocg[0], ndft_, SPLINE_FLAT_BC, SPLINE_NATURAL_BC);
 
   // Non-local KB projectors
   if ( !usoft_ && nquad_ == 0 && non_local()){
@@ -1463,7 +1461,7 @@ void Species::vlocg(double g, double &v)
   }
   else
   {
-    splint(&gspl_[0],&vlocg_[0],&vlocg_spl[0],ndft_,g,&v);
+    v = local_potential.value(g);
   }
 }
 
@@ -1477,7 +1475,7 @@ void Species::dvlocg(double g, double &v, double &dv)
   }
   else
   {
-    splintd(&gspl_[0],&vlocg_[0],&vlocg_spl[0],ndft_,g,&v,&dv);
+    local_potential.derivative(g, v, dv);
   }
 }
 
