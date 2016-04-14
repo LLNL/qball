@@ -1,0 +1,37 @@
+Test       : LiF molecule
+Program    : qb
+TestGroups : short-run
+Enabled    : Yes
+
+ExtraFile  : Li_HSCV_LDA-1.0.xml
+ExtraFile  : F_HSCV_LDA-1.0.xml
+Input      : 01_lif_hscv.inp
+Reference  : 01_lif_hscv.reference.xml
+
+match ; ekin    ; GREPFIELD(out, '<ekin>',   2) ;  14.19046351
+match ; econf   ; GREPFIELD(out, '<econf>',  2) ;   0.00000000
+match ; eps     ; GREPFIELD(out, '<eps>',    2) ; -19.09478516
+match ; enl     ; GREPFIELD(out, '<enl>',    2) ;   3.89493507
+match ; ecoul   ; GREPFIELD(out, '<ecoul>',  2) ; -17.45178113
+match ; exc     ; GREPFIELD(out, '<exc>',    2) ;  -4.55763419
+match ; esr     ; GREPFIELD(out, '<esr>',    2) ;   0.24066752
+match ; eself   ; GREPFIELD(out, '<eself>',  2) ;  18.17000750
+match ; ets     ; GREPFIELD(out, '<ets>',    2) ;   0.00000000
+match ; etotal  ; GREPFIELD(out, '<etotal>', 2) ; -23.01880189
+
+ExtraFile  : Li_ONCV_PBE-1.0.xml
+ExtraFile  : F_ONCV_PBE-1.0.xml
+Input      : 02_lif_oncv.inp
+Reference  : 02_lif_oncv.reference.xml
+
+match ; ekin    ; GREPFIELD(out, '<ekin>',   2) ;  20.17165013
+match ; econf   ; GREPFIELD(out, '<econf>',  2) ;   0.00000000
+match ; eps     ; GREPFIELD(out, '<eps>',    2) ; -19.06505911
+match ; enl     ; GREPFIELD(out, '<enl>',    2) ;  -5.42543554
+match ; ecoul   ; GREPFIELD(out, '<ecoul>',  2) ; -19.60129481
+match ; exc     ; GREPFIELD(out, '<exc>',    2) ;  -6.31746883
+match ; esr     ; GREPFIELD(out, '<esr>',    2) ;   0.79076908
+match ; eself   ; GREPFIELD(out, '<eself>',  2) ;  21.19057048
+match ; ets     ; GREPFIELD(out, '<ets>',    2) ;   0.00000000
+match ; etotal  ; GREPFIELD(out, '<etotal>', 2) ; -30.23760816
+

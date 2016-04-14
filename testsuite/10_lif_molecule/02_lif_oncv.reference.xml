@@ -1,0 +1,885 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+                   ===========================
+                   I qbox qb@LL-r213         I
+                   I                         I
+                   I                         I
+                   I                         I
+                   I                         I
+                   I                         I
+                   I                         I
+                   I                         I
+                   I                         I
+                   I                         I
+                   I                         I
+                   I                         I
+                   I  F.Gygi and E. Draeger  I
+                   I                  LLNL   I
+                   I Copyright (c) 2003-2013 I
+                   ===========================
+
+-->
+<qbox:simulation xmlns:qbox="http://www.quantum-simulation.org/ns/fpmd/fpmd-1.0">
+<release> qb@LL-r213 fedora </release>
+<npes> 4 </npes>
+<nthreads> 1 </nthreads>
+<user> andradevalen1 </user>
+<sysname> Linux </sysname>
+<nodename> pill.llnl.gov </nodename>
+<start_time> 2016-04-14T21:26:26Z </start_time>
+<!-- [qbox] set cell 10 0 0 0 10 0 0 0 10 -->
+  <unitcell>
+<unit_cell 
+    a="10.00000000  0.00000000   0.00000000  "
+    b="0.00000000   10.00000000  0.00000000  "
+    c="0.00000000   0.00000000   10.00000000 " />
+  </unitcell>
+<!-- [qbox] species lithium Li_ONCV_PBE-1.0.xml -->
+  <!-- SpeciesCmd: defining species lithium as Li_ONCV_PBE-1.0.xml -->
+  <!-- SpeciesReader opening file Li_ONCV_PBE-1.0.xml size: 64479 -->
+  <!-- SpeciesReader::readSpecies: potential type:  ONCV norm-conserving -->
+  <!-- SpeciesReader::readSpecies: read description 
+
+
+ This pseudopotential file has been produced using the code
+ ONCVPSP  (Optimized Norm-Conservinng Vanderbilt PSeudopotential)
+ scalar-relativistic version 2.1.1, 03/26/2014 by D. R. Hamann
+ The code is available through a link at URL www.mat-simresearch.com.
+ Documentation with the package provides a full discription of the
+ input data below.
+
+
+ While it is not required under the terms of the GNU GPL, it is
+ suggested that you cite D. R. Hamann, Phys. Rev. B 88, 085117 (2013)
+ in any publication using these pseudopotentials.
+
+
+ Copyright 2015 The Regents of the University of California
+ 
+ This work is licensed under the Creative Commons Attribution-ShareAlike 
+ 4.0 International License. To view a copy of this license, visit 
+ http://creativecommons.org/licenses/by-sa/4.0/ or send a letter to 
+ Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
+ 
+ This pseudopotential is part of the Schlipf-Gygi norm-conserving 
+ pseudopotential library. Its construction parameters were tuned to 
+ reproduce materials of a training set with very high accuracy and 
+ should be suitable as a general purpose pseudopotential to treat a 
+ variety of different compounds. For details of the construction and 
+ testing of the pseudopotential please refer to:
+ 
+ M. Schlipf, F. Gygi, Comp. Phys. Comm. 196, 36 (2015)
+ http://dx.doi.org/10.1016/j.cpc.2015.05.011
+ 
+ We kindly ask that you include this reference in all publications 
+ associated to this pseudopotential.
+
+
+Input file for PP generation:
+
+# ATOM AND REFERENCE CONFIGURATION
+# atsym  z    nc    nv    iexc   psfile
+  Li  3.00     0     2     4      fpmd
+#
+#   n    l    f        energy (Ha)
+    1    0    2.00
+    2    0    1.00
+#
+# PSEUDOPOTENTIAL AND OPTIMIZATION
+# lmax
+    1
+#
+#   l,   rc,     ep,   ncon, nbas, qcut
+    0   1.74553  -1.90562    5    8   7.75888
+    1   1.40824   0.11292    5    8  11.11410
+#
+# LOCAL POTENTIAL
+# lloc, lpopt,  rc(5),   dvloc0
+    4    5   0.89499      0.00000
+#
+# VANDERBILT-KLEINMAN-BYLANDER PROJECTORs
+# l, nproj, debl
+    0    2   1.80000
+    1    2   1.03347
+#
+# MODEL CORE CHARGE
+# icmod, fcfact
+    0   0.00000
+#
+# LOG DERIVATIVE ANALYSIS
+# epsh1, epsh2, depsh
+   -5.00    3.00    0.02
+#
+# OUTPUT GRID
+# rlmax, drl
+    6.00    0.01
+#
+# TEST CONFIGURATIONS
+# ncnf
+    0
+# nvcnf
+#   n    l    f
+ -->
+  <!-- SpeciesReader::readSpecies: read symbol Li -->
+  <!-- SpeciesReader::readSpecies: read atomic_number 3 -->
+  <!-- SpeciesReader::readSpecies: read mass 6.94000006 -->
+  <!-- SpeciesReader::readSpecies: read valence_charge 3 -->
+  <!-- SpeciesReader::readSpecies: read mesh_spacing 0.01000000 -->
+  <!-- SpeciesReader::readSpecies: read local_potential size=602 -->
+L = 0
+  <!-- SpeciesReader::readSpecies: read projector l=0 i=1 size=602 -->
+  <!-- SpeciesReader::readSpecies: read projector l=0 i=2 size=602 -->
+L = 1
+  <!-- SpeciesReader::readSpecies: read projector l=1 i=1 size=602 -->
+  <!-- SpeciesReader::readSpecies: read projector l=1 i=2 size=602 -->
+L = 2
+  <!-- SpeciesReader::readSpecies: read d_ij l=0 -->
+  <!-- SpeciesReader::readSpecies: read d_ij l=1 -->
+<!-- Species lithium:  extending grid to rmax = 40.00000000 to increase vnlg resolution (4096 pts) -->
+SPECIES.ndft = 4096, np = 602, rmax = 40.96000000, gmax = 314.08256632, hubbard_l = -1
+SIZE 2
+SIZE 2
+SIZE 2
+SIZE 2
+
+ species lithium:
+ name_ = lithium
+ description_ = 
+
+
+ This pseudopotential file has been produced using the code
+ ONCVPSP  (Optimized Norm-Conservinng Vanderbilt PSeudopotential)
+ scalar-relativistic version 2.1.1, 03/26/2014 by D. R. Hamann
+ The code is available through a link at URL www.mat-simresearch.com.
+ Documentation with the package provides a full discription of the
+ input data below.
+
+
+ While it is not required under the terms of the GNU GPL, it is
+ suggested that you cite D. R. Hamann, Phys. Rev. B 88, 085117 (2013)
+ in any publication using these pseudopotentials.
+
+
+ Copyright 2015 The Regents of the University of California
+ 
+ This work is licensed under the Creative Commons Attribution-ShareAlike 
+ 4.0 International License. To view a copy of this license, visit 
+ http://creativecommons.org/licenses/by-sa/4.0/ or send a letter to 
+ Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
+ 
+ This pseudopotential is part of the Schlipf-Gygi norm-conserving 
+ pseudopotential library. Its construction parameters were tuned to 
+ reproduce materials of a training set with very high accuracy and 
+ should be suitable as a general purpose pseudopotential to treat a 
+ variety of different compounds. For details of the construction and 
+ testing of the pseudopotential please refer to:
+ 
+ M. Schlipf, F. Gygi, Comp. Phys. Comm. 196, 36 (2015)
+ http://dx.doi.org/10.1016/j.cpc.2015.05.011
+ 
+ We kindly ask that you include this reference in all publications 
+ associated to this pseudopotential.
+
+
+Input file for PP generation:
+
+# ATOM AND REFERENCE CONFIGURATION
+# atsym  z    nc    nv    iexc   psfile
+  Li  3.00     0     2     4      fpmd
+#
+#   n    l    f        energy (Ha)
+    1    0    2.00
+    2    0    1.00
+#
+# PSEUDOPOTENTIAL AND OPTIMIZATION
+# lmax
+    1
+#
+#   l,   rc,     ep,   ncon, nbas, qcut
+    0   1.74553  -1.90562    5    8   7.75888
+    1   1.40824   0.11292    5    8  11.11410
+#
+# LOCAL POTENTIAL
+# lloc, lpopt,  rc(5),   dvloc0
+    4    5   0.89499      0.00000
+#
+# VANDERBILT-KLEINMAN-BYLANDER PROJECTORs
+# l, nproj, debl
+    0    2   1.80000
+    1    2   1.03347
+#
+# MODEL CORE CHARGE
+# icmod, fcfact
+    0   0.00000
+#
+# LOG DERIVATIVE ANALYSIS
+# epsh1, epsh2, depsh
+   -5.00    3.00    0.02
+#
+# OUTPUT GRID
+# rlmax, drl
+    6.00    0.01
+#
+# TEST CONFIGURATIONS
+# ncnf
+    0
+# nvcnf
+#   n    l    f
+
+ uri_ = Li_ONCV_PBE-1.0.xml
+ symbol_ = Li
+ atomic_number_ = 3
+ Kleinman-Bylander potential
+ valence charge = 3 / ionic mass_ = 6.94000006 (amu)
+ lmax_ =   1
+ llocal_ = -1
+ rcps_ =   1.50000000
+<!-- [qbox] species flouride F_ONCV_PBE-1.0.xml -->
+  <!-- SpeciesCmd: defining species flouride as F_ONCV_PBE-1.0.xml -->
+  <!-- SpeciesReader opening file F_ONCV_PBE-1.0.xml size: 64497 -->
+  <!-- SpeciesReader::readSpecies: potential type:  ONCV norm-conserving -->
+  <!-- SpeciesReader::readSpecies: read description 
+
+
+ This pseudopotential file has been produced using the code
+ ONCVPSP  (Optimized Norm-Conservinng Vanderbilt PSeudopotential)
+ scalar-relativistic version 2.1.1, 03/26/2014 by D. R. Hamann
+ The code is available through a link at URL www.mat-simresearch.com.
+ Documentation with the package provides a full discription of the
+ input data below.
+
+
+ While it is not required under the terms of the GNU GPL, it is
+ suggested that you cite D. R. Hamann, Phys. Rev. B 88, 085117 (2013)
+ in any publication using these pseudopotentials.
+
+
+ Copyright 2015 The Regents of the University of California
+ 
+ This work is licensed under the Creative Commons Attribution-ShareAlike 
+ 4.0 International License. To view a copy of this license, visit 
+ http://creativecommons.org/licenses/by-sa/4.0/ or send a letter to 
+ Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
+ 
+ This pseudopotential is part of the Schlipf-Gygi norm-conserving 
+ pseudopotential library. Its construction parameters were tuned to 
+ reproduce materials of a training set with very high accuracy and 
+ should be suitable as a general purpose pseudopotential to treat a 
+ variety of different compounds. For details of the construction and 
+ testing of the pseudopotential please refer to:
+ 
+ M. Schlipf, F. Gygi, Comp. Phys. Comm. 196, 36 (2015)
+ http://dx.doi.org/10.1016/j.cpc.2015.05.011
+ 
+ We kindly ask that you include this reference in all publications 
+ associated to this pseudopotential.
+
+
+Input file for PP generation:
+
+# ATOM AND REFERENCE CONFIGURATION
+# atsym  z    nc    nv    iexc   psfile
+  F  9.00     1     2     4      fpmd
+#
+#   n    l    f        energy (Ha)
+    1    0    2.00
+    2    0    2.00
+    2    1    5.00
+#
+# PSEUDOPOTENTIAL AND OPTIMIZATION
+# lmax
+    1
+#
+#   l,   rc,     ep,   ncon, nbas, qcut
+    0   1.58478  -1.09879    5    8   8.73495
+    1   1.66223  -0.40834    5    8   8.69707
+#
+# LOCAL POTENTIAL
+# lloc, lpopt,  rc(5),   dvloc0
+    4    5   0.97178      0.00000
+#
+# VANDERBILT-KLEINMAN-BYLANDER PROJECTORs
+# l, nproj, debl
+    0    2   1.51125
+    1    2   1.53167
+#
+# MODEL CORE CHARGE
+# icmod, fcfact
+    0   0.00000
+#
+# LOG DERIVATIVE ANALYSIS
+# epsh1, epsh2, depsh
+   -5.00    3.00    0.02
+#
+# OUTPUT GRID
+# rlmax, drl
+    6.00    0.01
+#
+# TEST CONFIGURATIONS
+# ncnf
+    0
+# nvcnf
+#   n    l    f
+ -->
+  <!-- SpeciesReader::readSpecies: read symbol F -->
+  <!-- SpeciesReader::readSpecies: read atomic_number 9 -->
+  <!-- SpeciesReader::readSpecies: read mass 18.99799919 -->
+  <!-- SpeciesReader::readSpecies: read valence_charge 7 -->
+  <!-- SpeciesReader::readSpecies: read mesh_spacing 0.01000000 -->
+  <!-- SpeciesReader::readSpecies: read local_potential size=602 -->
+L = 0
+  <!-- SpeciesReader::readSpecies: read projector l=0 i=1 size=602 -->
+  <!-- SpeciesReader::readSpecies: read projector l=0 i=2 size=602 -->
+L = 1
+  <!-- SpeciesReader::readSpecies: read projector l=1 i=1 size=602 -->
+  <!-- SpeciesReader::readSpecies: read projector l=1 i=2 size=602 -->
+L = 2
+  <!-- SpeciesReader::readSpecies: read d_ij l=0 -->
+  <!-- SpeciesReader::readSpecies: read d_ij l=1 -->
+<!-- Species flouride:  extending grid to rmax = 40.00000000 to increase vnlg resolution (4096 pts) -->
+SPECIES.ndft = 4096, np = 602, rmax = 40.96000000, gmax = 314.08256632, hubbard_l = -1
+SIZE 2
+SIZE 2
+SIZE 2
+SIZE 2
+
+ species flouride:
+ name_ = flouride
+ description_ = 
+
+
+ This pseudopotential file has been produced using the code
+ ONCVPSP  (Optimized Norm-Conservinng Vanderbilt PSeudopotential)
+ scalar-relativistic version 2.1.1, 03/26/2014 by D. R. Hamann
+ The code is available through a link at URL www.mat-simresearch.com.
+ Documentation with the package provides a full discription of the
+ input data below.
+
+
+ While it is not required under the terms of the GNU GPL, it is
+ suggested that you cite D. R. Hamann, Phys. Rev. B 88, 085117 (2013)
+ in any publication using these pseudopotentials.
+
+
+ Copyright 2015 The Regents of the University of California
+ 
+ This work is licensed under the Creative Commons Attribution-ShareAlike 
+ 4.0 International License. To view a copy of this license, visit 
+ http://creativecommons.org/licenses/by-sa/4.0/ or send a letter to 
+ Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
+ 
+ This pseudopotential is part of the Schlipf-Gygi norm-conserving 
+ pseudopotential library. Its construction parameters were tuned to 
+ reproduce materials of a training set with very high accuracy and 
+ should be suitable as a general purpose pseudopotential to treat a 
+ variety of different compounds. For details of the construction and 
+ testing of the pseudopotential please refer to:
+ 
+ M. Schlipf, F. Gygi, Comp. Phys. Comm. 196, 36 (2015)
+ http://dx.doi.org/10.1016/j.cpc.2015.05.011
+ 
+ We kindly ask that you include this reference in all publications 
+ associated to this pseudopotential.
+
+
+Input file for PP generation:
+
+# ATOM AND REFERENCE CONFIGURATION
+# atsym  z    nc    nv    iexc   psfile
+  F  9.00     1     2     4      fpmd
+#
+#   n    l    f        energy (Ha)
+    1    0    2.00
+    2    0    2.00
+    2    1    5.00
+#
+# PSEUDOPOTENTIAL AND OPTIMIZATION
+# lmax
+    1
+#
+#   l,   rc,     ep,   ncon, nbas, qcut
+    0   1.58478  -1.09879    5    8   8.73495
+    1   1.66223  -0.40834    5    8   8.69707
+#
+# LOCAL POTENTIAL
+# lloc, lpopt,  rc(5),   dvloc0
+    4    5   0.97178      0.00000
+#
+# VANDERBILT-KLEINMAN-BYLANDER PROJECTORs
+# l, nproj, debl
+    0    2   1.51125
+    1    2   1.53167
+#
+# MODEL CORE CHARGE
+# icmod, fcfact
+    0   0.00000
+#
+# LOG DERIVATIVE ANALYSIS
+# epsh1, epsh2, depsh
+   -5.00    3.00    0.02
+#
+# OUTPUT GRID
+# rlmax, drl
+    6.00    0.01
+#
+# TEST CONFIGURATIONS
+# ncnf
+    0
+# nvcnf
+#   n    l    f
+
+ uri_ = F_ONCV_PBE-1.0.xml
+ symbol_ = F
+ atomic_number_ = 9
+ Kleinman-Bylander potential
+ valence charge = 7 / ionic mass_ = 18.99799919 (amu)
+ lmax_ =   1
+ llocal_ = -1
+ rcps_ =   1.50000000
+<!-- [qbox] atom Li lithium 0.0 0.0 0.0 -->
+<!-- [qbox] atom F flouride 0.0 0.0 1.93 -->
+<!-- [qbox] set xc PBE -->
+<!-- [qbox] set ecut 30 -->
+<!-- [qbox] set wf_dyn PSDA -->
+<!-- [qbox] set ecutprec 4 -->
+<!-- [qbox] set threshold_scf 1.E-8 10 -->
+<!-- [qbox] randomize_wf -->
+<!-- Randomize_wf:  allocating wavefunction... -->
+<!-- Creating SlaterDet context 4x1 from spincontext, ispin = 0 -->
+SlaterDet.resize:  new c dimensions = 1412x5   (353x5 blocks, local data size on pe 0 = 353x5) -->
+<!-- Updated occupation of wf -->
+<!-- [qbox] run 0 200 -->
+SlaterDet.resize:  new c dimensions = 1412x5   (353x5 blocks, local data size on pe 0 = 353x5) -->
+ChargeDensity:  vbasis = 36 36 36, resize to 40 40 40
+  <!-- EnergyFunctional: charge density basis: 11060 plane waves, ngloc = 2774 -->
+  <!-- EnergyFunctional: np0v,np1v,np2v: 40 40 40 -->
+  <!-- EnergyFunctional: vft->np012(): 64000 -->
+<!-- AtomSet.set_rcps:  Ewald width for species lithium is too small for reciprocal sum convergence, increasing rcps from 1.50000000 to 1.05000000 -->
+<!-- Species lithium:  extending grid to rmax = 40.00000000 to increase vnlg resolution (4096 pts) -->
+SPECIES.ndft = 4096, np = 602, rmax = 40.96000000, gmax = 314.08256632, hubbard_l = -1
+SIZE 2
+SIZE 2
+SIZE 2
+SIZE 2
+SIZE 2
+<!-- AtomSet.set_rcps:  Ewald width for species lithium = 1.05000000 -->
+<!-- AtomSet.set_rcps:  Ewald width for species flouride is too small for reciprocal sum convergence, increasing rcps from 1.50000000 to 1.10000000 -->
+<!-- Species flouride:  extending grid to rmax = 40.00000000 to increase vnlg resolution (4096 pts) -->
+SIZE 2
+SPECIES.ndft = 4096, np = 602, rmax = 40.96000000, gmax = 314.08256632, hubbard_l = -1
+SIZE 2
+SIZE 2
+<!-- AtomSet.set_rcps:  Ewald width for species flouride = 1.10000000 -->
+<!-- EnergyFunctional:  number of images in real-space ewald sum = 0 for rckj = 1.48492424 -->
+<!-- EnergyFunctional:  number of images in real-space ewald sum = 0 for rckj = 1.52069063 -->
+<!-- EnergyFunctional:  number of images in real-space ewald sum = 0 for rckj = 1.55563492 -->
+<run niter_ionic="0" niter_scf="200" niter_nonscf="0">
+<wavefunction ecut="15.00000000" nspin="1" nel="10" nempty="0">
+<cell a0="10.000000 0.000000 0.000000"
+      a1="0.000000 10.000000 0.000000"
+      a2="0.000000 0.000000 10.000000"/>
+<reciprocal_lattice b0="0.628319 0.000000 0.000000"
+      b1="0.000000 0.628319 0.000000"
+      b2="0.000000 0.000000 0.628319"/>
+<refcell a0="0.000000 0.000000 0.000000"
+         a1="0.000000 0.000000 0.000000"
+         a2="0.000000 0.000000 0.000000"/>
+<slater_determinant kpoint="0.000000 0.000000 0.000000"  weight="1.000000" size="5">
+ <!-- sdcontext: 4x1 -->
+<grid nx="20" ny="20" nz="20"/>
+ <!-- basis size: 1389 -->
+ <!-- c dimensions: 1412x5   (353x5 blocks) -->
+ <density_matrix form="diagonal" size="5">
+ </density_matrix>
+</slater_determinant>
+</wavefunction>
+<!-- BOSampleStepper:  fractional occupation not detected. -->
+SlaterDet.resize:  new c dimensions = 1412x5   (353x5 blocks, local data size on pe 0 = 353x5) -->
+SlaterDet.resize:  new c dimensions = 1412x5   (353x5 blocks, local data size on pe 0 = 353x5) -->
+<iteration count="1">
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> 7.62907899 </eigenvalue_sum>
+  <etotal_int scf_iter="0">     12.25585141 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.76912854 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.07708880 ( using 0.07708880 ) -->
+  <etotal_int scf_iter="1">     -4.68394839 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -4.31459495 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -0.12342172 ( using -0.12342172 ) -->
+  <etotal_int scf_iter="2">    -12.23393561 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -5.88436307 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -0.53815555 ( using -0.53815555 ) -->
+  <etotal_int scf_iter="3">    -15.99534374 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -6.64033513 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.45974371 ( using 0.45974371 ) -->
+  <etotal_int scf_iter="4">    -18.17027522 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -7.48188996 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.14161747 ( using 0.14161747 ) -->
+  <etotal_int scf_iter="5">    -21.63786385 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -7.54128762 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -0.16651771 ( using -0.16651771 ) -->
+  <etotal_int scf_iter="6">    -22.97628803 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -7.50134059 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -1.63260107 ( using 0.00000000 ) -->
+  <etotal_int scf_iter="7">    -23.80239734 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -7.35194055 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -0.97111754 ( using -0.97111754 ) -->
+  <etotal_int scf_iter="8">    -24.95442115 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -7.34676836 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -6.21256488 ( using 0.00000000 ) -->
+  <etotal_int scf_iter="9">    -24.98955277 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -7.06885244 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.28123689 ( using 0.28123689 ) -->
+  <etotal_int scf_iter="10">    -26.17546486 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -6.57703799 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 1.06519062 ( using 1.06519062 ) -->
+  <etotal_int scf_iter="11">    -27.44531386 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -5.72358266 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.49021903 ( using 0.49021903 ) -->
+  <etotal_int scf_iter="12">    -28.74592748 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -5.37368157 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.29917982 ( using 0.29917982 ) -->
+  <etotal_int scf_iter="13">    -29.15953023 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -5.25780525 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.16495952 ( using 0.16495952 ) -->
+  <etotal_int scf_iter="14">    -29.31496270 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -5.17563226 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -0.25930032 ( using -0.25930032 ) -->
+  <etotal_int scf_iter="15">    -29.41994372 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -5.12565424 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -0.77476647 ( using -0.77476647 ) -->
+  <etotal_int scf_iter="16">    -29.47576664 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -5.08584032 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.98447037 ( using 0.98447037 ) -->
+  <etotal_int scf_iter="17">    -29.51510883 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -4.94904345 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.66508464 ( using 0.66508464 ) -->
+  <etotal_int scf_iter="18">    -29.63407903 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -4.74141762 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 1.49016056 ( using 1.49016056 ) -->
+  <etotal_int scf_iter="19">    -29.78154547 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -4.32494187 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.84928796 ( using 0.84928796 ) -->
+  <etotal_int scf_iter="20">    -30.00441223 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -4.01633317 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.62467303 ( using 0.62467303 ) -->
+  <etotal_int scf_iter="21">    -30.13742743 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -3.90963716 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.54118896 ( using 0.54118896 ) -->
+  <etotal_int scf_iter="22">    -30.18907209 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -3.87849926 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.89397398 ( using 0.89397398 ) -->
+  <etotal_int scf_iter="23">    -30.20956065 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -3.86862168 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.55457855 ( using 0.55457855 ) -->
+  <etotal_int scf_iter="24">    -30.22249928 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -3.86254837 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.99684952 ( using 0.99684952 ) -->
+  <etotal_int scf_iter="25">    -30.22819679 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -3.86065812 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.54365176 ( using 0.54365176 ) -->
+  <etotal_int scf_iter="26">    -30.23217114 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -3.85669107 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 1.10707739 ( using 1.10707739 ) -->
+  <etotal_int scf_iter="27">    -30.23396344 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -3.85312228 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.52708901 ( using 0.52708901 ) -->
+  <etotal_int scf_iter="28">    -30.23524255 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -3.84860296 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 1.01217014 ( using 1.01217014 ) -->
+  <etotal_int scf_iter="29">    -30.23576832 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -3.84253227 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.49114751 ( using 0.49114751 ) -->
+  <etotal_int scf_iter="30">    -30.23610944 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -3.83747050 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 1.05205370 ( using 1.05205370 ) -->
+  <etotal_int scf_iter="31">    -30.23631263 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -3.83136923 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.55621786 ( using 0.55621786 ) -->
+  <etotal_int scf_iter="32">    -30.23653027 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -3.82759001 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 1.26396999 ( using 1.26396999 ) -->
+  <etotal_int scf_iter="33">    -30.23670824 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -3.82336542 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.68476252 ( using 0.68476252 ) -->
+  <etotal_int scf_iter="34">    -30.23693959 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -3.82124866 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 1.31375754 ( using 1.31375754 ) -->
+  <etotal_int scf_iter="35">    -30.23711286 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -3.81968952 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.70507378 ( using 0.70507378 ) -->
+  <etotal_int scf_iter="36">    -30.23730518 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -3.81964598 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 1.10128481 ( using 1.10128481 ) -->
+  <etotal_int scf_iter="37">    -30.23741606 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -3.82057855 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.60249409 ( using 0.60249409 ) -->
+  <etotal_int scf_iter="38">    -30.23749589 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -3.82175393 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.92791184 ( using 0.92791184 ) -->
+  <etotal_int scf_iter="39">    -30.23752672 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -3.82327055 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.53486303 ( using 0.53486303 ) -->
+  <etotal_int scf_iter="40">    -30.23754171 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -3.82432387 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.95804075 ( using 0.95804075 ) -->
+  <etotal_int scf_iter="41">    -30.23754900 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -3.82547954 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.57085066 ( using 0.57085066 ) -->
+  <etotal_int scf_iter="42">    -30.23755571 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -3.82620430 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 1.16030955 ( using 1.16030955 ) -->
+  <etotal_int scf_iter="43">    -30.23756230 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -3.82704299 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.68657456 ( using 0.68657456 ) -->
+  <etotal_int scf_iter="44">    -30.23757104 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -3.82756395 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 1.29599450 ( using 1.29599450 ) -->
+  <etotal_int scf_iter="45">    -30.23757855 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -3.82814235 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.73863346 ( using 0.73863346 ) -->
+  <etotal_int scf_iter="46">    -30.23758764 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -3.82844363 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 1.17043116 ( using 1.17043116 ) -->
+  <etotal_int scf_iter="47">    -30.23759384 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -3.82866249 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.66452041 ( using 0.66452041 ) -->
+  <etotal_int scf_iter="48">    -30.23759926 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -3.82867027 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.99784158 ( using 0.99784158 ) -->
+  <etotal_int scf_iter="49">    -30.23760193 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -3.82855854 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.58758237 ( using 0.58758237 ) -->
+  <etotal_int scf_iter="50">    -30.23760357 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -3.82838844 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.96014930 ( using 0.96014930 ) -->
+  <etotal_int scf_iter="51">    -30.23760431 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -3.82814851 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.58233209 ( using 0.58233209 ) -->
+  <etotal_int scf_iter="52">    -30.23760484 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -3.82795091 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 1.06876883 ( using 1.06876883 ) -->
+  <etotal_int scf_iter="53">    -30.23760524 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -3.82770613 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.64717852 ( using 0.64717852 ) -->
+  <etotal_int scf_iter="54">    -30.23760570 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -3.82752894 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 1.20422253 ( using 1.20422253 ) -->
+  <etotal_int scf_iter="55">    -30.23760610 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -3.82731430 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.71617766 ( using 0.71617766 ) -->
+  <etotal_int scf_iter="56">    -30.23760657 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -3.82716890 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 1.20569530 ( using 1.20569530 ) -->
+  <etotal_int scf_iter="57">    -30.23760694 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -3.82701147 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.70866583 ( using 0.70866583 ) -->
+  <etotal_int scf_iter="58">    -30.23760732 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -3.82692105 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 1.09228514 ( using 1.09228514 ) -->
+  <etotal_int scf_iter="59">    -30.23760755 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -3.82684502 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.65390445 ( using 0.65390445 ) -->
+  <etotal_int scf_iter="60">    -30.23760774 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -3.82681646 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 1.01125187 ( using 1.01125187 ) -->
+  <etotal_int scf_iter="61">    -30.23760784 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -3.82680602 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.62122401 ( using 0.62122401 ) -->
+  <etotal_int scf_iter="62">    -30.23760791 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -3.82681490 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 1.01739185 ( using 1.01739185 ) -->
+  <etotal_int scf_iter="63">    -30.23760795 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -3.82683581 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.62869977 ( using 0.62869977 ) -->
+  <etotal_int scf_iter="64">    -30.23760798 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -3.82685815 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 1.07848413 ( using 1.07848413 ) -->
+  <etotal_int scf_iter="65">    -30.23760800 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -3.82688864 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.66170951 ( using 0.66170951 ) -->
+  <etotal_int scf_iter="66">    -30.23760803 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -3.82691341 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 1.13947268 ( using 1.13947268 ) -->
+  <etotal_int scf_iter="67">    -30.23760805 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -3.82694445 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.69814339 ( using 0.69814339 ) -->
+  <etotal_int scf_iter="68">    -30.23760807 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -3.82696794 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 1.16196646 ( using 1.16196646 ) -->
+  <etotal_int scf_iter="69">    -30.23760809 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -3.82699617 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.71713423 ( using 0.71713423 ) -->
+  <etotal_int scf_iter="70">    -30.23760811 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -3.82701688 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 1.13260727 ( using 1.13260727 ) -->
+  <etotal_int scf_iter="71">    -30.23760812 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -3.82704044 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.70296019 ( using 0.70296019 ) -->
+  <etotal_int scf_iter="72">    -30.23760813 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -3.82705685 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 1.06450453 ( using 1.06450453 ) -->
+  <etotal_int scf_iter="73">    -30.23760814 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -3.82707391 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.66166629 ( using 0.66166629 ) -->
+  <etotal_int scf_iter="74">    -30.23760814 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -3.82708455 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 1.00511319 ( using 1.00511319 ) -->
+  <etotal_int scf_iter="75">    -30.23760815 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -3.82709434 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.62762524 ( using 0.62762524 ) -->
+  <etotal_int scf_iter="76">    -30.23760815 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -3.82709932 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 1.01012353 ( using 1.01012353 ) -->
+  <etotal_int scf_iter="77">    -30.23760815 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -3.82710294 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.63707291 ( using 0.63707291 ) -->
+  <etotal_int scf_iter="78">    -30.23760815 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -3.82710366 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 1.09580341 ( using 1.09580341 ) -->
+  <etotal_int scf_iter="79">    -30.23760815 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -3.82710275 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.69626760 ( using 0.69626760 ) -->
+  <etotal_int scf_iter="80">    -30.23760815 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -3.82710036 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 1.19374397 ( using 1.19374397 ) -->
+  <etotal_int scf_iter="81">    -30.23760815 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -3.82709582 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.75241994 ( using 0.75241994 ) -->
+  <etotal_int scf_iter="82">    -30.23760815 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -3.82709085 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 1.18235758 ( using 1.18235758 ) -->
+  <etotal_int scf_iter="83">    -30.23760815 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -3.82708369 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.73447790 ( using 0.73447790 ) -->
+  <etotal_int scf_iter="84">    -30.23760816 </etotal_int>
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <eigenvalue_sum> -3.82707744 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 1.06638255 ( using 1.06638255 ) -->
+  <etotal_int scf_iter="85">    -30.23760816 </etotal_int>
+  <!-- BOSampleStepper: scf convergence at itscf = 86, scf energy varied by less than 1.00e-08 a.u. over 10 scf steps. -->
+  <!-- total_electronic_charge: 10.00000000, spin = 0 -->
+  <ekin>       20.17164482 </ekin>
+  <econf>       0.00000000 </econf>
+  <eps>       -19.06505555 </eps>
+  <enl>        -5.42543603 </enl>
+  <ecoul>     -19.60129496 </ecoul>
+  <exc>        -6.31746644 </exc>
+  <esr>         0.79076908 </esr>
+  <eself>      21.19057048 </eself>
+  <ets>         0.00000000 </ets>
+  <etotal>    -30.23760816 </etotal>
+<atomset>
+<unit_cell 
+    a=" 10.00000000   0.00000000   0.00000000"
+    b="  0.00000000  10.00000000   0.00000000"
+    c="  0.00000000   0.00000000  10.00000000" />
+  <atom name="Li" species="lithium">
+    <position> 0.00000000 0.00000000 0.00000000 </position>
+    <velocity> 0.00000000 0.00000000 0.00000000 </velocity>
+    <force> 0.00000260 -0.00000354 -0.92342438 </force>
+  </atom>
+  <atom name="F" species="flouride">
+    <position> 0.00000000 0.00000000 1.93000000 </position>
+    <velocity> 0.00000000 0.00000000 0.00000000 </velocity>
+    <force> -0.00000525 0.00000175 0.92281017 </force>
+  </atom>
+</atomset>
+<timing where="run"                name=" iteration"       min="1.623    " max="1.623    " count="1        "/>
+</iteration>
+<!-- memory nlp.twnl    :    0.170 MB  (0.043 MB local) -->
+<!-- memory sd.psi      :    0.106 MB  (0.027 MB local) -->
+<!-- memory sd.hpsi     :    0.106 MB  (0.027 MB local) -->
+<!-- memory cd.rhor     :    0.488 MB  (0.122 MB local) -->
+<!-- memory cd.rhog     :    0.169 MB  (0.042 MB local) -->
+<!-- memory total       :    1.039 MB  (0.261 MB local) -->
+</run>
+<!-- [qbox]  -->
+<!-- end of command stream -->
+<real_time> 1.674 </real_time>
+<end_time> 2016-04-14T21:26:28Z </end_time>
+</qbox:simulation>
