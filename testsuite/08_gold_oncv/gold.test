@@ -1,0 +1,20 @@
+Test       : ONCV Gold
+Program    : qb
+TestGroups : short-run
+Enabled    : Yes
+
+ExtraFile  : Au_ONCV_PBE-1.0.xml
+Input      : gold.inp
+Reference  : gold.standard.xml
+
+match ; ekin    ; GREPFIELD(out, '<ekin>',   2) ;   39.55943420
+match ; econf   ; GREPFIELD(out, '<econf>',  2) ;    0.00000000
+match ; eps     ; GREPFIELD(out, '<eps>',    2) ;  -70.62474078
+match ; enl     ; GREPFIELD(out, '<enl>',    2) ;    1.01718426
+match ; ecoul   ; GREPFIELD(out, '<ecoul>',  2) ;  -93.27357419
+match ; exc     ; GREPFIELD(out, '<exc>',    2) ;  -12.19061990
+match ; esr     ; GREPFIELD(out, '<esr>',    2) ;    0.00000000 
+match ; eself   ; GREPFIELD(out, '<eself>',  2) ;   96.01210882
+match ; ets     ; GREPFIELD(out, '<ets>',    2) ;   -0.00714970
+match ; etotal  ; GREPFIELD(out, '<etotal>', 2) ; -135.51946611
+

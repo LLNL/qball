@@ -1,0 +1,1671 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+                   ===========================
+                   I qbox qb@LL-r213         I
+                   I                         I
+                   I                         I
+                   I                         I
+                   I                         I
+                   I                         I
+                   I                         I
+                   I                         I
+                   I                         I
+                   I                         I
+                   I                         I
+                   I                         I
+                   I  F.Gygi and E. Draeger  I
+                   I                  LLNL   I
+                   I Copyright (c) 2003-2013 I
+                   ===========================
+
+-->
+<qbox:simulation xmlns:qbox="http://www.quantum-simulation.org/ns/fpmd/fpmd-1.0">
+<release> qb@LL-r213 fedora </release>
+<npes> 4 </npes>
+<nthreads> 1 </nthreads>
+<user> andradevalen1 </user>
+<sysname> Linux </sysname>
+<nodename> pill.llnl.gov </nodename>
+<start_time> 2016-04-14T20:39:22Z </start_time>
+<!-- [qbox] set cell 20 0 0 0 20 0 0 0 20 -->
+  <unitcell>
+<unit_cell 
+    a="20.00000000  0.00000000   0.00000000  "
+    b="0.00000000   20.00000000  0.00000000  "
+    c="0.00000000   0.00000000   20.00000000 " />
+  </unitcell>
+<!-- [qbox] species gold Au_ONCV_PBE-1.0.xml -->
+  <!-- SpeciesCmd: defining species gold as Au_ONCV_PBE-1.0.xml -->
+  <!-- SpeciesReader opening file Au_ONCV_PBE-1.0.xml size: 114151 -->
+  <!-- SpeciesReader::readSpecies: potential type:  ONCV norm-conserving -->
+  <!-- SpeciesReader::readSpecies: read description 
+
+
+ This pseudopotential file has been produced using the code
+ ONCVPSP  (Optimized Norm-Conservinng Vanderbilt PSeudopotential)
+ scalar-relativistic version 2.1.1, 03/26/2014 by D. R. Hamann
+ The code is available through a link at URL www.mat-simresearch.com.
+ Documentation with the package provides a full discription of the
+ input data below.
+
+
+ While it is not required under the terms of the GNU GPL, it is
+ suggested that you cite D. R. Hamann, Phys. Rev. B 88, 085117 (2013)
+ in any publication using these pseudopotentials.
+
+
+ Copyright 2015 The Regents of the University of California
+ 
+ This work is licensed under the Creative Commons Attribution-ShareAlike 
+ 4.0 International License. To view a copy of this license, visit 
+ http://creativecommons.org/licenses/by-sa/4.0/ or send a letter to 
+ Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
+ 
+ This pseudopotential is part of the Schlipf-Gygi norm-conserving 
+ pseudopotential library. Its construction parameters were tuned to 
+ reproduce materials of a training set with very high accuracy and 
+ should be suitable as a general purpose pseudopotential to treat a 
+ variety of different compounds. For details of the construction and 
+ testing of the pseudopotential please refer to:
+ 
+ [insert reference to paper here]
+ 
+ We kindly ask that you include this reference in all publications 
+ associated to this pseudopotential.
+
+
+Input file for PP generation:
+
+# ATOM AND REFERENCE CONFIGURATION
+# atsym  z    nc    nv    iexc   psfile
+  Au 79.00    10     4     4      fpmd
+#
+#   n    l    f        energy (Ha)
+    1    0    2.00
+    2    0    2.00
+    2    1    6.00
+    3    0    2.00
+    3    1    6.00
+    3    2   10.00
+    4    0    2.00
+    4    1    6.00
+    4    2   10.00
+    4    3   14.00
+    5    0    2.00
+    5    1    6.00
+    6    0    2.00
+    5    2    9.00
+#
+# PSEUDOPOTENTIAL AND OPTIMIZATION
+# lmax
+    3
+#
+#   l,   rc,     ep,   ncon, nbas, qcut
+    0   2.46102  -4.08990    5    8   6.08494
+    1   2.46102  -2.29801    5    8   6.28249
+    2   2.18429  -0.32889    5    8   6.84203
+    3   3.12411   0.19646    5    8   4.94734
+#
+# LOCAL POTENTIAL
+# lloc, lpopt,  rc(5),   dvloc0
+    4    5   1.58284      0.00000
+#
+# VANDERBILT-KLEINMAN-BYLANDER PROJECTORs
+# l, nproj, debl
+    0    2   3.84504
+    1    2   2.25747
+    2    2   1.29537
+    3    2   1.78775
+#
+# MODEL CORE CHARGE
+# icmod, fcfact
+    0   0.00000
+#
+# LOG DERIVATIVE ANALYSIS
+# epsh1, epsh2, depsh
+   -5.00    3.00    0.02
+#
+# OUTPUT GRID
+# rlmax, drl
+    6.00    0.01
+#
+# TEST CONFIGURATIONS
+# ncnf
+    0
+# nvcnf
+#   n    l    f
+ -->
+  <!-- SpeciesReader::readSpecies: read symbol Au -->
+  <!-- SpeciesReader::readSpecies: read atomic_number 79 -->
+  <!-- SpeciesReader::readSpecies: read mass 196.97000122 -->
+  <!-- SpeciesReader::readSpecies: read valence_charge 19 -->
+  <!-- SpeciesReader::readSpecies: read mesh_spacing 0.01000000 -->
+  <!-- SpeciesReader::readSpecies: read local_potential size=602 -->
+L = 0
+  <!-- SpeciesReader::readSpecies: read projector l=0 i=1 size=602 -->
+  <!-- SpeciesReader::readSpecies: read projector l=0 i=2 size=602 -->
+L = 1
+  <!-- SpeciesReader::readSpecies: read projector l=1 i=1 size=602 -->
+  <!-- SpeciesReader::readSpecies: read projector l=1 i=2 size=602 -->
+L = 2
+  <!-- SpeciesReader::readSpecies: read projector l=2 i=1 size=602 -->
+  <!-- SpeciesReader::readSpecies: read projector l=2 i=2 size=602 -->
+L = 3
+  <!-- SpeciesReader::readSpecies: read projector l=3 i=1 size=602 -->
+  <!-- SpeciesReader::readSpecies: read projector l=3 i=2 size=602 -->
+  <!-- SpeciesReader::readSpecies: read d_ij l=0 -->
+  <!-- SpeciesReader::readSpecies: read d_ij l=1 -->
+  <!-- SpeciesReader::readSpecies: read d_ij l=2 -->
+  <!-- SpeciesReader::readSpecies: read d_ij l=3 -->
+<!-- Species gold:  extending grid to rmax = 40.00000000 to increase vnlg resolution (4096 pts) -->
+SPECIES.ndft = 4096, np = 602, rmax = 40.96000000, gmax = 314.08256632, hubbard_l = -1
+SIZE 4
+SIZE 4
+SIZE 4
+SIZE 4
+
+ species gold:
+ name_ = gold
+ description_ = 
+
+
+ This pseudopotential file has been produced using the code
+ ONCVPSP  (Optimized Norm-Conservinng Vanderbilt PSeudopotential)
+ scalar-relativistic version 2.1.1, 03/26/2014 by D. R. Hamann
+ The code is available through a link at URL www.mat-simresearch.com.
+ Documentation with the package provides a full discription of the
+ input data below.
+
+
+ While it is not required under the terms of the GNU GPL, it is
+ suggested that you cite D. R. Hamann, Phys. Rev. B 88, 085117 (2013)
+ in any publication using these pseudopotentials.
+
+
+ Copyright 2015 The Regents of the University of California
+ 
+ This work is licensed under the Creative Commons Attribution-ShareAlike 
+ 4.0 International License. To view a copy of this license, visit 
+ http://creativecommons.org/licenses/by-sa/4.0/ or send a letter to 
+ Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
+ 
+ This pseudopotential is part of the Schlipf-Gygi norm-conserving 
+ pseudopotential library. Its construction parameters were tuned to 
+ reproduce materials of a training set with very high accuracy and 
+ should be suitable as a general purpose pseudopotential to treat a 
+ variety of different compounds. For details of the construction and 
+ testing of the pseudopotential please refer to:
+ 
+ [insert reference to paper here]
+ 
+ We kindly ask that you include this reference in all publications 
+ associated to this pseudopotential.
+
+
+Input file for PP generation:
+
+# ATOM AND REFERENCE CONFIGURATION
+# atsym  z    nc    nv    iexc   psfile
+  Au 79.00    10     4     4      fpmd
+#
+#   n    l    f        energy (Ha)
+    1    0    2.00
+    2    0    2.00
+    2    1    6.00
+    3    0    2.00
+    3    1    6.00
+    3    2   10.00
+    4    0    2.00
+    4    1    6.00
+    4    2   10.00
+    4    3   14.00
+    5    0    2.00
+    5    1    6.00
+    6    0    2.00
+    5    2    9.00
+#
+# PSEUDOPOTENTIAL AND OPTIMIZATION
+# lmax
+    3
+#
+#   l,   rc,     ep,   ncon, nbas, qcut
+    0   2.46102  -4.08990    5    8   6.08494
+    1   2.46102  -2.29801    5    8   6.28249
+    2   2.18429  -0.32889    5    8   6.84203
+    3   3.12411   0.19646    5    8   4.94734
+#
+# LOCAL POTENTIAL
+# lloc, lpopt,  rc(5),   dvloc0
+    4    5   1.58284      0.00000
+#
+# VANDERBILT-KLEINMAN-BYLANDER PROJECTORs
+# l, nproj, debl
+    0    2   3.84504
+    1    2   2.25747
+    2    2   1.29537
+    3    2   1.78775
+#
+# MODEL CORE CHARGE
+# icmod, fcfact
+    0   0.00000
+#
+# LOG DERIVATIVE ANALYSIS
+# epsh1, epsh2, depsh
+   -5.00    3.00    0.02
+#
+# OUTPUT GRID
+# rlmax, drl
+    6.00    0.01
+#
+# TEST CONFIGURATIONS
+# ncnf
+    0
+# nvcnf
+#   n    l    f
+
+ uri_ = Au_ONCV_PBE-1.0.xml
+ symbol_ = Au
+ atomic_number_ = 79
+ Kleinman-Bylander potential
+ valence charge = 19 / ionic mass_ = 196.97000122 (amu)
+ lmax_ =   3
+ llocal_ = -1
+ rcps_ =   1.50000000
+<!-- [qbox] #species gold Au1.xml -->
+<!-- [qbox] #species gold Au_HSCV_PBE-1.0.xml -->
+<!-- [qbox] atom Au gold 0.0 0.0 0.0 -->
+<!-- [qbox] set xc PBE -->
+<!-- [qbox] set ecut 18 -->
+<!-- [qbox] set wf_dyn PSDA -->
+<!-- [qbox] set ecutprec 4 -->
+<!-- [qbox] set threshold_scf 1.E-8 10 -->
+<!-- [qbox] set fermi_temp 1000 -->
+<!-- Note:  fermi_temp variable is deprecated.  Automatically converting input -->
+<!-- to the following commands instead: -->
+<!--   set smearing fermi -->
+<!--   set smearing_width 0.00633331 -->
+<!-- [qbox] set nempty 4 -->
+<!-- [qbox] randomize_wf -->
+<!-- Randomize_wf:  allocating wavefunction... -->
+<!-- Creating SlaterDet context 4x1 from spincontext, ispin = 0 -->
+SlaterDet.resize:  new c dimensions = 5252x14   (1313x14 blocks, local data size on pe 0 = 1313x14) -->
+<!-- Updated occupation of wf -->
+<!-- [qbox] run 0 200 5 -->
+SlaterDet.resize:  new c dimensions = 5252x14   (1313x14 blocks, local data size on pe 0 = 1313x14) -->
+ChargeDensity:  vbasis = 56 56 56, resize to 60 60 60
+  <!-- EnergyFunctional: charge density basis: 41260 plane waves, ngloc = 10313 -->
+  <!-- EnergyFunctional: np0v,np1v,np2v: 60 60 60 -->
+  <!-- EnergyFunctional: vft->np012(): 216000 -->
+<!-- AtomSet.set_rcps:  Ewald width for species gold is too small for reciprocal sum convergence, increasing rcps from 1.50000000 to 1.50000000 -->
+<!-- Species gold:  extending grid to rmax = 40.00000000 to increase vnlg resolution (4096 pts) -->
+SPECIES.ndft = 4096, np = 602, rmax = 40.96000000, gmax = 314.08256632, hubbard_l = -1
+SIZE 4
+SIZE 4
+SIZE 4
+SIZE 4
+<!-- AtomSet.set_rcps:  Ewald width for species gold = 1.50000000 -->
+<!-- EnergyFunctional:  number of images in real-space ewald sum = 0 for rckj = 2.12132034 -->
+<run niter_ionic="0" niter_scf="200" niter_nonscf="5">
+<wavefunction ecut="9.00000000" nspin="1" nel="19" nempty="4">
+<cell a0="20.000000 0.000000 0.000000"
+      a1="0.000000 20.000000 0.000000"
+      a2="0.000000 0.000000 20.000000"/>
+<reciprocal_lattice b0="0.314159 0.000000 0.000000"
+      b1="0.000000 0.314159 0.000000"
+      b2="0.000000 0.000000 0.314159"/>
+<refcell a0="0.000000 0.000000 0.000000"
+         a1="0.000000 0.000000 0.000000"
+         a2="0.000000 0.000000 0.000000"/>
+<slater_determinant kpoint="0.000000 0.000000 0.000000"  weight="1.000000" size="14">
+ <!-- sdcontext: 4x1 -->
+<grid nx="30" ny="30" nz="30"/>
+ <!-- basis size: 5198 -->
+ <!-- c dimensions: 5252x14   (1313x14 blocks) -->
+ <density_matrix form="diagonal" size="14">
+ </density_matrix>
+</slater_determinant>
+</wavefunction>
+<!-- BOSampleStepper:  fractional occupation detected. -->
+ <!-- Wavefunction::update_occ: sum = 19.000000 -->
+ <!-- Wavefunction::update_occ: using Fermi smearing, mu = 0.0644 eV, ispin = 0 -->
+SlaterDet.resize:  new c dimensions = 5252x14   (1313x14 blocks, local data size on pe 0 = 1313x14) -->
+SlaterDet.resize:  new c dimensions = 5252x14   (1313x14 blocks, local data size on pe 0 = 1313x14) -->
+<iteration count="1">
+  <!-- BOSampleStepper: start scf iteration -->
+  <!-- total_electronic_charge: 19.00000000, spin = 0 -->
+  <eigenvalue_sum> 20.79350696 </eigenvalue_sum>
+  <etotal_int scf_iter="0">      3.07957682 </etotal_int>
+  <eharris>      3.07957682 </eharris>
+  <eigenvalue_sum> -5.27513992 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.05225689 ( using 0.05225689 ) -->
+  <etotal_int scf_iter="0">    -27.23218703 </etotal_int>
+  <eigenvalue_sum> -16.20333262 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -0.77206831 ( using -0.77206831 ) -->
+  <etotal_int scf_iter="0">    -36.01359956 </etotal_int>
+  <eigenvalue_sum> -20.42966337 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -0.82859774 ( using -0.82859774 ) -->
+  <etotal_int scf_iter="0">    -35.47857929 </etotal_int>
+  <eigenvalue_sum> -37.77229968 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -1.05659166 ( using 0.00000000 ) -->
+  <etotal_int scf_iter="0">    -33.57724074 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  -297.19141  -280.68015  -279.69861  -269.75513  -167.05063  -133.10577  -125.04877   -89.37966
+   -50.57103   -40.54272   -26.98539   -22.07538   -18.42759    -9.12260
+  </eigenvalues>
+ <!-- Wavefunction::update_occ: sum = 19.00000 -->
+ <!-- Wavefunction::update_occ: using Fermi smearing, mu = -40.5431 eV, ispin = 0 -->
+  <occupation spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  2.0000  2.0000  2.0000  2.0000  2.0000  2.0000  2.0000  2.0000  2.0000  1.0000
+  0.0000  0.0000  0.0000  0.0000
+  </occupation>
+  <!-- Wavefunction entropy: 1.38629436 -->
+  <!-- Entropy contribution to free energy: -0.01755966 -->
+  <!-- BOSampleStepper: end scf iteration -->
+  <!-- BOSampleStepper: start scf iteration -->
+  <!-- total_electronic_charge: 19.00000000, spin = 0 -->
+  <eigenvalue_sum> -57.54042825 </eigenvalue_sum>
+  <etotal_int scf_iter="1">    -53.90317114 </etotal_int>
+  <eharris>   -118.55887125 </eharris>
+  <eigenvalue_sum> -75.72607369 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -0.45181741 ( using -0.45181741 ) -->
+  <etotal_int scf_iter="1">    -43.65845782 </etotal_int>
+  <eigenvalue_sum> -88.37386953 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -0.15746795 ( using -0.15746795 ) -->
+  <etotal_int scf_iter="1">    -38.35760723 </etotal_int>
+  <eigenvalue_sum> -96.90338986 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -0.45000691 ( using -0.45000691 ) -->
+  <etotal_int scf_iter="1">    -31.51485673 </etotal_int>
+  <eigenvalue_sum> -100.02949871 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -0.33592947 ( using -0.33592947 ) -->
+  <etotal_int scf_iter="1">    -29.00527386 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  -357.57441  -287.30303  -287.09472  -286.21379  -197.54711  -195.95073  -195.45809  -194.95461
+  -191.95492  -161.82072  -121.83167  -116.11454  -101.50311   -86.02405
+  </eigenvalues>
+ <!-- Wavefunction::update_occ: sum = 19.00000 -->
+ <!-- Wavefunction::update_occ: using Fermi smearing, mu = -161.8220 eV, ispin = 0 -->
+  <occupation spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  2.0000  2.0000  2.0000  2.0000  2.0000  2.0000  2.0000  2.0000  2.0000  1.0000
+  0.0000  0.0000  0.0000  0.0000
+  </occupation>
+  <!-- Wavefunction entropy: 1.38629436 -->
+  <!-- Entropy contribution to free energy: -0.01755966 -->
+  <!-- BOSampleStepper: end scf iteration -->
+  <!-- BOSampleStepper: start scf iteration -->
+  <!-- total_electronic_charge: 18.99999999, spin = 0 -->
+ AndersonMixer: theta = 0.74643675 
+  <eigenvalue_sum> -95.08153754 </eigenvalue_sum>
+  <etotal_int scf_iter="2">    -34.17855695 </etotal_int>
+  <eharris>   -130.01987621 </eharris>
+  <eigenvalue_sum> -95.55815178 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -0.66543836 ( using -0.66543836 ) -->
+  <etotal_int scf_iter="2">    -33.00713672 </etotal_int>
+  <eigenvalue_sum> -96.46699946 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -0.02497459 ( using -0.02497459 ) -->
+  <etotal_int scf_iter="2">    -32.61873889 </etotal_int>
+  <eigenvalue_sum> -96.95288510 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -0.60477591 ( using -0.60477591 ) -->
+  <etotal_int scf_iter="2">    -31.93908688 </etotal_int>
+  <eigenvalue_sum> -97.11407303 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -0.16339798 ( using -0.16339798 ) -->
+  <etotal_int scf_iter="2">    -31.80853216 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  -339.77676  -269.30483  -269.21641  -268.50530  -182.90884  -182.72397  -182.31899  -182.25791
+  -182.06982  -150.82500  -117.06713  -114.00918  -109.38633   -99.75527
+  </eigenvalues>
+ <!-- Wavefunction::update_occ: sum = 19.00000 -->
+ <!-- Wavefunction::update_occ: using Fermi smearing, mu = -150.8262 eV, ispin = 0 -->
+  <occupation spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  2.0000  2.0000  2.0000  2.0000  2.0000  2.0000  2.0000  2.0000  2.0000  1.0000
+  0.0000  0.0000  0.0000  0.0000
+  </occupation>
+  <!-- Wavefunction entropy: 1.38629436 -->
+  <!-- Entropy contribution to free energy: -0.01755966 -->
+  <!-- BOSampleStepper: end scf iteration -->
+  <!-- BOSampleStepper: start scf iteration -->
+  <!-- total_electronic_charge: 19.00000000, spin = 0 -->
+ AndersonMixer: theta = -0.13758305 0.63207060 
+  <eigenvalue_sum> -90.99637521 </eigenvalue_sum>
+  <etotal_int scf_iter="3">    -42.02693452 </etotal_int>
+  <eharris>   -129.11506107 </eharris>
+  <eigenvalue_sum> -91.16077275 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -0.62561126 ( using -0.62561126 ) -->
+  <etotal_int scf_iter="3">    -42.47686582 </etotal_int>
+  <eigenvalue_sum> -91.21606176 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -0.13992450 ( using -0.13992450 ) -->
+  <etotal_int scf_iter="3">    -42.51657398 </etotal_int>
+  <eigenvalue_sum> -91.32269829 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -0.31349319 ( using -0.31349319 ) -->
+  <etotal_int scf_iter="3">    -42.60930910 </etotal_int>
+  <eigenvalue_sum> -91.38284905 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -0.48591807 ( using -0.48591807 ) -->
+  <etotal_int scf_iter="3">    -42.64774187 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  -321.81658  -253.67386  -253.65117  -252.94369  -170.17547  -170.06484  -169.63846  -169.63371
+  -169.43529  -140.04290  -108.81138  -106.95715  -102.10469   -98.96998
+  </eigenvalues>
+ <!-- Wavefunction::update_occ: sum = 19.00000 -->
+ <!-- Wavefunction::update_occ: using Fermi smearing, mu = -140.0440 eV, ispin = 0 -->
+  <occupation spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  2.0000  2.0000  2.0000  2.0000  2.0000  2.0000  2.0000  2.0000  2.0000  1.0000
+  0.0000  0.0000  0.0000  0.0000
+  </occupation>
+  <!-- Wavefunction entropy: 1.38629436 -->
+  <!-- Entropy contribution to free energy: -0.01755966 -->
+  <!-- BOSampleStepper: end scf iteration -->
+  <!-- BOSampleStepper: start scf iteration -->
+  <!-- total_electronic_charge: 19.00000000, spin = 0 -->
+ AndersonMixer: theta = -0.26243588 -0.49185823 0.73676404 
+  <eigenvalue_sum> -88.82928273 </eigenvalue_sum>
+  <etotal_int scf_iter="4">    -46.53439360 </etotal_int>
+  <eharris>   -129.57500797 </eharris>
+  <eigenvalue_sum> -88.88169050 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -0.51687241 ( using -0.51687241 ) -->
+  <etotal_int scf_iter="4">    -46.73937315 </etotal_int>
+  <eigenvalue_sum> -88.90123221 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -0.31001348 ( using -0.31001348 ) -->
+  <etotal_int scf_iter="4">    -46.77301968 </etotal_int>
+  <eigenvalue_sum> -88.93061249 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -0.04684955 ( using -0.04684955 ) -->
+  <etotal_int scf_iter="4">    -46.82231702 </etotal_int>
+  <eigenvalue_sum> -88.95645475 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -0.44491138 ( using -0.44491138 ) -->
+  <etotal_int scf_iter="4">    -46.85148407 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  -315.17868  -247.65269  -247.63424  -246.93977  -164.99669  -164.90207  -164.46763  -164.45985
+  -164.27981  -135.55962  -105.18323  -103.82354   -99.07247   -96.82099
+  </eigenvalues>
+ <!-- Wavefunction::update_occ: sum = 19.00000 -->
+ <!-- Wavefunction::update_occ: using Fermi smearing, mu = -135.5607 eV, ispin = 0 -->
+  <occupation spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  2.0000  2.0000  2.0000  2.0000  2.0000  2.0000  2.0000  2.0000  2.0000  1.0000
+  0.0000  0.0000  0.0000  0.0000
+  </occupation>
+  <!-- Wavefunction entropy: 1.38629436 -->
+  <!-- Entropy contribution to free energy: -0.01755966 -->
+  <!-- BOSampleStepper: end scf iteration -->
+  <!-- BOSampleStepper: start scf iteration -->
+  <!-- total_electronic_charge: 19.00000000, spin = 0 -->
+ AndersonMixer: theta = -0.11941345 -0.42279879 -0.67034328 
+  <eigenvalue_sum> -52.14482761 </eigenvalue_sum>
+  <etotal_int scf_iter="5">    -93.49412734 </etotal_int>
+  <eharris>   -129.77597143 </eharris>
+  <eigenvalue_sum> -52.87825728 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.79119681 ( using 0.79119681 ) -->
+  <etotal_int scf_iter="5">    -96.93002389 </etotal_int>
+  <eigenvalue_sum> -53.40876606 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.25863436 ( using 0.25863436 ) -->
+  <etotal_int scf_iter="5">   -100.13628447 </etotal_int>
+  <eigenvalue_sum> -53.56592384 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -0.21953572 ( using -0.21953572 ) -->
+  <etotal_int scf_iter="5">   -101.14729395 </etotal_int>
+  <eigenvalue_sum> -53.60442076 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -0.36538094 ( using -0.36538094 ) -->
+  <etotal_int scf_iter="5">   -101.10675570 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  -215.47281  -159.74625  -159.67448  -159.45806   -93.47591   -93.35310   -93.28143   -93.21766
+   -93.14547   -78.61812   -60.80392   -60.05214   -53.77264   -45.74043
+  </eigenvalues>
+ <!-- Wavefunction::update_occ: sum = 19.00000 -->
+ <!-- Wavefunction::update_occ: using Fermi smearing, mu = -78.6188 eV, ispin = 0 -->
+  <occupation spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  2.0000  2.0000  2.0000  2.0000  2.0000  2.0000  2.0000  2.0000  2.0000  1.0000
+  0.0000  0.0000  0.0000  0.0000
+  </occupation>
+  <!-- Wavefunction entropy: 1.38629436 -->
+  <!-- Entropy contribution to free energy: -0.01755966 -->
+  <!-- BOSampleStepper: end scf iteration -->
+  <!-- BOSampleStepper: start scf iteration -->
+  <!-- total_electronic_charge: 19.00000000, spin = 0 -->
+ AndersonMixer: theta = 0.33520639 -0.58414705 -0.35143762 
+  <eigenvalue_sum> -25.85295149 </eigenvalue_sum>
+  <etotal_int scf_iter="6">   -125.84306418 </etotal_int>
+  <eharris>   -133.56374597 </eharris>
+  <eigenvalue_sum> -26.61384539 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 1.46545749 ( using 1.46545749 ) -->
+  <etotal_int scf_iter="6">   -128.66472245 </etotal_int>
+  <eigenvalue_sum> -27.60107385 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.34870861 ( using 0.34870861 ) -->
+  <etotal_int scf_iter="6">   -133.28066326 </etotal_int>
+  <eigenvalue_sum> -27.89636066 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.58533405 ( using 0.58533405 ) -->
+  <etotal_int scf_iter="6">   -135.02476628 </etotal_int>
+  <eigenvalue_sum> -28.05617852 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.25790620 ( using 0.25790620 ) -->
+  <etotal_int scf_iter="6">   -136.05214767 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  -142.85622   -93.43043   -93.30235   -93.26943   -39.75309   -39.74111   -39.70098   -39.66675
+   -39.62934   -39.39502   -30.01912   -29.98134   -29.18899   -15.13130
+  </eigenvalues>
+ <!-- Wavefunction::update_occ: sum = 19.00000 -->
+ <!-- Wavefunction::update_occ: using Fermi smearing, mu = -39.3577 eV, ispin = 0 -->
+  <occupation spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  2.0000  2.0000  2.0000  2.0000  1.9799  1.9770  1.9636  1.9463  1.9183  1.2149
+  0.0000  0.0000  0.0000  0.0000
+  </occupation>
+  <!-- Wavefunction entropy: 2.34824917 -->
+  <!-- Entropy contribution to free energy: -0.02974438 -->
+  <!-- BOSampleStepper: end scf iteration -->
+  <!-- BOSampleStepper: start scf iteration -->
+  <!-- total_electronic_charge: 19.00000001, spin = 0 -->
+ AndersonMixer: theta = -0.72184395 0.25665129 0.12547988 
+  <eigenvalue_sum> -29.97884897 </eigenvalue_sum>
+  <etotal_int scf_iter="7">   -131.98697806 </etotal_int>
+  <eharris>   -135.30023843 </eharris>
+  <eigenvalue_sum> -30.07939687 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.42049326 ( using 0.42049326 ) -->
+  <etotal_int scf_iter="7">   -130.67187287 </etotal_int>
+  <eigenvalue_sum> -30.14675599 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.10714998 ( using 0.10714998 ) -->
+  <etotal_int scf_iter="7">   -129.56323613 </etotal_int>
+  <eigenvalue_sum> -30.17397215 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -0.29052501 ( using -0.29052501 ) -->
+  <etotal_int scf_iter="7">   -129.01507864 </etotal_int>
+  <eigenvalue_sum> -30.18407404 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -0.14751819 ( using -0.14751819 ) -->
+  <etotal_int scf_iter="7">   -128.81121674 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  -157.81357  -103.98805  -103.91988  -103.85154   -43.53851   -43.50480   -43.45965   -43.41526
+   -43.39338   -39.02342   -27.74303   -27.73733   -27.49837   -12.74292
+  </eigenvalues>
+ <!-- Wavefunction::update_occ: sum = 19.00000 -->
+ <!-- Wavefunction::update_occ: using Fermi smearing, mu = -39.0237 eV, ispin = 0 -->
+  <occupation spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  2.0000  2.0000  2.0000  2.0000  2.0000  2.0000  2.0000  2.0000  2.0000  1.0000
+  0.0000  0.0000  0.0000  0.0000
+  </occupation>
+  <!-- Wavefunction entropy: 1.38629436 -->
+  <!-- Entropy contribution to free energy: -0.01755966 -->
+  <!-- BOSampleStepper: end scf iteration -->
+  <!-- BOSampleStepper: start scf iteration -->
+  <!-- total_electronic_charge: 18.99999999, spin = 0 -->
+ AndersonMixer: theta = -0.85946761 -0.30125488 -0.21979660 
+  <eigenvalue_sum> -13.77680650 </eigenvalue_sum>
+  <etotal_int scf_iter="8">   -133.74567281 </etotal_int>
+  <eharris>   -135.30826138 </eharris>
+  <eigenvalue_sum> -13.94748335 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 2.41804046 ( using 2.00000000 ) -->
+  <etotal_int scf_iter="8">   -134.48045009 </etotal_int>
+  <eigenvalue_sum> -14.28131390 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.45782258 ( using 0.45782258 ) -->
+  <etotal_int scf_iter="8">   -136.30784770 </etotal_int>
+  <eigenvalue_sum> -14.42960663 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.39068781 ( using 0.39068781 ) -->
+  <etotal_int scf_iter="8">   -137.34956994 </etotal_int>
+  <eigenvalue_sum> -14.50926579 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.31078513 ( using 0.31078513 ) -->
+  <etotal_int scf_iter="8">   -137.88939745 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  -119.97061   -66.45961   -66.41196   -66.36166   -12.13394    -9.66845    -9.64287    -9.61071
+    -9.57875    -9.56939    -6.43759    -6.43075    -6.39491     2.52565
+  </eigenvalues>
+ <!-- Wavefunction::update_occ: sum = 19.00000 -->
+ <!-- Wavefunction::update_occ: using Fermi smearing, mu = -9.4184 eV, ispin = 0 -->
+  <occupation spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  2.0000  2.0000  2.0000  2.0000  2.0000  1.8959  1.8624  1.8062  1.7309  1.7046
+  0.0000  0.0000  0.0000  0.0000
+  </occupation>
+  <!-- Wavefunction entropy: 3.17376144 -->
+  <!-- Entropy contribution to free energy: -0.04020083 -->
+  <!-- BOSampleStepper: end scf iteration -->
+  <!-- BOSampleStepper: start scf iteration -->
+  <!-- total_electronic_charge: 19.00000000, spin = 0 -->
+ AndersonMixer: theta = -0.50332196 -0.27362264 0.41540600 
+  <eigenvalue_sum> -18.46354690 </eigenvalue_sum>
+  <etotal_int scf_iter="9">   -136.47132002 </etotal_int>
+  <eharris>   -135.28664643 </eharris>
+  <eigenvalue_sum> -18.52041731 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 1.13630864 ( using 1.13630864 ) -->
+  <etotal_int scf_iter="9">   -135.58365712 </etotal_int>
+  <eigenvalue_sum> -18.59150920 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.52118121 ( using 0.52118121 ) -->
+  <etotal_int scf_iter="9">   -134.24576126 </etotal_int>
+  <eigenvalue_sum> -18.62701040 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -0.07881992 ( using -0.07881992 ) -->
+  <etotal_int scf_iter="9">   -133.36311323 </etotal_int>
+  <eigenvalue_sum> -18.63406501 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -0.26612149 ( using -0.26612149 ) -->
+  <etotal_int scf_iter="9">   -133.24927113 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  -134.38563   -79.90686   -79.77906   -79.69092   -18.90432   -18.87717   -18.82559   -18.74925
+   -18.72061   -16.46471    -8.26603    -8.21897    -8.19148     1.75800
+  </eigenvalues>
+ <!-- Wavefunction::update_occ: sum = 19.00000 -->
+ <!-- Wavefunction::update_occ: using Fermi smearing, mu = -16.4648 eV, ispin = 0 -->
+  <occupation spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  2.0000  2.0000  2.0000  2.0000  2.0000  2.0000  2.0000  2.0000  2.0000  1.0000
+  0.0000  0.0000  0.0000  0.0000
+  </occupation>
+  <!-- Wavefunction entropy: 1.38629436 -->
+  <!-- Entropy contribution to free energy: -0.01755966 -->
+  <!-- BOSampleStepper: end scf iteration -->
+  <!-- BOSampleStepper: start scf iteration -->
+  <!-- total_electronic_charge: 18.99999999, spin = 0 -->
+ AndersonMixer: theta = -0.14436739 -0.83626071 0.39550342 
+  <eigenvalue_sum> -13.66996044 </eigenvalue_sum>
+  <etotal_int scf_iter="10">   -134.22682063 </etotal_int>
+  <eharris>   -135.47169567 </eharris>
+  <eigenvalue_sum> -13.69366075 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.87486771 ( using 0.87486771 ) -->
+  <etotal_int scf_iter="10">   -134.60999976 </etotal_int>
+  <eigenvalue_sum> -13.72627781 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.70705954 ( using 0.70705954 ) -->
+  <etotal_int scf_iter="10">   -135.06018097 </etotal_int>
+  <eigenvalue_sum> -13.75692097 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.46894515 ( using 0.46894515 ) -->
+  <etotal_int scf_iter="10">   -135.42414826 </etotal_int>
+  <eigenvalue_sum> -13.77872842 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.15605360 ( using 0.15605360 ) -->
+  <etotal_int scf_iter="10">   -135.61920127 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  -120.52772   -67.12627   -67.06789   -67.03565    -8.59893    -8.43684    -8.41137    -8.39571
+    -8.37171    -8.35111    -2.45253    -2.44087    -2.42929     4.39594
+  </eigenvalues>
+ <!-- Wavefunction::update_occ: sum = 19.00000 -->
+ <!-- Wavefunction::update_occ: using Fermi smearing, mu = -8.1981 eV, ispin = 0 -->
+  <occupation spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  2.0000  2.0000  2.0000  2.0000  1.9811  1.8822  1.8448  1.8167  1.7648  1.7104
+  0.0000  0.0000  0.0000  0.0000
+  </occupation>
+  <!-- Wavefunction entropy: 3.26461959 -->
+  <!-- Entropy contribution to free energy: -0.04135170 -->
+  <!-- BOSampleStepper: end scf iteration -->
+  <!-- BOSampleStepper: start scf iteration -->
+  <!-- total_electronic_charge: 19.00000000, spin = 0 -->
+ AndersonMixer: theta = -0.23736369 -0.46015795 0.10503138 
+  <eigenvalue_sum> -14.05211804 </eigenvalue_sum>
+  <etotal_int scf_iter="11">   -136.68599785 </etotal_int>
+  <eharris>   -135.48133298 </eharris>
+  <eigenvalue_sum> -14.06075456 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 1.19204956 ( using 1.19204956 ) -->
+  <etotal_int scf_iter="11">   -136.51830941 </etotal_int>
+  <eigenvalue_sum> -14.07556741 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.31694678 ( using 0.31694678 ) -->
+  <etotal_int scf_iter="11">   -136.24957914 </etotal_int>
+  <eigenvalue_sum> -14.08510157 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -0.08066019 ( using -0.08066019 ) -->
+  <etotal_int scf_iter="11">   -136.11985917 </etotal_int>
+  <eigenvalue_sum> -14.08947485 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -0.11915212 ( using -0.11915212 ) -->
+  <etotal_int scf_iter="11">   -136.08997971 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  -122.15869   -68.80472   -68.71702   -68.56724    -9.41147    -9.39978    -9.29658    -9.25598
+    -9.22780    -8.29514    -1.74202    -1.71593    -1.67204     4.75100
+  </eigenvalues>
+ <!-- Wavefunction::update_occ: sum = 19.00000 -->
+ <!-- Wavefunction::update_occ: using Fermi smearing, mu = -8.2952 eV, ispin = 0 -->
+  <occupation spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  2.0000  2.0000  2.0000  2.0000  2.0000  2.0000  2.0000  2.0000  2.0000  1.0001
+  0.0000  0.0000  0.0000  0.0000
+  </occupation>
+  <!-- Wavefunction entropy: 1.38748160 -->
+  <!-- Entropy contribution to free energy: -0.01757470 -->
+  <!-- BOSampleStepper: end scf iteration -->
+  <!-- BOSampleStepper: start scf iteration -->
+  <!-- total_electronic_charge: 19.00000000, spin = 0 -->
+ AndersonMixer: theta = -0.61917898 -0.36455367 0.37178295 
+  <eigenvalue_sum> -12.89561280 </eigenvalue_sum>
+  <etotal_int scf_iter="12">   -135.33654022 </etotal_int>
+  <eharris>   -135.50909910 </eharris>
+  <eigenvalue_sum> -12.90362232 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 1.37558129 ( using 1.37558129 ) -->
+  <etotal_int scf_iter="12">   -135.52158475 </etotal_int>
+  <eigenvalue_sum> -12.91940340 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.65766066 ( using 0.65766066 ) -->
+  <etotal_int scf_iter="12">   -135.83165144 </etotal_int>
+  <eigenvalue_sum> -12.93343113 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.58180354 ( using 0.58180354 ) -->
+  <etotal_int scf_iter="12">   -136.05186634 </etotal_int>
+  <eigenvalue_sum> -12.94506017 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.32999581 ( using 0.32999581 ) -->
+  <etotal_int scf_iter="12">   -136.18088253 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  -118.50006   -65.14030   -65.13421   -65.12933    -6.78638    -6.66407    -6.65485    -6.63533
+    -6.63062    -6.62544    -0.92550    -0.91193    -0.90829     4.18947
+  </eigenvalues>
+ <!-- Wavefunction::update_occ: sum = 19.00000 -->
+ <!-- Wavefunction::update_occ: using Fermi smearing, mu = -6.4480 eV, ispin = 0 -->
+  <occupation spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  2.0000  2.0000  2.0000  2.0000  1.9614  1.8494  1.8338  1.7959  1.7857  1.7739
+  0.0000  0.0000  0.0000  0.0000
+  </occupation>
+  <!-- Wavefunction entropy: 3.34352258 -->
+  <!-- Entropy contribution to free energy: -0.04235113 -->
+  <!-- BOSampleStepper: end scf iteration -->
+  <!-- BOSampleStepper: start scf iteration -->
+  <!-- total_electronic_charge: 18.99999999, spin = 0 -->
+ AndersonMixer: theta = 0.18922951 -0.88355870 0.30548753 
+  <eigenvalue_sum> -14.08980049 </eigenvalue_sum>
+  <etotal_int scf_iter="13">   -136.76571678 </etotal_int>
+  <eharris>   -135.47362656 </eharris>
+  <eigenvalue_sum> -14.09500028 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 1.48518163 ( using 1.48518163 ) -->
+  <etotal_int scf_iter="13">   -136.55578783 </etotal_int>
+  <eigenvalue_sum> -14.10404208 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.54892033 ( using 0.54892033 ) -->
+  <etotal_int scf_iter="13">   -136.19384645 </etotal_int>
+  <eigenvalue_sum> -14.11025955 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.20310022 ( using 0.20310022 ) -->
+  <etotal_int scf_iter="13">   -135.97490494 </etotal_int>
+  <eigenvalue_sum> -14.11356659 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -0.04351857 ( using -0.04351857 ) -->
+  <etotal_int scf_iter="13">   -135.91257319 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  -122.25639   -68.58032   -68.55356   -68.51310    -9.25091    -9.22435    -9.20370    -9.18810
+    -9.16898    -8.26563    -1.77981    -1.76557    -1.75097     3.39864
+  </eigenvalues>
+ <!-- Wavefunction::update_occ: sum = 19.00000 -->
+ <!-- Wavefunction::update_occ: using Fermi smearing, mu = -8.2657 eV, ispin = 0 -->
+  <occupation spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  2.0000  2.0000  2.0000  2.0000  2.0000  2.0000  2.0000  2.0000  1.9999  1.0002
+  0.0000  0.0000  0.0000  0.0000
+  </occupation>
+  <!-- Wavefunction entropy: 1.38853236 -->
+  <!-- Entropy contribution to free energy: -0.01758801 -->
+  <!-- BOSampleStepper: end scf iteration -->
+  <!-- BOSampleStepper: start scf iteration -->
+  <!-- total_electronic_charge: 18.99999999, spin = 0 -->
+ AndersonMixer: theta = 0.29801295 -0.35498619 0.01536392 
+  <eigenvalue_sum> -13.68221796 </eigenvalue_sum>
+  <etotal_int scf_iter="14">   -134.74955879 </etotal_int>
+  <eharris>   -135.50973995 </eharris>
+  <eigenvalue_sum> -13.68483476 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.68927184 ( using 0.68927184 ) -->
+  <etotal_int scf_iter="14">   -134.80573710 </etotal_int>
+  <eigenvalue_sum> -13.68883583 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.28949853 ( using 0.28949853 ) -->
+  <etotal_int scf_iter="14">   -134.86734087 </etotal_int>
+  <eigenvalue_sum> -13.69209539 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -0.07636595 ( using -0.07636595 ) -->
+  <etotal_int scf_iter="14">   -134.90050229 </etotal_int>
+  <eigenvalue_sum> -13.69393135 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -0.08078798 ( using -0.08078798 ) -->
+  <etotal_int scf_iter="14">   -134.91120448 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  -120.90313   -67.25645   -67.25128   -67.23879    -8.22186    -8.21155    -8.19529    -8.18735
+    -8.18320    -7.66875    -1.46898    -1.46793    -1.46500     3.03771
+  </eigenvalues>
+ <!-- Wavefunction::update_occ: sum = 19.00000 -->
+ <!-- Wavefunction::update_occ: using Fermi smearing, mu = -7.6653 eV, ispin = 0 -->
+  <occupation spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  2.0000  2.0000  2.0000  2.0000  1.9969  1.9965  1.9957  1.9953  1.9951  1.0205
+  0.0000  0.0000  0.0000  0.0000
+  </occupation>
+  <!-- Wavefunction entropy: 1.53266634 -->
+  <!-- Entropy contribution to free energy: -0.01941370 -->
+  <!-- BOSampleStepper: end scf iteration -->
+  <!-- BOSampleStepper: start scf iteration -->
+  <!-- total_electronic_charge: 19.00000000, spin = 0 -->
+ AndersonMixer: theta = -0.93347068 0.04509828 0.00291220 
+  <eigenvalue_sum> -13.22467561 </eigenvalue_sum>
+  <etotal_int scf_iter="15">   -135.20747329 </etotal_int>
+  <eharris>   -135.51445351 </eharris>
+  <eigenvalue_sum> -13.22774800 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 2.11394499 ( using 2.00000000 ) -->
+  <etotal_int scf_iter="15">   -135.29749775 </etotal_int>
+  <eigenvalue_sum> -13.23569898 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.55501210 ( using 0.55501210 ) -->
+  <etotal_int scf_iter="15">   -135.49692042 </etotal_int>
+  <eigenvalue_sum> -13.24172658 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.56801802 ( using 0.56801802 ) -->
+  <etotal_int scf_iter="15">   -135.61077147 </etotal_int>
+  <eigenvalue_sum> -13.24677928 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.51474666 ( using 0.51474666 ) -->
+  <etotal_int scf_iter="15">   -135.67278896 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  -119.44086   -65.86433   -65.85972   -65.85369    -7.14046    -7.13177    -7.11138    -7.10761
+    -7.10269    -7.02398    -1.16279    -1.15979    -1.15641     2.53851
+  </eigenvalues>
+ <!-- Wavefunction::update_occ: sum = 19.00000 -->
+ <!-- Wavefunction::update_occ: using Fermi smearing, mu = -6.8888 eV, ispin = 0 -->
+  <occupation spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  2.0000  2.0000  2.0000  2.0000  1.8978  1.8875  1.8596  1.8538  1.8459  1.6554
+  0.0000  0.0000  0.0000  0.0000
+  </occupation>
+  <!-- Wavefunction entropy: 3.33005393 -->
+  <!-- Entropy contribution to free energy: -0.04218053 -->
+  <!-- BOSampleStepper: end scf iteration -->
+  <!-- BOSampleStepper: start scf iteration -->
+  <!-- total_electronic_charge: 19.00000001, spin = 0 -->
+ AndersonMixer: theta = 0.82455282 -0.18408457 -0.13933403 
+  <eigenvalue_sum> -13.47209606 </eigenvalue_sum>
+  <etotal_int scf_iter="16">   -136.43862578 </etotal_int>
+  <eharris>   -135.50395135 </eharris>
+  <eigenvalue_sum> -13.47375842 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 1.42230703 ( using 1.42230703 ) -->
+  <etotal_int scf_iter="16">   -136.39221519 </etotal_int>
+  <eigenvalue_sum> -13.47749988 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.46877548 ( using 0.46877548 ) -->
+  <etotal_int scf_iter="16">   -136.31337623 </etotal_int>
+  <eigenvalue_sum> -13.48055351 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.03832331 ( using 0.03832331 ) -->
+  <etotal_int scf_iter="16">   -136.27049326 </etotal_int>
+  <eigenvalue_sum> -13.48200425 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -0.13865975 ( using -0.13865975 ) -->
+  <etotal_int scf_iter="16">   -136.26258823 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  -120.17546   -66.55242   -66.54451   -66.54043    -7.64191    -7.63736    -7.61477    -7.61186
+    -7.60821    -7.29549    -1.29809    -1.29681    -1.29624     2.21940
+  </eigenvalues>
+ <!-- Wavefunction::update_occ: sum = 19.00000 -->
+ <!-- Wavefunction::update_occ: using Fermi smearing, mu = -7.2675 eV, ispin = 0 -->
+  <occupation spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  2.0000  2.0000  2.0000  2.0000  1.9744  1.9730  1.9651  1.9639  1.9624  1.1612
+  0.0000  0.0000  0.0000  0.0000
+  </occupation>
+  <!-- Wavefunction entropy: 2.18346734 -->
+  <!-- Entropy contribution to free energy: -0.02765715 -->
+  <!-- BOSampleStepper: end scf iteration -->
+  <!-- BOSampleStepper: start scf iteration -->
+  <!-- total_electronic_charge: 18.99999999, spin = 0 -->
+ AndersonMixer: theta = -0.22741127 -0.61273458 0.16745343 
+  <eigenvalue_sum> -13.48062186 </eigenvalue_sum>
+  <etotal_int scf_iter="17">   -135.52435484 </etotal_int>
+  <eharris>   -135.51935738 </eharris>
+  <eigenvalue_sum> -13.48202564 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 1.36908064 ( using 1.36908064 ) -->
+  <etotal_int scf_iter="17">   -135.51032134 </etotal_int>
+  <eigenvalue_sum> -13.48512425 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.65623841 ( using 0.65623841 ) -->
+  <etotal_int scf_iter="17">   -135.48569885 </etotal_int>
+  <eigenvalue_sum> -13.48823004 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.19498027 ( using 0.19498027 ) -->
+  <etotal_int scf_iter="17">   -135.46693485 </etotal_int>
+  <eigenvalue_sum> -13.48993504 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -0.07560067 ( using -0.07560067 ) -->
+  <etotal_int scf_iter="17">   -135.46102362 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  -120.22056   -66.58253   -66.58186   -66.57802    -7.63464    -7.63123    -7.60721    -7.60465
+    -7.60258    -7.26074    -1.25436    -1.25287    -1.25062     1.95584
+  </eigenvalues>
+ <!-- Wavefunction::update_occ: sum = 19.00000 -->
+ <!-- Wavefunction::update_occ: using Fermi smearing, mu = -7.2390 eV, ispin = 0 -->
+  <occupation spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  2.0000  2.0000  2.0000  2.0000  1.9799  1.9791  1.9725  1.9717  1.9710  1.1257
+  0.0000  0.0000  0.0000  0.0000
+  </occupation>
+  <!-- Wavefunction entropy: 2.04392680 -->
+  <!-- Entropy contribution to free energy: -0.02588965 -->
+  <!-- BOSampleStepper: end scf iteration -->
+  <!-- BOSampleStepper: start scf iteration -->
+  <!-- total_electronic_charge: 19.00000000, spin = 0 -->
+ AndersonMixer: theta = -0.78298230 0.18536612 0.03127620 
+  <eigenvalue_sum> -13.43923374 </eigenvalue_sum>
+  <etotal_int scf_iter="18">   -135.42118959 </etotal_int>
+  <eharris>   -135.51923126 </eharris>
+  <eigenvalue_sum> -13.44040003 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 1.19239706 ( using 1.19239706 ) -->
+  <etotal_int scf_iter="18">   -135.42343248 </etotal_int>
+  <eigenvalue_sum> -13.44282915 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.26242115 ( using 0.26242115 ) -->
+  <etotal_int scf_iter="18">   -135.42631534 </etotal_int>
+  <eigenvalue_sum> -13.44447969 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -0.10841663 ( using -0.10841663 ) -->
+  <etotal_int scf_iter="18">   -135.42716999 </etotal_int>
+  <eigenvalue_sum> -13.44531085 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -0.09141281 ( using -0.09141281 ) -->
+  <etotal_int scf_iter="18">   -135.42717658 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  -120.08661   -66.46510   -66.45652   -66.45389    -7.52719    -7.52093    -7.50007    -7.49560
+    -7.49148    -7.17720    -1.17810    -1.17447    -1.17350     1.81033
+  </eigenvalues>
+ <!-- Wavefunction::update_occ: sum = 19.00000 -->
+ <!-- Wavefunction::update_occ: using Fermi smearing, mu = -7.1498 eV, ispin = 0 -->
+  <occupation spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  2.0000  2.0000  2.0000  2.0000  1.9753  1.9734  1.9663  1.9645  1.9628  1.1578
+  0.0000  0.0000  0.0000  0.0000
+  </occupation>
+  <!-- Wavefunction entropy: 2.17048705 -->
+  <!-- Entropy contribution to free energy: -0.02749274 -->
+  <!-- BOSampleStepper: end scf iteration -->
+  <!-- BOSampleStepper: start scf iteration -->
+  <!-- total_electronic_charge: 19.00000000, spin = 0 -->
+ AndersonMixer: theta = -0.01214543 -0.24418667 0.06245201 
+  <eigenvalue_sum> -13.41837896 </eigenvalue_sum>
+  <etotal_int scf_iter="19">   -135.47729021 </etotal_int>
+  <eharris>   -135.51939681 </eharris>
+  <eigenvalue_sum> -13.41947460 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 1.62058087 ( using 1.62058087 ) -->
+  <etotal_int scf_iter="19">   -135.47887738 </etotal_int>
+  <eigenvalue_sum> -13.42220128 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.32381897 ( using 0.32381897 ) -->
+  <etotal_int scf_iter="19">   -135.48206789 </etotal_int>
+  <eigenvalue_sum> -13.42401291 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.40463540 ( using 0.40463540 ) -->
+  <etotal_int scf_iter="19">   -135.48345888 </etotal_int>
+  <eigenvalue_sum> -13.42564862 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.23382196 ( using 0.23382196 ) -->
+  <etotal_int scf_iter="19">   -135.48418340 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  -120.02150   -66.39986   -66.39858   -66.39433    -7.46850    -7.46586    -7.44117    -7.43921
+    -7.43698    -7.13041    -1.12407    -1.12245    -1.12111     1.59911
+  </eigenvalues>
+ <!-- Wavefunction::update_occ: sum = 19.00000 -->
+ <!-- Wavefunction::update_occ: using Fermi smearing, mu = -7.1006 eV, ispin = 0 -->
+  <occupation spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  2.0000  2.0000  2.0000  2.0000  1.9724  1.9716  1.9623  1.9615  1.9605  1.1717
+  0.0000  0.0000  0.0000  0.0000
+  </occupation>
+  <!-- Wavefunction entropy: 2.22260475 -->
+  <!-- Entropy contribution to free energy: -0.02815289 -->
+  <!-- BOSampleStepper: end scf iteration -->
+  <!-- BOSampleStepper: start scf iteration -->
+  <!-- total_electronic_charge: 18.99999999, spin = 0 -->
+ AndersonMixer: theta = 0.12872749 -0.35284851 0.13046121 
+  <eigenvalue_sum> -13.41728523 </eigenvalue_sum>
+  <etotal_int scf_iter="20">   -135.50356565 </etotal_int>
+  <eharris>   -135.51944557 </eharris>
+  <eigenvalue_sum> -13.41819208 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 1.25828683 ( using 1.25828683 ) -->
+  <etotal_int scf_iter="20">   -135.50374947 </etotal_int>
+  <eigenvalue_sum> -13.42017390 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.35785636 ( using 0.35785636 ) -->
+  <etotal_int scf_iter="20">   -135.50425787 </etotal_int>
+  <eigenvalue_sum> -13.42169845 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.02830576 ( using 0.02830576 ) -->
+  <etotal_int scf_iter="20">   -135.50466781 </etotal_int>
+  <eigenvalue_sum> -13.42255381 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -0.06789658 ( using -0.06789658 ) -->
+  <etotal_int scf_iter="20">   -135.50484457 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  -120.00520   -66.38245   -66.38153   -66.38127    -7.45101    -7.45070    -7.42354    -7.42286
+    -7.42264    -7.11745    -1.10467    -1.10314    -1.10312     1.48312
+  </eigenvalues>
+ <!-- Wavefunction::update_occ: sum = 19.00000 -->
+ <!-- Wavefunction::update_occ: using Fermi smearing, mu = -7.0868 eV, ispin = 0 -->
+  <occupation spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  2.0000  2.0000  2.0000  2.0000  1.9712  1.9711  1.9607  1.9604  1.9602  1.1764
+  0.0000  0.0000  0.0000  0.0000
+  </occupation>
+  <!-- Wavefunction entropy: 2.23988723 -->
+  <!-- Entropy contribution to free energy: -0.02837180 -->
+  <!-- BOSampleStepper: end scf iteration -->
+  <!-- BOSampleStepper: start scf iteration -->
+  <!-- total_electronic_charge: 19.00000000, spin = 0 -->
+ AndersonMixer: theta = -0.69651708 -0.48027845 0.17906296 
+  <eigenvalue_sum> -13.41296402 </eigenvalue_sum>
+  <etotal_int scf_iter="21">   -135.51196889 </etotal_int>
+  <eharris>   -135.51945747 </eharris>
+  <eigenvalue_sum> -13.41381364 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 1.80573420 ( using 1.80573420 ) -->
+  <etotal_int scf_iter="21">   -135.51245271 </etotal_int>
+  <eigenvalue_sum> -13.41609301 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.42435478 ( using 0.42435478 ) -->
+  <etotal_int scf_iter="21">   -135.51373575 </etotal_int>
+  <eigenvalue_sum> -13.41778856 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.49079809 ( using 0.49079809 ) -->
+  <etotal_int scf_iter="21">   -135.51456344 </etotal_int>
+  <eigenvalue_sum> -13.41933385 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.24276734 ( using 0.24276734 ) -->
+  <etotal_int scf_iter="21">   -135.51513243 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  -119.99029   -66.36732   -66.36681   -66.36637    -7.43699    -7.43651    -7.40923    -7.40906
+    -7.40856    -7.10789    -1.08266    -1.08222    -1.08193     1.35777
+  </eigenvalues>
+ <!-- Wavefunction::update_occ: sum = 19.00000 -->
+ <!-- Wavefunction::update_occ: using Fermi smearing, mu = -7.0760 eV, ispin = 0 -->
+  <occupation spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  2.0000  2.0000  2.0000  2.0000  1.9701  1.9700  1.9590  1.9590  1.9587  1.1832
+  0.0000  0.0000  0.0000  0.0000
+  </occupation>
+  <!-- Wavefunction entropy: 2.26450775 -->
+  <!-- Entropy contribution to free energy: -0.02868366 -->
+  <!-- BOSampleStepper: end scf iteration -->
+  <!-- BOSampleStepper: start scf iteration -->
+  <!-- total_electronic_charge: 19.00000001, spin = 0 -->
+ AndersonMixer: theta = -0.91051824 -0.00370624 0.20811686 
+  <eigenvalue_sum> -13.42114694 </eigenvalue_sum>
+  <etotal_int scf_iter="22">   -135.52215960 </etotal_int>
+  <eharris>   -135.51946350 </eharris>
+  <eigenvalue_sum> -13.42186446 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.92603727 ( using 0.92603727 ) -->
+  <etotal_int scf_iter="22">   -135.52160608 </etotal_int>
+  <eigenvalue_sum> -13.42321377 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.55411031 ( using 0.55411031 ) -->
+  <etotal_int scf_iter="22">   -135.52087143 </etotal_int>
+  <eigenvalue_sum> -13.42462293 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.12618800 ( using 0.12618800 ) -->
+  <etotal_int scf_iter="22">   -135.52034837 </etotal_int>
+  <eigenvalue_sum> -13.42545993 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -0.05084884 ( using -0.05084884 ) -->
+  <etotal_int scf_iter="22">   -135.52016827 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  -120.00651   -66.38226   -66.38185   -66.38109    -7.44964    -7.44867    -7.42195    -7.42130
+    -7.42108    -7.11754    -1.07814    -1.07794    -1.07748     1.32347
+  </eigenvalues>
+ <!-- Wavefunction::update_occ: sum = 19.00000 -->
+ <!-- Wavefunction::update_occ: using Fermi smearing, mu = -7.0864 eV, ispin = 0 -->
+  <occupation spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  2.0000  2.0000  2.0000  2.0000  1.9709  1.9706  1.9601  1.9598  1.9597  1.1789
+  0.0000  0.0000  0.0000  0.0000
+  </occupation>
+  <!-- Wavefunction entropy: 2.24913815 -->
+  <!-- Entropy contribution to free energy: -0.02848898 -->
+  <!-- BOSampleStepper: end scf iteration -->
+  <!-- BOSampleStepper: start scf iteration -->
+  <!-- total_electronic_charge: 19.00000001, spin = 0 -->
+ AndersonMixer: theta = 0.28766873 -0.21687828 -0.00047180 
+  <eigenvalue_sum> -13.42290450 </eigenvalue_sum>
+  <etotal_int scf_iter="23">   -135.51561615 </etotal_int>
+  <eharris>   -135.51946479 </eharris>
+  <eigenvalue_sum> -13.42359931 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 1.36527599 ( using 1.36527599 ) -->
+  <etotal_int scf_iter="23">   -135.51598199 </etotal_int>
+  <eigenvalue_sum> -13.42520059 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.81902299 ( using 0.81902299 ) -->
+  <etotal_int scf_iter="23">   -135.51654521 </etotal_int>
+  <eigenvalue_sum> -13.42712279 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.26592317 ( using 0.26592317 ) -->
+  <etotal_int scf_iter="23">   -135.51696109 </etotal_int>
+  <eigenvalue_sum> -13.42824916 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -0.06968290 ( using -0.06968290 ) -->
+  <etotal_int scf_iter="23">   -135.51703156 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  -120.00076   -66.37703   -66.37653   -66.37646    -7.44623    -7.44575    -7.41842    -7.41839
+    -7.41802    -7.11640    -1.06776    -1.06749    -1.06740     1.18071
+  </eigenvalues>
+ <!-- Wavefunction::update_occ: sum = 19.00000 -->
+ <!-- Wavefunction::update_occ: using Fermi smearing, mu = -7.0847 eV, ispin = 0 -->
+  <occupation spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  2.0000  2.0000  2.0000  2.0000  1.9703  1.9702  1.9593  1.9592  1.9591  1.1820
+  0.0000  0.0000  0.0000  0.0000
+  </occupation>
+  <!-- Wavefunction entropy: 2.26020035 -->
+  <!-- Entropy contribution to free energy: -0.02862910 -->
+  <!-- BOSampleStepper: end scf iteration -->
+  <!-- BOSampleStepper: start scf iteration -->
+  <!-- total_electronic_charge: 19.00000001, spin = 0 -->
+ AndersonMixer: theta = -0.38912209 -0.66385697 0.25236288 
+  <eigenvalue_sum> -13.43187328 </eigenvalue_sum>
+  <etotal_int scf_iter="24">   -135.52169065 </etotal_int>
+  <eharris>   -135.51946547 </eharris>
+  <eigenvalue_sum> -13.43249904 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.86945899 ( using 0.86945899 ) -->
+  <etotal_int scf_iter="24">   -135.52181015 </etotal_int>
+  <eigenvalue_sum> -13.43364905 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.51436383 ( using 0.51436383 ) -->
+  <etotal_int scf_iter="24">   -135.52191441 </etotal_int>
+  <eigenvalue_sum> -13.43483346 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.23756282 ( using 0.23756282 ) -->
+  <etotal_int scf_iter="24">   -135.52194163 </etotal_int>
+  <eigenvalue_sum> -13.43570370 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.04485887 ( using 0.04485887 ) -->
+  <etotal_int scf_iter="24">   -135.52191778 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  -120.00647   -66.38292   -66.38275   -66.38215    -7.45292    -7.45235    -7.42525    -7.42486
+    -7.42467    -7.12327    -1.07779    -1.07769    -1.07742     1.06940
+  </eigenvalues>
+ <!-- Wavefunction::update_occ: sum = 19.00000 -->
+ <!-- Wavefunction::update_occ: using Fermi smearing, mu = -7.0916 eV, ispin = 0 -->
+  <occupation spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  2.0000  2.0000  2.0000  2.0000  1.9703  1.9701  1.9593  1.9591  1.9590  1.1823
+  0.0000  0.0000  0.0000  0.0000
+  </occupation>
+  <!-- Wavefunction entropy: 2.26141496 -->
+  <!-- Entropy contribution to free energy: -0.02864449 -->
+  <!-- BOSampleStepper: end scf iteration -->
+  <!-- BOSampleStepper: start scf iteration -->
+  <!-- total_electronic_charge: 18.99999999, spin = 0 -->
+ AndersonMixer: theta = -0.07740031 0.00814753 -0.06127608 
+  <eigenvalue_sum> -13.43905637 </eigenvalue_sum>
+  <etotal_int scf_iter="25">   -135.52154115 </etotal_int>
+  <eharris>   -135.51946558 </eharris>
+  <eigenvalue_sum> -13.43964724 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 1.04883716 ( using 1.04883716 ) -->
+  <etotal_int scf_iter="25">   -135.52130043 </etotal_int>
+  <eigenvalue_sum> -13.44084588 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.76139231 ( using 0.76139231 ) -->
+  <etotal_int scf_iter="25">   -135.52093988 </etotal_int>
+  <eigenvalue_sum> -13.44232294 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.16347082 ( using 0.16347082 ) -->
+  <etotal_int scf_iter="25">   -135.52060649 </etotal_int>
+  <eigenvalue_sum> -13.44312927 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -0.10400371 ( using -0.10400371 ) -->
+  <etotal_int scf_iter="25">   -135.52049890 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  -120.01194   -66.38816   -66.38774   -66.38764    -7.45717    -7.45675    -7.42944    -7.42933
+    -7.42904    -7.12648    -1.08086    -1.08066    -1.08059     0.92659
+  </eigenvalues>
+ <!-- Wavefunction::update_occ: sum = 19.00000 -->
+ <!-- Wavefunction::update_occ: using Fermi smearing, mu = -7.0951 eV, ispin = 0 -->
+  <occupation spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  2.0000  2.0000  2.0000  2.0000  1.9705  1.9704  1.9596  1.9595  1.9594  1.1806
+  0.0000  0.0000  0.0000  0.0000
+  </occupation>
+  <!-- Wavefunction entropy: 2.25525687 -->
+  <!-- Entropy contribution to free energy: -0.02856648 -->
+  <!-- BOSampleStepper: end scf iteration -->
+  <!-- BOSampleStepper: start scf iteration -->
+  <!-- total_electronic_charge: 19.00000001, spin = 0 -->
+ AndersonMixer: theta = 0.50155437 -0.47122298 -0.13634082 
+  <eigenvalue_sum> -13.44617056 </eigenvalue_sum>
+  <etotal_int scf_iter="26">   -135.51861061 </etotal_int>
+  <eharris>   -135.51946586 </eharris>
+  <eigenvalue_sum> -13.44674243 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 1.28342746 ( using 1.28342746 ) -->
+  <etotal_int scf_iter="26">   -135.51873983 </etotal_int>
+  <eigenvalue_sum> -13.44803746 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.63841491 ( using 0.63841491 ) -->
+  <etotal_int scf_iter="26">   -135.51888379 </etotal_int>
+  <eigenvalue_sum> -13.44941590 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.38631929 ( using 0.38631929 ) -->
+  <etotal_int scf_iter="26">   -135.51892215 </etotal_int>
+  <eigenvalue_sum> -13.45049736 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.11359474 ( using 0.11359474 ) -->
+  <etotal_int scf_iter="26">   -135.51888716 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  -120.01487   -66.39111   -66.39108   -66.39104    -7.46101    -7.46097    -7.43333    -7.43330
+    -7.43329    -7.13096    -1.08586    -1.08577    -1.08571     0.77338
+  </eigenvalues>
+ <!-- Wavefunction::update_occ: sum = 19.00000 -->
+ <!-- Wavefunction::update_occ: using Fermi smearing, mu = -7.0994 eV, ispin = 0 -->
+  <occupation spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  2.0000  2.0000  2.0000  2.0000  1.9704  1.9703  1.9594  1.9593  1.9593  1.1813
+  0.0000  0.0000  0.0000  0.0000
+  </occupation>
+  <!-- Wavefunction entropy: 2.25770248 -->
+  <!-- Entropy contribution to free energy: -0.02859746 -->
+  <!-- BOSampleStepper: end scf iteration -->
+  <!-- BOSampleStepper: start scf iteration -->
+  <!-- total_electronic_charge: 19.00000001, spin = 0 -->
+ AndersonMixer: theta = -0.49862386 -0.46473514 0.33951633 
+  <eigenvalue_sum> -13.45318946 </eigenvalue_sum>
+  <etotal_int scf_iter="27">   -135.51975540 </etotal_int>
+  <eharris>   -135.51946595 </eharris>
+  <eigenvalue_sum> -13.45373585 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.79470476 ( using 0.79470476 ) -->
+  <etotal_int scf_iter="27">   -135.51971885 </etotal_int>
+  <eigenvalue_sum> -13.45471157 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.59873711 ( using 0.59873711 ) -->
+  <etotal_int scf_iter="27">   -135.51966235 </etotal_int>
+  <eigenvalue_sum> -13.45583234 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.26077316 ( using 0.26077316 ) -->
+  <etotal_int scf_iter="27">   -135.51960315 </etotal_int>
+  <eigenvalue_sum> -13.45665940 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.00942784 ( using 0.00942784 ) -->
+  <etotal_int scf_iter="27">   -135.51956401 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  -120.01613   -66.39242   -66.39240   -66.39232    -7.46232    -7.46224    -7.43464    -7.43458
+    -7.43457    -7.13217    -1.08778    -1.08766    -1.08762     0.62776
+  </eigenvalues>
+ <!-- Wavefunction::update_occ: sum = 19.00000 -->
+ <!-- Wavefunction::update_occ: using Fermi smearing, mu = -7.1007 eV, ispin = 0 -->
+  <occupation spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  2.0000  2.0000  2.0000  2.0000  1.9704  1.9704  1.9594  1.9594  1.9594  1.1811
+  0.0000  0.0000  0.0000  0.0000
+  </occupation>
+  <!-- Wavefunction entropy: 2.25721998 -->
+  <!-- Entropy contribution to free energy: -0.02859135 -->
+  <!-- BOSampleStepper: end scf iteration -->
+  <!-- BOSampleStepper: start scf iteration -->
+  <!-- total_electronic_charge: 19.00000001, spin = 0 -->
+ AndersonMixer: theta = -0.94478983 0.02306729 0.06393145 
+  <eigenvalue_sum> -13.45877387 </eigenvalue_sum>
+  <etotal_int scf_iter="28">   -135.51950022 </etotal_int>
+  <eharris>   -135.51946602 </eharris>
+  <eigenvalue_sum> -13.45930565 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 1.05016454 ( using 1.05016454 ) -->
+  <etotal_int scf_iter="28">   -135.51951934 </etotal_int>
+  <eigenvalue_sum> -13.46038964 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.77465161 ( using 0.77465161 ) -->
+  <etotal_int scf_iter="28">   -135.51952945 </etotal_int>
+  <eigenvalue_sum> -13.46174725 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.47830884 ( using 0.47830884 ) -->
+  <etotal_int scf_iter="28">   -135.51951750 </etotal_int>
+  <eigenvalue_sum> -13.46291049 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.08388869 ( using 0.08388869 ) -->
+  <etotal_int scf_iter="28">   -135.51948959 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  -120.01620   -66.39261   -66.39253   -66.39251    -7.46270    -7.46261    -7.43499    -7.43498
+    -7.43492    -7.13268    -1.08919    -1.08910    -1.08906     0.46299
+  </eigenvalues>
+ <!-- Wavefunction::update_occ: sum = 19.00000 -->
+ <!-- Wavefunction::update_occ: using Fermi smearing, mu = -7.1011 eV, ispin = 0 -->
+  <occupation spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  2.0000  2.0000  2.0000  2.0000  1.9704  1.9703  1.9593  1.9593  1.9593  1.1813
+  0.0000  0.0000  0.0000  0.0000
+  </occupation>
+  <!-- Wavefunction entropy: 2.25800814 -->
+  <!-- Entropy contribution to free energy: -0.02860133 -->
+  <!-- BOSampleStepper: end scf iteration -->
+  <!-- BOSampleStepper: start scf iteration -->
+  <!-- total_electronic_charge: 19.00000000, spin = 0 -->
+ AndersonMixer: theta = 0.27753842 -0.53463172 0.10096961 
+  <eigenvalue_sum> -13.46432182 </eigenvalue_sum>
+  <etotal_int scf_iter="29">   -135.51974897 </etotal_int>
+  <eharris>   -135.51946608 </eharris>
+  <eigenvalue_sum> -13.46483409 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.99400852 ( using 0.99400852 ) -->
+  <etotal_int scf_iter="29">   -135.51972384 </etotal_int>
+  <eigenvalue_sum> -13.46584973 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.63208908 ( using 0.63208908 ) -->
+  <etotal_int scf_iter="29">   -135.51967994 </etotal_int>
+  <eigenvalue_sum> -13.46699159 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.10812438 ( using 0.10812438 ) -->
+  <etotal_int scf_iter="29">   -135.51963557 </etotal_int>
+  <eigenvalue_sum> -13.46761428 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -0.10718111 ( using -0.10718111 ) -->
+  <etotal_int scf_iter="29">   -135.51961565 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  -120.01657   -66.39296   -66.39295   -66.39287    -7.46305    -7.46297    -7.43535    -7.43530
+    -7.43528    -7.13297    -1.08981    -1.08971    -1.08968     0.34531
+  </eigenvalues>
+ <!-- Wavefunction::update_occ: sum = 19.00000 -->
+ <!-- Wavefunction::update_occ: using Fermi smearing, mu = -7.1014 eV, ispin = 0 -->
+  <occupation spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  2.0000  2.0000  2.0000  2.0000  1.9704  1.9703  1.9594  1.9593  1.9593  1.1813
+  0.0000  0.0000  0.0000  0.0000
+  </occupation>
+  <!-- Wavefunction entropy: 2.25769401 -->
+  <!-- Entropy contribution to free energy: -0.02859735 -->
+  <!-- BOSampleStepper: end scf iteration -->
+  <!-- BOSampleStepper: start scf iteration -->
+  <!-- total_electronic_charge: 19.00000000, spin = 0 -->
+ AndersonMixer: theta = 0.03438418 -0.85100381 0.44001370 
+  <eigenvalue_sum> -13.46814739 </eigenvalue_sum>
+  <etotal_int scf_iter="30">   -135.51945434 </etotal_int>
+  <eharris>   -135.51946610 </eharris>
+  <eigenvalue_sum> -13.46864143 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 1.43608692 ( using 1.43608692 ) -->
+  <etotal_int scf_iter="30">   -135.51943200 </etotal_int>
+  <eigenvalue_sum> -13.46983682 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.77668385 ( using 0.77668385 ) -->
+  <etotal_int scf_iter="30">   -135.51938560 </etotal_int>
+  <eigenvalue_sum> -13.47123980 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.07988953 ( using 0.07988953 ) -->
+  <etotal_int scf_iter="30">   -135.51934088 </etotal_int>
+  <eigenvalue_sum> -13.47182823 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -0.18570530 ( using -0.18570530 ) -->
+  <etotal_int scf_iter="30">   -135.51932936 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  -120.01660   -66.39297   -66.39294   -66.39293    -7.46301    -7.46298    -7.43531    -7.43530
+    -7.43528    -7.13292    -1.09017    -1.09010    -1.09009     0.23357
+  </eigenvalues>
+ <!-- Wavefunction::update_occ: sum = 19.00000 -->
+ <!-- Wavefunction::update_occ: using Fermi smearing, mu = -7.1014 eV, ispin = 0 -->
+  <occupation spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  2.0000  2.0000  2.0000  2.0000  1.9704  1.9704  1.9594  1.9594  1.9593  1.1812
+  0.0000  0.0000  0.0000  0.0000
+  </occupation>
+  <!-- Wavefunction entropy: 2.25749136 -->
+  <!-- Entropy contribution to free energy: -0.02859479 -->
+  <!-- BOSampleStepper: end scf iteration -->
+  <!-- BOSampleStepper: start scf iteration -->
+  <!-- total_electronic_charge: 19.00000000, spin = 0 -->
+ AndersonMixer: theta = 0.05448117 -0.06882917 -0.01346313 
+  <eigenvalue_sum> -13.47217706 </eigenvalue_sum>
+  <etotal_int scf_iter="31">   -135.51934801 </etotal_int>
+  <eharris>   -135.51946610 </eharris>
+  <eigenvalue_sum> -13.47264882 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 1.45967244 ( using 1.45967244 ) -->
+  <etotal_int scf_iter="31">   -135.51936852 </etotal_int>
+  <eigenvalue_sum> -13.47379943 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.69324197 ( using 0.69324197 ) -->
+  <etotal_int scf_iter="31">   -135.51939828 </etotal_int>
+  <eigenvalue_sum> -13.47504742 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.09058619 ( using 0.09058619 ) -->
+  <etotal_int scf_iter="31">   -135.51941471 </etotal_int>
+  <eigenvalue_sum> -13.47561181 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -0.14488027 ( using -0.14488027 ) -->
+  <etotal_int scf_iter="31">   -135.51941406 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  -120.01634   -66.39273   -66.39272   -66.39270    -7.46290    -7.46288    -7.43519    -7.43519
+    -7.43518    -7.13293    -1.09045    -1.09040    -1.09039     0.12993
+  </eigenvalues>
+ <!-- Wavefunction::update_occ: sum = 19.00000 -->
+ <!-- Wavefunction::update_occ: using Fermi smearing, mu = -7.1014 eV, ispin = 0 -->
+  <occupation spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  2.0000  2.0000  2.0000  2.0000  1.9703  1.9703  1.9593  1.9593  1.9593  1.1814
+  0.0000  0.0000  0.0000  0.0000
+  </occupation>
+  <!-- Wavefunction entropy: 2.25810908 -->
+  <!-- Entropy contribution to free energy: -0.02860261 -->
+  <!-- BOSampleStepper: end scf iteration -->
+  <!-- BOSampleStepper: start scf iteration -->
+  <!-- total_electronic_charge: 19.00000000, spin = 0 -->
+ AndersonMixer: theta = 0.43493025 -0.31973127 -0.04923646 
+  <eigenvalue_sum> -13.47603790 </eigenvalue_sum>
+  <etotal_int scf_iter="32">   -135.51961571 </etotal_int>
+  <eharris>   -135.51946611 </eharris>
+  <eigenvalue_sum> -13.47648320 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 1.70145949 ( using 1.70145949 ) -->
+  <etotal_int scf_iter="32">   -135.51960423 </etotal_int>
+  <eigenvalue_sum> -13.47767280 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.83451512 ( using 0.83451512 ) -->
+  <etotal_int scf_iter="32">   -135.51958230 </etotal_int>
+  <eigenvalue_sum> -13.47907854 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.24314555 ( using 0.24314555 ) -->
+  <etotal_int scf_iter="32">   -135.51956484 </etotal_int>
+  <eigenvalue_sum> -13.47983371 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -0.10629423 ( using -0.10629423 ) -->
+  <etotal_int scf_iter="32">   -135.51956127 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  -120.01648   -66.39286   -66.39285   -66.39284    -7.46298    -7.46297    -7.43528    -7.43527
+    -7.43527    -7.13296    -1.09071    -1.09067    -1.09067     0.01780
+  </eigenvalues>
+ <!-- Wavefunction::update_occ: sum = 19.00000 -->
+ <!-- Wavefunction::update_occ: using Fermi smearing, mu = -7.1014 eV, ispin = 0 -->
+  <occupation spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  2.0000  2.0000  2.0000  2.0000  1.9704  1.9703  1.9593  1.9593  1.9593  1.1813
+  0.0000  0.0000  0.0000  0.0000
+  </occupation>
+  <!-- Wavefunction entropy: 2.25782640 -->
+  <!-- Entropy contribution to free energy: -0.02859903 -->
+  <!-- BOSampleStepper: end scf iteration -->
+  <!-- BOSampleStepper: start scf iteration -->
+  <!-- total_electronic_charge: 19.00000000, spin = 0 -->
+ AndersonMixer: theta = -0.00692582 -0.03629578 -0.10749071 
+  <eigenvalue_sum> -13.48016774 </eigenvalue_sum>
+  <etotal_int scf_iter="33">   -135.51946271 </etotal_int>
+  <eharris>   -135.51946611 </eharris>
+  <eigenvalue_sum> -13.48057713 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 1.21508700 ( using 1.21508700 ) -->
+  <etotal_int scf_iter="33">   -135.51946512 </etotal_int>
+  <eigenvalue_sum> -13.48147240 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.70887102 ( using 0.70887102 ) -->
+  <etotal_int scf_iter="33">   -135.51946778 </etotal_int>
+  <eigenvalue_sum> -13.48249053 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.11113807 ( using 0.11113807 ) -->
+  <etotal_int scf_iter="33">   -135.51946905 </etotal_int>
+  <eigenvalue_sum> -13.48298709 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -0.12448109 ( using -0.12448109 ) -->
+  <etotal_int scf_iter="33">   -135.51946899 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  -120.01647   -66.39284   -66.39284   -66.39284    -7.46298    -7.46297    -7.43527    -7.43527
+    -7.43527    -7.13297    -1.09089    -1.09087    -1.09086    -0.06710
+  </eigenvalues>
+ <!-- Wavefunction::update_occ: sum = 19.00000 -->
+ <!-- Wavefunction::update_occ: using Fermi smearing, mu = -7.1014 eV, ispin = 0 -->
+  <occupation spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  2.0000  2.0000  2.0000  2.0000  1.9703  1.9703  1.9593  1.9593  1.9593  1.1813
+  0.0000  0.0000  0.0000  0.0000
+  </occupation>
+  <!-- Wavefunction entropy: 2.25786968 -->
+  <!-- Entropy contribution to free energy: -0.02859958 -->
+  <!-- BOSampleStepper: end scf iteration -->
+  <!-- BOSampleStepper: start scf iteration -->
+  <!-- total_electronic_charge: 18.99999999, spin = 0 -->
+ AndersonMixer: theta = -0.27464944 -0.04115531 0.02694644 
+  <eigenvalue_sum> -13.48331126 </eigenvalue_sum>
+  <etotal_int scf_iter="34">   -135.51948086 </etotal_int>
+  <eharris>   -135.51946611 </eharris>
+  <eigenvalue_sum> -13.48368778 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 1.24814243 ( using 1.24814243 ) -->
+  <etotal_int scf_iter="34">   -135.51947897 </etotal_int>
+  <eigenvalue_sum> -13.48452144 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.87874661 ( using 0.87874661 ) -->
+  <etotal_int scf_iter="34">   -135.51947596 </etotal_int>
+  <eigenvalue_sum> -13.48559797 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.24623810 ( using 0.24623810 ) -->
+  <etotal_int scf_iter="34">   -135.51947344 </etotal_int>
+  <eigenvalue_sum> -13.48620542 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -0.08962437 ( using -0.08962437 ) -->
+  <etotal_int scf_iter="34">   -135.51947308 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  -120.01650   -66.39287   -66.39287   -66.39287    -7.46300    -7.46300    -7.43530    -7.43529
+    -7.43529    -7.13298    -1.09100    -1.09098    -1.09098    -0.15321
+  </eigenvalues>
+ <!-- Wavefunction::update_occ: sum = 19.00000 -->
+ <!-- Wavefunction::update_occ: using Fermi smearing, mu = -7.1014 eV, ispin = 0 -->
+  <occupation spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  2.0000  2.0000  2.0000  2.0000  1.9704  1.9703  1.9593  1.9593  1.9593  1.1813
+  0.0000  0.0000  0.0000  0.0000
+  </occupation>
+  <!-- Wavefunction entropy: 2.25781215 -->
+  <!-- Entropy contribution to free energy: -0.02859885 -->
+  <!-- BOSampleStepper: end scf iteration -->
+  <!-- BOSampleStepper: start scf iteration -->
+  <!-- total_electronic_charge: 18.99999999, spin = 0 -->
+ AndersonMixer: theta = -0.49445123 -0.77505759 0.25193202 
+  <eigenvalue_sum> -13.48648838 </eigenvalue_sum>
+  <etotal_int scf_iter="35">   -135.51945191 </etotal_int>
+  <eharris>   -135.51946611 </eharris>
+  <eigenvalue_sum> -13.48682581 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.97061651 ( using 0.97061651 ) -->
+  <etotal_int scf_iter="35">   -135.51945202 </etotal_int>
+  <eigenvalue_sum> -13.48747970 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.87096729 ( using 0.87096729 ) -->
+  <etotal_int scf_iter="35">   -135.51945186 </etotal_int>
+  <eigenvalue_sum> -13.48835798 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.51492698 ( using 0.51492698 ) -->
+  <etotal_int scf_iter="35">   -135.51945162 </etotal_int>
+  <eigenvalue_sum> -13.48910843 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.15106087 ( using 0.15106087 ) -->
+  <etotal_int scf_iter="35">   -135.51945166 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  -120.01652   -66.39289   -66.39288   -66.39288    -7.46302    -7.46301    -7.43531    -7.43531
+    -7.43531    -7.13300    -1.09112    -1.09111    -1.09111    -0.23503
+  </eigenvalues>
+ <!-- Wavefunction::update_occ: sum = 19.00000 -->
+ <!-- Wavefunction::update_occ: using Fermi smearing, mu = -7.1015 eV, ispin = 0 -->
+  <occupation spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  2.0000  2.0000  2.0000  2.0000  1.9704  1.9704  1.9593  1.9593  1.9593  1.1813
+  0.0000  0.0000  0.0000  0.0000
+  </occupation>
+  <!-- Wavefunction entropy: 2.25779749 -->
+  <!-- Entropy contribution to free energy: -0.02859866 -->
+  <!-- BOSampleStepper: end scf iteration -->
+  <!-- BOSampleStepper: start scf iteration -->
+  <!-- total_electronic_charge: 19.00000001, spin = 0 -->
+ AndersonMixer: theta = -0.20434107 -0.25631772 0.23383944 
+  <eigenvalue_sum> -13.48950762 </eigenvalue_sum>
+  <etotal_int scf_iter="36">   -135.51945551 </etotal_int>
+  <eharris>   -135.51946611 </eharris>
+  <eigenvalue_sum> -13.48980206 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.39252475 ( using 0.39252475 ) -->
+  <etotal_int scf_iter="36">   -135.51945801 </etotal_int>
+  <eigenvalue_sum> -13.49020524 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.46617280 ( using 0.46617280 ) -->
+  <etotal_int scf_iter="36">   -135.51946065 </etotal_int>
+  <eigenvalue_sum> -13.49067254 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.19446042 ( using 0.19446042 ) -->
+  <etotal_int scf_iter="36">   -135.51946311 </etotal_int>
+  <eigenvalue_sum> -13.49103769 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.04874650 ( using 0.04874650 ) -->
+  <etotal_int scf_iter="36">   -135.51946462 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  -120.01648   -66.39286   -66.39286   -66.39285    -7.46300    -7.46300    -7.43529    -7.43529
+    -7.43529    -7.13299    -1.09112    -1.09111    -1.09111    -0.28441
+  </eigenvalues>
+ <!-- Wavefunction::update_occ: sum = 19.00000 -->
+ <!-- Wavefunction::update_occ: using Fermi smearing, mu = -7.1014 eV, ispin = 0 -->
+  <occupation spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  2.0000  2.0000  2.0000  2.0000  1.9703  1.9703  1.9593  1.9593  1.9593  1.1813
+  0.0000  0.0000  0.0000  0.0000
+  </occupation>
+  <!-- Wavefunction entropy: 2.25785181 -->
+  <!-- Entropy contribution to free energy: -0.02859935 -->
+  <!-- BOSampleStepper: end scf iteration -->
+  <!-- BOSampleStepper: start scf iteration -->
+  <!-- total_electronic_charge: 19.00000000, spin = 0 -->
+ AndersonMixer: theta = 0.39438666 0.00931735 -0.12498635 
+  <eigenvalue_sum> -13.49132871 </eigenvalue_sum>
+  <etotal_int scf_iter="37">   -135.51948111 </etotal_int>
+  <eharris>   -135.51946611 </eharris>
+  <eigenvalue_sum> -13.49159464 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.88205381 ( using 0.88205381 ) -->
+  <etotal_int scf_iter="37">   -135.51948036 </etotal_int>
+  <eigenvalue_sum> -13.49208516 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.77089974 ( using 0.77089974 ) -->
+  <etotal_int scf_iter="37">   -135.51947965 </etotal_int>
+  <eigenvalue_sum> -13.49270513 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.17899944 ( using 0.17899944 ) -->
+  <etotal_int scf_iter="37">   -135.51947928 </etotal_int>
+  <eigenvalue_sum> -13.49305576 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -0.10869596 ( using -0.10869596 ) -->
+  <etotal_int scf_iter="37">   -135.51947939 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  -120.01650   -66.39287   -66.39287   -66.39287    -7.46301    -7.46301    -7.43530    -7.43530
+    -7.43530    -7.13299    -1.09115    -1.09114    -1.09114    -0.33670
+  </eigenvalues>
+ <!-- Wavefunction::update_occ: sum = 19.00000 -->
+ <!-- Wavefunction::update_occ: using Fermi smearing, mu = -7.1015 eV, ispin = 0 -->
+  <occupation spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  2.0000  2.0000  2.0000  2.0000  1.9704  1.9704  1.9593  1.9593  1.9593  1.1813
+  0.0000  0.0000  0.0000  0.0000
+  </occupation>
+  <!-- Wavefunction entropy: 2.25781236 -->
+  <!-- Entropy contribution to free energy: -0.02859885 -->
+  <!-- BOSampleStepper: end scf iteration -->
+  <!-- BOSampleStepper: start scf iteration -->
+  <!-- total_electronic_charge: 18.99999999, spin = 0 -->
+ AndersonMixer: theta = -0.13877470 -0.29462499 0.03299774 
+  <eigenvalue_sum> -13.49325289 </eigenvalue_sum>
+  <etotal_int scf_iter="38">   -135.51946397 </etotal_int>
+  <eharris>   -135.51946611 </eharris>
+  <eigenvalue_sum> -13.49348631 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.93168142 ( using 0.93168142 ) -->
+  <etotal_int scf_iter="38">   -135.51946393 </etotal_int>
+  <eigenvalue_sum> -13.49392745 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.81973936 ( using 0.81973936 ) -->
+  <etotal_int scf_iter="38">   -135.51946400 </etotal_int>
+  <eigenvalue_sum> -13.49449838 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.21308751 ( using 0.21308751 ) -->
+  <etotal_int scf_iter="38">   -135.51946420 </etotal_int>
+  <eigenvalue_sum> -13.49482720 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -0.10007973 ( using -0.10007973 ) -->
+  <etotal_int scf_iter="38">   -135.51946438 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  -120.01650   -66.39287   -66.39287   -66.39287    -7.46301    -7.46300    -7.43530    -7.43530
+    -7.43530    -7.13299    -1.09115    -1.09114    -1.09114    -0.38420
+  </eigenvalues>
+ <!-- Wavefunction::update_occ: sum = 19.00000 -->
+ <!-- Wavefunction::update_occ: using Fermi smearing, mu = -7.1015 eV, ispin = 0 -->
+  <occupation spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  2.0000  2.0000  2.0000  2.0000  1.9704  1.9704  1.9593  1.9593  1.9593  1.1813
+  0.0000  0.0000  0.0000  0.0000
+  </occupation>
+  <!-- Wavefunction entropy: 2.25780997 -->
+  <!-- Entropy contribution to free energy: -0.02859882 -->
+  <!-- BOSampleStepper: end scf iteration -->
+  <!-- BOSampleStepper: start scf iteration -->
+  <!-- total_electronic_charge: 19.00000000, spin = 0 -->
+ AndersonMixer: theta = -0.69478706 0.12562636 -0.04613830 
+  <eigenvalue_sum> -13.49499773 </eigenvalue_sum>
+  <etotal_int scf_iter="39">   -135.51946375 </etotal_int>
+  <eharris>   -135.51946611 </eharris>
+  <eigenvalue_sum> -13.49519963 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 1.27216689 ( using 1.27216689 ) -->
+  <etotal_int scf_iter="39">   -135.51946388 </etotal_int>
+  <eigenvalue_sum> -13.49564709 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.71698003 ( using 0.71698003 ) -->
+  <etotal_int scf_iter="39">   -135.51946418 </etotal_int>
+  <eigenvalue_sum> -13.49614555 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.13420194 ( using 0.13420194 ) -->
+  <etotal_int scf_iter="39">   -135.51946453 </etotal_int>
+  <eigenvalue_sum> -13.49639031 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -0.13214859 ( using -0.13214859 ) -->
+  <etotal_int scf_iter="39">   -135.51946469 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  -120.01650   -66.39287   -66.39287   -66.39287    -7.46300    -7.46300    -7.43530    -7.43529
+    -7.43529    -7.13298    -1.09114    -1.09114    -1.09114    -0.42599
+  </eigenvalues>
+ <!-- Wavefunction::update_occ: sum = 19.00000 -->
+ <!-- Wavefunction::update_occ: using Fermi smearing, mu = -7.1014 eV, ispin = 0 -->
+  <occupation spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  2.0000  2.0000  2.0000  2.0000  1.9704  1.9704  1.9593  1.9593  1.9593  1.1813
+  0.0000  0.0000  0.0000  0.0000
+  </occupation>
+  <!-- Wavefunction entropy: 2.25781184 -->
+  <!-- Entropy contribution to free energy: -0.02859885 -->
+  <!-- BOSampleStepper: end scf iteration -->
+  <!-- BOSampleStepper: start scf iteration -->
+  <!-- total_electronic_charge: 18.99999999, spin = 0 -->
+ AndersonMixer: theta = 0.51492353 -0.43540183 0.06773117 
+  <eigenvalue_sum> -13.49653329 </eigenvalue_sum>
+  <etotal_int scf_iter="40">   -135.51946543 </etotal_int>
+  <eharris>   -135.51946611 </eharris>
+  <eigenvalue_sum> -13.49670587 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 1.52239483 ( using 1.52239483 ) -->
+  <etotal_int scf_iter="40">   -135.51946551 </etotal_int>
+  <eigenvalue_sum> -13.49712940 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.64313461 ( using 0.64313461 ) -->
+  <etotal_int scf_iter="40">   -135.51946570 </etotal_int>
+  <eigenvalue_sum> -13.49755153 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -0.00320120 ( using -0.00320120 ) -->
+  <etotal_int scf_iter="40">   -135.51946589 </etotal_int>
+  <eigenvalue_sum> -13.49770256 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = -0.19558838 ( using -0.19558838 ) -->
+  <etotal_int scf_iter="40">   -135.51946594 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  -120.01650   -66.39286   -66.39286   -66.39286    -7.46300    -7.46300    -7.43529    -7.43529
+    -7.43529    -7.13298    -1.09114    -1.09114    -1.09114    -0.46107
+  </eigenvalues>
+ <!-- Wavefunction::update_occ: sum = 19.00000 -->
+ <!-- Wavefunction::update_occ: using Fermi smearing, mu = -7.1014 eV, ispin = 0 -->
+  <occupation spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  2.0000  2.0000  2.0000  2.0000  1.9704  1.9704  1.9593  1.9593  1.9593  1.1813
+  0.0000  0.0000  0.0000  0.0000
+  </occupation>
+  <!-- Wavefunction entropy: 2.25781226 -->
+  <!-- Entropy contribution to free energy: -0.02859885 -->
+  <!-- BOSampleStepper: end scf iteration -->
+  <!-- BOSampleStepper: start scf iteration -->
+  <!-- total_electronic_charge: 19.00000000, spin = 0 -->
+ AndersonMixer: theta = -0.42964391 -0.38554092 0.24121614 
+  <eigenvalue_sum> -13.49782291 </eigenvalue_sum>
+  <etotal_int scf_iter="41">   -135.51946584 </etotal_int>
+  <eharris>   -135.51946611 </eharris>
+  <eigenvalue_sum> -13.49796975 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.65732848 ( using 0.65732848 ) -->
+  <etotal_int scf_iter="41">   -135.51946580 </etotal_int>
+  <eigenvalue_sum> -13.49820734 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.76096543 ( using 0.76096543 ) -->
+  <etotal_int scf_iter="41">   -135.51946579 </etotal_int>
+  <eigenvalue_sum> -13.49852070 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.55769344 ( using 0.55769344 ) -->
+  <etotal_int scf_iter="41">   -135.51946579 </etotal_int>
+  <eigenvalue_sum> -13.49882113 </eigenvalue_sum>
+  <!-- Anderson extrapolation: theta = 0.20338749 ( using 0.20338749 ) -->
+  <etotal_int scf_iter="41">   -135.51946581 </etotal_int>
+  <eigenvalues spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  -120.01650   -66.39286   -66.39286   -66.39286    -7.46300    -7.46300    -7.43529    -7.43529
+    -7.43529    -7.13298    -1.09115    -1.09114    -1.09114    -0.49327
+  </eigenvalues>
+ <!-- Wavefunction::update_occ: sum = 19.00000 -->
+ <!-- Wavefunction::update_occ: using Fermi smearing, mu = -7.1014 eV, ispin = 0 -->
+  <occupation spin="0" kpoint="0.00000000 0.00000000 0.00000000" n="14">
+  2.0000  2.0000  2.0000  2.0000  1.9704  1.9704  1.9593  1.9593  1.9593  1.1813
+  0.0000  0.0000  0.0000  0.0000
+  </occupation>
+  <!-- Wavefunction entropy: 2.25781103 -->
+  <!-- Entropy contribution to free energy: -0.02859884 -->
+  <!-- BOSampleStepper: end scf iteration -->
+  <!-- BOSampleStepper: scf convergence at itscf = 42, Harris-Foulkes energy varied by less than 1.00e-08 a.u. over 10 scf steps. -->
+  <!-- total_electronic_charge: 19.00000000, spin = 0 -->
+  <ekin>       39.55943441 </ekin>
+  <econf>       0.00000000 </econf>
+  <eps>       -70.62474084 </eps>
+  <enl>         1.01718487 </enl>
+  <ecoul>     -93.27357426 </ecoul>
+  <exc>       -12.19062057 </exc>
+  <esr>         0.00000000 </esr>
+  <eself>      96.01210882 </eself>
+  <ets>        -0.00714971 </ets>
+  <etotal>   -135.51946611 </etotal>
+<atomset>
+<unit_cell 
+    a=" 20.00000000   0.00000000   0.00000000"
+    b="  0.00000000  20.00000000   0.00000000"
+    c="  0.00000000   0.00000000  20.00000000" />
+  <atom name="Au" species="gold">
+    <position> 0.00000000 0.00000000 0.00000000 </position>
+    <velocity> 0.00000000 0.00000000 0.00000000 </velocity>
+    <force> -0.00000005 -0.00000014 0.00000002 </force>
+  </atom>
+</atomset>
+<timing where="run"                name=" iteration"       min="11.297   " max="11.298   " count="1        "/>
+</iteration>
+<!-- memory nlp.twnl    :    1.269 MB  (0.316 MB local) -->
+<!-- memory sd.psi      :    1.110 MB  (0.276 MB local) -->
+<!-- memory sd.hpsi     :    1.110 MB  (0.276 MB local) -->
+<!-- memory cd.rhor     :    1.648 MB  (0.412 MB local) -->
+<!-- memory cd.rhog     :    0.630 MB  (0.157 MB local) -->
+<!-- memory total       :    5.767 MB  (1.437 MB local) -->
+</run>
+<!-- [qbox]  -->
+<!-- end of command stream -->
+<real_time> 11.360 </real_time>
+<end_time> 2016-04-14T20:39:34Z </end_time>
+</qbox:simulation>

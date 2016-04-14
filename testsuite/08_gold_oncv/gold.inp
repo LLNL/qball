@@ -1,0 +1,12 @@
+set cell 20 0 0 0 20 0 0 0 20
+species gold Au_ONCV_PBE-1.0.xml
+atom Au gold 0.0 0.0 0.0
+set xc PBE
+set ecut 18
+set wf_dyn PSDA
+set ecutprec 4
+set threshold_scf 1.E-8 10
+set fermi_temp 1000
+set nempty 4
+randomize_wf
+run 0 200 5
