@@ -231,7 +231,6 @@ void SpeciesReader::readSpecies (Species& sp, const string uri)
       
       for ( int l = 0; l < sp.lmax_ + 1; l++ )
       {
-	std::cout << "L = " << l << std::endl;
 	int size;
 	{
 	  // read projector

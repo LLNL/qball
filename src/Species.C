@@ -382,8 +382,6 @@ bool Species::initialize(double rcpsval)
       
     }
 
-    cout << "SIZE " << projectors_g_.size() << endl;
-    
     //  compute radial Fourier transforms of vnlr
     for ( int l = 0; l <= lmax_; l++ )
     {
