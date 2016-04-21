@@ -157,6 +157,8 @@ using namespace std;
 #include "SaveWfFreq.h"
 #include "NetCharge.h"
 #include "WfInner.h"
+#include "PPCGSbsize.h"
+#include "PPCGQRStep.h"
 
 #ifdef USE_JAGGEMM
 extern "C" int setup_grid();
@@ -416,6 +418,8 @@ void qbLink::init(void) {
   ui->addVar(new SaveWfFreq(s));
   ui->addVar(new NetCharge(s));
   ui->addVar(new WfInner(s));
+  ui->addVar(new PPCGSbsize(s));
+  ui->addVar(new PPCGQRStep(s));
 
 #ifdef USE_JAGGEMM
   setup_grid();

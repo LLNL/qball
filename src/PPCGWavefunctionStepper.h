@@ -22,12 +22,12 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 //
-// DQBPCGWavefunctionStepper.h
+// PPCGWavefunctionStepper.h
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef DQBPCGWAVEFUNCTIONSTEPPER_H
-#define DQBPCGWAVEFUNCTIONSTEPPER_H
+#ifndef PPCGWAVEFUNCTIONSTEPPER_H
+#define PPCGWAVEFUNCTIONSTEPPER_H
 
 #include "WavefunctionStepper.h"
 #include "Wavefunction.h"
@@ -36,7 +36,7 @@ class Preconditioner;
 class AtomSet;
 class ChargeDensity;
 
-class DQBPCGWavefunctionStepper : public WavefunctionStepper
+class PPCGWavefunctionStepper : public WavefunctionStepper
 {
   private:
 
@@ -47,6 +47,14 @@ class DQBPCGWavefunctionStepper : public WavefunctionStepper
   
   int nkp_;
   int nspin_;
+
+// E.V. new members begin
+  int  sbsize_;  
+  int  qrstep_;     
+  void cholqr(DoubleMatrix&, DoubleMatrix&);
+  void update_wfp0(DoubleMatrix&, DoubleMatrix&, DoubleMatrix&, DoubleMatrix&, DoubleMatrix&, DoubleMatrix&, int, int, int);     
+  void update_wfp(DoubleMatrix&, DoubleMatrix&, DoubleMatrix&, DoubleMatrix&, DoubleMatrix&, DoubleMatrix&, int, int, int);     
+// E.V. new members end
   
   public:
 
@@ -56,9 +64,10 @@ class DQBPCGWavefunctionStepper : public WavefunctionStepper
   {
   }
 
-  DQBPCGWavefunctionStepper(Wavefunction& wf, Preconditioner& p, const int maxit,
+  PPCGWavefunctionStepper(Wavefunction& wf, Preconditioner& p, const int maxit,
                             const AtomSet& atoms, const ChargeDensity& cd_,
-                            vector<vector<double> >& v_r, TimerMap& tmap);
-  ~DQBPCGWavefunctionStepper() {};
+                            vector<vector<double> >& v_r, TimerMap& tmap, 
+                            int sbsize, int qrstep);
+  ~PPCGWavefunctionStepper() {};
 };
 #endif

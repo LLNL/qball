@@ -95,7 +95,9 @@ struct Control
   double charge_mix_rcut;
   int charge_mix_ndim;
 
-  int wf_inner; // number of inner iterations for wf steppers like DQBPCG that have inner loop inside stepper
+  int wf_inner; // number of inner iterations for wf steppers like PPCG that have inner loop inside stepper
+  int ppcg_sbsize;   // E.V.: PPCG subblock size (by default sbsize = 1) 
+  int ppcg_qrstep;   // E.V.: parameter controls frequency of QR factorizations in PPCG (by default qrstep = 1, i.e., QR is permormed at every iteration) 
     
   double enthalpy_pressure;
   double enthalpy_threshold;

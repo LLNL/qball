@@ -35,7 +35,7 @@
 #include "JDWavefunctionStepper.h"
 #include "PSDWavefunctionStepper.h"
 #include "PSDAWavefunctionStepper.h"
-#include "DQBPCGWavefunctionStepper.h"
+#include "PPCGWavefunctionStepper.h"
 #include "SDIonicStepper.h"
 #include "SDAIonicStepper.h"
 #include "CGIonicStepper.h"
@@ -209,8 +209,8 @@ void BOSampleStepper::step(int niter)
     return;
   }
 
-  //ewd DQBPCG requires preprocessing even when charge mixing not used
-  if (wf_dyn == "DQBPCG" && nite_ == 0)
+  //ewd PPCG requires preprocessing even when charge mixing not used
+  if (wf_dyn == "PPCG" && nite_ == 0)
   {
      nite_ = 1;
   }
@@ -256,7 +256,7 @@ void BOSampleStepper::step(int niter)
   
   Timer tm_iter;
 
-  const bool use_preconditioner = wf_dyn == "PSD" || wf_dyn == "PSDA" || wf_dyn == "JD" || wf_dyn == "DQBPCG";
+  const bool use_preconditioner = wf_dyn == "PSD" || wf_dyn == "PSDA" || wf_dyn == "JD" || wf_dyn == "PPCG";
   Preconditioner *preconditioner = 0;
   if ( use_preconditioner )
   {
@@ -288,8 +288,9 @@ void BOSampleStepper::step(int niter)
     wf_stepper = new PSDAWavefunctionStepper(wf,*preconditioner,tmap);  
   else if ( wf_dyn == "JD" )
     wf_stepper = new JDWavefunctionStepper(wf,*preconditioner,ef_,tmap);  
-  else if ( wf_dyn == "DQBPCG" )
-     wf_stepper = new DQBPCGWavefunctionStepper(wf,*preconditioner,s_.ctrl.wf_inner,atoms,cd_,ef_.v_r,tmap);  
+  else if ( wf_dyn == "PPCG" )
+     wf_stepper = new PPCGWavefunctionStepper(wf,*preconditioner,s_.ctrl.wf_inner,atoms,cd_,ef_.v_r,tmap,
+                                                s_.ctrl.ppcg_sbsize, s_.ctrl.ppcg_qrstep);  
 
   // wf_stepper == 0 indicates that wf_dyn == LOCKED
 
@@ -1356,7 +1357,7 @@ void BOSampleStepper::step(int niter)
                {
                   cout.setf(ios::fixed,ios::floatfield);
                   cout.setf(ios::right,ios::adjustfield);
-                  cout << "  <etotal_int> " << setw(15) << setprecision(8)
+                  cout << "  <etotal_int> " << setw(17) << setprecision(10)
                        << energy << " </etotal_int>\n";
                   if ( compute_stress )
                   {
@@ -1373,7 +1374,7 @@ void BOSampleStepper::step(int niter)
                   {
                      etot_harris = ef_.etotal_harris();
                      if (onpe0)
-                        cout << "  <eharris> " << setw(15) << setprecision(8) << etot_harris << " </eharris>\n";
+                        cout << "  <eharris> " << setw(16) << setprecision(10) << etot_harris << " </eharris>\n";
 
                      //ewd DEBUG
                      if (false && onpe0)
