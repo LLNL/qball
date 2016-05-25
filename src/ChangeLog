@@ -1,4 +1,270 @@
 ------------------------------------------------------------------------
+r272 | xavier | 2016-04-20 16:21:09 -0700 (Wed, 20 Apr 2016) | 2 lines
+
+Removed some debugging output.
+
+------------------------------------------------------------------------
+r269 | xavier | 2016-04-12 21:14:14 -0700 (Tue, 12 Apr 2016) | 2 lines
+
+Moved orbitals to a Spline object.
+
+------------------------------------------------------------------------
+r267 | xavier | 2016-04-12 20:47:55 -0700 (Tue, 12 Apr 2016) | 4 lines
+
+* Renamed local_potential to local_potential_g_.
+* Moved projectors to a Spline object.
+
+
+------------------------------------------------------------------------
+r266 | xavier | 2016-04-12 20:19:33 -0700 (Tue, 12 Apr 2016) | 5 lines
+
+* Defined a class for splines.
+* Renamed spline.h and spline.C to Spline.h and Spline.C.
+* Use the Spline class for the local potential.
+
+
+------------------------------------------------------------------------
+r265 | xavier | 2016-04-12 20:18:26 -0700 (Tue, 12 Apr 2016) | 2 lines
+
+Check for non-diagonal ONCV pseudos, that are not currently supported.
+
+------------------------------------------------------------------------
+r261 | xavier | 2016-04-11 22:50:22 -0700 (Mon, 11 Apr 2016) | 4 lines
+
+* Corrected output.
+* Added an assertion.
+
+
+------------------------------------------------------------------------
+r260 | xavier | 2016-04-11 22:47:50 -0700 (Mon, 11 Apr 2016) | 2 lines
+
+Bugfix: correct calculation of indices.
+
+------------------------------------------------------------------------
+r259 | xavier | 2016-04-11 00:11:47 -0700 (Mon, 11 Apr 2016) | 3 lines
+
+Use a separate array for the ONCV projectors.
+
+
+------------------------------------------------------------------------
+r258 | xavier | 2016-04-10 00:24:04 -0700 (Sun, 10 Apr 2016) | 2 lines
+
+Bugfix: Fixed size of ONCV radial grid.
+
+------------------------------------------------------------------------
+r257 | xavier | 2016-04-10 00:00:55 -0700 (Sun, 10 Apr 2016) | 2 lines
+
+Fixed initialization of ONCV projectors in Fourier space.
+
+------------------------------------------------------------------------
+r256 | xavier | 2016-04-09 23:04:11 -0700 (Sat, 09 Apr 2016) | 2 lines
+
+ONCVs are always non-local.
+
+------------------------------------------------------------------------
+r255 | xavier | 2016-04-09 22:24:43 -0700 (Sat, 09 Apr 2016) | 4 lines
+
+Connected the ONCV pseudos to the NonLocalPotential. The
+implementation is in principle complete, but not tested.
+
+
+------------------------------------------------------------------------
+r254 | xavier | 2016-04-09 22:23:50 -0700 (Sat, 09 Apr 2016) | 4 lines
+
+Do not hide the makedepend command, so it is easier to understand
+errors.
+
+
+------------------------------------------------------------------------
+r253 | xavier | 2016-04-09 19:11:52 -0700 (Sat, 09 Apr 2016) | 3 lines
+
+Added channels to the vnlg_ and vnlg_spl arrays.
+
+
+------------------------------------------------------------------------
+r252 | xavier | 2016-04-09 18:40:43 -0700 (Sat, 09 Apr 2016) | 3 lines
+
+Use the vlnr_ array for all norm conserving pseudos.
+
+
+------------------------------------------------------------------------
+r251 | xavier | 2016-04-09 18:10:18 -0700 (Sat, 09 Apr 2016) | 2 lines
+
+Added channels to the pseudopotential weights.
+
+------------------------------------------------------------------------
+r250 | xavier | 2016-04-08 18:39:09 -0700 (Fri, 08 Apr 2016) | 2 lines
+
+A bit more of the ONCV implementation.
+
+------------------------------------------------------------------------
+r249 | xavier | 2016-04-03 22:41:57 -0700 (Sun, 03 Apr 2016) | 3 lines
+
+More initialization of ONCV pseudos.
+
+
+------------------------------------------------------------------------
+r248 | xavier | 2016-04-03 22:14:20 -0700 (Sun, 03 Apr 2016) | 3 lines
+
+Started to modify the Species initlization routine to handle ONCV
+pseudos.
+
+------------------------------------------------------------------------
+r247 | xavier | 2016-04-03 11:29:25 -0700 (Sun, 03 Apr 2016) | 2 lines
+
+Broadcast of ONCV components.
+
+------------------------------------------------------------------------
+r246 | xavier | 2016-04-03 09:59:26 -0700 (Sun, 03 Apr 2016) | 4 lines
+
+* Rearranged all the ONCV-specific components of Species.
+* Read the ONCV weights.
+
+
+------------------------------------------------------------------------
+r245 | xavier | 2016-04-02 19:22:09 -0700 (Sat, 02 Apr 2016) | 2 lines
+
+Read the ONCV projectos and potential from the file.
+
+------------------------------------------------------------------------
+r244 | xavier | 2016-04-02 17:16:40 -0700 (Sat, 02 Apr 2016) | 2 lines
+
+Started implementation of ONCV pseudos.
+
+------------------------------------------------------------------------
+r243 | xavier | 2016-04-02 13:51:01 -0700 (Sat, 02 Apr 2016) | 2 lines
+
+Improved error handling.
+
+------------------------------------------------------------------------
+r242 | xavier | 2016-04-02 12:01:31 -0700 (Sat, 02 Apr 2016) | 4 lines
+
+Non-linear core corrections are read using the same code for
+norm-conserving and ultra-soft.
+
+
+------------------------------------------------------------------------
+r241 | xavier | 2016-04-02 11:53:08 -0700 (Sat, 02 Apr 2016) | 2 lines
+
+Read of the nlcc using the method.
+
+------------------------------------------------------------------------
+r239 | xavier | 2016-04-02 09:32:38 -0700 (Sat, 02 Apr 2016) | 3 lines
+
+Read radial functions using the new approach.
+
+
+------------------------------------------------------------------------
+r238 | xavier | 2016-04-02 08:54:04 -0700 (Sat, 02 Apr 2016) | 4 lines
+
+* Implemented a method to read a sequence of values from a tag.
+* Use this method to read the radial potential.
+
+
+------------------------------------------------------------------------
+r237 | xavier | 2016-04-01 22:32:17 -0700 (Fri, 01 Apr 2016) | 4 lines
+
+* Function to read attributes.
+* Converted more code to use XMLFile.
+
+
+------------------------------------------------------------------------
+r236 | xavier | 2016-04-01 19:20:04 -0700 (Fri, 01 Apr 2016) | 2 lines
+
+Implemented the XMLFile class.
+
+------------------------------------------------------------------------
+r235 | xavier | 2016-04-01 09:28:56 -0700 (Fri, 01 Apr 2016) | 4 lines
+
+* Moved the Tag class into the XMLFile class.
+* Fixed a compilation issue.
+
+
+------------------------------------------------------------------------
+r232 | xavier | 2016-04-01 08:00:27 -0700 (Fri, 01 Apr 2016) | 3 lines
+
+Moved the Tag class to a separate file.
+
+
+------------------------------------------------------------------------
+r231 | xavier | 2016-03-31 21:03:59 -0700 (Thu, 31 Mar 2016) | 4 lines
+
+More simplification of the xml pseudopotential parsing using the Tag
+object.
+
+
+------------------------------------------------------------------------
+r230 | xavier | 2016-03-31 20:36:32 -0700 (Thu, 31 Mar 2016) | 2 lines
+
+Defined a class to help parsing the XML pseudopotential files.
+
+------------------------------------------------------------------------
+r228 | xavier | 2016-03-09 14:37:11 -0800 (Wed, 09 Mar 2016) | 4 lines
+
+When qb receives the input file as argument, it stops with an error if
+there is an invalid command.
+
+
+------------------------------------------------------------------------
+r226 | xavier | 2016-03-09 10:43:48 -0800 (Wed, 09 Mar 2016) | 4 lines
+
+Now the qb executable honors the -c argument, that prints
+configuration information (for the moment mpi).
+
+
+------------------------------------------------------------------------
+r223 | xavier | 2016-03-08 18:07:18 -0800 (Tue, 08 Mar 2016) | 4 lines
+
+Added an iteration count as attribute to etotal_int, to make the
+output more readable.
+
+
+------------------------------------------------------------------------
+r221 | xavier | 2016-03-04 16:20:25 -0800 (Fri, 04 Mar 2016) | 5 lines
+
+- Initial implementation of the qbdiff utility, that compares two qbox
+  output files. For the moment only the number of iterations and the
+  total energy for each iteration is compared.
+
+
+------------------------------------------------------------------------
+r220 | xavier | 2016-03-03 15:40:04 -0800 (Thu, 03 Mar 2016) | 3 lines
+
+Ignore failure to remove directory with `make clean`.
+
+
+------------------------------------------------------------------------
+r215 | draeger | 2016-03-02 15:19:19 -0800 (Wed, 02 Mar 2016) | 4 lines
+
+
+Added error checking for currently-unsupported DFT+U case where hubbard l = llocal.
+
+
+------------------------------------------------------------------------
+r213 | xavier | 2016-03-02 14:00:39 -0800 (Wed, 02 Mar 2016) | 3 lines
+
+Bugfix: corrected the inteface for Csys2blacs_handle.
+
+
+------------------------------------------------------------------------
+r211 | draeger | 2016-03-02 11:40:21 -0800 (Wed, 02 Mar 2016) | 4 lines
+
+
+SVN permissions test.
+
+
+------------------------------------------------------------------------
+r210 | draeger | 2016-02-26 14:35:20 -0800 (Fri, 26 Feb 2016) | 4 lines
+
+
+Bug fix in HubbardPotential.C (hubbard occupations only computed up to 32 atoms).
+
+
+------------------------------------------------------------------------
+r209 | draeger | 2016-02-26 14:10:12 -0800 (Fri, 26 Feb 2016) | 1 line
+
+
+------------------------------------------------------------------------
 r208 | draeger | 2016-02-26 14:09:16 -0800 (Fri, 26 Feb 2016) | 3 lines
 
 Removed some debugging code and disabled some ultrasoft debugging print statements.
