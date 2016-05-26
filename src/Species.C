@@ -5,7 +5,8 @@
 // This file is part of qb@ll.
 //
 // Produced at the Lawrence Livermore National Laboratory. 
-// Written by Erik Draeger (draeger1@llnl.gov) and Francois Gygi (fgygi@ucdavis.edu).
+// Written by Erik Draeger (draeger1@llnl.gov), Xavier Andrade
+// (xavier@llnl.gov), and Francois Gygi (fgygi@ucdavis.edu).
 // Based on the Qbox code by Francois Gygi Copyright (c) 2008 
 // LLNL-CODE-635376. All rights reserved. 
 //
@@ -162,19 +163,17 @@ bool Species::initialize(double rcpsval)
     rps_[i] = i * deltar_;
     
   if (usoft_) {
-    vps_spl_.resize(1);
+    potentials_r_.resize(1);
     vps_[0].resize(ndft_);
-    vps_spl_[0].resize(ndft_);
   }
   else if(!oncv_){
-    vps_spl_.resize(lmax_+1);
+    potentials_r_.resize(lmax_+1);
     orbitals_r_.resize(lmax_ + 1);
   
     for ( int l = 0; l <= lmax_; l++ )
     {
       vps_[l].resize(ndft_);
       phi_[l].resize(ndft_);
-      vps_spl_[l].resize(ndft_);
     }
   }
   
@@ -206,8 +205,7 @@ bool Species::initialize(double rcpsval)
       vps_[0][i] = - zval_ / rps_[i];
 
     // spline vlocal
-    spline(&rps_[0],&vps_[0][0],ndft_,
-           SPLINE_FLAT_BC,SPLINE_NATURAL_BC,&vps_spl_[0][0]);
+    potentials_r_[0].fit(&rps_[0], &vps_[0][0], ndft_, SPLINE_FLAT_BC, SPLINE_NATURAL_BC);
 
   } else if(oncv_){
     assert(llocal_ == -1);
@@ -236,8 +234,7 @@ bool Species::initialize(double rcpsval)
     // compute spline coefficients of vps_ and phi_
     for ( int l = 0; l <= lmax_; l++ )
     {
-      spline(&rps_[0],&vps_[l][0],ndft_,
-             SPLINE_FLAT_BC,SPLINE_NATURAL_BC,&vps_spl_[l][0]);
+      potentials_r_[l].fit(&rps_[0], &vps_[l][0], ndft_, SPLINE_FLAT_BC, SPLINE_NATURAL_BC);
     }
     for ( int l = 0; l <= lmax_; l++ )
     {
@@ -1431,7 +1428,7 @@ void Species::vpsr(int l, double r, double &v)
   }
   else
   {
-    splint(&rps_[0],&vps_[l][0],&vps_spl_[l][0],ndft_,r,&v);
+    v = potentials_r_[l].value(r);
   }
 }
 
@@ -1445,7 +1442,7 @@ void Species::dvpsr(int l, double r, double &v, double &dv)
   }
   else
   {
-    splintd(&rps_[0],&vps_[l][0],&vps_spl_[l][0],ndft_,r,&v,&dv);
+    potentials_r_[l].derivative(r, v, dv);
   }
 }
 

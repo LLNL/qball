@@ -46,7 +46,7 @@ class Species {
   int nlm_;             // number of non-local projectors: 
   int ndft_;
   
-  vector<vector<double> > vps_spl_;
+  vector<Spline>          potentials_r_;
   vector<Spline>          orbitals_r_;
   vector<double>          gspl_;
   Spline                  local_potential_g_;
