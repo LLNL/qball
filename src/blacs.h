@@ -51,6 +51,9 @@ int sys2blacs_handle(int);
 
 
 #ifdef SCALAPACK
+
+#include <mpi.h>
+
 extern "C"{
 #endif
 // C interface to the BLACS
@@ -79,7 +82,7 @@ void Cblacs_gridmap(int*, int*, int, int, int);
 void Cblacs_abort(int, int);
 void Cblacs_gridexit(int);
 int Cblacs_pnum(int, int, int);
-int Csys2blacs_handle(int);
+int Csys2blacs_handle(MPI_Comm);
 
 #ifdef SCALAPACK
 }
