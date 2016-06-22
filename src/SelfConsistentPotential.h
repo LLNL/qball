@@ -22,37 +22,42 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 //
-// WavefunctionStepper.h
+// SelfConsistentPotential.h
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef WAVEFUNCTIONSTEPPER_H
-#define WAVEFUNCTIONSTEPPER_H
-#include "Timer.h"
+#ifndef SELFCONSISTENTPOTENTIAL_H
+#define SELFCONSISTENTPOTENTIAL_H
+
+#include <complex>
+#include <vector>
+#include <valarray>
 #include <map>
 #include <string>
+using namespace std;
 
-typedef std::map<std::string,Timer> TimerMap;
-class Wavefunction;
+class EnergyFunctional;
 
-class WavefunctionStepper
+class SelfConsistentPotential
 {
-  private:
-  
-  protected:
-  Wavefunction& wf_;
-  TimerMap& tmap_;
-  
   public:
 
-  virtual void preupdate(void) {}
-  virtual void update(Wavefunction& dwf) = 0;
-  virtual void preprocess(void) {}
-  virtual void postprocess(void) {}
+   SelfConsistentPotential() {};
+   SelfConsistentPotential(const EnergyFunctional& ef);
+   ~SelfConsistentPotential() {};
+   void extrapolate(const std::vector<SelfConsistentPotential> & previous);
+   
+  private:
 
-  WavefunctionStepper(Wavefunction& wf, TimerMap& tmap) : 
-  wf_(wf), tmap_(tmap)
-  {}
-  virtual ~WavefunctionStepper() {}
+   std::vector<std::vector<double> > v_r;
+   std::vector<std::complex<double> > hamil_rhoelg;
+   std::vector<std::complex<double> > rhoelg;
+   double eps_;
+   double ehart_;
+   double exc_;
+   double esr_;
+
+   friend class EnergyFunctional;
+
 };
 #endif

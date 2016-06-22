@@ -22,37 +22,51 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 //
-// WavefunctionStepper.h
+// ExponentialWavefunctionStepper.h
 //
 ////////////////////////////////////////////////////////////////////////////////
+// $Id: ExponentialWavefunctionStepper.h,v 1.5 2011-06-02 15:56:19 schleife Exp $
 
-#ifndef WAVEFUNCTIONSTEPPER_H
-#define WAVEFUNCTIONSTEPPER_H
-#include "Timer.h"
-#include <map>
-#include <string>
+#ifndef EXPONENTIALWAVEFUNCTIONSTEPPER_H
+#define EXPONENTIALWAVEFUNCTIONSTEPPER_H
 
-typedef std::map<std::string,Timer> TimerMap;
-class Wavefunction;
+#include "EnergyFunctional.h"
+#include "SelfConsistentPotential.h"
+#include "Wavefunction.h"
+#include "WavefunctionStepper.h"
 
-class WavefunctionStepper
+#include <deque>
+using namespace std;
+
+class ExponentialWavefunctionStepper : public WavefunctionStepper
 {
   private:
-  
+
+  double tddt_;
+  int order_;
+  int stored_iter_;
+  bool approximated_;
+  std::vector<SelfConsistentPotential> potential_;
+  Wavefunction expwf_;
+  Wavefunction wfhalf_;
+
   protected:
-  Wavefunction& wf_;
-  TimerMap& tmap_;
-  
+
+  EnergyFunctional & ef_;
+  Sample & s_;
+  void exponential(const double & dt, Wavefunction * dwf = 0);
+
   public:
+  void preupdate();
+  void update(Wavefunction& dwf);
 
-  virtual void preupdate(void) {}
-  virtual void update(Wavefunction& dwf) = 0;
-  virtual void preprocess(void) {}
-  virtual void postprocess(void) {}
-
-  WavefunctionStepper(Wavefunction& wf, TimerMap& tmap) : 
-  wf_(wf), tmap_(tmap)
-  {}
-  virtual ~WavefunctionStepper() {}
+  ExponentialWavefunctionStepper(Wavefunction& wf, double tddt, TimerMap& tmap, EnergyFunctional & ef, Sample & s, bool approximated);
+  ~ExponentialWavefunctionStepper() {};
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// coding: utf-8
+// End:
+

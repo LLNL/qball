@@ -36,6 +36,7 @@
 #include <string>
 #include "ChargeDensity.h"
 #include "StructureFactor.h"
+#include "SelfConsistentPotential.h"
 #include "Timer.h"
 using namespace std;
 
@@ -56,7 +57,9 @@ typedef map<string,Timer> TimerMap;
 class EnergyFunctional
 {
   private:
-  
+
+   friend class SelfConsistentPotential;
+   
   const Sample& s_;
   const Wavefunction& wf_;
   ChargeDensity& cd_;
@@ -137,6 +140,22 @@ class EnergyFunctional
   void print(ostream& os) const;
   void print_memory(ostream&os, double& totsum, double& locsum) const;
   void print_timing();
+
+  SelfConsistentPotential get_self_consistent_potential() const
+  {
+     return SelfConsistentPotential(*this);
+  }
+
+  void set_self_consistent_potential(const SelfConsistentPotential & potential)
+  {
+     v_r = potential.v_r;
+     hamil_rhoelg = potential.hamil_rhoelg;
+     rhoelg = potential.rhoelg;
+     eps_ = potential.eps_;
+     ehart_ = potential.ehart_;
+     exc_ = potential.exc_;
+     esr_ = potential.esr_;
+  }
   
   EnergyFunctional(const Sample& s, const Wavefunction& wf, ChargeDensity& cd);
   ~EnergyFunctional();

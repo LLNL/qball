@@ -84,6 +84,8 @@ class ShiftWFCmd : public Cmd
     if ( ( ( s->ctrl.wf_dyn == "TDEULER" ) ||
            ( s->ctrl.wf_dyn == "SOTD" ) ||
            ( s->ctrl.wf_dyn == "SORKTD" ) ||
+           ( s->ctrl.wf_dyn == "ETRS" ) ||
+           ( s->ctrl.wf_dyn == "AETRS" ) ||
            ( s->ctrl.wf_dyn == "FORKTD" ) ) && (s->hamil_wf == &(s->wf) ) )
     {
       if ( ui->oncoutpe() )

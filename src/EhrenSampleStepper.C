@@ -35,6 +35,7 @@
 #include "SORKTDWavefunctionStepper.h"
 #include "FORKTDWavefunctionStepper.h"
 #include "TDEULERWavefunctionStepper.h"
+#include "ExponentialWavefunctionStepper.h"
 #include "SDIonicStepper.h"
 #include "SDAIonicStepper.h"
 #include "CGIonicStepper.h"
@@ -193,6 +194,10 @@ void EhrenSampleStepper::step(int niter)
      wf_stepper = new SORKTDWavefunctionStepper(wf,s_.ctrl.tddt,tmap,&wfdeque);
   else if ( wf_dyn == "FORKTD" )
      wf_stepper = new FORKTDWavefunctionStepper(wf,s_.ctrl.tddt,tmap,&wfdeque);
+  else if ( wf_dyn == "ETRS" )
+     wf_stepper = new ExponentialWavefunctionStepper(wf,s_.ctrl.tddt,tmap,ef_,s_,false);
+  else if ( wf_dyn == "AETRS" )
+     wf_stepper = new ExponentialWavefunctionStepper(wf,s_.ctrl.tddt,tmap,ef_,s_,true);
   else
   {
      if ( oncoutpe )
@@ -264,6 +269,7 @@ void EhrenSampleStepper::step(int niter)
 #ifdef HPM  
   HPM_Start("iterloop");
   summary_start();
+       summary_start();
 #endif
 #ifdef TAU
   QB_Pstart(14,scfloop);
@@ -409,7 +415,7 @@ void EhrenSampleStepper::step(int niter)
        }
     }
         
-      
+    tmap["ionic"].start();      
     if ( iter > 0 && ionic_stepper )
     {
        ionic_stepper->compute_v(energy,fion);
@@ -453,7 +459,13 @@ void EhrenSampleStepper::step(int niter)
        cout << "  <ekin_ion> " << ekin_ion << " </ekin_ion>\n";
        cout << "  <temp_ion> " << temp_ion << " </temp_ion>\n";
     }
-        
+    tmap["ionic"].stop();
+
+    tmap["preupdate"].start();
+    wf_stepper->preupdate();
+    tmap["preupdate"].stop();
+    
+    tmap["ionic"].start();
     if ( atoms_move )
     {
        if ( s_.constraints.size() > 0 )
@@ -480,6 +492,7 @@ void EhrenSampleStepper::step(int niter)
           cd_.update_nlcc();
        tmap["charge"].stop();
     }
+    tmap["ionic"].stop();
 
     if ( compute_stress )
     {
@@ -877,9 +890,10 @@ void EhrenSampleStepper::step(int niter)
     //   cout << wf_dyn << " expectation value: " << wf_dyn_eigenvalue_sum << endl;
     // }
     // }    
-                
-    wf_stepper->update(dwf);
 
+    tmap["wfupdate"].start();
+    wf_stepper->update(dwf);
+    tmap["wfupdate"].stop();
 
 
     // update ultrasoft functions if needed, call gram
