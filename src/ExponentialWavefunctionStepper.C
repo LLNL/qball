@@ -37,7 +37,7 @@ using namespace std;
 
 ////////////////////////////////////////////////////////////////////////////////
 ExponentialWavefunctionStepper::ExponentialWavefunctionStepper(Wavefunction& wf, double tddt, TimerMap& tmap, EnergyFunctional & ef, Sample & s, bool approximated)
-    : tddt_(tddt), WavefunctionStepper(wf,tmap), ef_(ef), s_(s), approximated_(approximated), expwf_(s.wf), wfhalf_(s.wf)
+    : tddt_(tddt), WavefunctionStepper(wf,tmap), ef_(ef), s_(s), approximated_(approximated), expwf_(s.wf), wfhalf_(s.wf), newwf_(s.wf), newwf2_(s.wf)
 {
   order_ = 4;
   potential_.resize(3);
@@ -135,15 +135,28 @@ void ExponentialWavefunctionStepper::preupdate()
     potential_[1] = potential_[2];
     potential_[2] = ef_.get_self_consistent_potential();
     stored_iter_++;
-  }
+  } 
+  else
+  {
+    // if you are running ETRS, make a copy of the wavefunctions at time t
+    // prior to propagating wf_ to t + 0.5*tddt_
+    // store wavefunctions at time t in newwf2_  
+    for ( int ispin = 0; ispin < wf_.nspin(); ispin++)
+       for ( int ikp = 0; ikp < wf_.nkp(); ikp++ )
+          newwf2_.sd(ispin, ikp)->c() = wf_.sd(ispin, ikp)->c();
+  } 
 
   // The propagator is U(t + dt, t) = exp(-i dt/2 H(t + dt)) exp(-i dt/2 H(t))
+  // In preupdate(), we propagate the wavefunctions (wf_) to psi(t + dt/2) using
+  // only part of this propagator, exp(-i dt/2 H(t)) 
 
-  // propagate to the half of the step with H(t)
+  // propagate wf_ by half of the time step with H(t)
   exponential(0.5*tddt_);
 
   if( approximated_ && stored_iter_ >= 3 )
   {
+     // If running AETRS, extrapolate the potential using values of the
+     // potential from previous stored iterations 
      tmap_["expowf_copy"].start();
      SelfConsistentPotential future_potential;
      future_potential.extrapolate(potential_);
@@ -152,21 +165,48 @@ void ExponentialWavefunctionStepper::preupdate()
 
      // now do the other half of the propagation with H(t + dt)
      exponential(0.5*tddt_);
-  }
+  } 
+  else if (!approximated_)
+  {
+    // If running ETRS, propagate the wavefunctions from time t to time t + dt
+    // using H(t). Wavefunctions will be shuffled around to ensure that 
+    // the wavefunctions in wf_ are restored to their values at time t prior
+    // to propagating to time t + dt
+    
+    // First, copy the wavefunctions at time t + dt/2 in wf_ to newwf_ so that
+    // these wavefunctions will be accessible when update() is called 
+    for ( int ispin = 0; ispin < wf_.nspin(); ispin++)
+        for ( int ikp = 0; ikp < wf_.nkp(); ikp++ )
+            newwf_.sd(ispin, ikp)->c() = wf_.sd(ispin, ikp)->c();
+
+    // Copy the wavefunctions at time t into wf_ 
+    for ( int ispin = 0; ispin < wf_.nspin(); ispin++)
+        for ( int ikp = 0; ikp < wf_.nkp(); ikp++ )
+            wf_.sd(ispin, ikp)->c() = newwf2_.sd(ispin, ikp)->c();
+  
+    // Update the wavefunctions in wf_ from time t to time t + dt using
+    // the operator H(t). These wavefunctions will be used in update()
+    // to reset the hamiltonian to H(t + dt)
+    exponential(tddt_);
+
+    // At the end of this function (for ETRS), psi(t + dt) are stored
+    // in wf_ and psi(t + dt/2) are stored in newwf_
+ }
 
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 void ExponentialWavefunctionStepper::update(Wavefunction& dwf)
 {
-
    // Now we need to get the Hamiltonian at time t + dt
    //
    // Here we consider that the atoms (and their potential) was
    // propagated to t + dt by the calling routine
 
-   if ( !approximated_  || stored_iter_ < 3 )
+   if ( approximated_  && stored_iter_ < 3 )
    {
+      // The following code block should be executed for AETRS only
+      
       tmap_["expowf_copy"].start();
       //save the current status
       for ( int ispin = 0; ispin < wf_.nspin(); ispin++)
@@ -194,6 +234,29 @@ void ExponentialWavefunctionStepper::update(Wavefunction& dwf)
       // now do the other half of the propagation with H(t + dt)
       exponential(0.5*tddt_);
     
+   }
+   else if (!approximated_)
+   {
+     // For ETRS, update the Hamiltonian from H(t) to H(t + dt) given
+     // that the wavefunctions in wf_ contain an approximation to
+     // psi(t + dt) (psi was propagated to t + dt using H(t).).
+     // After updating the Hamiltonian, use H(t + dt) to propagate
+     // psi from t + dt/2 (stored initially in newwf_) to t + dt.
+     
+     // Get the approximated vhxc for the end of the step and update
+     // H(t) to H(t + dt)
+     ef_.hamil_cd()->update_density();
+     ef_.update_hamiltonian();
+     ef_.update_vhxc();
+
+     // Copy the wavefunctions at t + dt/2 (currently in newwf_) to wf_
+     for ( int ispin = 0; ispin < wf_.nspin(); ispin++)
+         for ( int ikp = 0; ikp < wf_.nkp(); ikp++ )
+            wf_.sd(ispin, ikp)->c() = newwf_.sd(ispin, ikp)->c();
+    
+     // Propagate the wavefunctions in wf_ from t + dt/2 to t + dt
+     // using H(t + dt)
+     exponential(0.5*tddt_); 
    }
    
 }

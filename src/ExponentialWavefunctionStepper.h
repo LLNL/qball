@@ -49,6 +49,8 @@ class ExponentialWavefunctionStepper : public WavefunctionStepper
   std::vector<SelfConsistentPotential> potential_;
   Wavefunction expwf_;
   Wavefunction wfhalf_;
+  Wavefunction newwf_; 
+  Wavefunction newwf2_;
 
   protected:
 
