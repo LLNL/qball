@@ -1,3 +1,3 @@
 SUBDIRS =        \
 	src      \
-	testing
+	testsuite
