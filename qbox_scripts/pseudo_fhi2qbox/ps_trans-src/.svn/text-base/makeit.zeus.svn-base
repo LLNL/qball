@@ -1,3 +1,0 @@
-#!/bin/csh
-ifort -O -o ps_trans.zeus ps_trans.f90
-

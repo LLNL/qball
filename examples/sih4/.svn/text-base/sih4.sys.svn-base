@@ -1,8 +1,0 @@
-set cell 14 0 0 0 14 0 0 0 14
-species silicon Si_PBE.xml
-species hydrogen H_PBE.xml
-atom Si   silicon      0.00000000   0.00000000   0.00000000 
-atom H1   hydrogen     1.60000000   1.60000000   1.60000000 
-atom H2   hydrogen     1.60000000  -1.60000000  -1.60000000 
-atom H3   hydrogen    -1.60000000   1.60000000  -1.60000000 
-atom H4   hydrogen    -1.60000000  -1.60000000   1.60000000 

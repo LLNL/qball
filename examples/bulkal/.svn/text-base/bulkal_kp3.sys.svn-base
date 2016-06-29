@@ -1,3 +1,0 @@
-set cell -3.80 0.0 3.80 0.0 3.80 3.80 -3.80 3.80 0.0
-species aluminum TM_CAPW91_Al.xml
-atom Al1 aluminum 0.0 0.0 0.0 0 0 0
