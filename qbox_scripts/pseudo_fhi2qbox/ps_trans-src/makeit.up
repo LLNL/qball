@@ -1,0 +1,4 @@
+#!/bin/csh
+rm *.mod
+xlf90 -O3 -qarch=pwr5 -qtune=pwr5 -qmaxmem=-1 -o ps_trans.up ps_trans.f
+

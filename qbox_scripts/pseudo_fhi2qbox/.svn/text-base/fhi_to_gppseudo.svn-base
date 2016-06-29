@@ -1,0 +1,88 @@
+#! /usr/bin/perl -w
+
+# fhi_to_xmlpseudo converts an (Abinit) fhi pseudopotential to Qbox xml format 
+
+if ($#ARGV < 0) {
+  print "syntax:  fhi_to_xmlpseudo [.fhi pseudopotential file(s)]\n";
+  exit;
+}
+
+$pstrans = "ps_trans";
+while (! -e $pstrans) {
+  print "Please enter name of ps_trans executable: ";
+  $pstrans = <STDIN>;  chomp $pstrans;
+}
+
+$fitprm = "fit.prm";
+if (! -e $fitprm) {
+  open FIT, ">$fitprm";
+  print FIT "0.0\n";
+  close FIT;
+}
+
+foreach $fhifile (@ARGV[0..$#ARGV]) {  
+
+  @filesplit = split '\.fhi',$fhifile;
+  if ($#filesplit < 0) { 
+    print "$fhifile does not have a .fhi extension!\n";
+    exit;
+  }
+  else { 
+    $filebase = $filesplit[0];
+  }
+
+  $inifile = join '',$filebase,'.ini';
+  while (! -e $inifile) { 
+    print "Looking for $inifile...not found.\n  Enter name of .ini file for $fhifile:  ";
+    $inifile = <STDIN>;  chomp $inifile;
+  }
+
+# for now, assume files are named according to current naming scheme
+# on Abinit website, e.g. 73-Ta.GGA.fhi so we'll try to grab element
+# from filename
+  @eltsplit1 = split '\.',$filebase;
+  if ($#eltsplit1 < 0) {
+    print "Could not determine element symbol from filename.\n  Please enter element symbol for $fhifile:  ";
+    $symbol = <STDIN>;  chomp $symbol;
+  }
+  else {
+    @eltsplit2 = split '-',$eltsplit1[0];
+    if ($#eltsplit2 < 1) {
+      print "Could not determine element symbol from filename.\n  Please enter element symbol for $fhifile:  ";
+      $symbol = <STDIN>;  chomp $symbol;
+    }
+    else {
+      $symbol = $eltsplit2[1];
+    }
+  }
+  print "atom symbol = $symbol\n";
+
+  # create $symbol.cpi and $symbol.ini from .fhi and .ini files
+
+  open FHI, $fhifile;
+  $cpifile = join '',$symbol,'.cpi';
+  open CPI, ">$cpifile";
+  $cnt = 0;
+  while ($line=<FHI>) {
+    if ($cnt == 2) {
+      @data = split ' ',$line;
+      $lloc = $data[3];
+    }      
+    if ($cnt > 6) {
+      print CPI $line;
+    }
+    $cnt++;
+  }
+  close FHI;
+  close CPI;
+
+  $newinifile = join '',$symbol,'.ini';
+  system("cp $inifile $newinifile");
+
+  $tmpfile = join '',$filebase,'.tmptmptmp';
+  open TMP, ">$tmpfile";
+  print TMP "$symbol $lloc JEEP\n";
+  close TMP;
+  system("$pstrans < $tmpfile");
+  unlink $tmpfile;
+}

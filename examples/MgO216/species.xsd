@@ -1,0 +1,70 @@
+<?xml version="1.0"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" 
+  targetNamespace="http://www.quantum-simulation.org/ns/fpmd/fpmd-1.0"
+  xmlns:fpmd="http://www.quantum-simulation.org/ns/fpmd/fpmd-1.0">
+  
+  <annotation>
+    <documentation> $Id: species.xsd,v 1.6 2008/03/07 20:05:31 fgygi Exp $
+      http://www.quantum-simulation.org
+      FPMD atomic species XML Schema specification. 
+      Copyright (c) 2006-2008 The Regents of the University of California.
+    </documentation>
+  </annotation>
+  
+  <element name="species" type="fpmd:speciesType"/>
+  
+  <complexType name="speciesType">
+    <sequence minOccurs="0">
+      <element name="description" type="string" minOccurs="0" maxOccurs="1"/>
+      <element name="symbol" type="NMTOKEN"/>
+      <element name="atomic_number" type="nonNegativeInteger"/>
+      <element name="mass" type="fpmd:positiveDouble"/>
+      <element name="norm_conserving_pseudopotential" minOccurs="0" maxOccurs="1"
+       type="fpmd:norm_conserving_pseudopotentialType"/>
+    </sequence>
+    <attribute name="name" type="NMTOKEN" use="optional"/>
+    <attribute name="href" type="anyURI" use="optional"/>
+  </complexType>
+  
+  <complexType name="norm_conserving_pseudopotentialType">
+    <sequence>
+      <element name="valence_charge" type="nonNegativeInteger"/>
+      <element name="lmax" type="nonNegativeInteger"/>
+      <element name="llocal" type="nonNegativeInteger"/>
+      <element name="nquad" type="nonNegativeInteger"/>
+      <element name="rquad" type="fpmd:nonNegativeDouble"/>
+      <element name="mesh_spacing" type="fpmd:positiveDouble"/>
+      <element name="projector" minOccurs="1" maxOccurs="unbounded">
+        <complexType>
+          <sequence>
+            <element name="radial_potential">
+              <simpleType>
+                <list itemType="double"/>
+              </simpleType>
+            </element>
+            <element name="radial_function" minOccurs="0">
+              <simpleType>
+                <list itemType="double"/>
+              </simpleType>
+            </element>
+          </sequence>
+          <attribute name="l" type="nonNegativeInteger" use="required"/>
+          <attribute name="size" type="positiveInteger" use="required"/>
+        </complexType>
+      </element>
+    </sequence>
+  </complexType>
+  
+  <simpleType name="positiveDouble">
+    <restriction base="double">
+      <minExclusive value="0"/>
+    </restriction>
+  </simpleType>
+  
+  <simpleType name="nonNegativeDouble">
+    <restriction base="double">
+      <minInclusive value="0"/>
+    </restriction>
+  </simpleType>
+  
+</schema>

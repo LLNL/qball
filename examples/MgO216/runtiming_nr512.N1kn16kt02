@@ -1,0 +1,6 @@
+#!/bin/bash
+#SBATCH --nodes=1024
+#SBATCH -A llnlsci
+export OMP_NUM_THREADS=2
+export BG_MAPCOMMONHEAP=1
+srun --runjob-opts="--verbose INFO" --ntasks=16384 ./qb-bgq_ctf_essl timing_nr512.i > timing_nr512.N1kn16kt02.out

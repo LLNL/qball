@@ -1,0 +1,85 @@
+#include <cassert>
+#include <cstdlib>
+#include <cmath>
+#include <iostream>
+#include <iomanip>
+#include <string>
+#include <vector>
+#include <omp.h>
+#include "blas.h"
+#include "Timer.h"
+using namespace std;
+
+#ifdef BGQ
+#include <bgpm/include/bgpm.h>
+extern "C" void HPM_Start(char *);
+extern "C" void HPM_Stop(char *);
+#endif
+
+#ifdef USE_MPI
+#include <mpi.h>
+#endif
+
+const double nrandinv = 1./(1.0*RAND_MAX + 1.0);
+const double maxrand = 0.000001;  // maximum random perturbation to identity matrix
+
+int main(int argc, char **argv)
+{
+   Timer tm;
+
+   // choose random number seed based on system clock
+   srand((unsigned)time(NULL));
+
+   int mype;
+   int npes;
+#ifdef USE_MPI
+   MPI_Init(&argc,&argv);
+   MPI_Comm_size(MPI_COMM_WORLD, &npes);
+   MPI_Comm_rank(MPI_COMM_WORLD, &mype);
+#else
+   npes=1;
+   mype=0;
+#endif
+
+   const int vsize = 10000;
+   const int ione = 1;
+   vector<complex<double> > avec(vsize);
+   vector<complex<double> > bvec(vsize);
+
+   for (int ii=0; ii<vsize; ii++) {
+      double drand1 =  rand()*nrandinv*maxrand;
+      double drand2 =  rand()*nrandinv*maxrand;
+      avec[ii] = complex<double>(drand1,drand2);
+   }
+   for (int ii=0; ii<vsize; ii++) {
+      double drand1 =  rand()*nrandinv*maxrand;
+      double drand2 =  rand()*nrandinv*maxrand;
+      bvec[ii] = complex<double>(drand1,drand2);
+   }
+
+   //test
+   complex<double> dotcheck = complex<double>(0.0,0.0);
+   for (int ii=0; ii<vsize; ii++)
+      dotcheck += conj(avec[ii])*bvec[ii];
+   cout << "dotcheck = " << dotcheck << endl;
+
+   tm.start();
+#ifdef BGQ
+   HPM_Start("zvec");
+#endif
+
+   complex<double> qv = zdotc_((int*)&vsize,&avec[0],(int*)&ione,&bvec[0],(int*)&ione);
+
+#ifdef BGQ
+   HPM_Stop("zvec");
+#endif
+   tm.stop();
+
+   //int nthreads = omp_get_max_threads();
+   if (mype == 0)
+      cout << "size = " << vsize << ", qv = " << real(qv) << ", zdotc time = " << setprecision(5) << setw(8) << tm.real() << endl;
+ 
+#ifdef USE_MPI
+   MPI_Finalize();
+#endif
+}

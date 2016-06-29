@@ -1,0 +1,56 @@
+
+To convert pseudopotentials from Abinit fhi format to JEEP format:
+
+1.  Download .fhi and .ini files from http://www.abinit.org/Psps/?text=psps
+
+2.  Copy the .fhi file to e.g. Ta.cpi and delete the first seven lines: 
+
+73-Ta.GGA.fhi looks like:
+----------------------------
+= 1 local
+ 73.000  5.000    011001              zatom,zion,pspdat
+   6        11    3   1    563     0       pspcod,pspxc,lmax,lloc,mmax,r2well
+  0.000  0.000  0.000                 rchrg, fchrg, qchrg
+5--- These two lines are available for giving more information, later
+6
+7-Here follows the cpi file from the fhi98pp code-
+5.00000E+00    4
+ 0.0000    0.0000    0.0000   0.0000
+  0.0000    .00e+00   .00e+00
+  0.0000    .00e+00   .00e+00
+<more stuff here>
+
+Ta.cpi should look like:
+----------------------------
+5.00000E+00    4
+ 0.0000    0.0000    0.0000   0.0000
+  0.0000    .00e+00   .00e+00
+  0.0000    .00e+00   .00e+00
+<more stuff here>
+
+3.  Copy the .ini file to have the same prefix as the .cpi file, e.g. Ta.ini.
+
+4.  Run ps_trans using the following syntax:
+
+ zeus287 % ./ps_trans
+ Ta 2 JEEP
+
+where 2 corresponds to using l=2 as the local pseudopotential. 
+
+You should see the following output (or something similar):
+
+ Exchange type: PBEGGA
+ PS CONF: nnln
+ NON LINEAR CORE: no
+         563
+
+
+To convert JEEP pseudopotentials to Qbox format:
+
+1.  If you used the above procedure, the JEEP potential should be
+named something like TM_PBEGGA_Ta.  Use the gp_pseudo_to_xml to
+convert to Qbox format.
+
+2.  Edit the resulting .xml file to set the atomic number and mass.
+
+

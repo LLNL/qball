@@ -1,0 +1,61 @@
+#! /usr/bin/perl
+
+# pwscf_outputsys reads in a PWSCF output file (verbosity = 'high'), parses out the
+# atomic coordinates and prints them in Qbox .sys format
+
+if ($#ARGV < 0) {
+  print "syntax:  pwscf_outputsys [PWSCF output file(s)]\n";
+  exit;
+}
+
+foreach $file (@ARGV[0..$#ARGV]) {  
+
+  open DATA, $file;
+  $outfile = join '',$file,'.sys';
+  open OUTPUT, ">$outfile";
+
+  LINE: while ($line=<DATA>) {
+     @data = split ' ',$line;
+
+     if ($data[0] eq "number" && $data[1] eq "of" && $data[2] eq "atoms/cell") {
+        $natoms = $data[4];
+        print "natoms = $natoms\n";
+     }
+     if ($data[0] eq "lattice" && $data[1] eq "parameter" && $data[2] eq "(a_0)") {
+        $latparam = $data[4];
+        print "a0 = $latparam\n";
+     }
+     if ($data[0] eq "crystal" && $data[1] eq "axes:" && $data[2] eq "(cart.") {
+        $line2 = <DATA>;
+        @data2 = split ' ',$line2;
+        $a0x = $latparam*$data2[3];  $a0y = $latparam*$data2[4];  $a0z = $latparam*$data2[5];  
+        $line2 = <DATA>;
+        @data2 = split ' ',$line2;
+        $a1x = $latparam*$data2[3];  $a1y = $latparam*$data2[4];  $a1z = $latparam*$data2[5];  
+        $line2 = <DATA>;
+        @data2 = split ' ',$line2;
+        $a2x = $latparam*$data2[3];  $a2y = $latparam*$data2[4];  $a2z = $latparam*$data2[5];  
+        print OUTPUT "set cell $a0x $a0y $a0z $a1x $a1y $a1z $a2x $a2y $a2z\n";
+     }
+     if ($line =~ /positions/ && $line =~ /a_0 units/) {
+        print "coordinates found.\n";
+        # read natoms lines
+        for ($i=0; $i<$natoms; $i++) {
+           $line2 = <DATA>;
+           @data2 = split ' ',$line2;
+
+           $x = $latparam*$data2[6];  $y = $latparam*$data2[7];  $z = $latparam*$data2[8];  
+           $type = $data2[1];
+           if (!defined($typecnt{$type})) { $typecnt{$type} = 1; }
+           else { $typecnt{$type}++; }
+           printf OUTPUT "atom $type$typecnt{$type} species$type  %11.7f %11.7f %11.7f\n",$x,$y,$z;
+        }
+     }
+
+
+  }
+
+  close DATA;
+  close OUTPUT;
+
+}

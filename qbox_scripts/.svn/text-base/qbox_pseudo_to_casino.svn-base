@@ -1,0 +1,297 @@
+#! /usr/bin/perl 
+
+# converts a Qbox .xml pseudopotential into .fhi format for use with Abinit
+#
+# written by Erik Draeger, LLNL, 10/27/2008
+
+use Math::Trig;
+use XML::Parser::PerlSAX;
+#use PseudoHandler;  # include package in script instead of in Perl include path
+
+if ($#ARGV < 0) {
+  print "syntax:  qbox_pseudo_to_casino [.xml file(s)]\n";
+  exit;
+}
+
+foreach $xmlfile (@ARGV[0..$#ARGV]) {  
+
+  $casinofile = join '',$xmlfile,".data";
+  open CASINO, ">$casinofile";
+
+  print "Processing $xmlfile...\n";
+
+  my $ps_handler = PseudoHandler->new();
+  my $parser = XML::Parser::PerlSAX->new( Handler => $ps_handler );
+  $parser->parse(Source => { SystemId => $xmlfile });
+
+  my $symbol = $ps_handler->return_symbol();
+  my $lmax = $ps_handler->return_lmax();
+  my $llocal = $ps_handler->return_llocal();
+  my $atomic_number = $ps_handler->return_atomic_number();
+  my $mass = $ps_handler->return_mass();
+  my $valence_charge = $ps_handler->return_valence_charge();
+  my $mesh_spacing = $ps_handler->return_mesh_spacing();
+  my @description = $ps_handler->return_description();
+
+  print "lloc = $llocal, lmax = $lmax\n";
+
+  print CASINO "$xmlfile, converted from Qbox format to CASINO format\n";
+  print CASINO "Atomic number and pseudo-charge\n";
+  printf CASINO "      %i    %0.2f \n",$atomic_number,$valence_charge;
+  print CASINO "Energy units (rydberg/hartree/ev):\n";
+  print CASINO "rydberg\n";
+  print CASINO "Angular momentum of local component (0=s,1=p,2=d..)\n";
+  printf CASINO "  %i\n",$llocal;
+  print CASINO "NLRULE override (1) VMC/DMC (2) config gen (0 ==> input/default value)\n";
+  print CASINO " 0 0\n";
+
+# read radial potential and wavefunction from .xml file
+  for ($l=0; $l<=$lmax; $l++) {
+    @vofr = $ps_handler->return_potential($l);
+    @phiofr = $ps_handler->return_wavefun($l);
+    for ($i=0;$i<=$#vofr;$i++) { 
+      $rlin[$i] = $i*$mesh_spacing;
+    }
+
+    # print radial grid
+    $npts = $#vofr-1;
+    if ($l == 0) {
+      print CASINO "Number of grid points\n";
+      print CASINO "    $npts\n";
+      print CASINO "R(i) in atomic units\n";
+      for ($i=0; $i<$npts; $i++) {
+        printf CASINO " %0.12e\n",$rlin[$i];
+      }
+    }
+
+    # print pseudopotential
+    $lname = "s";
+    if ($l==1) { $lname = "p"; }
+    if ($l==2) { $lname = "d"; }
+    if ($l==3) { $lname = "f"; }
+
+    print CASINO "r*$lname pseudopotential in Ry\n";
+    for ($i=0; $i<$npts; $i++) {
+      printf CASINO " %0.12e \n",2.0*$rlin[$i]*$vofr[$l];
+    }
+  }
+  close CASINO;
+}
+
+##########################################################################################
+#  Pseudopotential XML handler
+###########################################################################################
+
+package PseudoHandler;
+
+my $currelt = '';
+my $currl = -1;
+my $ndesc = -1;
+my $symbol;
+my $atomic_number;
+my $mass;
+my $lmax;
+my $llocal;
+my $valence_charge;
+my $mesh_spacing;
+
+sub new {
+  my ($type) = @_;
+
+  $currl = -1;
+  $ndesc = 0;
+  undef @desc;
+#  undef @wavefun;
+  undef @potential;
+
+  return bless {}, $type;  
+}
+
+sub start_element {
+  my ($self, $element) = @_;
+  
+#  print "Start element: $element->{Name}\n";
+
+  $currelt = $element->{Name};
+
+  if (defined $element->{'Attributes'}->{'l'}) { 
+    my $l = $element->{'Attributes'}->{'l'};
+    #print "attribute l = $l\n";
+    $currl = $l;
+    $npotpts[$currl] = -1;
+    $nwfpts[$currl] = -1;
+  }
+
+#  %attr = $element->{Attributes};
+#  foreach $key (keys %attr) { 
+#    print "attribute $key = $attr{$key}\n";;
+#  }
+
+}
+
+sub end_element {
+  my ($self, $element) = @_;
+#  print "End element: $element->{Name}\n";
+}
+
+sub characters {
+  my ($self, $characters) = @_;
+
+# PerlSAX handlers separate elements by newlines; each newline generates its own call to 
+# the characters() function.  Additionally, for large data files, a characters() call may only 
+# return a fraction of a string --> join everything between newlines into a single value
+
+  if ($currelt eq 'radial_potential' && $currl >= 0) { 
+    $data = $characters->{Data};
+    $ch = chomp($data);
+    if ($ch == 0) { 
+      $currcnt = $npotpts[$currl];
+      if (!defined($potential[$currcnt][$currl])) {
+        $potential[$currcnt][$currl] = $data;
+      }
+      else {
+        $potential[$currcnt][$currl] = join '',$potential[$currcnt][$currl],$data;
+      }
+    }
+    elsif ($ch == 1) {
+      $npotpts[$currl]++;
+    }
+    else {
+      print "Unexpected return value from chomp\n";
+      exit;
+    }
+  }
+  if ($currelt eq 'radial_function' && $currl >= 0) { 
+    $data = $characters->{Data};
+    $ch = chomp($data);
+    if ($ch == 0) { 
+      $currcnt = $nwfpts[$currl];
+      if (!defined($wavefun[$currcnt][$currl])) {
+        $wavefun[$currcnt][$currl] = $data;
+      }
+      else {
+        $wavefun[$currcnt][$currl] = join '',$wavefun[$currcnt][$currl],$data;
+      }
+    }
+    elsif ($ch == 1) {
+      $nwfpts[$currl]++;
+    }
+    else {
+      print "Unexpected return value from chomp\n";
+      exit;
+    }
+  }
+
+  if ($currelt eq 'description') { 
+    $data = $characters->{Data};
+    $ch = chomp($data);
+    if ($ch == 0) { 
+      if ($ndesc == -1) { $ndesc = 0; }
+      if (!defined($desc[$ndesc])) {
+        $desc[$ndesc] = $data;
+      }
+      else {
+        $desc[$ndesc] = join '',$desc[$ndesc],$data;
+      }
+    }
+    elsif ($ch == 1) { 
+      $ndesc++;
+    }
+  }
+  if ($currelt eq 'symbol') { 
+    $data = $characters->{Data};
+    $ch = chomp($data);
+    if ($data ne '') { $symbol = $data; }
+  }
+  if ($currelt eq 'lmax') { 
+    $data = $characters->{Data};
+    $ch = chomp($data);
+    if ($data ne '') { $lmax = $data; }
+  }
+  if ($currelt eq 'atomic_number') { 
+    $data = $characters->{Data};
+    $ch = chomp($data);
+    if ($data ne '') { $atomic_number = $data; }
+  }
+  if ($currelt eq 'mass') { 
+    $data = $characters->{Data};
+    $ch = chomp($data);
+    if ($data ne '') { $mass = $data; }
+  }
+  if ($currelt eq 'llocal') { 
+    $data = $characters->{Data};
+    $ch = chomp($data);
+    if ($data ne '') { $llocal = $data; }
+  }
+  if ($currelt eq 'valence_charge') { 
+    $data = $characters->{Data};
+    $ch = chomp($data);
+    if ($data ne '') { $valence_charge = $data; }
+  }
+  if ($currelt eq 'mesh_spacing') { 
+    $data = $characters->{Data};
+    $ch = chomp($data);
+    if ($data ne '') { $mesh_spacing = $data; }
+  }
+
+
+}
+
+sub return_wavefun {
+  my ($self,$lin) = @_;
+  my @outwf;
+  if (!defined($wavefun[0][$lin])) { 
+    print "Error:  wavefun undefined at l=$lin\n";
+    exit;
+  }
+  for ($j=0; $j<$nwfpts[$lin]; $j++) { 
+    if (defined($wavefun[$j][$lin])) { 
+      if ($wavefun[$j][$lin] ne '') { 
+        $outwf[$j] = $wavefun[$j][$lin];
+      }
+    }
+  }
+  return @outwf;
+}
+sub return_potential {
+  my ($self,$lin) = @_;
+  my @outpot;
+  if (!defined($potential[0][$lin])) { 
+    print "Error:  potential undefined at l=$lin\n";
+    exit;
+  }
+  for ($j=0; $j<$npotpts[$lin]; $j++) { 
+    if (defined($potential[$j][$lin])) { 
+      if ($potential[$j][$lin] ne '') { 
+        $outpot[$j] = $potential[$j][$lin];
+      }
+    }
+  }
+  return @outpot;
+}
+sub return_description {
+  return @desc;
+}
+sub return_symbol { 
+  return $symbol;
+}
+sub return_atomic_number { 
+  return $atomic_number;
+}
+sub return_mass { 
+  return $mass;
+}
+sub return_lmax { 
+  return $lmax;
+}
+sub return_llocal { 
+  return $llocal;
+}
+sub return_valence_charge { 
+  return $valence_charge;
+}
+sub return_mesh_spacing { 
+  return $mesh_spacing;
+}
+
+1;

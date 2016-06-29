@@ -1,0 +1,15 @@
+upf2qso converts a PWSCF UPF pseudopotential file to Qbox xml format.
+Both norm-conserving and ultrasoft potential formats are supported, as
+well as potentials with non-linear core corrections.  Note that
+ultrasoft and nlcc can only be used with qb@ll, as the open source
+Davis version does not currently have these features implemented.
+
+Usage:
+  upf2qso < C.tpss-mt.UPF > C.tpss-mt.xml
+
+This directory contains executables for some of the LC machines, as
+well as source code for compilation on other platforms.
+
+upf2qso was originally written by Francois Gygi at U.C. Davis. and
+later modified by Erik Draeger at LLNL.
+

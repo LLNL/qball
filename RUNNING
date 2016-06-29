@@ -1,0 +1,11 @@
+
+To run Qbox, one needs an input file (.i), a coordinate file (.sys)
+and pseudopotential file(s) (.xml).  Input examples can be found in
+the examples/ directory.
+
+The input file can be specified either as an argument or as stdin to Qbox, e.g. 
+
+srun -n 16384 ./qb-bgq_ctf_essl gold.N992.i > gold.N992.out
+
+srun -n 64 ./qb-linux < test.i > test.out
+

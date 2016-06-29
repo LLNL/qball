@@ -1,0 +1,145 @@
+#! /usr/bin/perl 
+
+# this is a modified script designed to extract a sys file from an xml 
+# checkpoint file -- currently pretty hacky
+#
+# written by Erik Draeger, LLNL, 11/21/2007
+
+sub print_usage {
+  print "syntax:  qbox_xmltosys [Qbox .xml checkpoint filename(s)]\n";
+  return;
+}
+
+if ($#ARGV < 0) {
+  print_usage();
+  exit;
+}
+
+$writetosys = 1;
+
+FILELOOP: foreach $outfile (@ARGV[$firstarg..$#ARGV]) {  
+
+  if (! -e $outfile) {
+    print "$outfile does not exist!\n";
+    next FILELOOP;
+  }
+
+  open OUT, $outfile;
+
+  $refcell_flag = 0;
+  $atomcnt = 0;
+
+  LINE: while ($line=<OUT>) {
+
+    @testchar = split("#",$line);   # ignore comment lines
+    if ($#testchar>0) { next LINE; }
+
+    if ($line =~ /<cell/) { 
+      @tdata = split '\"',$line;
+      $cell[0] = $tdata[1];
+      @tdata = split '\"',<OUT>;
+      $cell[1] = $tdata[1];
+      @tdata = split '\"',<OUT>;
+      $cell[2] = $tdata[1];
+    }
+    elsif ($line =~ /<refcell/) { 
+      $refcell_flag = 1;
+      @tdata = split '\"',$line;
+      $refcell[0] = $tdata[1];
+      @tdata = split '\"',<OUT>;
+      $refcell[1] = $tdata[1];
+      @tdata = split '\"',<OUT>;
+      $refcell[2] = $tdata[1];
+    }
+    elsif ($line =~ /<atom name/) { 
+      @tdata = split '\"',$line;
+      $atname[$atomcnt] = $tdata[1];
+      $atspecies[$atomcnt] = $tdata[3];
+      @tdata = split ' ',<OUT>;
+      if ($tdata[0] eq '<position>') {
+        $atpos[$atomcnt] = join ' ',$tdata[1],$tdata[2],$tdata[3];
+      }
+      @tdata = split ' ',<OUT>;
+      if ($tdata[0] eq '<velocity>') {
+        $atvel[$atomcnt] = join ' ',$tdata[1],$tdata[2],$tdata[3];
+      }
+      @tdata = split ' ',<OUT>;
+      if ($tdata[0] eq '</atom>') {
+        $atomcnt++;
+      }
+
+      # read all atom coordinates here
+      $nonatomline = 0;
+      while ($nonatomline == 0) {
+        $atline = <OUT>;
+        if ($atline =~ /<atom name/) { 
+          @tdata = split '\"',$atline;
+          $atname[$atomcnt] = $tdata[1];
+          $atspecies[$atomcnt] = $tdata[3];
+          @tdata = split ' ',<OUT>;
+          if ($tdata[0] eq '<position>') {
+            $atpos[$atomcnt] = join ' ',$tdata[1],$tdata[2],$tdata[3];
+          }
+          @tdata = split ' ',<OUT>;
+          if ($tdata[0] eq '<velocity>') {
+            $atvel[$atomcnt] = join ' ',$tdata[1],$tdata[2],$tdata[3];
+          }
+          @tdata = split ' ',<OUT>;
+          if ($tdata[0] eq '<force>') {
+            $atfor[$atomcnt] = join ' ',$tdata[1],$tdata[2],$tdata[3];
+            @tdata = split ' ',<OUT>;
+          }
+          if ($tdata[0] eq '</atom>') {
+            $atomcnt++;
+          }
+        }        
+        else {
+          $nonatomline = 1;
+
+# print current information to sys file
+          if ($writetosys == 1) {
+            $sysfile = join '',$outfile,'.sys';
+
+            open SYS, ">$sysfile";
+            print SYS "set cell  $cell[0]  $cell[1]  $cell[2]\n";
+            if ($refcell_flag == 1) {
+              print SYS "set ref_cell  $refcell[0]  $refcell[1]  $refcell[2]\n";
+            }
+            print SYS "# DEFINE ALL SPECIES HERE, e.g.\n";
+            print SYS "# species <species name> <xml filename>\n";
+
+            for ($i=0; $i<$atomcnt; $i++) {
+              print SYS "atom $atname[$i] $atspecies[$i]  $atpos[$i]  $atvel[$i]\n";
+            }
+            close SYS;
+          }
+        }
+
+
+      }
+
+    }
+
+  }
+  close OUT;
+
+  if ($writetosys == 0) {
+    $sysfile = join '',$outfile,'.sys';
+
+    print "Writing coordinates for $atomcnt atoms to $sysfile\n";
+
+    open SYS, ">$sysfile";
+    print SYS "set cell  $cell[0]  $cell[1]  $cell[2]\n";
+    if ($refcell_flag == 1) {
+      print SYS "set ref_cell  $refcell[0]  $refcell[1]  $refcell[2]\n";
+    }
+    print SYS "# DEFINE ALL SPECIES HERE, e.g.\n";
+    print SYS "# species <species name> <xml filename>\n";
+    
+    for ($i=0; $i<$atomcnt; $i++) {
+      print SYS "atom $atname[$i] $atspecies[$i]  $atpos[$i]  $atvel[$i]\n";
+    }
+    close SYS;
+  }
+
+}

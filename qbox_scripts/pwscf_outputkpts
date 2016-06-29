@@ -1,0 +1,54 @@
+#! /usr/bin/perl
+
+# pwscf_outputkpts reads in a PWSCF output file (verbosity = 'high'), parses out the
+# k-points in crystalline coordinates, and prints them out in Qbox input format
+
+if ($#ARGV < 0) {
+  print "syntax:  pwscf_outputkpts [PWSCF output file(s)]\n";
+  exit;
+}
+
+foreach $file (@ARGV[0..$#ARGV]) {  
+
+  open DATA, $file;
+  $outfile = join '',$file,'.qboxkpts';
+  open OUTPUT, ">$outfile";
+
+  LINE: while ($line=<DATA>) {
+    @data = split ' ',$line;
+
+    if ($data[0] eq "number" && $data[1] eq "of" && $data[2] eq "k" && $data[3] eq "points=") {
+      $nkpts = $data[4];
+      print "nkpts = $nkpts\n";
+      print OUTPUT "set nkpoints $nkpts\n";
+
+      $line2 = <DATA>;  #cart coord header
+      for ($k=0;$k<$nkpts;$k++) {
+        $line2 = <DATA>;  #k-points in cartesian coordinates
+      }
+      $line2 = <DATA>;  #blank line
+      $line2 = <DATA>;  #cryst. coord header
+      @data2 = split ' ',$line2;
+      if ($data2[0] ne 'cryst.' || $data2[1] ne 'coord.') {
+        print $line2;
+        print "Error reading output file.\n";
+        exit;
+      }
+      for ($k=0;$k<$nkpts;$k++) {
+        $line2 = <DATA>;  #k-points in crystal coordinates
+        @data2 = split ' ',$line2;
+        $kx = $data2[4];
+        $ky = $data2[5];
+        $kz = $data2[6];
+        chop $kz;  chop $kz;
+        $wt = $data2[9];
+        
+        printf OUTPUT "kpoint %11.7f %11.7f %11.7f %11.7f  crystal\n",$kx,$ky,$kz,$wt;
+      }
+    }
+  }
+
+  close DATA;
+  close OUTPUT;
+
+}

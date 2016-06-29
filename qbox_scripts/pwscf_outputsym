@@ -1,0 +1,99 @@
+#! /usr/bin/perl
+
+# pwscf_outputsym reads in a PWSCF output file (verbosity = 'high'), parses out the crystalline
+# symmetry operators, and prints them out in Qbox input format
+
+if ($#ARGV < 0) {
+  print "syntax:  pwscf_outputsym [PWSCF output file(s)]\n";
+  exit;
+}
+
+foreach $file (@ARGV[0..$#ARGV]) {  
+
+  open DATA, $file;
+  $outfile = join '',$file,'.qboxsym';
+  open OUTPUT, ">$outfile";
+
+  $nsym = 0;
+  LINE: while ($line=<DATA>) {
+    @data = split ' ',$line;
+
+    $off = -1;
+    for ($i=0; $i<=$#data; $i++) {
+      if ($data[$i] eq 'isym') { 
+        $off = $i;
+      }
+    }
+
+    if ($off > -1) {
+      if ($data[$off] eq 'isym') {
+        $symnum = $data[2+$off];
+        $nsym++;
+        #print "Found symmetry operator $symnum\n";
+        $line2 = <DATA>;  # blank line
+        $line2 = <DATA>;  # crystal coordinates, line 1
+        @data2 = split ' ',$line2;
+        
+        if ($data2[$off] ne 'cryst.') {
+          print "Error reading output file.\n"; 
+          exit;
+        }
+        $fractflag = 0;
+        if ($#data2 > 8+$off) {  # fractional translations
+          $fractflag = 1;
+          $f1 = $data2[$#data2-1];
+          $s11 = $data2[$#data2-7];
+          $s12 = $data2[$#data2-6];
+          $s13 = $data2[$#data2-5];
+        }
+        else {
+          $s11 = $data2[$#data2-3];
+          $s12 = $data2[$#data2-2];
+          $s13 = $data2[$#data2-1];
+        }
+        $line2 = <DATA>;  # crystalline coordinates, line 2
+        @data2 = split ' ',$line2;
+        if ($fractflag == 1) {  # fractional translations
+          $f2 = $data2[$#data2-1];
+          $s21 = $data2[$#data2-6];
+          $s22 = $data2[$#data2-5];
+          $s23 = $data2[$#data2-4];
+        }
+        else {
+          $s21 = $data2[$#data2-3];
+          $s22 = $data2[$#data2-2];
+          $s23 = $data2[$#data2-1];
+        }
+        $line2 = <DATA>;  # crystalline coordinates, line 3
+        @data2 = split ' ',$line2;
+        if ($fractflag == 1) {  # fractional translations
+          $f3 = $data2[$#data2-1];
+          $s31 = $data2[$#data2-6];
+          $s32 = $data2[$#data2-5];
+          $s33 = $data2[$#data2-4];
+        }
+        else {
+          $s31 = $data2[$#data2-3];
+          $s32 = $data2[$#data2-2];
+          $s33 = $data2[$#data2-1];
+        }
+        #print OUTPUT "symmetry $s11 $s12 $s13 $s21 $s22 $s23 $s31 $s32 $s33\n";
+        
+        if ($fractflag == 1) {
+          printf OUTPUT "symmetry  %1i  %1i  %1i  %1i  %1i  %1i  %1i  %1i  %1i  $f1  $f2  $f3\n",$s11,$s12,$s13,$s21,$s22,$s23,$s31,$s32,$s33;
+        }
+        else {
+          printf OUTPUT "symmetry  %1i  %1i  %1i  %1i  %1i  %1i  %1i  %1i  %1i\n",$s11,$s12,$s13,$s21,$s22,$s23,$s31,$s32,$s33;
+        }
+        
+        $line2 = <DATA>; $line2 = <DATA>; $line2 = <DATA>; # Cartesian coordinates
+        $line2 = <DATA>;  # blank line
+      }
+    }
+  }
+  print "Found $nsym symmetry operators.\n";
+
+  close DATA;
+  close OUTPUT;
+
+}
