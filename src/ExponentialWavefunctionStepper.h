@@ -50,13 +50,13 @@ class ExponentialWavefunctionStepper : public WavefunctionStepper
   Wavefunction expwf_;
   Wavefunction wfhalf_;
   Wavefunction newwf_; 
-  Wavefunction newwf2_;
 
   protected:
 
   EnergyFunctional & ef_;
   Sample & s_;
   void exponential(const double & dt, Wavefunction * dwf = 0);
+  void exponential_condensed(const double & dt1, const double & dt2, Wavefunction * dwf = 0);
 
   public:
   void preupdate();
