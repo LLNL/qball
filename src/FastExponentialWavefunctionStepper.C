@@ -44,6 +44,7 @@ ExponentialWavefunctionStepper::ExponentialWavefunctionStepper(Wavefunction& wf,
   order_ = 4;
   potential_.resize(3);
   stored_iter_ = 0;
+  merge_exp_ = true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -154,9 +155,6 @@ void ExponentialWavefunctionStepper::exponential_polymorph(tuple<int, double, do
 ////////////////////////////////////////////////////////////////////////////////
 void ExponentialWavefunctionStepper::preupdate()
 {
-  // declare tstep generally so the compiler recognizes that it exists
-  tuple<int, double, double> tstep (0, 0.0, 0.0);
-
   if (approximated_)
   {
     // For AETRS, save the potential
@@ -164,26 +162,20 @@ void ExponentialWavefunctionStepper::preupdate()
     potential_[1] = potential_[2];
     potential_[2] = ef_.get_self_consistent_potential();
     stored_iter_++;
-   
-    // Propagate wf_ by half of the time step with H(t)
-    // exponential(0.5*tddt_);
-    tuple<int, double, double> tstep (1, 0.5*tddt_, 0.0);
-    exponential_polymorph(tstep);
-  } 
-  else
-  {
-    // The propagator is U(t + dt, t) = exp(-i dt/2 H(t + dt)) exp(-i dt/2 H(t))
-    // In preupdate(), we propagate the wavefunctions (wf_) to psi(t + dt/2) using
-    // only part of this propagator, exp(-i dt/2 H(t)) 
+  }
+ 
+  // The propagator is U(t + dt, t) = exp(-i dt/2 H(t + dt)) exp(-i dt/2 H(t))
+  // In preupdate(), we propagate the wavefunctions (wf_) to psi(t + dt/2) using
+  // only part of this propagator, exp(-i dt/2 H(t)). Similarly, an approximation
+  // to the wavefunctions, psi(t + dt) are obtained by using the propagator,
+  // exp(-i dt H(t)). 
 
-    // For ETRS, propagate the wavefunctions by half a time step and by a full time
-    // step in one exponential() call. At the end of the call, wavefunctions at time
-    // t + dt will be stored in wf_ and wavefunctions at time t + dt/2 will be
-    // stored in newwf_. 
-    //exponential_condensed(tddt_, 0.5*tddt_);
-    tuple<int, double, double> tstep (2, tddt_, 0.5*tddt_);
-    exponential_polymorph(tstep);
-  } 
+  // Propagate the wavefunctions by half a time step and by a full time
+  // step in one exponential() call. At the end of the call, wavefunctions at time
+  // t + dt will be stored in wf_ and wavefunctions at time t + dt/2 will be
+  // stored in newwf_. 
+  tuple<int, double, double> tstep (2, tddt_, 0.5*tddt_);
+  exponential_polymorph(tstep);
 
   if( approximated_ && stored_iter_ >= 3 )
   {
@@ -196,7 +188,19 @@ void ExponentialWavefunctionStepper::preupdate()
      tmap_["expowf_copy"].stop();
 
      // now do the other half of the propagation with H(t + dt)
-     // exponential(0.5*tddt_);
+     //
+     // At the time the function call to exponential() is made below, psi(t + dt/2)
+     // --- what you want to propagate forward by another half step -- is stored
+     // in newwf_. Move this version of the wavefunction to wf_ before 
+     // propagation.
+     for ( int ispin = 0; ispin < wf_.nspin(); ispin++)
+         for ( int ikp = 0; ikp < wf_.nkp(); ikp++ )
+            wf_.sd(ispin, ikp)->c() = newwf_.sd(ispin, ikp)->c(); 
+     
+     // Redefine tstep so that only one exponential is calculated within
+     // exponential()
+     tstep = tuple<int, double, double> (1, 0.5*tddt_, 0.0)
+     // Propagate psi(t + dt/2) to psi(t + dt) using H(t + dt)
      exponential_polymorph(tstep);
   } 
 
@@ -207,47 +211,8 @@ void ExponentialWavefunctionStepper::update(Wavefunction& dwf)
 {
    // Define tstep for both AETRS and ETRS 
    tuple<int, double, double> tstep (1, 0.5*tddt_, 0.0);
-   
-   // Now we need to get the Hamiltonian at time t + dt
-   //
-   // Here we consider that the atoms (and their potential) was
-   // propagated to t + dt by the calling routine
 
-   if ( approximated_  && stored_iter_ < 3 )
-   {
-      // The following code block should be executed for AETRS only
-      
-      tmap_["expowf_copy"].start();
-      //save the current status
-      for ( int ispin = 0; ispin < wf_.nspin(); ispin++)
-         for ( int ikp = 0; ikp < wf_.nkp(); ikp++ )
-            wfhalf_.sd(ispin, ikp)->c() = wf_.sd(ispin, ikp)->c();
-      tmap_["expowf_copy"].stop();
-    
-      // do the rest of the propagation step with H(t)
-      // exponential(0.5*tddt_, &dwf);
-      exponential_polymorph(tstep, &dwf);  
-
-      tmap_["expowf_ef"].start();
-      // get the approximated vhxc for the end of the step
-      ef_.hamil_cd()->update_density();
-      ef_.update_hamiltonian();
-      ef_.update_vhxc();
-      tmap_["expowf_ef"].stop();
-
-      tmap_["expowf_copy"].start();
-      // restore the wf to the middle of the step
-      for ( int ispin = 0; ispin < wf_.nspin(); ispin++)
-         for ( int ikp = 0; ikp < wf_.nkp(); ikp++ )
-            wf_.sd(ispin, ikp)->c() = wfhalf_.sd(ispin, ikp)->c();
-      tmap_["expowf_copy"].stop();
-
-      // now do the other half of the propagation with H(t + dt)
-      // exponential(0.5*tddt_);
-      exponential_polymorph(tstep);
-    
-   }
-   else if (!approximated_)
+   if ( !approximated_ || stored_iter_ < 3 )
    {
      // For ETRS, update the Hamiltonian from H(t) to H(t + dt) given
      // that the wavefunctions in wf_ contain an approximation to

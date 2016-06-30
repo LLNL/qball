@@ -48,6 +48,7 @@ class ExponentialWavefunctionStepper : public WavefunctionStepper
   int order_;
   int stored_iter_;
   bool approximated_;
+  bool merge_exp_;
   std::vector<SelfConsistentPotential> potential_;
   Wavefunction expwf_;
   Wavefunction wfhalf_;
