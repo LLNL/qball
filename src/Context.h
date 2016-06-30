@@ -29,6 +29,8 @@
 #ifndef CONTEXT_H
 #define CONTEXT_H
 
+#include <config.h>
+
 #include <iosfwd>
 #include <vector>
 #include <string>

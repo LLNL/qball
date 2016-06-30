@@ -89,7 +89,7 @@ void Cblacs_gridinfo(int icontxt, int *nprow, int *npcol,
 int Cblacs_pnum(int icontxt, int prow, int pcol)
 { return 0;}
 
-int Csys2blacs_handle(int comm) {
+int Csys2blacs_handle(MPI_Comm comm) {
   return 0;
 }
 void Cdgesd2d(int icontxt,int m,int n,double *A,int lda,int rdest,int cdest)

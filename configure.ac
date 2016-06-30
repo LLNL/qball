@@ -18,6 +18,8 @@ AC_PROG_LN_S
 AC_PROG_MAKE_SET
 
 # Checks for libraries.
+AC_DEFINE(USE_MPI, 1, [enable MPI support])
+AC_DEFINE(FFT_NOLIB, 1, [no FFT library])
 
 # Checks for header files.
 AC_CHECK_HEADERS([stdint.h stdlib.h string.h sys/time.h unistd.h])

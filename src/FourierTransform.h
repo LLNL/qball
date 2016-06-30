@@ -29,6 +29,8 @@
 #ifndef FOURIERTRANSFORM_H
 #define FOURIERTRANSFORM_H
 
+#include <config.h>
+
 #include <complex>
 #include <vector>
 
