@@ -49,7 +49,6 @@ ExponentialWavefunctionStepper::ExponentialWavefunctionStepper(Wavefunction& wf,
 ////////////////////////////////////////////////////////////////////////////////
 void ExponentialWavefunctionStepper::exponential_polymorph(tuple<int, double, double> dt_tuple, Wavefunction * dwf){
 
-   printf("Hello from exp_polymorph!\n");
   // dummy variables to call ef_.energy
   std::vector<std::vector<double> > fion;
   std::valarray<double> sigma;
@@ -157,7 +156,6 @@ void ExponentialWavefunctionStepper::preupdate()
 {
   // declare tstep generally so the compiler recognizes that it exists
   tuple<int, double, double> tstep (0, 0.0, 0.0);
-  printf("preupdate() is being called in the tuple version of ETRS!\n");
 
   if (approximated_)
   {
