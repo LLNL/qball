@@ -57,8 +57,6 @@ class ExponentialWavefunctionStepper : public WavefunctionStepper
 
   EnergyFunctional & ef_;
   Sample & s_;
-  void exponential(const double & dt, Wavefunction * dwf = 0);
-  void exponential_condensed(const double & dt1, const double & dt2, Wavefunction * dwf = 0);
   void exponential_polymorph(tuple<int, double, double> dt_tuple, Wavefunction * dwf = 0);
 
   public:
