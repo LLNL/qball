@@ -23,6 +23,15 @@ AX_OPENMP([], [])
 CXXFLAGS="$CXXFLAGS $OPENMP_CXXFLAGS"
 AC_LANG_POP(C++)
 
+#XERCES-C
+AX_LIB_XERCES
+if test x$HAVE_XERCES == xyes ; then
+   CFLAGS="$CFLAGS $XERCES_CFLAGS"
+   LDFLAGS="$LDFLAGS $XERCES_LDFLAGS"
+   LIBS="$LIBS $XERCES_LIBS"
+   AC_DEFINE(USE_XERCES, 1, [have the Xerces-C library])
+fi
+
 AC_DEFINE(USE_MPI, 1, [enable MPI support])
 AC_DEFINE(FFT_NOLIB, 1, [no FFT library])
 AC_DEFINE(ARCH, "autotools", [architecture])

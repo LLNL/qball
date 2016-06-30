@@ -26,12 +26,13 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+#include <config.h>
+
 #if USE_XERCES
 
+#include "StructuredDocumentHandler.h"
 #include <xercesc/util/XMLUniDefs.hpp>
 #include <xercesc/sax2/Attributes.hpp>
-#include "StructuredDocumentHandler.h"
-
 #if TIMING
 #include "Timer.h"
 #endif
@@ -69,7 +70,7 @@ void StructuredDocumentHandler::startElement(const XMLCh* const uri,
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-#if XERCESC_3
+#if XERCES_VERSION_MAJOR >= 3
 void StructuredDocumentHandler::characters(const XMLCh* const chars,
                                            const XMLSize_t length)
 #else
