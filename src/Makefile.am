@@ -103,4 +103,5 @@ qball_SOURCES =                             \
 	SelfConsistentPotential.C           \
 	SymOpSet.C                          \
 	SymOp.C                             \
-	clooper.c
+	clooper.c                           \
+	qb.C

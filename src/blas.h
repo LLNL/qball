@@ -29,6 +29,7 @@
 #ifndef BLAS_H
 #define BLAS_H
 
+#include <config.h>
 #include <complex>
 using namespace std;
 
@@ -40,35 +41,33 @@ using namespace std;
 #define dgemm jag_dgemm
 #endif
 
-#ifdef ADD_
-#define dcopy  dcopy_  
-#define zcopy  zcopy_  
-#define daxpy  daxpy_  
-#define zaxpy  zaxpy_  
-#define ddot   ddot_   
-#define zdotu  zdotu_   
-#define zdotc  zdotc_   
-#define drot   drot_   
-#define dasum  dasum_  
-#define dsbmv  dsbmv_  
-#define dgemm  dgemm_  
-#define zgemm  zgemm_  
-#define dgesv  dgesv_  
-#define dgemv  dgemv_  
-#define dscal  dscal_  
-#define dsysv  dsysv_
-#define dsyev  dsyev_  
-#define zdscal zdscal_ 
-#define idamax idamax_ 
-#define dvea   dvea_   
-#define dyax   dyax_   
-#define dnaxpy dnaxpy_ 
-#define dger   dger_   
-#define zgeru   zgeru_   
-#define zgerc   zgerc_   
-#define dgetrf     dgetrf_
-#define dgetri     dgetri_
-#endif
+#define dcopy  FC_FUNC(dcopy, DCOPY) 
+#define zcopy  FC_FUNC(zcopy, ZCOPY) 
+#define daxpy  FC_FUNC(daxpy, DAXPY) 
+#define zaxpy  FC_FUNC(zaxpy, ZAXPY) 
+#define ddot   FC_FUNC(ddot,  DDOT)  
+#define zdotu  FC_FUNC(zdotu, ZDOTU)  
+#define zdotc  FC_FUNC(zdotc, ZDOTC)  
+#define drot   FC_FUNC(drot,  DROT)  
+#define dasum  FC_FUNC(dasum, DASUM) 
+#define dsbmv  FC_FUNC(dsbmv, DSBMV) 
+#define dgemm  FC_FUNC(dgemm, DGEMM) 
+#define zgemm  FC_FUNC(zgemm, ZGEMM) 
+#define dgesv  FC_FUNC(dgesv, DGESV) 
+#define dgemv  FC_FUNC(dgemv, DGEMV) 
+#define dscal  FC_FUNC(dscal, DSCAL) 
+#define dsysv  FC_FUNC(dsysv, DSYSV)
+#define dsyev  FC_FUNC(dsyev, DSYEV) 
+#define zdscal FC_FUNC(zdscal, ZDSCAL)
+#define idamax FC_FUNC(idamax, IDAMAX)
+#define dvea   FC_FUNC(dvea, DVEA)  
+#define dyax   FC_FUNC(dyax, DYAX)  
+#define dnaxpy FC_FUNC(dnaxpy, DNAXPY)
+#define dger   FC_FUNC(dger, DGER)  
+#define zgeru  FC_FUNC(zgeru, ZGERU)  
+#define zgerc  FC_FUNC(zgerc, ZGERC)  
+#define dgetrf FC_FUNC(dgetrf, DGETRF)
+#define dgetri FC_FUNC(dgetri, DGETRI)
 
 #ifdef USE_JAGGEMM
 #define zgemm jag_zgemm

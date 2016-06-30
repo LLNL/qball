@@ -30,6 +30,8 @@
 #include <string>
 using namespace std;
 
+#include <config.h>
+
 #include <sys/utsname.h>
 #include <unistd.h>
 #include <cstdlib>
