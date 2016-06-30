@@ -37,7 +37,7 @@ ACX_BLAS([], AC_MSG_ERROR([could not find required BLAS library]))
 dnl check for LAPACK
 ACX_LAPACK([], AC_MSG_ERROR([could not find required LAPACK library]))
 
-LIBS="$LIBS $BLAS_LIBS $LIBS_LAPACK"
+LIBS="$LIBS_LAPACK $BLAS_LIBS $LIBS $FCLIBS"
 
 # Checks for header files.
 AC_CHECK_HEADERS([stdint.h stdlib.h string.h sys/time.h unistd.h])
