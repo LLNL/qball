@@ -36,7 +36,9 @@
 #include "WavefunctionStepper.h"
 
 #include <deque>
+#include "boost/tuple/tuple.hpp"
 using namespace std;
+using boost::tuple;
 
 class ExponentialWavefunctionStepper : public WavefunctionStepper
 {
@@ -57,6 +59,7 @@ class ExponentialWavefunctionStepper : public WavefunctionStepper
   Sample & s_;
   void exponential(const double & dt, Wavefunction * dwf = 0);
   void exponential_condensed(const double & dt1, const double & dt2, Wavefunction * dwf = 0);
+  void exponential_polymorph(tuple<int, double, double> dt_tuple, Wavefunction * dwf = 0);
 
   public:
   void preupdate();

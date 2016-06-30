@@ -33,7 +33,9 @@
 #include "Sample.h"
 #include <iostream>
 #include <deque>
+#include "boost/tuple/tuple.hpp"
 using namespace std;
+using boost::tuple;
 
 ////////////////////////////////////////////////////////////////////////////////
 ExponentialWavefunctionStepper::ExponentialWavefunctionStepper(Wavefunction& wf, double tddt, TimerMap& tmap, EnergyFunctional & ef, Sample & s, bool approximated)
@@ -47,24 +49,18 @@ ExponentialWavefunctionStepper::ExponentialWavefunctionStepper(Wavefunction& wf,
 ////////////////////////////////////////////////////////////////////////////////
 void ExponentialWavefunctionStepper::exponential(const double & dt, Wavefunction * dwf){
 
+   printf("NEVER\n");
   // dummy variables to call ef_.energy
   std::vector<std::vector<double> > fion;
   std::valarray<double> sigma;
-  bool delete_dwf;
-  
+ 
+  // If dwf was not explicitly passed, generate a new dwf object  
   if (dwf == 0)
   {
-    delete_dwf = true;
-    //ewd:  don't want to keep calling Wavefunction constructor, should be able to use wfhalf_ for this call
-    //dwf = new Wavefunction(wf_);
     dwf = &wfhalf_;
     tmap_["expowf_ef"].start();
     ef_.energy(true, *dwf, false, fion, false, sigma);
     tmap_["expowf_ef"].stop();
-  }
-  else
-  {
-    delete_dwf = false;
   }
 
   // exp(A)x ~= x + Ax + A^2x/2! + A^3x/3! + A^4x/4!
@@ -120,32 +116,23 @@ void ExponentialWavefunctionStepper::exponential(const double & dt, Wavefunction
   }
   tmap_["expowf_copy"].stop();
   
-  //if(delete_dwf) delete dwf;
-  
 }
 
 
 ////////////////////////////////////////////////////////////////////////////////
 void ExponentialWavefunctionStepper::exponential_condensed(const double & dt1, const double & dt2, Wavefunction * dwf){
 
+   printf("NEVER\n");
   // dummy variables to call ef_.energy
   std::vector<std::vector<double> > fion;
   std::valarray<double> sigma;
-  bool delete_dwf;
   
   if (dwf == 0)
   {
-    delete_dwf = true;
-    //ewd:  don't want to keep calling Wavefunction constructor, should be able to use wfhalf_ for this call
-    //dwf = new Wavefunction(wf_);
     dwf = &wfhalf_;
     tmap_["expowf_ef"].start();
     ef_.energy(true, *dwf, false, fion, false, sigma);
     tmap_["expowf_ef"].stop();
-  }
-  else
-  {
-    delete_dwf = false;
   }
 
   // exp(A)x ~= x + Ax + A^2x/2! + A^3x/3! + A^4x/4!
@@ -215,7 +202,110 @@ void ExponentialWavefunctionStepper::exponential_condensed(const double & dt1, c
   }
   tmap_["expowf_copy"].stop();
   
-  //if(delete_dwf) delete dwf;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+void ExponentialWavefunctionStepper::exponential_polymorph(tuple<int, double, double> dt_tuple, Wavefunction * dwf){
+
+   printf("Hello from exp_polymorph!\n");
+  // dummy variables to call ef_.energy
+  std::vector<std::vector<double> > fion;
+  std::valarray<double> sigma;
+
+  // unpack dt_tuple and use the first argument to determine if the current
+  // call to exponential requires one or two timestep arguments and 
+  // exponential calculations
+  int num_exp = boost::get<0>(dt_tuple);
+  double dt1 = boost::get<1>(dt_tuple);
+  double dt2 = boost::get<2>(dt_tuple);
+ 
+  // if dwf is not explicitly passed, recreate the dwf object with the
+  // ef.energy() call
+  if (dwf == 0)
+  {
+    dwf = &wfhalf_;
+    tmap_["expowf_ef"].start();
+    ef_.energy(true, *dwf, false, fion, false, sigma);
+    tmap_["expowf_ef"].stop();
+  }
+
+  // exp(A)x ~= x + Ax + A^2x/2! + A^3x/3! + A^4x/4!
+  //          = x + Ax + A(Ax)/2 + A(A^2x/2)/3 + A(A^3x/6)/4 
+  
+  // order 0
+  // For the 0th order term of the Taylor expansion, simply copy the
+  // wavefunctions from wf_ to expwf_ for the first exponential calculation
+  // and conditionally from wf_ to newwf_ for the second exponential calculation
+  tmap_["expowf_copy"].start();
+  for ( int ispin = 0; ispin < wf_.nspin(); ispin++)
+    for ( int ikp = 0; ikp < wf_.nkp(); ikp++ )
+      expwf_.sd(ispin, ikp)->c() = wf_.sd(ispin, ikp)->c();
+  
+  if (num_exp == 2)
+  {
+    for ( int ispin = 0; ispin < wf_.nspin(); ispin++)
+      for ( int ikp = 0; ikp < wf_.nkp(); ikp++ )
+        newwf_.sd(ispin, ikp)->c() = wf_.sd(ispin, ikp)->c();
+  } 
+  tmap_["expowf_copy"].stop();
+
+  // initialize factors by which each additional term in the Taylor expansion
+  // will be multiplied --- factor 1 for the first exponential and factor 2
+  // for the second exponential (if a second exp() is requested). 
+  complex<double> factor1 = 1.0;
+  complex<double> factor2 = 1.0;
+ 
+  //order N:
+  for(int N = 1; N <= order_; N++)
+  {
+    factor1 *= -complex<double>(0.0, 1.0)*dt1/double(N);
+    if (num_exp == 2)
+      factor2 *= -complex<double>(0.0, 1.0)*dt2/double(N);
+
+    if(N != 1)        // for N == 1 this is already done
+    {
+       tmap_["expowf_copy"].start();
+       //move dwf to wf
+       for ( int ispin = 0; ispin < wf_.nspin(); ispin++)
+          for ( int ikp = 0; ikp < wf_.nkp(); ikp++ )
+             wf_.sd(ispin, ikp)->c() = dwf->sd(ispin, ikp)->c();
+       tmap_["expowf_copy"].stop();
+      
+       // apply A
+       tmap_["expowf_ef"].start();
+       ef_.energy(true, *dwf, false, fion, false, sigma);
+       tmap_["expowf_ef"].stop();
+    }
+    
+    // accumulate the result of propagating wf_ by the first or only
+    // time step in expwf_. If a second time step is provided, 
+    // store the wavefunctions propagated by that time step in newwf_
+    tmap_["expowf_axpy"].start();
+    for ( int ispin = 0; ispin < wf_.nspin(); ispin++)
+       for ( int ikp = 0; ikp < wf_.nkp(); ikp++ )
+          expwf_.sd(ispin, ikp)->c().axpy(factor1, dwf->sd(ispin, ikp)->c());
+    
+    if (num_exp == 2)
+    {
+      for ( int ispin = 0; ispin < wf_.nspin(); ispin++)
+         for ( int ikp = 0; ikp < wf_.nkp(); ikp++ )
+            newwf_.sd(ispin, ikp)->c().axpy(factor2, dwf->sd(ispin, ikp)->c());
+    }
+    tmap_["expowf_axpy"].stop();
+    
+  } // Note: this bracket terminates the for loop from 1 to order_
+  
+  tmap_["expowf_copy"].start();
+  // copy the result back to THE wavefunction, wf_
+  for ( int ispin = 0; ispin < wf_.nspin(); ispin++)
+  {
+    for ( int ikp = 0; ikp < wf_.nkp(); ikp++ )
+    {
+      wf_.sd(ispin, ikp)->c() = expwf_.sd(ispin, ikp)->c();
+      s_.hamil_wf->sd(ispin, ikp)->c() = wf_.sd(ispin, ikp)->c();
+    }
+  }
+  tmap_["expowf_copy"].stop();
   
 }
 
@@ -223,6 +313,10 @@ void ExponentialWavefunctionStepper::exponential_condensed(const double & dt1, c
 ////////////////////////////////////////////////////////////////////////////////
 void ExponentialWavefunctionStepper::preupdate()
 {
+  // declare tstep generally so the compiler recognizes that it exists
+  tuple<int, double, double> tstep (0, 0.0, 0.0);
+  printf("preupdate() is being called in the tuple version of ETRS!\n");
+
   if (approximated_)
   {
     // For AETRS, save the potential
@@ -232,7 +326,9 @@ void ExponentialWavefunctionStepper::preupdate()
     stored_iter_++;
    
     // Propagate wf_ by half of the time step with H(t)
-    exponential(0.5*tddt_);
+    // exponential(0.5*tddt_);
+    tuple<int, double, double> tstep (1, 0.5*tddt_, 0.0);
+    exponential_polymorph(tstep);
   } 
   else
   {
@@ -244,7 +340,9 @@ void ExponentialWavefunctionStepper::preupdate()
     // step in one exponential() call. At the end of the call, wavefunctions at time
     // t + dt will be stored in wf_ and wavefunctions at time t + dt/2 will be
     // stored in newwf_. 
-    exponential_condensed(tddt_, 0.5*tddt_);
+    //exponential_condensed(tddt_, 0.5*tddt_);
+    tuple<int, double, double> tstep (2, tddt_, 0.5*tddt_);
+    exponential_polymorph(tstep);
   } 
 
   if( approximated_ && stored_iter_ >= 3 )
@@ -258,7 +356,8 @@ void ExponentialWavefunctionStepper::preupdate()
      tmap_["expowf_copy"].stop();
 
      // now do the other half of the propagation with H(t + dt)
-     exponential(0.5*tddt_);
+     // exponential(0.5*tddt_);
+     exponential_polymorph(tstep);
   } 
 
 }
@@ -266,6 +365,9 @@ void ExponentialWavefunctionStepper::preupdate()
 ////////////////////////////////////////////////////////////////////////////////
 void ExponentialWavefunctionStepper::update(Wavefunction& dwf)
 {
+   // Define tstep for both AETRS and ETRS 
+   tuple<int, double, double> tstep (1, 0.5*tddt_, 0.0);
+   
    // Now we need to get the Hamiltonian at time t + dt
    //
    // Here we consider that the atoms (and their potential) was
@@ -283,7 +385,8 @@ void ExponentialWavefunctionStepper::update(Wavefunction& dwf)
       tmap_["expowf_copy"].stop();
     
       // do the rest of the propagation step with H(t)
-      exponential(0.5*tddt_, &dwf);
+      // exponential(0.5*tddt_, &dwf);
+      exponential_polymorph(tstep, &dwf);  
 
       tmap_["expowf_ef"].start();
       // get the approximated vhxc for the end of the step
@@ -300,7 +403,8 @@ void ExponentialWavefunctionStepper::update(Wavefunction& dwf)
       tmap_["expowf_copy"].stop();
 
       // now do the other half of the propagation with H(t + dt)
-      exponential(0.5*tddt_);
+      // exponential(0.5*tddt_);
+      exponential_polymorph(tstep);
     
    }
    else if (!approximated_)
@@ -328,7 +432,7 @@ void ExponentialWavefunctionStepper::update(Wavefunction& dwf)
     
      // Propagate the wavefunctions in wf_ from t + dt/2 to t + dt
      // using H(t + dt)
-     exponential(0.5*tddt_); 
+     exponential_polymorph(tstep); 
    }
    
 }
