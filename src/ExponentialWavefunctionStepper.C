@@ -44,7 +44,7 @@ ExponentialWavefunctionStepper::ExponentialWavefunctionStepper(Wavefunction& wf,
   order_ = 4;
   potential_.resize(3);
   stored_iter_ = 0;
-  merge_exp_ = true;
+  merge_exp_ = false;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -155,6 +155,9 @@ void ExponentialWavefunctionStepper::exponential_polymorph(tuple<int, double, do
 ////////////////////////////////////////////////////////////////////////////////
 void ExponentialWavefunctionStepper::preupdate()
 {
+  // allocate memory for tstep tuple to be used by exponential()
+  tuple<int, double, double> tstep;
+ 
   if (approximated_)
   {
     // For AETRS, save the potential
@@ -170,12 +173,33 @@ void ExponentialWavefunctionStepper::preupdate()
   // to the wavefunctions, psi(t + dt) are obtained by using the propagator,
   // exp(-i dt H(t)). 
 
-  // Propagate the wavefunctions by half a time step and by a full time
-  // step in one exponential() call. At the end of the call, wavefunctions at time
-  // t + dt will be stored in wf_ and wavefunctions at time t + dt/2 will be
-  // stored in newwf_. 
-  tuple<int, double, double> tstep (2, tddt_, 0.5*tddt_);
-  exponential_polymorph(tstep);
+  if (merge_exp_) 
+  { 
+    // Propagate the wavefunctions by half a time step and by a full time
+    // step in one exponential() call. At the end of the call, wavefunctions at time
+    // t + dt will be stored in wf_ and wavefunctions at time t + dt/2 will be
+    // stored in newwf_.
+    printf("merging!\n");
+    tstep = tuple<int, double, double> (2, tddt_, 0.5*tddt_);
+    exponential_polymorph(tstep);
+  }
+  else 
+  {
+    printf("Not merging!\n"); 
+    // Propagate the wavefunctions by half a time step and by a full time step
+    // in two separate exponential calls.
+    tstep = tuple<int, double, double> (1, 0.5*tddt_, 0.0);
+    // First, propagate to t + dt/2
+    exponential_polymorph(tstep);
+    // Then, backup the wavefunctions at t + dt/2 in newwf_ 
+    for ( int ispin = 0; ispin < wf_.nspin(); ispin++)
+       for ( int ikp = 0; ikp < wf_.nkp(); ikp++ )
+          newwf_.sd(ispin, ikp)->c() = wf_.sd(ispin, ikp)->c(); 
+    // Finally, propagate wavefunctions in wf_ from t + dt/2 to t + dt via
+    // a second half step
+    exponential_polymorph(tstep);
+  }
+
 
   if( approximated_ && stored_iter_ >= 3 )
   {
