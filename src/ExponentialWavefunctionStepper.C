@@ -48,18 +48,18 @@ ExponentialWavefunctionStepper::ExponentialWavefunctionStepper(Wavefunction& wf,
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-void ExponentialWavefunctionStepper::exponential(tuple<int, double, double> dt_tuple, Wavefunction * dwf){
+void ExponentialWavefunctionStepper::exponential(tuple<int, double, double> tstep, Wavefunction * dwf){
 
   // dummy variables to call ef_.energy
   std::vector<std::vector<double> > fion;
   std::valarray<double> sigma;
 
-  // unpack dt_tuple and use the first argument to determine if the current
+  // unpack tstep and use the first argument to determine if the current
   // call to exponential requires one or two timestep arguments and 
   // exponential calculations
-  int num_exp = boost::get<0>(dt_tuple);
-  double dt1 = boost::get<1>(dt_tuple);
-  double dt2 = boost::get<2>(dt_tuple);
+  int num_exp = boost::get<0>(tstep);
+  double dt1 = boost::get<1>(tstep);
+  double dt2 = boost::get<2>(tstep);
  
   // if dwf is not explicitly passed, recreate the dwf object with the
   // ef.energy() call

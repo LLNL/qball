@@ -58,7 +58,7 @@ class ExponentialWavefunctionStepper : public WavefunctionStepper
 
   EnergyFunctional & ef_;
   Sample & s_;
-  void exponential(tuple<int, double, double> dt_tuple, Wavefunction * dwf = 0);
+  void exponential(tuple<int, double, double> tstep, Wavefunction * dwf = 0);
 
   public:
   void preupdate();
