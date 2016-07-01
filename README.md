@@ -15,12 +15,14 @@ or vendor-equivalents, e.g. ESSL), FFTW 2.x or equivalent, and
 (optionally) Xerces XML. You also need the makedepend utility (in
 Debian comes in the xutils-dev package).
 
-4. Build the code using the ARCH variable to point to this include file, e.g.
-
-    make ARCH=bgq_ctf_essl
-
-If the ARCH variable is not specified, a default value will be guessed
-from the hostname or uname commands listed in Makefile.arch.  
+4. Build the code using the ARCH variable to point to this include file, e.g.:
+    
+   ```
+   make ARCH=bgq_ctf_essl
+   ```
+   
+   If the ARCH variable is not specified, a default value will be guessed
+   from the hostname or uname commands listed in Makefile.arch.  
 
 5. Object files are stored in objs-$(ARCH) subdirectories, so one can
 compile multiple versions of the code simultaneously in the same
