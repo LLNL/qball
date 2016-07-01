@@ -38,7 +38,7 @@ using namespace std;
 #include <mpi.h>
 #endif
 
-#ifdef SCALAPACK
+#ifdef HAVE_SCALAPACK
 #include "blacs.h"
 #endif
 

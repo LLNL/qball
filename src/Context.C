@@ -33,7 +33,7 @@
 #include <string>
 using namespace std;
 
-#ifdef SCALAPACK
+#ifdef HAVE_SCALAPACK
 #include "blacs.h"
 #endif
 

@@ -50,7 +50,7 @@ int sys2blacs_handle(int);
 }
 
 
-#ifdef SCALAPACK
+#ifdef HAVE_SCALAPACK
 
 #include <mpi.h>
 
@@ -84,7 +84,7 @@ void Cblacs_gridexit(int);
 int Cblacs_pnum(int, int, int);
 int Csys2blacs_handle(MPI_Comm);
 
-#ifdef SCALAPACK
+#ifdef HAVE_SCALAPACK
 }
 #endif
 

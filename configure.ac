@@ -81,7 +81,7 @@ AC_DEFINE(ARCH, "autotools", [architecture])
 
 AC_MSG_NOTICE([
 ================================================================================
-  CHECKING FOR THE REQUIRED LINEAR ALGEBRA LIBRARIES (BLAS AND LAPACK)
+  CHECKING FOR REQUIRED LINEAR ALGEBRA LIBRARIES (BLAS AND LAPACK)
 ================================================================================])
 dnl We need to check for fortran, to link with blas and other libraries
 AC_FC_LIBRARY_LDFLAGS
@@ -93,7 +93,16 @@ ACX_BLAS([], AC_MSG_ERROR([could not find required BLAS library]))
 dnl check for LAPACK
 ACX_LAPACK([], AC_MSG_ERROR([could not find required LAPACK library]))
 
-LIBS="$LIBS_LAPACK $BLAS_LIBS $LIBS $FCLIBS"
+AC_MSG_NOTICE([
+================================================================================
+  CHECKING FOR OPTIONAL PARALLEL LINEAR ALGEBRA LIBRARIES (BLACS AND SCALAPACK)
+================================================================================])
+
+ACX_BLACS
+ACX_SCALAPACK
+ACX_SCALAPACK2
+
+LIBS="$LIBS_SCALAPACK $LIBS_BLACS $LIBS_LAPACK $BLAS_LIBS $LIBS $FCLIBS"
 
 AC_MSG_NOTICE([
 ================================================================================
