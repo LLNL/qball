@@ -48,7 +48,7 @@ ExponentialWavefunctionStepper::ExponentialWavefunctionStepper(Wavefunction& wf,
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-void ExponentialWavefunctionStepper::exponential_polymorph(tuple<int, double, double> dt_tuple, Wavefunction * dwf){
+void ExponentialWavefunctionStepper::exponential(tuple<int, double, double> dt_tuple, Wavefunction * dwf){
 
   // dummy variables to call ef_.energy
   std::vector<std::vector<double> > fion;
@@ -181,7 +181,7 @@ void ExponentialWavefunctionStepper::preupdate()
     // stored in newwf_.
     printf("merging!\n");
     tstep = tuple<int, double, double> (2, tddt_, 0.5*tddt_);
-    exponential_polymorph(tstep);
+    exponential(tstep);
   }
   else 
   {
@@ -190,14 +190,14 @@ void ExponentialWavefunctionStepper::preupdate()
     // in two separate exponential calls.
     tstep = tuple<int, double, double> (1, 0.5*tddt_, 0.0);
     // First, propagate to t + dt/2
-    exponential_polymorph(tstep);
+    exponential(tstep);
     // Then, backup the wavefunctions at t + dt/2 in newwf_ 
     for ( int ispin = 0; ispin < wf_.nspin(); ispin++)
        for ( int ikp = 0; ikp < wf_.nkp(); ikp++ )
           newwf_.sd(ispin, ikp)->c() = wf_.sd(ispin, ikp)->c(); 
     // Finally, propagate wavefunctions in wf_ from t + dt/2 to t + dt via
     // a second half step
-    exponential_polymorph(tstep);
+    exponential(tstep);
   }
 
 
@@ -225,7 +225,7 @@ void ExponentialWavefunctionStepper::preupdate()
      // exponential()
      tstep = tuple<int, double, double> (1, 0.5*tddt_, 0.0);
      // Propagate psi(t + dt/2) to psi(t + dt) using H(t + dt)
-     exponential_polymorph(tstep);
+     exponential(tstep);
   } 
 
 }
@@ -261,7 +261,7 @@ void ExponentialWavefunctionStepper::update(Wavefunction& dwf)
     
      // Propagate the wavefunctions in wf_ from t + dt/2 to t + dt
      // using H(t + dt)
-     exponential_polymorph(tstep);
+     exponential(tstep);
    }
    
 }
