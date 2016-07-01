@@ -43,6 +43,29 @@ AC_CHECK_FUNCS([gettimeofday memset mkdir pow sqrt strspn uname])
 
 AC_MSG_NOTICE([
 ================================================================================
+  CHECKING FOR MPI
+================================================================================])
+
+acx_mpi_ok=yes
+AC_LANG_PUSH(C++)
+AC_CHECK_HEADERS([mpi.h], [], [acx_mpi_ok=no])
+AC_CHECK_FUNCS([MPI_Init], [], [acx_mpi_ok=no])
+AC_LANG_POP(C++)
+AC_MSG_CHECKING(whether we can use MPI)
+AC_MSG_RESULT($acx_mpi_ok)
+
+if test $acx_mpi_ok == yes; then
+   AC_DEFINE(USE_MPI, 1, [enable MPI support])
+else
+   AC_MSG_ERROR([
+   
+   Cannot find the required MPI library. If you have an MPI Implementation
+   installed you might need to set CC=mpicc and CXX=mpic++.
+   ])
+fi
+
+AC_MSG_NOTICE([
+================================================================================
   CHECKING FOR THE OPTIONAL XERCES-C LIBRARY (USED TO PARSE XML)
 ================================================================================])
 AX_LIB_XERCES
@@ -53,7 +76,6 @@ if test x$HAVE_XERCES == xyes ; then
    AC_DEFINE(USE_XERCES, 1, [have the Xerces-C library])
 fi
 
-AC_DEFINE(USE_MPI, 1, [enable MPI support])
 AC_DEFINE(FFT_NOLIB, 1, [no FFT library])
 AC_DEFINE(ARCH, "autotools", [architecture])
 
