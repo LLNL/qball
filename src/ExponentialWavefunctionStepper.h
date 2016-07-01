@@ -36,7 +36,9 @@
 #include "WavefunctionStepper.h"
 
 #include <deque>
+#include "boost/tuple/tuple.hpp"
 using namespace std;
+using boost::tuple;
 
 class ExponentialWavefunctionStepper : public WavefunctionStepper
 {
@@ -46,17 +48,17 @@ class ExponentialWavefunctionStepper : public WavefunctionStepper
   int order_;
   int stored_iter_;
   bool approximated_;
+  bool merge_exp_;
   std::vector<SelfConsistentPotential> potential_;
   Wavefunction expwf_;
   Wavefunction wfhalf_;
   Wavefunction newwf_; 
-  Wavefunction newwf2_;
 
   protected:
 
   EnergyFunctional & ef_;
   Sample & s_;
-  void exponential(const double & dt, Wavefunction * dwf = 0);
+  void exponential_polymorph(tuple<int, double, double> dt_tuple, Wavefunction * dwf = 0);
 
   public:
   void preupdate();
@@ -71,4 +73,3 @@ class ExponentialWavefunctionStepper : public WavefunctionStepper
 // mode: c++
 // coding: utf-8
 // End:
-
