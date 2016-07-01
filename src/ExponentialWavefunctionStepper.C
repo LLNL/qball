@@ -54,9 +54,9 @@ void ExponentialWavefunctionStepper::exponential(tuple<int, double, double> tste
   std::vector<std::vector<double> > fion;
   std::valarray<double> sigma;
 
-  // unpack tstep and use the first argument to determine if the current
-  // call to exponential requires one or two timestep arguments and 
-  // exponential calculations
+  // unpack tstep and use the first argument (here, num_exp) to determine 
+  // if the current call to exponential requires one or two timestep args
+  // and exponential calculations
   int num_exp = boost::get<0>(tstep);
   double dt1 = boost::get<1>(tstep);
   double dt2 = boost::get<2>(tstep);
@@ -71,6 +71,7 @@ void ExponentialWavefunctionStepper::exponential(tuple<int, double, double> tste
     tmap_["expowf_ef"].stop();
   }
 
+  // Expand exp(A)x as a 4th order Taylor series
   // exp(A)x ~= x + Ax + A^2x/2! + A^3x/3! + A^4x/4!
   //          = x + Ax + A(Ax)/2 + A(A^2x/2)/3 + A(A^3x/6)/4 
   
@@ -93,7 +94,7 @@ void ExponentialWavefunctionStepper::exponential(tuple<int, double, double> tste
 
   // initialize factors by which each additional term in the Taylor expansion
   // will be multiplied --- factor 1 for the first exponential and factor 2
-  // for the second exponential (if a second exp() is requested). 
+  // for the second exponential (only used if a second exp() is requested). 
   complex<double> factor1 = 1.0;
   complex<double> factor2 = 1.0;
  
@@ -119,8 +120,8 @@ void ExponentialWavefunctionStepper::exponential(tuple<int, double, double> tste
        tmap_["expowf_ef"].stop();
     }
     
-    // accumulate the result of propagating wf_ by the first or only
-    // time step in expwf_. If a second time step is provided, 
+    // accumulate the result of propagating wf_ by the first 
+    // time step (dt1) in expwf_. If a second time step is provided, 
     // store the wavefunctions propagated by that time step in newwf_
     tmap_["expowf_axpy"].start();
     for ( int ispin = 0; ispin < wf_.nspin(); ispin++)
@@ -179,22 +180,22 @@ void ExponentialWavefunctionStepper::preupdate()
     // step in one exponential() call. At the end of the call, wavefunctions at time
     // t + dt will be stored in wf_ and wavefunctions at time t + dt/2 will be
     // stored in newwf_.
-    printf("merging!\n");
     tstep = tuple<int, double, double> (2, tddt_, 0.5*tddt_);
     exponential(tstep);
   }
   else 
   {
-    printf("Not merging!\n"); 
     // Propagate the wavefunctions by half a time step and by a full time step
     // in two separate exponential calls.
     tstep = tuple<int, double, double> (1, 0.5*tddt_, 0.0);
     // First, propagate to t + dt/2
     exponential(tstep);
     // Then, backup the wavefunctions at t + dt/2 in newwf_ 
+    tmap_["expowf_copy"].start();
     for ( int ispin = 0; ispin < wf_.nspin(); ispin++)
        for ( int ikp = 0; ikp < wf_.nkp(); ikp++ )
           newwf_.sd(ispin, ikp)->c() = wf_.sd(ispin, ikp)->c(); 
+    tmap_["expowf_copy"].stop();
     // Finally, propagate wavefunctions in wf_ from t + dt/2 to t + dt via
     // a second half step
     exponential(tstep);
@@ -217,9 +218,11 @@ void ExponentialWavefunctionStepper::preupdate()
      // --- what you want to propagate forward by another half step -- is stored
      // in newwf_. Move this version of the wavefunction to wf_ before 
      // propagation.
+     tmap_["expowf_copy"].start();
      for ( int ispin = 0; ispin < wf_.nspin(); ispin++)
          for ( int ikp = 0; ikp < wf_.nkp(); ikp++ )
             wf_.sd(ispin, ikp)->c() = newwf_.sd(ispin, ikp)->c(); 
+     tmap_["expowf_copy"].stop();
      
      // Redefine tstep so that only one exponential is calculated within
      // exponential()
