@@ -36,15 +36,15 @@
 #include <complex>
 #include <vector>
 
-#if !( defined(USE_FFTW2) || defined(USE_FFTW3) || defined(USE_ESSL_FFT) || defined(FFT_NOLIB) )
-#error "Must define USE_FFTW2, USE_FFTW3, USE_ESSL_FFT or FFT_NOLIB"
+#if !( defined(HAVE_FFTW2) || defined(HAVE_FFTW3) || defined(USE_ESSL_FFT) || defined(FFT_NOLIB) )
+#error "Must define HAVE_FFTW2, HAVE_FFTW3, USE_ESSL_FFT or FFT_NOLIB"
 #endif
 
-#if defined(USE_FFTW2) && defined(USE_FFTW3)
-#error "Cannot define USE_FFTW2 and USE_FFTW3"
+#if defined(HAVE_FFTW2) && defined(HAVE_FFTW3)
+#error "Cannot define HAVE_FFTW2 and HAVE_FFTW3"
 #endif
 
-#if USE_FFTW2
+#if HAVE_FFTW2
 #if USE_DFFTW
 #include "dfftw.h"
 #else
@@ -52,9 +52,9 @@
 #endif
 #endif
 
-#if USE_FFTW3
+#if HAVE_FFTW3
 #include "fftw3.h"
-#if USE_FFTW3MKL
+#if HAVE_FFTW3MKL
 #include "fftw3_mkl.h"
 #endif
 #endif
@@ -105,12 +105,12 @@ class FourierTransform
   std::vector<double> aux2;
   int naux1x,naux1y,naux1z,naux1z1d,naux2;
 #endif
-#elif USE_FFTW2
+#elif HAVE_FFTW2
   fftw_plan fwplan0,fwplan1,fwplan2,bwplan0,bwplan1,bwplan2;
-#elif USE_FFTW3
+#elif HAVE_FFTW3
   //plans for np2_
   fftw_plan fwplan, bwplan, fwplan1z, bwplan1z;
-#if defined(USE_FFTW3_2D) || defined(USE_FFTW3_THREADS)
+#if defined(HAVE_FFTW3_2D) || defined(HAVE_FFTW3_THREADS)
   fftw_plan fwplan2d, bwplan2d;
 #else
   fftw_plan fwplanx, fwplany, bwplanx, bwplany;
@@ -118,7 +118,7 @@ class FourierTransform
 #elif defined(FFT_NOLIB)
   // no library
 #else
-#error "Must define USE_FFTW2, USE_FFTW3, USE_ESSL_FFT or FFT_NOLIB"
+#error "Must define HAVE_FFTW2, HAVE_FFTW3, USE_ESSL_FFT or FFT_NOLIB"
 #endif
 
   void vector_to_zvec(const std::complex<double>* c);

@@ -43,6 +43,44 @@ AC_CHECK_FUNCS([gettimeofday memset mkdir pow sqrt strspn uname])
 
 AC_MSG_NOTICE([
 ================================================================================
+  CHECKING FOR FFT LIBRARIES
+================================================================================])
+
+found_fft=no
+
+#FFTW3
+if test x$found_fft != xyes ; then
+  ACX_FFTW3
+fi
+
+if test x$acx_fftw3_ok == xyes ; then
+  found_fft=yes
+  CFLAGS="$CFLAGS $CFLAGS_FFTW3"
+  LIBS="$LIBS $LIBS_FFTW3"
+fi
+
+#FFTW2
+if test x$found_fft != xyes ; then
+   ACX_FFTW2
+fi
+
+if test x$acx_fftw2_ok == xyes ; then
+  found_fft=yes
+  CFLAGS="$CFLAGS $CFLAGS_FFTW2"
+  LIBS="$LIBS $LIBS_FFTW2"
+fi
+
+if test x$found_fft != xyes ; then
+  AC_MSG_WARN([
+
+   Cannot find an FFT library, using the slower internal FFT routines.
+
+  ])
+  AC_DEFINE(FFT_NOLIB, 1, [no FFT library])
+fi
+
+AC_MSG_NOTICE([
+================================================================================
   CHECKING FOR MPI
 ================================================================================])
 
@@ -76,7 +114,6 @@ if test x$HAVE_XERCES == xyes ; then
    AC_DEFINE(USE_XERCES, 1, [have the Xerces-C library])
 fi
 
-AC_DEFINE(FFT_NOLIB, 1, [no FFT library])
 AC_DEFINE(ARCH, "autotools", [architecture])
 
 AC_MSG_NOTICE([
