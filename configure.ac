@@ -1,7 +1,7 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
-AC_PREREQ([2.69])
+AC_PREREQ([2.63])
 AC_INIT(qball, alpha, xavier@llnl.gov)
 AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([src/FoldInWsCmd.h])
@@ -19,7 +19,7 @@ AC_PROG_MAKE_SET
 
 # Checks for OpenMP
 AC_LANG_PUSH(C++)
-AX_OPENMP([], [])
+AX_OPENMP
 CXXFLAGS="$CXXFLAGS $OPENMP_CXXFLAGS"
 AC_LANG_POP(C++)
 
@@ -27,7 +27,6 @@ AC_LANG_POP(C++)
 AC_CHECK_HEADERS([stdint.h stdlib.h string.h sys/time.h unistd.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
-AC_CHECK_HEADER_STDBOOL
 AC_C_INLINE
 AC_TYPE_OFF_T
 AC_TYPE_SIZE_T
