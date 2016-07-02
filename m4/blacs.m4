@@ -48,7 +48,7 @@ for blacs in blacs blacs-openmpi; do
   fi
   if test $acx_blacs_ok = no; then
     AC_CHECK_LIB($blacs -l$blacsinit -l$blacs, $blacs_pinfo,
-      [acx_blacs_ok=yes; LIBS_BLACS="$LIBS_BLACS -l$blacs -l$blacsinit -l$blacs"], [], [$FLIBS])
+      [acx_blacs_ok=yes; LIBS_BLACS="$LIBS_BLACS -l$blacs -l$blacsinit -l$blacs"], [], [$FCLIBS])
   fi
 done
 

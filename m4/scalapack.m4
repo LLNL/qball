@@ -44,7 +44,7 @@ dnl Generic SCALAPACK library?
 for scalapack in scalapack scalapack-openmpi; do
   if test $acx_scalapack_ok = no; then
     AC_CHECK_LIB($scalapack, $pcheev,
-      [acx_scalapack_ok=yes; LIBS_SCALAPACK="$LIBS_SCALAPACK -l$scalapack"], [], [$FLIBS])
+      [acx_scalapack_ok=yes; LIBS_SCALAPACK="$LIBS_SCALAPACK -l$scalapack"], [], [$FCLIBS])
   fi
 done
 

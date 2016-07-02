@@ -17,7 +17,7 @@ AC_FC_FUNC(sgemm)
 AC_FC_FUNC(dgemm)
 
 acx_blas_save_LIBS="$LIBS"
-LIBS="$LIBS $FLIBS"
+LIBS="$LIBS $FCLIBS"
 
 # First, check LIBS_BLAS environment variable
 if test $acx_blas_ok = no; then
@@ -94,7 +94,7 @@ if test $acx_blas_ok = no; then
 	AC_CHECK_LIB(blas, $sgemm,
 		[AC_CHECK_LIB(essl, $sgemm,
 			[acx_blas_ok=yes; LIBS_BLAS="-lessl -lblas"],
-			[], [-lblas $FLIBS])])
+			[], [-lblas $FCLIBS])])
 fi
 
 # Generic BLAS library?
