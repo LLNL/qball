@@ -26,6 +26,8 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+#include <config.h>
+
 #include <cassert>
 #include <iostream>
 using namespace std;
@@ -362,7 +364,7 @@ extern "C"
 }
 
 
-#ifndef SCALAPACK
+#ifndef HAVE_SCALAPACK
 int numroc(int* a, int* b, int* c, int* d, int* e)
 {
   return *a;

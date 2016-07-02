@@ -25,6 +25,7 @@
 // Context.C
 //
 ////////////////////////////////////////////////////////////////////////////////
+#include <config.h>
 
 #include <iostream>
 #include <iomanip>
@@ -39,7 +40,7 @@ using namespace std;
 
 #include "Context.h"
 
-#ifndef SCALAPACK
+#ifndef HAVE_SCALAPACK
 void Cblacs_pinfo(int *mypnum, int *nprocs)
 {
     *mypnum = 0;
