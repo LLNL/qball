@@ -248,7 +248,7 @@ while ($_ = <TESTSUITE>) {
 	}
 
     } elsif ( $_ =~ /^Program\s*:\s*(.*)\s*$/) {
-	$command = "$exec_directory/$1"."-".$ENV{'ARCH'};
+        $command = "$exec_directory/$1";
 
 	# FIXME: should we do this for a dry-run?
 	if( ! -x "$command") {
