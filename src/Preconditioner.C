@@ -26,6 +26,8 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+#include <config.h>
+
 #include "Preconditioner.h"
 #include "EnergyFunctional.h"
 #include "Wavefunction.h"

@@ -27,6 +27,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 // $Id: WFPhaseRealCmd.h,v 1.0 2011-03-25 15:56:17 schleife Exp $
 
+#include <config.h>
+
 #ifndef WF_PHASE_REAL_CMD_H
 #define WF_PHASE_REAL_CMD_H
 

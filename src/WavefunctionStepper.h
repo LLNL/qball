@@ -26,6 +26,8 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+#include <config.h>
+
 #ifndef WAVEFUNCTIONSTEPPER_H
 #define WAVEFUNCTIONSTEPPER_H
 #include "Timer.h"

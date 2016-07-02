@@ -26,6 +26,8 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+#include <config.h>
+
 #include "SaveESPCmd.h"
 #include "EnergyFunctional.h"
 #include "Wavefunction.h"

@@ -27,6 +27,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 // $Id: FOTDWavefunctionStepper.C,v 1.8 2011-06-02 15:56:19 schleife Exp $
 
+#include <config.h>
+
 #include "FOTDWavefunctionStepper.h"
 #include "Wavefunction.h"
 #include "SlaterDet.h"

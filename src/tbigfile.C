@@ -24,6 +24,8 @@
 // Write large files ( > 2 GB ) on Linux
 //
 
+#include <config.h>
+
 #define _LARGEFILE_SOURCE 1
 #define _FILE_OFFSET_BITS 64
 

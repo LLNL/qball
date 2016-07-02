@@ -26,6 +26,8 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+#include <config.h>
+
 #include "XCPotential.h"
 #include "Basis.h"
 #include "FourierTransform.h"

@@ -27,6 +27,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 // $Id: PlotCmd.h,v 1.1 2009-06-29 09:59:41 fgygi Exp $
 
+#include <config.h>
+
 #ifndef PLOTCMD_H
 #define PLOTCMD_H
 

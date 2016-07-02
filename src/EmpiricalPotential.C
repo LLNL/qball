@@ -26,6 +26,8 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+#include <config.h>
+
 #include "Context.h"
 #include "Spline.h"
 #include "EmpiricalPotential.h"

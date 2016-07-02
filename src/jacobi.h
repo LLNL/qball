@@ -20,6 +20,8 @@
 // GNU General Public License for more details, in the file COPYING in the
 // root directory of this distribution or <http://www.gnu.org/licenses/>.
 //
+
+#include <config.h>
 #include <vector>
 int jacobi(int maxsweep, double tol, DoubleMatrix& a, DoubleMatrix& u,
               std::vector<double>& e);

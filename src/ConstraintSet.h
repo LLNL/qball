@@ -27,6 +27,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 // $Id: ConstraintSet.h,v 1.10 2010-02-20 23:13:02 fgygi Exp $
 
+#include <config.h>
+
 #ifndef CONSTRAINTSET_H
 #define CONSTRAINTSET_H
 

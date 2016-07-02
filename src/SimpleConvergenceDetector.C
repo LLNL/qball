@@ -26,6 +26,8 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+#include <config.h>
+
 #include <cmath>
 #include "SimpleConvergenceDetector.h"
 #include "ConvergenceDetector.h"

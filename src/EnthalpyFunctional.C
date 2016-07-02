@@ -26,6 +26,8 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+#include <config.h>
+
 #include "EnthalpyFunctional.h"
 #include "Basis.h"
 #include "FourierTransform.h"

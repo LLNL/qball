@@ -21,6 +21,8 @@
 // root directory of this distribution or <http://www.gnu.org/licenses/>.
 //
 
+#include <config.h>
+
 //
 // create a square matrix and diagonalize with different Scalapack eigensolvers
 //

@@ -27,6 +27,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 // $Id: ConstraintSet.C,v 1.11 2010-02-20 23:13:02 fgygi Exp $
 
+#include <config.h>
+
 #include "ConstraintSet.h"
 #include "PositionConstraint.h"
 #include "DistanceConstraint.h"

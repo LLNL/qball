@@ -27,6 +27,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 // $Id: SOTDWavefunctionStepper.h,v 1.5 2011-05-03 15:56:19 schleife Exp $
 
+#include <config.h>
+
 #ifndef SOTDWAVEFUNCTIONSTEPPER_H
 #define SOTDWAVEFUNCTIONSTEPPER_H
 

@@ -23,6 +23,8 @@
 //
 // usage:  testPgemm nprow npcol m n
 
+#include <config.h>
+
 #include <cassert>
 #include <cstdlib>
 #include <cmath>

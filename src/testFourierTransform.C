@@ -24,6 +24,8 @@
 // testFourierTransform.C
 //
 
+#include <config.h>
+
 #include <iostream>
 #include <iomanip>
 using namespace std;

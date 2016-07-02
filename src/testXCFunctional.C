@@ -26,6 +26,8 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+#include <config.h>
+
 // Test an XC functional by computing the xc energy of a gaussian
 // of width 0.1 a.u. in a cube of side 1.0 a.u.
 // With a cube of side 1.0 and 32x32x32 points, 

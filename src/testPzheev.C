@@ -25,6 +25,8 @@
 //
 // usage:  testEigenSolvers nprow npcol matrix_size
 
+#include <config.h>
+
 #include <cassert>
 #include <cstdlib>
 #include <cmath>

@@ -26,6 +26,8 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+#include <config.h>
+
 #include "ParallelOptimizer.h"
 #include "EnergyFunctional.h"
 #include "Wavefunction.h"

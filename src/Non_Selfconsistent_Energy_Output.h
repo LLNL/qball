@@ -27,6 +27,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 // $Id: Force_Complex_WF.h,v 1.0 2011-05-27 11:53:20 schleife Exp $
 
+#include <config.h>
+
 #ifndef NON_SELFCONSISTENT_ENERGY_OUTPUT_H
 #define NON_SELFCONSISTENT_ENERGY_OUTPUT_H
 

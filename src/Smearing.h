@@ -30,6 +30,8 @@
 // (Methfessel and Paxton, PRB 40, 3616 (1989)).  In the latter case, the number of terms 
 // in the expansion can be given as an optional second argument.  
 
+#include <config.h>
+
 #ifndef SMEARING_H
 #define SMEARING_H
 

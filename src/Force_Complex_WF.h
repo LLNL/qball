@@ -27,6 +27,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 // $Id: Force_Complex_WF.h,v 1.0 2011-03-09 15:53:20 schleife Exp $
 
+#include <config.h>
+
 #ifndef FORCE_COMPLEX_WF_H
 #define FORCE_COMPLEX_WF_H
 

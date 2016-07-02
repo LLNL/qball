@@ -24,6 +24,8 @@
 //
 // usage:  testEigenBlock nprow npcol m n mb nb
 
+#include <config.h>
+
 #include <cassert>
 #include <cstdlib>
 #include <cmath>
