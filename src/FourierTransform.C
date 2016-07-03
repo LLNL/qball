@@ -76,7 +76,7 @@ typedef int MPI_Comm;
 
 #if defined(HAVE_FFTW2) || defined(HAVE_FFTW3)
 extern "C" void zdscal(int *n,double *alpha,std::complex<double> *x,int *incx);
-#elif USE_ESSL_FFT
+#elif HAVE_ESSL_FFT
 extern "C" {
   void dcft_(int *initflag, std::complex<double> *x, int *inc2x, int *inc3x,
              std::complex<double> *y, int *inc2y, int *inc3y,
@@ -94,7 +94,7 @@ extern "C" {
 void cfftm ( std::complex<double> *ain, std::complex<double> *aout,
   double scale, int ntrans, int length, int ainc, int ajmp, int idir );
 #else
-#error "Must define HAVE_FFTW2, HAVE_FFTW3, USE_ESSL_FFT or FFT_NOLIB"
+#error "Must define HAVE_FFTW2, HAVE_FFTW3, HAVE_ESSL_FFT or FFT_NOLIB"
 #endif
 
 #if USE_GATHER_SCATTER
@@ -596,7 +596,7 @@ void FourierTransform::bwd(complex<double>* val)
   tm_b_z.start();
 #endif
 
-#if USE_ESSL_FFT
+#if HAVE_ESSL_FFT
   int inc1 = 1, inc2 = np2_, ntrans = nvec_, isign = -1, initflag = 0;
   double scale = 1.0;
   if (ntrans > 0)
@@ -645,7 +645,7 @@ void FourierTransform::bwd(complex<double>* val)
   int idir = -1;
   cfftm ( &zvec_[0], &zvec_[0], scale, ntrans, length, ainc, ajmp, idir );
 #else
-#error "Must define HAVE_FFTW2, HAVE_FFTW3, USE_ESSL_FFT or FFT_NOLIB"
+#error "Must define HAVE_FFTW2, HAVE_FFTW3, HAVE_ESSL_FFT or FFT_NOLIB"
 #endif // HAVE_FFTW3
 
 #if TIMING
@@ -819,12 +819,12 @@ void FourierTransform::bwd(complex<double>* val)
   }
 #endif // HAVE_FFTW3_2D
 
-#elif USE_ESSL_FFT
+#elif HAVE_ESSL_FFT
   for ( int k = 0; k < np2_loc_[myproc_]; k++ )
   {
     // transform along x for non-zero vectors only
     // transform along x for y in [0,ntrans0_] and y in [np1-ntrans0_, np1-1]
-#if USE_ESSL_2DFFT
+#if HAVE_ESSL_2DFFT
 
     // use 2D FFT for x and y transforms
     int inc1, inc2, istart, isign = -1, initflag = 0;
@@ -868,7 +868,7 @@ void FourierTransform::bwd(complex<double>* val)
     length = np1_;
     dcft_(&initflag,&val[istart],&inc1,&inc2,&val[istart],&inc1,&inc2,
          &length,&ntrans,&isign,&scale,&aux1yb[0],&naux1y,&aux2[0],&naux2);
-#endif // USE_ESSL_2DFFT
+#endif // HAVE_ESSL_2DFFT
   } // k
 
 #elif HAVE_FFTW2
@@ -970,7 +970,7 @@ void FourierTransform::bwd(complex<double>* val)
     cfftm (&val[istart],&val[istart],scale,ntrans,length,ainc,ajmp,idir );
   } // for k
 #else
-#error "Must define HAVE_FFTW2, HAVE_FFTW3, USE_ESSL_FFT or FFT_NOLIB"
+#error "Must define HAVE_FFTW2, HAVE_FFTW3, HAVE_ESSL_FFT or FFT_NOLIB"
 #endif
 
 #if TIMING
@@ -1048,12 +1048,12 @@ void FourierTransform::fwd(complex<double>* val)
 #endif
   }
 #endif // HAVE_FFTW3_2D
-#elif USE_ESSL_FFT
+#elif HAVE_ESSL_FFT
   for ( int k = 0; k < np2_loc_[myproc_]; k++ )
   {
     // transform along x for non-zero vectors only
     // transform along x for y in [0,ntrans0_] and y in [np1-ntrans0_, np1-1]
-#if USE_ESSL_2DFFT
+#if HAVE_ESSL_2DFFT
 
     // use 2D FFT for x and y transforms
     int inc1, inc2, istart, isign = 1, initflag = 0;
@@ -1095,7 +1095,7 @@ void FourierTransform::fwd(complex<double>* val)
     length = np0_;
     dcft_(&initflag,&val[istart],&inc1,&inc2,&val[istart],&inc1,&inc2,
          &length,&ntrans,&isign,&scale,&aux1xf[0],&naux1x,&aux2[0],&naux2);
-#endif // USE_ESSL_2DFFT
+#endif // HAVE_ESSL_2DFFT
   } // k
 #elif HAVE_FFTW2
   for ( int k = 0; k < np2_loc_[myproc_]; k++ )
@@ -1191,7 +1191,7 @@ void FourierTransform::fwd(complex<double>* val)
     cfftm (&val[istart],&val[istart],scale,ntrans,length,ainc,ajmp,idir );
   } // for k
 #else
-#error "Must define HAVE_FFTW2, HAVE_FFTW3, USE_ESSL_FFT or FFT_NOLIB"
+#error "Must define HAVE_FFTW2, HAVE_FFTW3, HAVE_ESSL_FFT or FFT_NOLIB"
 #endif
 
 #if TIMING
@@ -1282,7 +1282,7 @@ void FourierTransform::fwd(complex<double>* val)
   tm_f_z.start();
 #endif
 
-#if USE_ESSL_FFT
+#if HAVE_ESSL_FFT
   int inc1 = 1, inc2 = np2_, ntrans = nvec_, isign = 1, initflag = 0;
   double scale = 1.0 / (np0_ * np1_ * np2_);
 
@@ -1351,7 +1351,7 @@ void FourierTransform::fwd(complex<double>* val)
   int idir = 1;
   cfftm ( &zvec_[0], &zvec_[0], scale, ntrans, length, ainc, ajmp, idir );
 #else
-#error "Must define HAVE_FFTW2, HAVE_FFTW3, USE_ESSL_FFT or FFT_NOLIB"
+#error "Must define HAVE_FFTW2, HAVE_FFTW3, HAVE_ESSL_FFT or FFT_NOLIB"
 #endif
 
 #if TIMING
@@ -1370,9 +1370,9 @@ void FourierTransform::init_lib(void)
    nthreads = omp_get_max_threads();
 #endif  
 
-#if USE_ESSL_FFT
+#if HAVE_ESSL_FFT
   complex<double> *p = 0;
-#if USE_ESSL_2DFFT
+#if HAVE_ESSL_2DFFT
   // use 2D FFT for x and y transforms and 1D FFT for z transforms
   naux1xy = 40000 + 2.28 * (np0_+np1_);
   aux1xyf.resize(naux1xy);
@@ -1424,7 +1424,7 @@ void FourierTransform::init_lib(void)
   dcft_(&initflag,p,&inc1,&inc2,p,&inc1,&inc2,&np2_,&ntrans,
         &isign,&scale,&aux1zf1d[0],&naux1z1d,&aux2[0],&naux2);
 
-#else // USE_ESSL_2DFFT
+#else // HAVE_ESSL_2DFFT
 
   naux1x = (int) (20000 + 2.28 * np0_);
   naux1y = (int) (20000 + 2.28 * np1_);
@@ -1489,7 +1489,7 @@ void FourierTransform::init_lib(void)
   dcft_(&initflag,p,&inc1,&inc2,p,&inc1,&inc2,&np2_,&ntrans,
         &isign,&scale,&aux1zf1d[0],&naux1z1d,&aux2[0],&naux2);
 
-#endif // USE_ESSL_2DFFT
+#endif // HAVE_ESSL_2DFFT
 
 #elif HAVE_FFTW2
 
@@ -1615,7 +1615,7 @@ void FourierTransform::init_lib(void)
 #elif FFT_NOLIB // HAVE_FFTW3
   /* no library */
 #else
-#error "Must define HAVE_FFTW2, HAVE_FFTW3, USE_ESSL_FFT or FFT_NOLIB"
+#error "Must define HAVE_FFTW2, HAVE_FFTW3, HAVE_ESSL_FFT or FFT_NOLIB"
 #endif
 
 }
@@ -1991,7 +1991,7 @@ void FourierTransform::fft_1z( vector<complex<double> >& val_in,
 {
   val_out.resize(np2_);
 
-#if USE_ESSL_FFT
+#if HAVE_ESSL_FFT
   int inc1 = 1, inc2 = np2_, ntrans = 1, initflag = 0;
   double scale = 1.0;
 

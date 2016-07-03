@@ -39,47 +39,6 @@ AC_FUNC_STRTOD
 AC_CHECK_FUNCS([gettimeofday memset mkdir pow sqrt strspn uname])
 
 #LIBRARIES
-
-AC_MSG_NOTICE([
-================================================================================
-  CHECKING FOR FFT LIBRARIES
-================================================================================])
-
-found_fft=no
-
-#FFTW3
-if test x$found_fft != xyes ; then
-  ACX_FFTW3
-fi
-
-if test x$acx_fftw3_ok == xyes ; then
-  found_fft=yes
-  CFLAGS="$CFLAGS $CFLAGS_FFTW3"
-  CXXFLAGS="$CXXFLAGS $CFLAGS_FFTW3"
-  LIBS="$LIBS $LIBS_FFTW3"
-fi
-
-#FFTW2
-if test x$found_fft != xyes ; then
-   ACX_FFTW2
-fi
-
-if test x$acx_fftw2_ok == xyes ; then
-  found_fft=yes
-  CFLAGS="$CFLAGS $CFLAGS_FFTW2"
-  CXXFLAGS="$CXXFLAGS $CFLAGS_FFTW2"
-  LIBS="$LIBS $LIBS_FFTW2"
-fi
-
-if test x$found_fft != xyes ; then
-  AC_MSG_WARN([
-
-   Cannot find an FFT library, using the slower internal FFT routines.
-
-  ])
-  AC_DEFINE(FFT_NOLIB, 1, [no FFT library])
-fi
-
 AC_MSG_NOTICE([
 ================================================================================
   CHECKING FOR MPI
@@ -120,12 +79,68 @@ AC_DEFINE(ARCH, "autotools", [architecture])
 
 AC_MSG_NOTICE([
 ================================================================================
-  CHECKING FOR REQUIRED LINEAR ALGEBRA LIBRARIES (BLAS AND LAPACK)
+  CHECKING FOR FORTRAN LIBRARIES
 ================================================================================])
 dnl We need to check for fortran, to link with blas and other libraries
 AC_FC_LIBRARY_LDFLAGS
 AC_FC_WRAPPERS
 
+AC_MSG_NOTICE([
+================================================================================
+  CHECKING FOR FFT LIBRARIES
+================================================================================])
+
+found_fft=no
+
+#FFTW3
+if test x$found_fft != xyes ; then
+  ACX_ESSL_FFT
+fi
+
+if test x$acx_essl_fft_ok == xyes ; then
+  found_fft=yes
+  CFLAGS="$CFLAGS $CFLAGS_ESSL_FFT"
+  CXXFLAGS="$CXXFLAGS $CFLAGS_ESSL_FFT"
+  LIBS="$LIBS $LIBS_FFTW3"
+fi
+
+#FFTW3
+if test x$found_fft != xyes ; then
+  ACX_FFTW3
+fi
+
+if test x$acx_fftw3_ok == xyes ; then
+  found_fft=yes
+  CFLAGS="$CFLAGS $CFLAGS_FFTW3"
+  CXXFLAGS="$CXXFLAGS $CFLAGS_FFTW3"
+  LIBS="$LIBS $LIBS_FFTW3"
+fi
+
+#FFTW2
+if test x$found_fft != xyes ; then
+   ACX_FFTW2
+fi
+
+if test x$acx_fftw2_ok == xyes ; then
+  found_fft=yes
+  CFLAGS="$CFLAGS $CFLAGS_FFTW2"
+  CXXFLAGS="$CXXFLAGS $CFLAGS_FFTW2"
+  LIBS="$LIBS $LIBS_FFTW2"
+fi
+
+if test x$found_fft != xyes ; then
+  AC_MSG_WARN([
+
+   Cannot find a suitable FFT library, using _slower_ internal FFT routines.
+
+  ])
+  AC_DEFINE(FFT_NOLIB, 1, [no FFT library])
+fi
+
+AC_MSG_NOTICE([
+================================================================================
+  CHECKING FOR REQUIRED LINEAR ALGEBRA LIBRARIES (BLAS AND LAPACK)
+================================================================================])
 dnl check for BLAS
 ACX_BLAS([], AC_MSG_ERROR([could not find required BLAS library]))
 

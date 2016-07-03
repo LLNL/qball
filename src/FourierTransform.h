@@ -36,8 +36,8 @@
 #include <complex>
 #include <vector>
 
-#if !( defined(HAVE_FFTW2) || defined(HAVE_FFTW3) || defined(USE_ESSL_FFT) || defined(FFT_NOLIB) )
-#error "Must define HAVE_FFTW2, HAVE_FFTW3, USE_ESSL_FFT or FFT_NOLIB"
+#if !( defined(HAVE_FFTW2) || defined(HAVE_FFTW3) || defined(HAVE_ESSL_FFT) || defined(FFT_NOLIB) )
+#error "Must define HAVE_FFTW2, HAVE_FFTW3, HAVE_ESSL_FFT or FFT_NOLIB"
 #endif
 
 #if defined(HAVE_FFTW2) && defined(HAVE_FFTW3)
@@ -93,8 +93,8 @@ class FourierTransform
 
   void init_lib(void);
 
-#if USE_ESSL_FFT
-#if USE_ESSL_2DFFT
+#if HAVE_ESSL_FFT
+#if HAVE_ESSL_2DFFT
   std::vector<double> aux1xyf,aux1zf;
   std::vector<double> aux1xyb,aux1zb;
   std::vector<double> aux2;
@@ -118,7 +118,7 @@ class FourierTransform
 #elif defined(FFT_NOLIB)
   // no library
 #else
-#error "Must define HAVE_FFTW2, HAVE_FFTW3, USE_ESSL_FFT or FFT_NOLIB"
+#error "Must define HAVE_FFTW2, HAVE_FFTW3, HAVE_ESSL_FFT or FFT_NOLIB"
 #endif
 
   void vector_to_zvec(const std::complex<double>* c);
