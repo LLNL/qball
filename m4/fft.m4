@@ -91,9 +91,9 @@ for essl_flavor in esslsmpbg esslbg esslsmp essl; do
 
   if test x"$with_essl_prefix" != x; then
      CFLAGS_ESSL_FFT="-I$with_essl_prefix/include"
-     LIBS_ESSL_FFT="-L$with_essl_prefix/lib" # -l$essl_flavor"
+     LIBS_ESSL_FFT="-L$with_essl_prefix/lib"
   else
-     LIBS_ESSL_FFT="" #"-l$essl_flavor"
+     LIBS_ESSL_FFT=""
   fi
 
   CFLAGS="$CFLAGS_ESSL_FFT $CFLAGS"
@@ -102,11 +102,11 @@ for essl_flavor in esslsmpbg esslbg esslsmp essl; do
   AC_CHECK_LIB($essl_flavor, dcft_, [acx_essl_fft_ok=yes], [])
   
   if test x"$acx_essl_fft_ok" == xyes; then
+    LIBS_ESSL_FFT="$LIBS_ESSL_FFT -l$essl_flavor"
     break
   fi
 
 done
-
 
 AC_MSG_CHECKING(for essl_fft)
 AC_MSG_RESULT($acx_essl_fft_ok ( $CFLAGS_ESSL_FFT $LIBS_ESSL_FFT ))
