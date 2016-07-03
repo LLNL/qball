@@ -39,6 +39,14 @@ AC_FUNC_STRTOD
 AC_CHECK_FUNCS([gettimeofday memset mkdir pow sqrt strspn uname])
 
 #LIBRARIES
+AC_CHECK_LIB(mass, sincos)
+
+ACX_MASSV
+
+if test x$acx_massv_ok == xyes; then
+  LIBS="$LIBS_MASSV $LIBS"
+fi
+
 AC_MSG_NOTICE([
 ================================================================================
   CHECKING FOR MPI
