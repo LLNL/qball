@@ -439,7 +439,7 @@ void WavefunctionHandler::endElement(const XMLCh* const uri,
         assert(b!=0);
         // use data in b
         assert(length/sizeof(double)==wftmpr_size);
-#if PLT_BIG_ENDIAN
+#ifdef WORDS_BIGENDIAN
         byteswap_double(wftmpr_size,(double*)b);
 #endif
         memcpy(&wftmpr[0],b,wftmpr_size*sizeof(double));

@@ -16,6 +16,7 @@ AC_PROG_CC(mpicc)
 AC_PROG_CC_C99
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
+AC_C_BIGENDIAN([AC_DEFINE(WORDS_BIGENDIAN, 1, [the architecture is bigendian])])
 
 # Checks for OpenMP
 AC_LANG_PUSH(C++)
