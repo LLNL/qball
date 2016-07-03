@@ -55,6 +55,7 @@ fi
 if test x$acx_fftw3_ok == xyes ; then
   found_fft=yes
   CFLAGS="$CFLAGS $CFLAGS_FFTW3"
+  CXXFLAGS="$CXXFLAGS $CFLAGS_FFTW3"
   LIBS="$LIBS $LIBS_FFTW3"
 fi
 
@@ -66,6 +67,7 @@ fi
 if test x$acx_fftw2_ok == xyes ; then
   found_fft=yes
   CFLAGS="$CFLAGS $CFLAGS_FFTW2"
+  CXXFLAGS="$CXXFLAGS $CFLAGS_FFTW2"
   LIBS="$LIBS $LIBS_FFTW2"
 fi
 
@@ -108,6 +110,7 @@ AC_MSG_NOTICE([
 AX_LIB_XERCES
 if test x$HAVE_XERCES == xyes ; then
    CFLAGS="$CFLAGS $XERCES_CFLAGS"
+   CXXFLAGS="$CXXFLAGS $XERCES_CFLAGS"
    LDFLAGS="$LDFLAGS $XERCES_LDFLAGS"
    LIBS="$LIBS $XERCES_LIBS"
    AC_DEFINE(USE_XERCES, 1, [have the Xerces-C library])
