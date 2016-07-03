@@ -68,11 +68,10 @@ AC_MSG_NOTICE([
 ================================================================================])
 AX_LIB_XERCES
 if test x$HAVE_XERCES == xyes ; then
-   CFLAGS="$CFLAGS $XERCES_CFLAGS"
-   CXXFLAGS="$CXXFLAGS $XERCES_CFLAGS"
+   CXXFLAGS="$CXXFLAGS $XERCES_CPPFLAGS"
    LDFLAGS="$LDFLAGS $XERCES_LDFLAGS"
    LIBS="$LIBS $XERCES_LIBS"
-   AC_DEFINE(USE_XERCES, 1, [have the Xerces-C library])
+   AC_DEFINE(HAVE_XERCES, 1, [have the Xerces-C library])
 fi
 
 AC_DEFINE(ARCH, "autotools", [architecture])

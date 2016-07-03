@@ -28,7 +28,7 @@
 
 #include <config.h>
 
-#if USE_XERCES
+#if HAVE_XERCES
 
 #include "StructuredDocumentHandler.h"
 #include <xercesc/util/XMLUniDefs.hpp>

@@ -28,7 +28,7 @@
 
 #include <config.h>
 
-#if USE_XERCES
+#if HAVE_XERCES
 
 #include "SampleHandler.h"
 #include "Sample.h"

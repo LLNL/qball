@@ -40,7 +40,7 @@
 using namespace std;
 
 #if 0
-//#if USE_XERCES
+//#if HAVE_XERCES
 #include "StructuredDocumentHandler.h"
 #include "SpeciesHandler.h"
 #include <xercesc/util/XMLUniDefs.hpp>

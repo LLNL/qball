@@ -48,7 +48,7 @@
 #include <fstream>
 #include <sys/stat.h>
 
-#if USE_XERCES
+#if HAVE_XERCES
 #include "SampleHandler.h"
 #include "StructuredDocumentHandler.h"
 #include <xercesc/util/XMLUniDefs.hpp>
@@ -70,7 +70,7 @@ void SampleReader::readSample (Sample& s, const string uri, bool serial)
 {
   Timer tm;
   tm.start();
-#if USE_XERCES
+#if HAVE_XERCES
   const char* encodingName = "UTF-8";
   //SAX2XMLReader::ValSchemes valScheme = SAX2XMLReader::Val_Auto;
   //SAX2XMLReader::ValSchemes valScheme = SAX2XMLReader::Val_Always;
@@ -667,7 +667,7 @@ void SampleReader::readSample (Sample& s, const string uri, bool serial)
     s.wfv = wfvtmp;
   }
 #else
-  // USE_XERCES was not defined
+  // HAVE_XERCES was not defined
   if ( ctxt_.oncoutpe() )
   {
     cout << "  SampleReader: could not read (parser not defined)"

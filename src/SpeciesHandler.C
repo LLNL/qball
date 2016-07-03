@@ -28,7 +28,7 @@
 
 #include <config.h>
 
-#if USE_XERCES
+#if HAVE_XERCES
 
 #include "SpeciesHandler.h"
 #include "Species.h"

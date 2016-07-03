@@ -49,8 +49,8 @@ AC_DEFUN([AX_LIB_XERCES],
 [
     AC_REQUIRE([AX_PTHREAD])
 
-    AC_ARG_WITH([xerces],
-        AS_HELP_STRING([--with-xerces=@<:@ARG@:>@],
+    AC_ARG_WITH([xerces-prefix],
+        AS_HELP_STRING([--with-xerces-prefix=@<:@ARG@:>@],
             [use Xerces C++ Parser from given prefix (ARG=path); check standard prefixes (ARG=yes); disable (ARG=no)]
         ),
         [
