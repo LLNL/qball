@@ -88,13 +88,13 @@ int main(int argc, char **argv)
    cout << "dotcheck = " << dotcheck << endl;
 
    tm.start();
-#ifdef HAVE_BGQLIBS
+#ifdef HPM
    HPM_Start("zvec");
 #endif
 
-   complex<double> qv = zdotc_((int*)&vsize,&avec[0],(int*)&ione,&bvec[0],(int*)&ione);
+   complex<double> qv = FC_FUNC(zdotc, ZDOTC)((int*)&vsize,&avec[0],(int*)&ione,&bvec[0],(int*)&ione);
 
-#ifdef HAVE_BGQLIBS
+#ifdef HPM
    HPM_Stop("zvec");
 #endif
    tm.stop();
