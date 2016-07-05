@@ -33,9 +33,7 @@
 #include "Sample.h"
 #include <iostream>
 #include <deque>
-#include "boost/tuple/tuple.hpp"
 using namespace std;
-using boost::tuple;
 
 ////////////////////////////////////////////////////////////////////////////////
 ExponentialWavefunctionStepper::ExponentialWavefunctionStepper(Wavefunction& wf, double tddt, TimerMap& tmap, EnergyFunctional & ef, Sample & s, bool approximated)
@@ -48,19 +46,15 @@ ExponentialWavefunctionStepper::ExponentialWavefunctionStepper(Wavefunction& wf,
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-void ExponentialWavefunctionStepper::exponential(tuple<int, double, double> tstep, Wavefunction * dwf){
+void ExponentialWavefunctionStepper::exponential(int num_exp, double dt1, double dt2, Wavefunction * dwf){
 
+  // The first input argument num_exp determines if the current call to 
+  // exponential requires one or two timestep args and exponential calcs 
+  
   // dummy variables to call ef_.energy
   std::vector<std::vector<double> > fion;
   std::valarray<double> sigma;
 
-  // unpack tstep and use the first argument (here, num_exp) to determine 
-  // if the current call to exponential requires one or two timestep args
-  // and exponential calculations
-  int num_exp = boost::get<0>(tstep);
-  double dt1 = boost::get<1>(tstep);
-  double dt2 = boost::get<2>(tstep);
- 
   // if dwf is not explicitly passed, recreate the dwf object with the
   // ef.energy() call
   if (dwf == 0)
@@ -156,8 +150,10 @@ void ExponentialWavefunctionStepper::exponential(tuple<int, double, double> tste
 ////////////////////////////////////////////////////////////////////////////////
 void ExponentialWavefunctionStepper::preupdate()
 {
-  // allocate memory for tstep tuple to be used by exponential()
-  tuple<int, double, double> tstep;
+  // allocate memory for the input args to exponential()
+  int num_exp;
+  double dt1;
+  double dt2; 
  
   if (approximated_)
   {
@@ -180,16 +176,20 @@ void ExponentialWavefunctionStepper::preupdate()
     // step in one exponential() call. At the end of the call, wavefunctions at time
     // t + dt will be stored in wf_ and wavefunctions at time t + dt/2 will be
     // stored in newwf_.
-    tstep = tuple<int, double, double> (2, tddt_, 0.5*tddt_);
-    exponential(tstep);
+    num_exp = 2;
+    dt1 = tddt_;
+    dt2 = 0.5*tddt_;
+    exponential(num_exp, dt1, dt2);
   }
   else 
   {
     // Propagate the wavefunctions by half a time step and by a full time step
     // in two separate exponential calls.
-    tstep = tuple<int, double, double> (1, 0.5*tddt_, 0.0);
+    num_exp = 1;
+    dt1 = 0.5*tddt_;
+    dt2 = 0.0;
     // First, propagate to t + dt/2
-    exponential(tstep);
+    exponential(num_exp, dt1, dt2);
     // Then, backup the wavefunctions at t + dt/2 in newwf_ 
     tmap_["expowf_copy"].start();
     for ( int ispin = 0; ispin < wf_.nspin(); ispin++)
@@ -198,7 +198,7 @@ void ExponentialWavefunctionStepper::preupdate()
     tmap_["expowf_copy"].stop();
     // Finally, propagate wavefunctions in wf_ from t + dt/2 to t + dt via
     // a second half step
-    exponential(tstep);
+    exponential(num_exp, dt1, dt2);
   }
 
 
@@ -224,11 +224,13 @@ void ExponentialWavefunctionStepper::preupdate()
             wf_.sd(ispin, ikp)->c() = newwf_.sd(ispin, ikp)->c(); 
      tmap_["expowf_copy"].stop();
      
-     // Redefine tstep so that only one exponential is calculated within
-     // exponential()
-     tstep = tuple<int, double, double> (1, 0.5*tddt_, 0.0);
+     // Redefine time step arguments so that only one exponential is calculated
+     // within exponential()
+     num_exp = 1;
+     dt1 = 0.5*tddt_;
+     dt2 = 0.0;
      // Propagate psi(t + dt/2) to psi(t + dt) using H(t + dt)
-     exponential(tstep);
+     exponential(num_exp, dt1, dt2);
   } 
 
 }
@@ -236,8 +238,10 @@ void ExponentialWavefunctionStepper::preupdate()
 ////////////////////////////////////////////////////////////////////////////////
 void ExponentialWavefunctionStepper::update(Wavefunction& dwf)
 {
-   // Define tstep for both AETRS and ETRS 
-   tuple<int, double, double> tstep (1, 0.5*tddt_, 0.0);
+   // Define time step args for both AETRS and ETRS 
+   int num_exp = 1;
+   double dt1 = 0.5*tddt_;
+   double dt2 = 0.0;
 
    if ( !approximated_ || stored_iter_ < 3 )
    {
@@ -264,7 +268,7 @@ void ExponentialWavefunctionStepper::update(Wavefunction& dwf)
     
      // Propagate the wavefunctions in wf_ from t + dt/2 to t + dt
      // using H(t + dt)
-     exponential(tstep);
+     exponential(num_exp, dt1, dt2);
    }
    
 }
