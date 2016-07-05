@@ -122,10 +122,14 @@ int main(int argc, char **argv)
 
    const int niter = 100;
    tm.start();
+#ifdef HAVE_BGQLIBS
    HPM_Start("dgemm1");
+#endif
    for (int iter=0; iter<niter; iter++)
       dgemm(&cc,&cn,&mm,&nn,&kk,&done,&avec[0],&kk,&bvec[0],&kk,&dzero,&cvec[0],&mm);
+#ifdef HAVE_BGQLIBS   
    HPM_Stop("dgemm1");
+#endif
    tm.stop();
 
    int nthreads = omp_get_max_threads();

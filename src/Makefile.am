@@ -4,8 +4,32 @@
 #
 # Get name of architecture-specific include file from hostname
 
-bin_PROGRAMS  = qball
+bin_PROGRAMS  =                             \
+	qball                               \
+	qball-nruns                         \
+	qball-setupkpts                     \
+	qballdiff                           \
+	xmlSpecies                          \
+	xmlget                              \
+	xmlextract                          \
+	testMatrix                          \
+	testBasis                           \
+	testRowBcast                        \
+	testFourierTransform                \
+	testBlas                            \
+	testGram                            \
+	testGramBlock                       \
+	testPgemm                           \
+	testPgemmBlock                      \
+	testPzheev                          \
+	testEigenSolvers                    \
+	testEigenBlock
 
+lib_LIBRARIES =                             \
+	libqbLink.a
+
+include_HEADERS =                           \
+	qbLink.h
 
 noinst_HEADERS =                            \
 	AndersonMixer.h                     \
@@ -141,7 +165,6 @@ noinst_HEADERS =                            \
 	PromoteOccCmd.h                     \
 	PSDAWavefunctionStepper.h           \
 	PSDWavefunctionStepper.h            \
-	qbLink.h                            \
 	qbox_xmlns.h                        \
 	QuitCmd.h                           \
 	RandomizeRealWfCmd.h                \
@@ -231,7 +254,7 @@ noinst_HEADERS =                            \
 	XMLFile.h                           \
 	XMLGFPreprocessor.h
 
-qball_SOURCES =                             \
+libqbLink_a_SOURCES =                        \
 	AtomSet.C                           \
 	Atom.C                              \
 	SymmetrySet.C                       \
@@ -326,7 +349,100 @@ qball_SOURCES =                             \
 	FCPStepper.C                        \
 	ExponentialWavefunctionStepper.C    \
 	SelfConsistentPotential.C           \
-	SymOpSet.C                          \
-	SymOp.C                             \
 	clooper.c                           \
+	qbLink.C
+
+qball_SOURCES =                             \
 	qb.C
+
+qball_LDADD =                               \
+	libqbLink.a
+
+qball_nruns_SOURCES =                       \
+	qb-nruns.C
+
+qball_nruns_LDADD =                         \
+	libqbLink.a
+
+qball_setupkpts_SOURCES =                   \
+	qb-setupkpts.C                      \
+	SymOpSet.C                          \
+	SymOp.C
+
+qball_setupkpts_LDADD =                     \
+	libqbLink.a
+
+qballdiff_SOURCES =                         \
+	qbdiff.C
+
+testMatrix_SOURCES =                        \
+	testMatrix.C                        \
+	Matrix.C                            \
+	Context.C
+
+testBasis_SOURCES =                         \
+	testBasis.C                         \
+	Basis.C                             \
+	UnitCell.C                          \
+	Context.C
+
+testRowBcast_SOURCES =                       \
+	testRowBcast.C                      \
+	Context.C
+
+testFourierTransform_SOURCES =              \
+	testFourierTransform.C              \
+	FourierTransform.C                  \
+	Basis.C                             \
+	UnitCell.C                          \
+	Context.C
+
+testBlas_SOURCES =                          \
+	testBlas.C
+
+testGram_SOURCES =                          \
+	testGram.C                          \
+	Matrix.C                            \
+	Context.C
+
+testGramBlock_SOURCES =                     \
+	testGramBlock.C                     \
+	Matrix.C                            \
+	Context.C
+
+testPgemm_SOURCES =                         \
+	testPgemm.C                         \
+	Matrix.C                            \
+	Context.C
+
+testPgemmBlock_SOURCES =                    \
+	testPgemmBlock.C                    \
+	Matrix.C                            \
+	Context.C
+
+testPzheev_SOURCES =                        \
+	testPzheev.C                        \
+	Matrix.C                            \
+	Context.C
+
+testEigenSolvers_SOURCES =                  \
+	testEigenSolvers.C                  \
+	Matrix.C                            \
+	Context.C                           \
+	jacobi.C
+
+testEigenBlock_SOURCES =                    \
+	testEigenBlock.C                    \
+	Matrix.C                            \
+	Context.C                           \
+	jacobi.C
+
+xmlSpecies_SOURCES =                        \
+	xmlSpecies.C                        \
+	qbox_xmlns.C
+
+xmlget_SOURCES =                            \
+	xmlget.C
+
+xmlextract_SOURCES =                        \
+	xmlextract.C

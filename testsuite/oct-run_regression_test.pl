@@ -418,7 +418,7 @@ while ($_ = <TESTSUITE>) {
       elsif ( $_ =~ /^Reference\s*:\s*(.*)\s*$/) {
 	printf "%-40s%s", " Comparison with reference values", ":";
 	$reference_file = dirname($opt_f)."/".$1;
-	$diff_cmd = "$exec_directory/qbdiff"."-".$ENV{'ARCH'}." $reference_file $workdir/out";
+	$diff_cmd = "$exec_directory/qballdiff $reference_file $workdir/out";
 #	print "Executing: " . $diff_cmd . "\n";
 	$diff_return = system("$diff_cmd > $workdir/diff.out");
 	if($diff_return == 0){
