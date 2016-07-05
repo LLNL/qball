@@ -32,6 +32,6 @@ check-base:
 	@base=`basename "$(top_builddir)/share"` && \
 	dir=`dirname "$(top_builddir)/share"` && \
 	sharedir="`(cd \"$$dir\" 2> /dev/null && pwd || echo \"$$dir\")`/$$base" && \
-	QBALL_SHARE=$$sharedir ./oct-run_testsuite.sh -c -d $(srcdir) -l $(CHECKOPTS)
+	QBALL_SHARE=$$sharedir $(top_srcdir)/testsuite/oct-run_testsuite.sh -c -d $(srcdir) -l $(CHECKOPTS)
 
 
