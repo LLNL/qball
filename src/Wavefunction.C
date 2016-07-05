@@ -42,7 +42,7 @@
 #include <cstdio>
 #endif
 #include "fstream"
-#ifdef BGQ
+#ifdef HAVE_BGQLIBS
 #include <spi/include/kernel/process.h>
 #include <spi/include/kernel/location.h>
 #endif
@@ -740,7 +740,7 @@ void Wavefunction::set_nrowmax(int n) {
 
   // set nrowmax to be compatible with torus dimensions on BG/Q
 #ifdef USE_CTF
-#ifdef BGQ
+#ifdef HAVE_BGQLIBS
   Personality_t pers;
   Kernel_GetPersonality(&pers, sizeof(pers));
   const int nTDim = 5;
@@ -2226,7 +2226,7 @@ void Wavefunction::write_dump(string filebase) {
   //fopenFILE* PEFILE = fopen(mypefile.c_str(),"wb");
   
   // hack to make checkpointing work w. BlueGene compilers
-#ifdef BGQ
+#ifdef HAVE_BGQLIBS
   os.write(mypefile.c_str(),sizeof(char)*mypefile.length());
   os.flush();
 #endif
@@ -2297,7 +2297,7 @@ void Wavefunction::write_fast(string filebase) {
   int filenum = mype;
   int writerTask = mype;
   int nTasksPerFile = 1;
-#ifdef BGQ
+#ifdef HAVE_BGQLIBS
   nTasksPerFile = 32;
   nFiles = npes/nTasksPerFile;
 #endif
@@ -2589,7 +2589,7 @@ void Wavefunction::read_dump(string filebase) {
   if (is.is_open()) {
 
      // hack to make checkpointing work with BlueGene compilers
-#ifdef BGQ
+#ifdef HAVE_BGQLIBS
      int len = mypefile.length();
      char* tmpfilename = new char[256];
      is.read(tmpfilename,sizeof(char)*mypefile.length());
@@ -2655,7 +2655,7 @@ void Wavefunction::read_fast(string filebase) {
   int filenum = mype;
   int readerTask = mype;
   int nTasksPerFile = 1;
-#ifdef BGQ
+#ifdef HAVE_BGQLIBS
   nTasksPerFile = 32;
   nFiles = npes/nTasksPerFile;
 #endif
@@ -3009,7 +3009,7 @@ void Wavefunction::write_states_old(string filebase, string format) {
                     }
 
                     // hack to make checkpointing work w. BlueGene compilers
-#ifdef BGQ
+#ifdef HAVE_BGQLIBS
                     if (format == "binary") {
                        os.write(statefile.c_str(),sizeof(char)*statefile.length());
                        os.flush();
@@ -3126,7 +3126,7 @@ void Wavefunction::write_states_old(string filebase, string format) {
                     const double* peig = sd_[ispin][kp]->eig_ptr();
                     const double* pocc = sd_[ispin][kp]->occ_ptr();
                     // hack to make checkpointing work w. BlueGene compilers
-#ifdef BGQ
+#ifdef HAVE_BGQLIBS
                     os.write(statefile.c_str(),sizeof(char)*statefile.length());
 #endif
                     os.write((char*)&peig[0],sizeof(double)*nst);
@@ -3193,7 +3193,7 @@ void Wavefunction::read_states_old(string filebase) {
                     if (is.is_open()) {
 
                       // hack to make checkpointing work with BlueGene compilers
-#ifdef BGQ
+#ifdef HAVE_BGQLIBS
                       int len = statefile.length();
                       char* tmpfilename = new char[256];
                       is.read(tmpfilename,sizeof(char)*statefile.length());
@@ -3274,7 +3274,7 @@ void Wavefunction::read_states_old(string filebase) {
 
                     if (is.is_open()) {
                       // hack to make checkpointing work with BlueGene compilers
-#ifdef BGQ
+#ifdef HAVE_BGQLIBS
                       int len = statefile.length();
                       char* tmpfilename = new char[256];
                       is.read(tmpfilename,sizeof(char)*statefile.length());

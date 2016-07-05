@@ -46,7 +46,7 @@
 #ifdef USE_CTF
 #include "cyclopstf.hpp"
 #endif
-#ifdef BGQ
+#ifdef HAVE_BGQLIBS
 #include <spi/include/kernel/process.h>
 #include <spi/include/kernel/location.h>
 #endif
@@ -76,7 +76,7 @@ int main(int argc, char **argv)
   if (mype == 0)
      cout << "Calling myctf_->init..." << endl;
 
-#ifdef BGQ
+#ifdef HAVE_BGQLIBS
   myctf_->init(MPI_COMM_WORLD,mype,npes,,MACHINE_BGQ);
 #else
   myctf_->init(MPI_COMM_WORLD,mype,npes);
@@ -124,7 +124,7 @@ int main(int argc, char **argv)
 #endif
      }
 
-#ifdef BGQ
+#ifdef HAVE_BGQLIBS
      Personality_t pers;
      Kernel_GetPersonality(&pers, sizeof(pers));
      const int nTDim = 5;

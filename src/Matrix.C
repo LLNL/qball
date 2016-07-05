@@ -504,7 +504,7 @@ void DoubleMatrix::init_size(int m, int n, int mb, int nb)
 
 #ifdef USE_CTF
   myctf_ = new CTF;
-#ifdef BGQ
+#ifdef HAVE_BGQLIBS
   myctf_->init(ctxt_.comm(),ctxt_.mype(),ctxt_.size(),MACHINE_BGQ);
 #else
   myctf_->init(ctxt_.comm(),ctxt_.mype(),ctxt_.size());
@@ -617,7 +617,7 @@ void ComplexMatrix::init_size(int m, int n, int mb, int nb)
   if (ctxt_.mype() == 0)
      cout << "MATRIX.INIT_SIZE, CTF2" << endl;
 
-#ifdef BGQ
+#ifdef HAVE_BGQLIBS
   //myctf_->init(ctxt_.comm(),ctxt_.mype(),ctxt_.size(),MACHINE_BGQ);
 
   //ewd DEBUG

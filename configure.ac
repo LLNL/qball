@@ -168,6 +168,14 @@ LIBS="$LIBS_SCALAPACK $LIBS_BLACS $LIBS_LAPACK $LIBS_BLAS $LIBS $FCLIBS"
 
 AC_MSG_NOTICE([
 ================================================================================
+  CHECKING FOR BLUEGENE/Q LIBRARIES
+================================================================================])
+
+AC_CHECK_HEADERS([spi/include/kernel/location.h bgpm/include/bgpm.h], 
+  [AC_DEFINE(HAVE_BGQLIBS, 1, [whether BlueGene/Q libraries are available])], [])
+
+AC_MSG_NOTICE([
+================================================================================
   CONFIGURATION DONE, GENERATING MAKEFILES
 ================================================================================])
 AC_CONFIG_FILES([Makefile

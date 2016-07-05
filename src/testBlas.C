@@ -34,7 +34,7 @@
 #include "Timer.h"
 using namespace std;
 
-#ifdef BGQ
+#ifdef HAVE_BGQLIBS
 #include <bgpm/include/bgpm.h>
 extern "C" void HPM_Start(char *);
 extern "C" void HPM_Stop(char *);
@@ -88,13 +88,13 @@ int main(int argc, char **argv)
    cout << "dotcheck = " << dotcheck << endl;
 
    tm.start();
-#ifdef BGQ
+#ifdef HAVE_BGQLIBS
    HPM_Start("zvec");
 #endif
 
    complex<double> qv = zdotc_((int*)&vsize,&avec[0],(int*)&ione,&bvec[0],(int*)&ione);
 
-#ifdef BGQ
+#ifdef HAVE_BGQLIBS
    HPM_Stop("zvec");
 #endif
    tm.stop();

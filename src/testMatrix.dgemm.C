@@ -49,7 +49,7 @@
 #include "omp.h"
 #include "Timer.h"
 
-#ifdef BGQ
+#ifdef HAVE_BGQLIBS
 #include <bgpm/include/bgpm.h>
 extern "C" void HPM_Start(char *);
 extern "C" void HPM_Stop(char *);
