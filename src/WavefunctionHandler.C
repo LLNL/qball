@@ -430,7 +430,7 @@ void WavefunctionHandler::endElement(const XMLCh* const uri,
         // base64 encoding
         unsigned int length;
 
-#ifdef XERCES_VERSION_MAJOR >= 3
+#if XERCES_VERSION_MAJOR >= 3
         XMLByte* b = Base64::decode((XMLByte*)content.c_str(),
                                     (XMLSize_t*) &length);
 #else
