@@ -2,7 +2,7 @@
 # $Id: 01-carbon_atom.test 13244 2015-02-28 23:19:28Z dstrubbe $
 
 Test       : Nitrogen
-Program    : qb
+Program    : qball
 TestGroups : short-run
 Enabled    : Yes
 

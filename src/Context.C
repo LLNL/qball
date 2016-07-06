@@ -25,6 +25,7 @@
 // Context.C
 //
 ////////////////////////////////////////////////////////////////////////////////
+#include <config.h>
 
 #include <iostream>
 #include <iomanip>
@@ -33,13 +34,13 @@
 #include <string>
 using namespace std;
 
-#ifdef SCALAPACK
+#ifdef HAVE_SCALAPACK
 #include "blacs.h"
 #endif
 
 #include "Context.h"
 
-#ifndef SCALAPACK
+#ifndef HAVE_SCALAPACK
 void Cblacs_pinfo(int *mypnum, int *nprocs)
 {
     *mypnum = 0;
@@ -89,7 +90,7 @@ void Cblacs_gridinfo(int icontxt, int *nprow, int *npcol,
 int Cblacs_pnum(int icontxt, int prow, int pcol)
 { return 0;}
 
-int Csys2blacs_handle(int comm) {
+int Csys2blacs_handle(MPI_Comm comm) {
   return 0;
 }
 void Cdgesd2d(int icontxt,int m,int n,double *A,int lda,int rdest,int cdest)

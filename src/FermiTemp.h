@@ -30,6 +30,8 @@
 // input files.  Fermi_temp inputs smearing in Kelvin, converted to Ry to be compatible
 // with smearing and smearing_width variables.
 
+#include <config.h>
+
 #ifndef FERMITEMP_H
 #define FERMITEMP_H
 

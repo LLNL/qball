@@ -26,6 +26,8 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+#include <config.h>
+
 //
 // Abstract base class for density functionals
 // Input variables are: rho, rho_up, rho_dn, grad_rho, grad_rho_up, grad_rho_dn

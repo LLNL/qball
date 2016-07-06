@@ -27,6 +27,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 // $Id: FcpThermostat.h,v 1.7 2010-04-16 21:43:36 fgygi Exp $
 
+#include <config.h>
+
 #ifndef FCPTHERMOSTAT_H
 #define FCPTHERMOSTAT_H
 

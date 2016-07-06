@@ -20,6 +20,8 @@
 // GNU General Public License for more details, in the file COPYING in the
 // root directory of this distribution or <http://www.gnu.org/licenses/>.
 //
+
+#include <config.h>
 #include <cassert>
 #include <cstdlib>
 #include <cmath>
@@ -32,7 +34,7 @@
 #include "Timer.h"
 using namespace std;
 
-#ifdef BGQ
+#ifdef HAVE_BGQLIBS
 #include <bgpm/include/bgpm.h>
 extern "C" void HPM_Start(char *);
 extern "C" void HPM_Stop(char *);
@@ -86,13 +88,13 @@ int main(int argc, char **argv)
    cout << "dotcheck = " << dotcheck << endl;
 
    tm.start();
-#ifdef BGQ
+#ifdef HPM
    HPM_Start("zvec");
 #endif
 
-   complex<double> qv = zdotc_((int*)&vsize,&avec[0],(int*)&ione,&bvec[0],(int*)&ione);
+   complex<double> qv = FC_FUNC(zdotc, ZDOTC)((int*)&vsize,&avec[0],(int*)&ione,&bvec[0],(int*)&ione);
 
-#ifdef BGQ
+#ifdef HPM
    HPM_Stop("zvec");
 #endif
    tm.stop();

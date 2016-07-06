@@ -24,6 +24,8 @@
 // tvalarray.C
 // causes error messages related to valarray headers using xlC 7.0
 ////////////////////////////////////////////////////////////////////////////////
+
+#include <config.h>
 #include <valarray>
 using namespace std;
 class A

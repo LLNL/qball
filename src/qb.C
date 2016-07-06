@@ -30,6 +30,8 @@
 #include <string>
 using namespace std;
 
+#include <config.h>
+
 #include <sys/utsname.h>
 #include <unistd.h>
 #include <cstdlib>
@@ -162,7 +164,7 @@ using namespace std;
 #include "FcpThWidth.h"
 #include "FcpPmass.h"
 #include "FcpMu.h"
-#ifdef BGQ
+#ifdef HAVE_BGQLIBS
 #include <spi/include/kernel/process.h>
 #include <spi/include/kernel/location.h>
 #endif
@@ -281,7 +283,7 @@ int main(int argc, char **argv, char **envp)
 
   }
 
-#ifdef BGQ
+#ifdef HAVE_BGQLIBS
   Personality_t pers;
   Kernel_GetPersonality(&pers, sizeof(pers));
   const int nTDim = 5;

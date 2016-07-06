@@ -26,6 +26,8 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+#include <config.h>
+
 #include <iostream>
 #include <iomanip>
 #include <cmath>
@@ -33,7 +35,7 @@
 #include <string>
 using namespace std;
 
-#ifdef SCALAPACK
+#ifdef HAVE_SCALAPACK
 #include "blacs.h"
 #endif
 

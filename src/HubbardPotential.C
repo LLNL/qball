@@ -26,6 +26,8 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+#include <config.h>
+
 #include "HubbardPotential.h"
 #include "Wavefunction.h"
 #include "SlaterDet.h"

@@ -33,6 +33,8 @@
 // m_c n_c mb_c nb_c
 //
 
+#include <config.h>
+
 #include <cassert>
 #include <cstdlib>
 #include <cmath>
@@ -47,7 +49,7 @@
 #include "omp.h"
 #include "Timer.h"
 
-#ifdef BGQ
+#ifdef HPM
 #include <bgpm/include/bgpm.h>
 extern "C" void HPM_Start(char *);
 extern "C" void HPM_Stop(char *);
@@ -120,10 +122,14 @@ int main(int argc, char **argv)
 
    const int niter = 100;
    tm.start();
+#ifdef HPM
    HPM_Start("dgemm1");
+#endif
    for (int iter=0; iter<niter; iter++)
       dgemm(&cc,&cn,&mm,&nn,&kk,&done,&avec[0],&kk,&bvec[0],&kk,&dzero,&cvec[0],&mm);
+#ifdef HPM
    HPM_Stop("dgemm1");
+#endif
    tm.stop();
 
    int nthreads = omp_get_max_threads();

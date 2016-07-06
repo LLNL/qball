@@ -26,6 +26,8 @@
 // use: testSpecies uri
 //
 
+#include <config.h>
+
 #include "Species.h"
 #include "Context.h"
 #include "SpeciesReader.h"

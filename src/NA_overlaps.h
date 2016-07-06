@@ -27,6 +27,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 // $Id: NA_overlaps.h,v 1.5 2011-05-25 15:56:18 schleife Exp $
 
+#include <config.h>
+
 #ifndef NA_OVERLAPS_H
 #define NA_OVERLAPS_H
 

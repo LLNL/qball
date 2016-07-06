@@ -34,6 +34,8 @@
 // m_c n_c mb_c nb_c
 //
 
+#include <config.h>
+
 #include <cassert>
 #include <cstdlib>
 #include <cmath>

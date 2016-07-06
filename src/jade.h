@@ -20,6 +20,8 @@
 // GNU General Public License for more details, in the file COPYING in the
 // root directory of this distribution or <http://www.gnu.org/licenses/>.
 //
+
+#include <config.h>
 #include <vector>
 int jade(int maxsweep, double tol, std::vector<DoubleMatrix*> a,
          DoubleMatrix& u, std::vector<std::vector<double> > &adiag);

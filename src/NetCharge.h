@@ -27,6 +27,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 // $Id: NetCharge.h,v 1.4 2008-09-08 15:56:18 fgygi Exp $
 
+#include <config.h>
+
 #ifndef NETCHARGE_H
 #define NETCHARGE_H
 

@@ -21,6 +21,8 @@
 // root directory of this distribution or <http://www.gnu.org/licenses/>.
 //
 ////////////////////////////////////////////////////////////////////////////////
+
+#include <config.h>
 double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd, 
     bool compute_forces, vector<vector<double> >& fion, 
     bool compute_stress, valarray<double>& sigma_enl)

@@ -27,6 +27,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 // $Id: ExponentialWavefunctionStepper.h,v 1.5 2011-06-02 15:56:19 schleife Exp $
 
+#include <config.h>
+
 #ifndef EXPONENTIALWAVEFUNCTIONSTEPPER_H
 #define EXPONENTIALWAVEFUNCTIONSTEPPER_H
 

@@ -27,6 +27,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 // $Id: FCPStepper.h,v 1.13 2010-04-16 22:41:55 fgygi Exp $
 
+#include <config.h>
+
 //
 // FCPStepper is used in the following way
 //

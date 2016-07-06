@@ -26,6 +26,8 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+#include <config.h>
+
 #include "EhrenSampleStepper.h"
 #include "EnergyFunctional.h"
 #include "SlaterDet.h"

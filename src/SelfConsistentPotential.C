@@ -26,6 +26,8 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+#include <config.h>
+
 #include "SelfConsistentPotential.h"
 #include "EnergyFunctional.h"
 #include <complex>

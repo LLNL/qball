@@ -26,6 +26,8 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+#include <config.h>
+
 #include "ChargeDensity.h"
 #include "Sample.h"
 #include "Basis.h"
@@ -39,7 +41,7 @@
 #include "StructureFactor.h"
 #include "blas.h"
 #include <iomanip>
-#ifdef BGQ
+#ifdef HAVE_BGQLIBS
 extern "C" void cdLoop(const int size, complex<double>* v1, complex<double>* v2, complex<double>* vout);
 extern "C" void cdLoop2(const int size, double* v1, double* v2, double* vout);
 #endif
@@ -410,7 +412,7 @@ void ChargeDensity::update_density() {
                       zgemm(&cn,&ct,(int*)&naloc,(int*)&ngwl,&nqtot,&zone,&summatloc[0],&naloc,
                             &qnmg_[is][0],(int*)&ngwl,&zzero,&tmpmult[0],&naloc);
 
-#ifdef BGQDISABLE
+#ifdef HAVE_BGQLIBSDISABLE
                       double* ptmp = (double*) &tmpmult[0];
                       double* psfloc = (double*) &sfactloc_[is][0];
                       double* prhogus = (double*) &rhogus[0];

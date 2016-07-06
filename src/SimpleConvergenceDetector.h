@@ -26,6 +26,8 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+#include <config.h>
+
 #ifndef SIMPLECONVERGENCEDETECTOR_H
 #define SIMPLECONVERGENCEDETECTOR_H
 

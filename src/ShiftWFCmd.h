@@ -27,6 +27,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 // $Id: ShiftWFCmd.h,v 1.0 2011-03-25 15:56:17 schleife Exp $
 
+#include <config.h>
+
 #ifndef SHIFT_WF_CMD_H
 #define SHIFT_WF_CMD_H
 

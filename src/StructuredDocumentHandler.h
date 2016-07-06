@@ -26,6 +26,8 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+#include <config.h>
+
 #ifndef STRUCTUREDDOCUMENTHANDLER_H
 #define STRUCTUREDDOCUMENTHANDLER_H
 
@@ -70,9 +72,9 @@ class StructuredDocumentHandler : public DefaultHandler
 
   void startElement(const XMLCh* const uri,const XMLCh* const localname,
     const XMLCh* const qname, const Attributes& attributes);
-#if XERCESC_3
+#if XERCES_VERSION_MAJOR >= 3
   void characters(const XMLCh* const chars, const XMLSize_t length);
-  #else
+#else
   void characters(const XMLCh* const chars, const unsigned int length);
 #endif
   void endElement(const XMLCh* const uri, const XMLCh* const localname,

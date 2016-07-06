@@ -27,6 +27,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 // $Id: FCPStepper.C,v 1.23 2010-04-16 22:41:55 fgygi Exp $
 
+#include <config.h>
+
 #include "FCPStepper.h"
 #include <stdlib.h>
 using namespace std;

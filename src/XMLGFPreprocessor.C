@@ -26,6 +26,8 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+#include <config.h>
+
 #include <cassert>
 #include <iostream>
 #include <fstream>
@@ -718,7 +720,7 @@ void XMLGFPreprocessor::process(const char* const filename,
 
   ////////////////////////////////////////////////////////////////////////////
   // byte swapping on big-endian platforms
-#if PLT_BIG_ENDIAN
+#ifdef WORDS_BIGENDIAN
   for ( int iseg = 0; iseg < seg_start.size(); iseg++ )
     xcdr.byteswap_double(dbuf[iseg].size(),&dbuf[iseg][0]);
 

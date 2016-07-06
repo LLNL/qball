@@ -26,7 +26,9 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#if USE_XERCES
+#include <config.h>
+
+#if HAVE_XERCES
 
 #include "WavefunctionHandler.h"
 #include "Wavefunction.h"
@@ -428,7 +430,7 @@ void WavefunctionHandler::endElement(const XMLCh* const uri,
         // base64 encoding
         unsigned int length;
 
-#ifdef XERCESC_3
+#if XERCES_VERSION_MAJOR >= 3
         XMLByte* b = Base64::decode((XMLByte*)content.c_str(),
                                     (XMLSize_t*) &length);
 #else
@@ -437,7 +439,7 @@ void WavefunctionHandler::endElement(const XMLCh* const uri,
         assert(b!=0);
         // use data in b
         assert(length/sizeof(double)==wftmpr_size);
-#if PLT_BIG_ENDIAN
+#ifdef WORDS_BIGENDIAN
         byteswap_double(wftmpr_size,(double*)b);
 #endif
         memcpy(&wftmpr[0],b,wftmpr_size*sizeof(double));

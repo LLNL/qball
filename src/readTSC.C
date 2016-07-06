@@ -26,6 +26,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
+#include <config.h>
+
 long long readTSC(void)
 {
   union { long long complete; unsigned int part[2]; } ticks;

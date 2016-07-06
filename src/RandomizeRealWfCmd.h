@@ -27,6 +27,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 // $Id: RandomizeRealWfCmd.h,v 1.5 2008-09-08 15:56:19 fgygi Exp $
 
+#include <config.h>
+
 #ifndef RANDOMIZEREALWFCMD_H
 #define RANDOMIZEREALWFCMD_H
 

@@ -20,6 +20,9 @@
 // GNU General Public License for more details, in the file COPYING in the
 // root directory of this distribution or <http://www.gnu.org/licenses/>.
 //
+
+#include <config.h>
+
 #ifndef CLOOPER_H
 #define CLOOPER_H
 #include <complex.h>

@@ -21,6 +21,8 @@
 // root directory of this distribution or <http://www.gnu.org/licenses/>.
 //
 
+#include <config.h>
+
 #if LINUX
 #define _LARGEFILE_SOURCE 1
 #define _LARGEFILE64_SOURCE 1

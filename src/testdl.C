@@ -21,6 +21,8 @@
 // root directory of this distribution or <http://www.gnu.org/licenses/>.
 //
 // compile using icc -o testdl testdl.C -ldl
+
+#include <config.h>
 #include <cstdio>
 #include <cstdlib>
 #include <iostream>

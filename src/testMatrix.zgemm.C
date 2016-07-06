@@ -33,6 +33,8 @@
 // m_c n_c mb_c nb_c
 //
 
+#include <config.h>
+
 #include <cassert>
 #include <cstdlib>
 #include <cmath>
@@ -47,7 +49,7 @@
 #include "omp.h"
 #include "Timer.h"
 
-#ifdef BGQ
+#ifdef HAVE_BGQLIBS
 #include <bgpm/include/bgpm.h>
 extern "C" void HPM_Start(char *);
 extern "C" void HPM_Stop(char *);

@@ -26,6 +26,8 @@
 // use: xmlSpecies < psfile > xmlfile
 //
 
+#include <config.h>
+
 #include <iostream>
 #include <iomanip>
 #include <fstream>

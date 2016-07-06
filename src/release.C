@@ -26,6 +26,8 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+#include <config.h>
+
 #include "release.h"
 std::string release(void) {
   return std::string("qb@LL-r274");

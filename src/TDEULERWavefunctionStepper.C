@@ -27,6 +27,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 // $Id: TDEULERWavefunctionStepper.C,v 1.8 2011-03-31 15:56:19 schleife Exp $
 
+#include <config.h>
+
 #include "TDEULERWavefunctionStepper.h"
 #include "Wavefunction.h"
 #include "SlaterDet.h"

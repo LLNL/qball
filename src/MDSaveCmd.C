@@ -26,6 +26,8 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+#include <config.h>
+
 
 #include "MDSaveCmd.h"
 #include "SampleWriter.h"
@@ -191,7 +193,7 @@ int MDSaveCmd::action(int argc, char **argv) {
               if (wfctxt->onpe0()) {
                  os.open(rhorfile.c_str(),ofstream::binary);
                  // hack to make checkpointing work w. BlueGene compilers
-#ifdef BGQ
+#ifdef HAVE_BGQLIBS
                  os.write(rhorfile.c_str(),sizeof(char)*rhorfile.length());
 #endif
                 
@@ -265,7 +267,7 @@ int MDSaveCmd::action(int argc, char **argv) {
               if (wfctxt->onpe0()) {
                  os.open(rhorfile.c_str(),ofstream::binary);
                  // hack to make checkpointing work w. BlueGene compilers
-#ifdef BGQ
+#ifdef HAVE_BGQLIBS
                  os.write(rhorfile.c_str(),sizeof(char)*rhorfile.length());
 #endif
                 
@@ -338,7 +340,7 @@ int MDSaveCmd::action(int argc, char **argv) {
               if (wfctxt->onpe0()) {
                  os.open(rhorfile.c_str(),ofstream::binary);
                  // hack to make checkpointing work w. BlueGene compilers
-#ifdef BGQ
+#ifdef HAVE_BGQLIBS
                  os.write(rhorfile.c_str(),sizeof(char)*rhorfile.length());
 #endif          
               }

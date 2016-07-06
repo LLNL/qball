@@ -26,6 +26,8 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+#include <config.h>
+
 #include "CPSampleStepper.h"
 #include "SlaterDet.h"
 #include "MDWavefunctionStepper.h"

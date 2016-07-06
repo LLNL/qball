@@ -26,6 +26,8 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+#include <config.h>
+
 #include <cassert>
 #include <iostream>
 using namespace std;
@@ -35,7 +37,7 @@ using namespace std;
 #endif
 
 #include "Context.h"
-#ifdef SCALAPACK
+#ifdef HAVE_SCALAPACK
 #include "blacs.h"
 #endif
 
@@ -43,94 +45,92 @@ using namespace std;
 #include "Matrix.h"
 #include "profile.h"
 
-#ifdef ADD_
-#define numroc     numroc_
-#define pdtran     pdtran_
-#define pztranc    pztranc_
-#define pdsymm     pdsymm_
-#define pzsymm     pzsymm_
-#define pzhemm     pzhemm_
-#define pdgemm     pdgemm_
-#define pzgemm     pzgemm_
-#define pdsyrk     pdsyrk_
-#define pzherk     pzherk_
-#define pdsyr      pdsyr_
-#define pdger      pdger_
-#define pdgemr2d   pdgemr2d_
-#define pzgemr2d   pzgemr2d_
-#define pdtrmm     pdtrmm_
-#define pdtrsm     pdtrsm_
-#define pztrsm     pztrsm_
-#define pdtrtrs    pdtrtrs_
-#define pztrtrs    pztrtrs_
-#define pdpotrf    pdpotrf_
-#define pzpotrf    pzpotrf_
-#define pdpotri    pdpotri_
-#define pdpocon    pdpocon_
-#define pdsygst    pdsygst_
-#define pdsyev     pdsyev_
-#define pdsyevd    pdsyevd_
-#define pdormtr    pdormtr_
-#define pzheev     pzheev_
-#define pzheevd    pzheevd_
-#define pzheevx    pzheevx_
-#define pzheevr    pzheevr_
-#define pzhegv     pzhegv_
-#define pdstedc    pdstedc_
-#define pdtrtri    pdtrtri_
-#define pztrtri    pztrtri_
-#define pdlatra    pdlatra_
-#define pdlacp2    pdlacp2_
-#define pdlacp3    pdlacp3_
-#define pdgetrf    pdgetrf_
-#define pdgetri    pdgetri_
-#define pzgetrf    pzgetrf_
-#define pzgetri    pzgetri_
+#define numroc     FC_FUNC(numroc, NUMROC)
+#define pdtran     FC_FUNC(pdtran, PDTRAN)
+#define pztranc    FC_FUNC(pztranc, PZTRANC)
+#define pdsymm     FC_FUNC(pdsymm, PDSYMM)
+#define pzsymm     FC_FUNC(pzsymm, PZSYMM)
+#define pzhemm     FC_FUNC(pzhemm, PZHEMM)
+#define pdgemm     FC_FUNC(pdgemm, PDGEMM)
+#define pzgemm     FC_FUNC(pzgemm, PZGEMM)
+#define pdsyrk     FC_FUNC(pdsyrk, PDSYRK)
+#define pzherk     FC_FUNC(pzherk, PZHERK)
+#define pdsyr      FC_FUNC(pdsyr, PDSYR)
+#define pdger      FC_FUNC(pdger, PDGER)
+#define pdgemr2d   FC_FUNC(pdgemr2d, PDGEMR2D)
+#define pzgemr2d   FC_FUNC(pzgemr2d, PZGEMR2D)
+#define pdtrmm     FC_FUNC(pdtrmm, PDTRMM)
+#define pdtrsm     FC_FUNC(pdtrsm, PDTRSM)
+#define pztrsm     FC_FUNC(pztrsm, PZTRSM)
+#define pdtrtrs    FC_FUNC(pdtrtrs, PDTRTRS)
+#define pztrtrs    FC_FUNC(pztrtrs, PZTRTRS)
+#define pdpotrf    FC_FUNC(pdpotrf, PDPOTRF)
+#define pzpotrf    FC_FUNC(pzpotrf, PZPOTRF)
+#define pdpotri    FC_FUNC(pdpotri, PDPOTRI)
+#define pdpocon    FC_FUNC(pdpocon, PDPOCON)
+#define pdsygst    FC_FUNC(pdsygst, PDSYGST)
+#define pdsyev     FC_FUNC(pdsyev,  PDSYEV)
+#define pdsyevd    FC_FUNC(pdsyevd, PDSYEVD)
+#define pdormtr    FC_FUNC(pdormtr, PDORMTR)
+#define pzheev     FC_FUNC(pzheev, PZHEEV)
+#define pzheevd    FC_FUNC(pzheevd, PZHEEVD)
+#define pzheevx    FC_FUNC(pzheevx, PZHEEVX)
+#define pzheevr    FC_FUNC(pzheevr, PZHEEVR)
+#define pzhegv     FC_FUNC(pzhegv, PZHEGV)
+#define pdstedc    FC_FUNC(pdstedc, PDSTEDC)
+#define pdtrtri    FC_FUNC(pdtrtri, PDTRTRI)
+#define pztrtri    FC_FUNC(pztrtri, PZTRTRI)
+#define pdlatra    FC_FUNC(pdlatra, PDLATRA)
+#define pdlacp2    FC_FUNC(pdlacp2, PDLACP2)
+#define pdlacp3    FC_FUNC(pdlacp3, PDLACP3)
+#define pdgetrf    FC_FUNC(pdgetrf, PDGETRF)
+#define pdgetri    FC_FUNC(pdgetri, PDGETRI)
+#define pzgetrf    FC_FUNC(pzgetrf, PZGETRF)
+#define pzgetri    FC_FUNC(pzgetri, PZGETRI)
 
-#define dscal      dscal_
-#define zscal      zscal_
-#define zdscal     zdscal_
-#define dcopy      dcopy_
-#define ddot       ddot_
-#define zdotu      zdotu_
-#define zdotc      zdotc_
-#define daxpy      daxpy_
-#define zaxpy      zaxpy_
-#define dsymm      dsymm_
-#define zsymm      zsymm_
-#define zhemm      zhemm_
-#define dgemm      dgemm_
-#define zgemm      zgemm_
-#define dsyr       dsyr_
-#define dger       dger_
-#define dsyrk      dsyrk_
-#define zherk      zherk_
-#define dtrmm      dtrmm_
-#define dtrsm      dtrsm_
-#define dtrtri     dtrtri_
-#define ztrtri     ztrtri_
-#define ztrsm      ztrsm_
-#define dtrtrs     dtrtrs_
-#define ztrtrs     ztrtrs_
-#define dpotrf     dpotrf_
-#define zpotrf     zpotrf_
-#define dpotri     dpotri_
-#define dpocon     dpocon_
-#define dsygst     dsygst_
-#define dsyev      dsyev_
-#define zheev      zheev_
-#define zhegv      zhegv_
-#define idamax     idamax_
-#define dgetrf     dgetrf_
-#define dgetri     dgetri_
-#define zgetrf     zgetrf_
-#define zgetri     zgetri_
-#endif
+#define dscal      FC_FUNC(dscal, DSCAL)
+#define zscal      FC_FUNC(zscal, ZSCAL)
+#define zdscal     FC_FUNC(zdscal, ZDSCAL)
+#define dcopy      FC_FUNC(dcopy, DCOPY)
+#define ddot       FC_FUNC(ddot, DDOT)
+#define zdotu      FC_FUNC(zdotu, ZDOTU)
+#define zdotc      FC_FUNC(zdotc, ZDOTC)
+#define daxpy      FC_FUNC(daxpy, DAXPY)
+#define zaxpy      FC_FUNC(zaxpy, ZAXPY)
+#define dsymm      FC_FUNC(dsymm, DSYMM)
+#define zsymm      FC_FUNC(zsymm, ZSYMM)
+#define zhemm      FC_FUNC(zhemm, ZHEMM)
+#define dgemm      FC_FUNC(dgemm, DGEMM)
+#define zgemm      FC_FUNC(zgemm, ZGEMM)
+#define dsyr       FC_FUNC(dsyr, DSYR)
+#define dger       FC_FUNC(dger, DGER)
+#define dsyrk      FC_FUNC(dsyrk, DSYRK)
+#define zherk      FC_FUNC(zherk, ZHERK)
+#define dtrmm      FC_FUNC(dtrmm, DTRMM)
+#define dtrsm      FC_FUNC(dtrsm, DTRSM)
+#define dtrtri     FC_FUNC(dtrtri, DTRTRI)
+#define ztrtri     FC_FUNC(ztrtri, ZTRTRI)
+#define ztrsm      FC_FUNC(ztrsm, ZTRSM)
+#define dtrtrs     FC_FUNC(dtrtrs, DTRTRS)
+#define ztrtrs     FC_FUNC(ztrtrs, ZTRTRS)
+#define dpotrf     FC_FUNC(dpotrf, DPOTRF)
+#define zpotrf     FC_FUNC(zpotrf, ZPOTRF)
+#define dpotri     FC_FUNC(dpotri, DPOTRI)
+#define dpocon     FC_FUNC(dpocon, DPOCON)
+#define dsygst     FC_FUNC(dsygst, DSYGST)
+#define dsyev      FC_FUNC(dsyev, DSYEV)
+#define zheev      FC_FUNC(zheev, ZHEEV)
+#define zhegv      FC_FUNC(zhegv, ZHEGV)
+#define idamax     FC_FUNC(idamax, IDAMAX)
+#define dgetrf     FC_FUNC(dgetrf, DGETRF)
+#define dgetri     FC_FUNC(dgetri, DGETRI)
+#define zgetrf     FC_FUNC(zgetrf, ZGETRF)
+#define zgetri     FC_FUNC(zgetri, ZGETRI)
 
 extern "C"
 {
   int numroc(int*, int*, int*, int*, int*);
-#ifdef SCALAPACK
+#ifdef HAVE_SCALAPACK
   // PBLAS
   void pdsymm(const char*, const char*, const int*, const int*, const double*,
        const double*, const int*, const int*, const int*,
@@ -364,7 +364,7 @@ extern "C"
 }
 
 
-#ifndef SCALAPACK
+#ifndef HAVE_SCALAPACK
 int numroc(int* a, int* b, int* c, int* d, int* e)
 {
   return *a;
@@ -428,7 +428,7 @@ void DoubleMatrix::init_size(int m, int n, int mb, int nb)
   assert(nb>=0);
   m_ = m;
   n_ = n;
-#ifdef SCALAPACK
+#ifdef HAVE_SCALAPACK
   mb_ = mb;
   nb_ = nb;
 #else
@@ -504,7 +504,7 @@ void DoubleMatrix::init_size(int m, int n, int mb, int nb)
 
 #ifdef USE_CTF
   myctf_ = new CTF;
-#ifdef BGQ
+#ifdef HAVE_BGQLIBS
   myctf_->init(ctxt_.comm(),ctxt_.mype(),ctxt_.size(),MACHINE_BGQ);
 #else
   myctf_->init(ctxt_.comm(),ctxt_.mype(),ctxt_.size());
@@ -523,7 +523,7 @@ void ComplexMatrix::init_size(int m, int n, int mb, int nb)
   assert(nb>=0);
   m_ = m;
   n_ = n;
-#ifdef SCALAPACK
+#ifdef HAVE_SCALAPACK
   mb_ = mb;
   nb_ = nb;
 #else
@@ -617,7 +617,7 @@ void ComplexMatrix::init_size(int m, int n, int mb, int nb)
   if (ctxt_.mype() == 0)
      cout << "MATRIX.INIT_SIZE, CTF2" << endl;
 
-#ifdef BGQ
+#ifdef HAVE_BGQLIBS
   //myctf_->init(ctxt_.comm(),ctxt_.mype(),ctxt_.size(),MACHINE_BGQ);
 
   //ewd DEBUG
@@ -921,7 +921,7 @@ double DoubleMatrix::dot(const DoubleMatrix &x) const
     int ione=1;
     tsum=ddot(&size_, val, &ione, x.val, &ione);
   }
-#ifdef SCALAPACK
+#ifdef HAVE_SCALAPACK
   if ( active_ )
     MPI_Allreduce(&tsum, &sum, 1, MPI_DOUBLE, MPI_SUM, ctxt_.comm() );
 #else
@@ -950,7 +950,7 @@ complex<double> ComplexMatrix::dot(const ComplexMatrix &x) const
     for ( int i = 0; i < size_; i++ )
       tsum += conj(val[i]) * x.val[i];
   }
-#ifdef SCALAPACK
+#ifdef HAVE_SCALAPACK
   if ( active_ )
     MPI_Allreduce((double*)&tsum, (double*)&sum, 2, 
                   MPI_DOUBLE, MPI_SUM, ctxt_.comm() );
@@ -980,7 +980,7 @@ complex<double> ComplexMatrix::dotu(const ComplexMatrix &x) const
     for ( int i = 0; i < size_; i++ )
       tsum += val[i] * x.val[i];
   }
-#ifdef SCALAPACK
+#ifdef HAVE_SCALAPACK
   if ( active_ )
     MPI_Allreduce((double*)&tsum, (double*)&sum, 2, 
                   MPI_DOUBLE, MPI_SUM, ctxt_.comm() );
@@ -999,7 +999,7 @@ double DoubleMatrix::amax(void) const
     int ione=1;
     tam = val[idamax(&size_,val,&ione) - 1];
   }
-#ifdef SCALAPACK
+#ifdef HAVE_SCALAPACK
   if ( active_ )
     MPI_Allreduce(&tam, &am, 1, MPI_DOUBLE, MPI_MAX, ctxt_.comm() );
 #else
@@ -1062,7 +1062,7 @@ void DoubleMatrix::copyInPlace(DoubleMatrix& a)
 void DoubleMatrix::getsub(const DoubleMatrix &a,
   int m, int n, int ia, int ja)
 {
-#if SCALAPACK
+#ifdef HAVE_SCALAPACK
   int iap=ia+1;
   int jap=ja+1;
   assert(n<=n_);
@@ -1089,7 +1089,7 @@ void DoubleMatrix::getsub(const DoubleMatrix &a,
 void DoubleMatrix::getsub(const DoubleMatrix &a,
   int m, int n, int isrc, int jsrc, int idest, int jdest)
 {
-#if SCALAPACK
+#ifdef HAVE_SCALAPACK
   int iap=isrc+1;
   int jap=jsrc+1;
   int idp=idest+1;
@@ -1121,7 +1121,7 @@ void ComplexMatrix::copyInPlace(ComplexMatrix& a)
 void ComplexMatrix::getsub(const ComplexMatrix &a,
   int m, int n, int ia, int ja)
 {
-#if SCALAPACK
+#ifdef HAVE_SCALAPACK
   int iap=ia+1;
   int jap=ja+1;
   assert(n<=n_);
@@ -1148,7 +1148,7 @@ void ComplexMatrix::getsub(const ComplexMatrix &a,
 void ComplexMatrix::getsub(const ComplexMatrix &a,
   int m, int n, int isrc, int jsrc, int idest, int jdest)
 {
-#if SCALAPACK
+#ifdef HAVE_SCALAPACK
   int iap=isrc+1;
   int jap=jsrc+1;
   int idp=idest+1;
@@ -1181,7 +1181,7 @@ void DoubleMatrix::transpose(double alpha, const DoubleMatrix& a, double beta)
     assert(a.m() == n_);
     assert(a.n() == m_);
  
-#ifdef SCALAPACK
+#ifdef HAVE_SCALAPACK
     int ione = 1;
     pdtran(&m_, &n_, &alpha,
          a.val, &ione, &ione, a.desc_,
@@ -1225,7 +1225,7 @@ void ComplexMatrix::transpose(complex<double> alpha, const ComplexMatrix& a,
     assert(a.m() == n_);
     assert(a.n() == m_);
  
-#ifdef SCALAPACK
+#ifdef HAVE_SCALAPACK
     int ione = 1;
     pztranc(&m_, &n_, &alpha,
          a.val, &ione, &ione, a.desc_,
@@ -1350,7 +1350,7 @@ void DoubleMatrix::ger(double alpha,
 {
   assert(x.n()==m_);
   assert(y.n()==n_);
-#if SCALAPACK
+#ifdef HAVE_SCALAPACK
   int ione=1;
   
   int ix = kx+1;
@@ -1377,7 +1377,7 @@ void DoubleMatrix::syr(char uplo, double alpha,
   const DoubleMatrix& x, int k, char rowcol)
 {
   assert(n_==m_);
-#if SCALAPACK
+#ifdef HAVE_SCALAPACK
   int ix,jx,incx,ione=1;
   if ( rowcol == 'c' )
   {
@@ -1615,7 +1615,7 @@ void DoubleMatrix::gemm(char transa, char transb,
       assert(k==b.n());
     }
  
-#ifdef SCALAPACK
+#ifdef HAVE_SCALAPACK
     QB_Pstart(3, pdgemm);
     int ione=1;
 #ifdef USE_CTF
@@ -1671,7 +1671,7 @@ void ComplexMatrix::gemm(char transa, char transb,
       assert(k==b.n());
     }
  
-#ifdef SCALAPACK
+#ifdef HAVE_SCALAPACK
     int ione=1;
     QB_Pstart(4, pzgemm);
 #ifdef USE_CTF
@@ -1721,7 +1721,7 @@ void DoubleMatrix::symm(char side, char uplo,
       assert(a.m()==b.n());
     }
  
-#ifdef SCALAPACK
+#ifdef HAVE_SCALAPACK
     int ione=1;
     pdsymm(&side, &uplo, &m_, &n_, &alpha,
          a.val, &ione, &ione, a.desc_,
@@ -1758,7 +1758,7 @@ void ComplexMatrix::hemm(char side, char uplo,
       assert(a.m()==b.n());
     }
  
-#ifdef SCALAPACK
+#ifdef HAVE_SCALAPACK
     int ione=1;
     pzhemm(&side, &uplo, &m_, &n_, &alpha,
          a.val, &ione, &ione, a.desc_,
@@ -1795,7 +1795,7 @@ void ComplexMatrix::symm(char side, char uplo,
       assert(a.m()==b.n());
     }
  
-#ifdef SCALAPACK
+#ifdef HAVE_SCALAPACK
     int ione=1;
     pzsymm(&side, &uplo, &m_, &n_, &alpha,
          a.val, &ione, &ione, a.desc_,
@@ -1831,7 +1831,7 @@ void DoubleMatrix::trmm(char side, char uplo, char trans, char diag,
     {
       assert(a.n_==n_);
     }
-#ifdef SCALAPACK
+#ifdef HAVE_SCALAPACK
     int ione=1;
     pdtrmm(&side, &uplo, &trans, &diag, &m_, &n_,
            &alpha, a.val, &ione, &ione, a.desc_,
@@ -1864,7 +1864,7 @@ void DoubleMatrix::trsm(char side, char uplo, char trans, char diag,
     {
       assert(a.n_==n_);
     }
-#ifdef SCALAPACK
+#ifdef HAVE_SCALAPACK
     int ione=1;
     pdtrsm(&side, &uplo, &trans, &diag, &m_, &n_,
            &alpha, a.val, &ione, &ione, a.desc_,
@@ -1897,7 +1897,7 @@ void ComplexMatrix::trsm(char side, char uplo, char trans,
     {
       assert(a.n_==n_);
     }
-#ifdef SCALAPACK
+#ifdef HAVE_SCALAPACK
     int ione=1;
     pztrsm(&side, &uplo, &trans, &diag, &m_, &n_,
            &alpha, a.val, &ione, &ione, a.desc_,
@@ -1923,7 +1923,7 @@ void DoubleMatrix::trtrs(char uplo, char trans, char diag,
   {
     assert(m_==n_);
 
-#ifdef SCALAPACK
+#ifdef HAVE_SCALAPACK
     int ione=1;
     pdtrtrs(&uplo, &trans, &diag, &m_, &b.n_, 
     val, &ione, &ione, desc_,
@@ -1955,7 +1955,7 @@ void ComplexMatrix::trtrs(char uplo, char trans, char diag, ComplexMatrix& b) co
   if ( active() ) {
     assert(m_==n_);
 
-#ifdef SCALAPACK
+#ifdef HAVE_SCALAPACK
     int ione=1;
     pztrtrs(&uplo, &trans, &diag, &m_, &b.n_, val, &ione, &ione, desc_,
             b.val, &ione, &ione, b.desc_, &info);
@@ -1985,7 +1985,7 @@ void DoubleMatrix::lu(valarray<int>& ipiv)
     assert(m_==n_);
     ipiv.resize(mloc_+mb_);
 
-#ifdef SCALAPACK
+#ifdef HAVE_SCALAPACK
     int ione=1;
     pdgetrf(&m_, &n_, val, &ione, &ione, desc_, &ipiv[0], &info);
 #else
@@ -2015,7 +2015,7 @@ void DoubleMatrix::inverse(void)
     valarray<int> ipiv(mloc_+mb_);
 
     // LU decomposition
-#ifdef SCALAPACK
+#ifdef HAVE_SCALAPACK
     int ione=1;
     pdgetrf(&m_, &n_, val, &ione, &ione, desc_, &ipiv[0], &info);
 #else
@@ -2032,7 +2032,7 @@ void DoubleMatrix::inverse(void)
     }
 
     // Compute inverse using LU decomposition
-#ifdef SCALAPACK
+#ifdef HAVE_SCALAPACK
     valarray<double> work(1);
     valarray<int> iwork(1);
     int lwork = -1;
@@ -2080,7 +2080,7 @@ void ComplexMatrix::inverse(void) {
     valarray<int> ipiv(mloc_+mb_);
 
     // LU decomposition
-#ifdef SCALAPACK
+#ifdef HAVE_SCALAPACK
     int ione=1;
     pzgetrf(&m_, &n_, val, &ione, &ione, desc_, &ipiv[0], &info);
 #else
@@ -2096,7 +2096,7 @@ void ComplexMatrix::inverse(void) {
     }
 
     // Compute inverse using LU decomposition
-#ifdef SCALAPACK
+#ifdef HAVE_SCALAPACK
     valarray<complex<double> > work(1);
     valarray<int> iwork(1);
     int lwork = -1;
@@ -2144,7 +2144,7 @@ void DoubleMatrix::potrf(char uplo)
   {
     assert(m_==n_);
 
-#ifdef SCALAPACK
+#ifdef HAVE_SCALAPACK
     int ione=1;
     pdpotrf(&uplo, &m_, val, &ione, &ione, desc_, &info);
 #else
@@ -2173,7 +2173,7 @@ void ComplexMatrix::potrf(char uplo)
   {
     assert(m_==n_);
 
-#ifdef SCALAPACK
+#ifdef HAVE_SCALAPACK
     int ione=1;
     pzpotrf(&uplo, &m_, val, &ione, &ione, desc_, &info);
 #else
@@ -2203,7 +2203,7 @@ void DoubleMatrix::potri(char uplo)
   {
     assert(m_==n_);
 
-#ifdef SCALAPACK
+#ifdef HAVE_SCALAPACK
     int ione=1;
     pdpotri(&uplo, &m_, val, &ione, &ione, desc_, &info);
 #else
@@ -2231,7 +2231,7 @@ void DoubleMatrix::trtri(char uplo, char diag)
   {
     assert(m_==n_);
 
-#ifdef SCALAPACK
+#ifdef HAVE_SCALAPACK
     int ione=1;
     pdtrtri(&uplo, &diag, &m_, val, &ione, &ione, desc_, &info);
 #else
@@ -2257,7 +2257,7 @@ void ComplexMatrix::trtri(char uplo, char diag) {
   if ( active() ) {
     assert(m_==n_);
 
-#ifdef SCALAPACK
+#ifdef HAVE_SCALAPACK
     int ione=1;
     pztrtri(&uplo, &diag, &m_, val, &ione, &ione, desc_, &info);
 #else
@@ -2288,7 +2288,7 @@ double DoubleMatrix::pocon(char uplo) const
   {
     assert(m_==n_);
 
-#ifdef SCALAPACK
+#ifdef HAVE_SCALAPACK
     int     ione=1;
     int     lwork=2*mloc_+3*nloc_+nb_;
     int     liwork=mloc_;
@@ -2350,7 +2350,7 @@ void DoubleMatrix::syrk(char uplo, char trans,
       k = a.m();
     }
  
-#ifdef SCALAPACK
+#ifdef HAVE_SCALAPACK
     int ione = 1;
     pdsyrk(&uplo, &trans, &n, &k, &alpha,
          a.val, &ione, &ione, a.desc_,
@@ -2396,7 +2396,7 @@ void ComplexMatrix::herk(char uplo, char trans,
 #endif
     }
  
-#ifdef SCALAPACK
+#ifdef HAVE_SCALAPACK
     int ione = 1;
     pzherk(&uplo, &trans, &n, &k, &alpha,
          a.val, &ione, &ione, a.desc_,
@@ -2440,7 +2440,7 @@ void DoubleMatrix::matgather(double *a, int lda) const
       }
     }
 
-#ifdef SCALAPACK
+#ifdef HAVE_SCALAPACK
     int     max_size=200000;
     int     size    = lda*n_;
     int     ione=1;
@@ -2522,7 +2522,7 @@ double DoubleMatrix::trace(void) const
 {
   assert(m_==n_);
 
-#ifdef SCALAPACK
+#ifdef HAVE_SCALAPACK
   int ione=1;
   return pdlatra(&n_,val,&ione,&ione,desc_);
 #else
@@ -2549,7 +2549,7 @@ void DoubleMatrix::sygst(int itype, char uplo, const DoubleMatrix& b)
   {
     assert(m_==n_);
 
-#ifdef SCALAPACK
+#ifdef HAVE_SCALAPACK
     int ione=1;
     double  scale;
     pdsygst(&itype, &uplo, &m_, val, &ione, &ione, desc_, 
@@ -2579,7 +2579,7 @@ void DoubleMatrix::syev(char uplo, valarray<double>& w, DoubleMatrix& z)
   {
     assert(m_==n_);
     char jobz = 'V';
-#ifdef SCALAPACK
+#ifdef HAVE_SCALAPACK
     // pdsyev sometimes fails on 1 cpu, use syev
     //if (ctxt_.nprow() == 1 || ctxt_.npcol() == 1) { 
     if (ctxt_.npcol() == 1) { 
@@ -2662,7 +2662,7 @@ void DoubleMatrix::syevd(char uplo, valarray<double>& w, DoubleMatrix& z)
   {
     assert(m_==n_);
     char jobz = 'V';
-#ifdef SCALAPACK
+#ifdef HAVE_SCALAPACK
     // pdsyev sometimes fails on 1 cpu, use syev
     //if (ctxt_.nprow() == 1 || ctxt_.npcol() == 1) { 
     if (ctxt_.npcol() == 1) { 
@@ -2766,7 +2766,7 @@ void DoubleMatrix::syev(char uplo, valarray<double>& w)
     assert(m_==n_);
     char jobz = 'N';
 
-#ifdef SCALAPACK
+#ifdef HAVE_SCALAPACK
     // psyev sometimes fails on 1 cpu, use syev
     //if (ctxt_.nprow() == 1 || ctxt_.npcol() == 1) { 
     if (ctxt_.npcol() == 1) { 
@@ -2851,7 +2851,7 @@ void DoubleMatrix::syevd(char uplo, valarray<double>& w)
     assert(m_==n_);
     char jobz = 'N';
 
-#ifdef SCALAPACK
+#ifdef HAVE_SCALAPACK
 
     // psyevd sometimes fails on 1 cpu, use syev
     //if (ctxt_.nprow() == 1 || ctxt_.npcol() == 1) { 
@@ -2945,7 +2945,7 @@ void ComplexMatrix::heev(char uplo, valarray<double>& w, ComplexMatrix& z) {
     assert(m_==n_);
     char jobz = 'V';
 
-#ifdef SCALAPACK
+#ifdef HAVE_SCALAPACK
     int ione=1;
     int lwork=-1;
     int lrwork=-1;
@@ -2998,7 +2998,7 @@ void ComplexMatrix::heev(char uplo, valarray<double>& w, ComplexMatrix& z) {
       exit(2);
 #endif
     }
-#ifdef SCALAPACK
+#ifdef HAVE_SCALAPACK
     delete[] work;
     delete[] rwork;
 #endif
@@ -3014,7 +3014,7 @@ void ComplexMatrix::heevd(char uplo, valarray<double>& w, ComplexMatrix& z) {
     assert(m_==n_);
     char jobz = 'V';
 
-#ifdef SCALAPACK
+#ifdef HAVE_SCALAPACK
 
     // pzheevd sometimes fails on 1 cpu, use zheev
 
@@ -3157,7 +3157,7 @@ void ComplexMatrix::heevx(char uplo, valarray<double>& w, ComplexMatrix& z, doub
                        // 'V' = find eigenvalues in interval [VL,VU]
                        // 'I' = the IL-th through IU-th eigenvalues will be found
 
-#ifdef SCALAPACK
+#ifdef HAVE_SCALAPACK
     int ione=1;
     int lwork=-1;
     int lrwork=-1;
@@ -3238,7 +3238,7 @@ void ComplexMatrix::heevx(char uplo, valarray<double>& w, ComplexMatrix& z, doub
     }
     delete[] work;
     delete[] rwork;
-#ifdef SCALAPACK
+#ifdef HAVE_SCALAPACK
     delete[] iwork;
     delete[] ifail;
 #endif
@@ -3254,7 +3254,7 @@ void ComplexMatrix::heevr(char uplo, valarray<double>& w, ComplexMatrix& z) {
     assert(m_==n_);
     char jobz = 'V';
 
-#ifdef SCALAPACK
+#ifdef HAVE_SCALAPACK
     // ewd:  memory error with single-row contexts and zheev:
     //    *** glibc detected *** double free or corruption (!prev): 0x084c0200 **
     //if (ctxt_.nprow() == 1 || ctxt_.npcol() == 1) { 
@@ -3378,7 +3378,7 @@ void ComplexMatrix::heevd(char uplo, valarray<double>& w) {
     assert(m_==n_);
     char jobz = 'N';
 
-#ifdef SCALAPACK
+#ifdef HAVE_SCALAPACK
     int ione=1;
     int lwork=-1;
     int lrwork=-1;
@@ -3436,7 +3436,7 @@ void ComplexMatrix::heevd(char uplo, valarray<double>& w) {
     }
     delete[] work;
     delete[] rwork;
-#ifdef SCALAPACK
+#ifdef HAVE_SCALAPACK
     delete[] iwork;
 #endif
   }
@@ -3452,7 +3452,7 @@ void ComplexMatrix::heev(char uplo, valarray<double>& w)
     assert(m_==n_);
     char jobz = 'N';
 
-#ifdef SCALAPACK
+#ifdef HAVE_SCALAPACK
     int ione=1;
     int lwork=-1;
     int lrwork=-1;

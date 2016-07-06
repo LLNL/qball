@@ -27,6 +27,8 @@
 //
 // written by Erik Draeger, 1/22/2007
 
+#include <config.h>
+
 #include "UserInterface.h"
 #include "Context.h"
 #include "Sample.h"

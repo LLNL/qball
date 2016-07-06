@@ -27,6 +27,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 // $Id: PlotCmd.C,v 1.4 2009-08-26 15:03:50 fgygi Exp $
 
+#include <config.h>
+
 #include "PlotCmd.h"
 #include "isodate.h"
 #include "release.h"

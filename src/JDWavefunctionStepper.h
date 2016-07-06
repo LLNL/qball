@@ -27,6 +27,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 // $Id: JDWavefunctionStepper.h,v 1.2 2009/09/08 05:36:49 fgygi Exp $
 
+#include <config.h>
+
 #ifndef JDWAVEFUNCTIONSTEPPER_H
 #define JDWAVEFUNCTIONSTEPPER_H
 

@@ -26,6 +26,8 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+#include <config.h>
+
 #include <cmath>
 #include <cassert>
 #include <vector>
@@ -38,7 +40,7 @@
 #include <mpi.h>
 #endif
 
-#ifdef SCALAPACK
+#ifdef HAVE_SCALAPACK
 #include "blacs.h"
 #endif
 

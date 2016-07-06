@@ -27,6 +27,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 // $Id: FcpThTime.h,v 1.4 2008-09-08 15:56:19 fgygi Exp $
 
+#include <config.h>
+
 #ifndef FCPTHTIM_H
 #define FCPTHTIM_H
 

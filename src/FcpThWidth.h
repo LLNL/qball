@@ -27,6 +27,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 // $Id: FcpThWidth.h,v 1.4 2008-09-08 15:56:19 fgygi Exp $
 
+#include <config.h>
+
 #ifndef FCPTHWIDTH_H
 #define FCPTHWIDTH_H
 

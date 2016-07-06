@@ -26,6 +26,8 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+#include <config.h>
+
 #include "SlaterDet.h"
 #include "FourierTransform.h"
 #include "Context.h"
@@ -3098,7 +3100,7 @@ void SlaterDet::write(SharedFilePtr& sfp, string encoding, double weight, int is
 
       if ( encoding == "base64" )
         {
-      #if PLT_BIG_ENDIAN
+      #ifdef WORDS_BIGENDIAN
           xcdr.byteswap_double(tmpr_size,&tmpr[0]);
       #endif
           int nbytes = tmpr_size*sizeof(double);

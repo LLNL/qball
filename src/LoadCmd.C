@@ -26,6 +26,8 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+#include <config.h>
+
 #include "LoadCmd.h"
 #include "SampleReader.h"
 #include "Sample.h"
@@ -177,7 +179,7 @@ int LoadCmd::action(int argc, char **argv) {
              if (wfctxt->onpe0()) {
                 cout << "<!-- LoadCmd:  loading mixed charge density from file. -->" << endl;
                 // hack to make checkpointing work w. BlueGene compilers
-#ifdef BGQ
+#ifdef HAVE_BGQLIBS
                 char* tmpfilename = new char[256];
                 is.read(tmpfilename,sizeof(char)*rhorfile.length());
 #endif          
@@ -316,7 +318,7 @@ int LoadCmd::action(int argc, char **argv) {
              if (wfctxt->onpe0()) {
                 cout << "<!-- LoadCmd:  loading mixed charge density from file. -->" << endl;
                 // hack to make checkpointing work w. BlueGene compilers
-#ifdef BGQ
+#ifdef HAVE_BGQLIBS
                 char* tmpfilename = new char[256];
                 is.read(tmpfilename,sizeof(char)*rhorfile.length());
 #endif          
@@ -455,7 +457,7 @@ int LoadCmd::action(int argc, char **argv) {
              if (wfctxt->onpe0()) {
                 cout << "<!-- LoadCmd:  loading mixed charge density from file. -->" << endl;
                 // hack to make checkpointing work w. BlueGene compilers
-#ifdef BGQ
+#ifdef HAVE_BGQLIBS
                 char* tmpfilename = new char[256];
                 is.read(tmpfilename,sizeof(char)*rhorfile.length());
 #endif
@@ -596,7 +598,7 @@ int LoadCmd::action(int argc, char **argv) {
              if (wfctxt->onpe0()) {
                 cout << "<!-- LoadCmd:  loading mixed charge density from file. -->" << endl;
                 // hack to make checkpointing work w. BlueGene compilers
-#ifdef BGQ
+#ifdef HAVE_BGQLIBS
                 char* tmpfilename = new char[256];
                 is.read(tmpfilename,sizeof(char)*rhorfile.length());
 #endif

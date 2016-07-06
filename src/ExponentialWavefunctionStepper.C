@@ -27,6 +27,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 // $Id: ExponentialWavefunctionStepper.C,v 1.8 2011-06-02 15:56:19 schleife Exp $
 
+#include <config.h>
+
 #include "ExponentialWavefunctionStepper.h"
 #include "SelfConsistentPotential.h"
 #include "SlaterDet.h"

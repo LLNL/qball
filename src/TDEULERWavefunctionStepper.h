@@ -27,6 +27,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 // $Id: TDEULERWavefunctionStepper.h,v 1.5 2011-03-31 15:56:19 schleife Exp $
 
+#include <config.h>
+
 #ifndef TDEULERWAVEFUNCTIONSTEPPER_H
 #define TDEULERWAVEFUNCTIONSTEPPER_H
 

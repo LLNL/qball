@@ -26,6 +26,8 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+#include <config.h>
+
 #include "EnergyFunctional.h"
 #include "Sample.h"
 #include "Wavefunction.h"
