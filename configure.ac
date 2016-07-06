@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.63])
-AC_INIT(qball, alpha, xavier@llnl.gov)
+AC_INIT(qball, alsos, xavier@llnl.gov)
 AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([src/FoldInWsCmd.h])
 AC_CONFIG_HEADERS([config.h])
