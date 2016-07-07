@@ -26,12 +26,6 @@ fi
 
 AC_SYS_LARGEFILE
 
-# Checks for OpenMP
-AC_LANG_PUSH(C++)
-AX_OPENMP
-CXXFLAGS="$CXXFLAGS $OPENMP_CXXFLAGS"
-AC_LANG_POP(C++)
-
 # Checks for header files.
 AC_CHECK_HEADERS([stdint.h stdlib.h string.h sys/time.h unistd.h])
 
@@ -47,15 +41,40 @@ AC_FUNC_FSEEKO
 AC_FUNC_STRTOD
 AC_CHECK_FUNCS([gettimeofday memset mkdir pow sqrt strspn uname])
 
+AC_MSG_NOTICE([
+================================================================================
+  CHECKING FOR FORTRAN LIBRARIES
+================================================================================])
+dnl We need to check for fortran, to link with blas and other libraries
+AC_PROG_FC(mpif90)
+AC_FC_LIBRARY_LDFLAGS
+AC_FC_WRAPPERS
+
+AC_MSG_NOTICE([
+================================================================================
+  CHECKING FOR OPENMP
+================================================================================])
+
+# Checks for OpenMP
+AC_LANG_PUSH(C)
+AX_OPENMP
+CXXFLAGS="$CXXFLAGS $OPENMP_CXXFLAGS"
+AC_LANG_POP(C)
+
+# Checks for OpenMP
+AC_LANG_PUSH(C++)
+AX_OPENMP
+CXXFLAGS="$CXXFLAGS $OPENMP_CXXFLAGS"
+AC_LANG_POP(C++)
+
+# Checks for OpenMP
+AC_LANG_PUSH(Fortran)
+AX_OPENMP
+CXXFLAGS="$CXXFLAGS $OPENMP_CXXFLAGS"
+AC_LANG_POP(Fortran)
+
+
 #LIBRARIES
-AC_CHECK_LIB(mass, sincos)
-
-ACX_MASSV
-
-if test x$acx_massv_ok == xyes; then
-  LIBS="$LIBS_MASSV $LIBS"
-fi
-
 AC_MSG_NOTICE([
 ================================================================================
   CHECKING FOR MPI
@@ -92,14 +111,6 @@ if test x$HAVE_XERCES == xyes ; then
 fi
 
 AC_DEFINE(ARCH, "autotools", [architecture])
-
-AC_MSG_NOTICE([
-================================================================================
-  CHECKING FOR FORTRAN LIBRARIES
-================================================================================])
-dnl We need to check for fortran, to link with blas and other libraries
-AC_FC_LIBRARY_LDFLAGS
-AC_FC_WRAPPERS
 
 AC_MSG_NOTICE([
 ================================================================================
@@ -181,6 +192,18 @@ LIBS="$LIBS_SCALAPACK $LIBS_BLACS $LIBS_LAPACK $LIBS_BLAS $LIBS $FCLIBS"
 
 AC_MSG_NOTICE([
 ================================================================================
+  IBM MASS LIBRARY
+================================================================================])
+AC_CHECK_LIB(mass, sincos)
+
+ACX_MASSV
+
+if test x$acx_massv_ok == xyes; then
+  LIBS="$LIBS_MASSV $LIBS"
+fi
+
+AC_MSG_NOTICE([
+================================================================================
   CHECKING FOR BLUEGENE/Q LIBRARIES
 ================================================================================])
 
@@ -218,7 +241,7 @@ LAPACK           :  $LIBS_LAPACK
 BLACS            :  $LIBS_BLACS
 SCALAPACK        :  $acx_scalapack_ok ($LIBS_SCALAPACK)
 SCALAPACK 2      :  $acx_scalapack2_ok
-BlueGene/Q       :  $acx_bgq
 MASSV            :  $acx_massv_ok
+BlueGene/Q       :  $acx_bgq
 ])
 
