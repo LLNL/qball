@@ -18,7 +18,12 @@ AC_PROG_LN_S
 AC_PROG_MAKE_SET
 AC_PROG_RANLIB
 
-AC_C_BIGENDIAN([AC_DEFINE(WORDS_BIGENDIAN, 1, [the architecture is bigendian])])
+AC_C_BIGENDIAN([acx_bigendian=yes], [acx_bigendian=no])
+
+if test x$acx_bigendian == xyes; then
+  AC_DEFINE(WORDS_BIGENDIAN, 1, [the architecture is bigendian])
+fi
+
 AC_SYS_LARGEFILE
 
 # Checks for OpenMP
@@ -110,6 +115,7 @@ fi
 
 if test x$acx_essl_fft_ok == xyes ; then
   found_fft=yes
+  fft_lib=essl
   CFLAGS="$CFLAGS $CFLAGS_ESSL_FFT"
   CXXFLAGS="$CXXFLAGS $CFLAGS_ESSL_FFT"
   LIBS="$LIBS $LIBS_FFTW3"
@@ -122,6 +128,7 @@ fi
 
 if test x$acx_fftw3_ok == xyes ; then
   found_fft=yes
+  fft_lib=fftw3
   CFLAGS="$CFLAGS $CFLAGS_FFTW3"
   CXXFLAGS="$CXXFLAGS $CFLAGS_FFTW3"
   LIBS="$LIBS $LIBS_FFTW3"
@@ -134,17 +141,20 @@ fi
 
 if test x$acx_fftw2_ok == xyes ; then
   found_fft=yes
+  fft_lib=fftw2
   CFLAGS="$CFLAGS $CFLAGS_FFTW2"
   CXXFLAGS="$CXXFLAGS $CFLAGS_FFTW2"
   LIBS="$LIBS $LIBS_FFTW2"
 fi
 
+#INTERNAL LIBRARY
 if test x$found_fft != xyes ; then
   AC_MSG_WARN([
 
    Cannot find a suitable FFT library, using _slower_ internal FFT routines.
 
   ])
+  fft_lib=internal  
   AC_DEFINE(FFT_NOLIB, 1, [no FFT library])
 fi
 
@@ -174,8 +184,11 @@ AC_MSG_NOTICE([
   CHECKING FOR BLUEGENE/Q LIBRARIES
 ================================================================================])
 
-AC_CHECK_HEADERS([spi/include/kernel/location.h bgpm/include/bgpm.h], 
-  [AC_DEFINE(HAVE_BGQLIBS, 1, [whether BlueGene/Q libraries are available])], [])
+AC_CHECK_HEADERS([spi/include/kernel/location.h bgpm/include/bgpm.h], [acx_bgq=yes], [acx_bgq=no])
+
+if test x$acx_bgq == xyes; then
+  AC_DEFINE(HAVE_BGQLIBS, 1, [whether BlueGene/Q libraries are available])
+fi
 
 AC_MSG_NOTICE([
 ================================================================================
@@ -186,3 +199,26 @@ AC_CONFIG_FILES([Makefile
                  testsuite/Makefile])
 
 AC_OUTPUT
+
+AC_MSG_NOTICE([
+
+================================================================================
+  CONFIGURATION SUMMARY
+================================================================================
+
+C compiler       :  $CC $CFLAGS
+C++ compiler     :  $CXX $CXXFLAGS
+Fortran compiler :  $FC $FCFLAGS
+Big endian       :  $acx_bigendian
+MPI              :  $acx_mpi_ok
+Xerces-C         :  $HAVE_XERCES
+FFT library      :  $fft_lib
+BLAS             :  $LIBS_BLAS
+LAPACK           :  $LIBS_LAPACK
+BLACS            :  $LIBS_BLACS
+SCALAPACK        :  $acx_scalapack_ok ($LIBS_SCALAPACK)
+SCALAPACK 2      :  $acx_scalapack2_ok
+BlueGene/Q       :  $acx_bgq
+MASSV            :  $acx_massv_ok
+])
+
