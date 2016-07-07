@@ -48,17 +48,17 @@ class ExponentialWavefunctionStepper : public WavefunctionStepper
   int order_;
   int stored_iter_;
   bool approximated_;
+  bool merge_exp_;
   std::vector<SelfConsistentPotential> potential_;
   Wavefunction expwf_;
   Wavefunction wfhalf_;
   Wavefunction newwf_; 
-  Wavefunction newwf2_;
 
   protected:
 
   EnergyFunctional & ef_;
   Sample & s_;
-  void exponential(const double & dt, Wavefunction * dwf = 0);
+  void exponential(int num_exp, double dt1, double dt2, Wavefunction * dwf = 0);
 
   public:
   void preupdate();
@@ -73,4 +73,3 @@ class ExponentialWavefunctionStepper : public WavefunctionStepper
 // mode: c++
 // coding: utf-8
 // End:
-
