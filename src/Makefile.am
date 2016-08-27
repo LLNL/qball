@@ -136,6 +136,7 @@ noinst_HEADERS =                            \
 	MDSaveCmd.h                         \
 	MDWavefunctionStepper.h             \
 	Memory.h                            \
+	Messages.h                          \
 	MLWFTransform.h                     \
 	MMAtomCmd.h                         \
 	MMSpeciesCmd.h                      \
