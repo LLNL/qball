@@ -33,6 +33,7 @@
 #include "Species.h"
 #include "SpeciesReader.h"
 #include "XMLFile.h"
+#include "Messages.h"
 #include <cassert>
 #include <string>
 #include <iostream>
@@ -68,11 +69,13 @@ void SpeciesReader::readSpecies (Species& sp, const string uri)
   {
     struct stat statbuf;
     bool found_file = !stat(uri.c_str(),&statbuf);
-    assert(found_file);
-      cout << "  <!-- SpeciesReader opening file "
-           << uri << " size: "
-           << statbuf.st_size << " -->" << endl;
 
+    if(!found_file)  Messages::fatal("cannot find pseudopotential file '" + uri + "'");
+    
+    cout << "  <!-- SpeciesReader opening file "
+	 << uri << " size: "
+	 << statbuf.st_size << " -->" << endl;
+    
     FILE* infile;
     infile = fopen(uri.c_str(),"r");
     if ( !infile )
