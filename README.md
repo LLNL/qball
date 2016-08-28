@@ -4,44 +4,82 @@
 
 To compile Qbox:
 
-1. Go to trunk/src
+1. Generate the configure script (you need autoconf and automake). 
 
-2. Create an architecture include file, e.g. bgq_ctf_essl.mk.  This file should
-define the make variables for compiling and linking (CXX, CXXFLAGS, LDFLAGS
-etc.) and should contain the locations of all libraries and include files.
+  ```
+  autoreconf -i
+  ```
 
-3. Qbox requires ScaLAPACK 2 and dependent libraries (blas and lapack
-or vendor-equivalents, e.g. ESSL), FFTW 2.x or equivalent, and
-(optionally) Xerces XML. You also need the makedepend utility (in
-Debian comes in the xutils-dev package).
+2. Now you need to determine how to run the configure script. Since Qball depends on some non-standard libraries you might need to set some environment variables and to add some flags to tell qball where to find those libraries.
 
-4. Build the code using the ARCH variable to point to this include file, e.g.:
+| Environment variable | Description             | Note                  |
+|----------------------|-------------------------|-----------------------|
+| CC                   | C compiler              | Default is mpicc      |
+| CXX                  | C++ compiler            | Default is mpic++     |
+| FC                   | Fortran compiler        | Default is mpif90. Used only to detect Fortran libraries.|
+| CFLAGS               | C compiler flags        |                       |
+| CXXFLAGS             | C++ compiler flags      |                       |
+| FCFLAGS              | Fortran compiler flags  | Used only to detect Fortran libraries.|
+| LDFLAGS              | Flags to add to the linker |                    |
+| LIBS                 | Extra libs add to linking  |                    |
+| LIBS_BLAS            | Compilation flags to add the blas library |     |
+
+
+| Flag                  | Value                          | Note                  |
+|-----------------------|--------------------------------|-----------------------|
+| --prefix=             | installation directory         | default is /usr/local |
+| --with-fftw3-prefix=  | path where fftw3 is installed  |                       |
+| --with-fftw2-prefix=  | path where fftw2 is installed  |                       |
+| --with-essl-prefix=   | path where the IBM ESSL library is installed |         |
+| --with-blas=          | path where the Blas library file is located  | you can also use LIBS_BLAS |
+| --with-lapack=        | path where the lapack library file is located |        |
+| --with-blacs=         | path where the blacs library file is located | you can also pass the location of scalapack |
+| --with-scalapack=     | path where the scalapack file is located |             |
+
+For example, for a Blue Gene/Q system, you configure script might look something like this:
+
+  ```
+  QBALLPREFIX=/usr/local/
+  QBALLDEPS=$QBALLPREFIX/dependencies/
+  export CC=mpixlc_r
+  export CXX=mpixlcxx_r
+  export FC=mpixlf95_r
+  export LIBS_BLAS="-L/usr/local/tools/essl/5.1/lib/ -lesslsmpbg"
+  export LDFLAGS="-qsmp=omp"
+  export CFLAGS="-O3 -qsmp=omp -qarch=qp -qtune=qp"
+  export CXXFLAGS=$CFLAGS
+  export FCFLAGS=$CFLAGS" -qxlf90=autodealloc -qessl -I$HOME/$xarch/fftw-3.3.4/include"
+  ./configure --with-essl-prefix=/usr/local/tools/essl/5.1/ --with-xerces-prefix=$QBALLDEPS \
+    --with-lapack=$QBALLDEPS/lib/liblapack.a --with-blacs=$QBALLDEPS/lib/libscalapack.a --prefix=$QBALLPREFIX
+  ```
+
+3. Run the configure script with the necessary flags:
+  
+  ```
+  ./configure --prefix=... 
+  ```
+
+4. Now we are ready to build the code:
     
    ```
-   make ARCH=bgq_ctf_essl
+   make
+   make install
    ```
-   
-   If the ARCH variable is not specified, a default value will be guessed
-   from the hostname or uname commands listed in Makefile.arch.  
-
-5. Object files are stored in objs-$(ARCH) subdirectories, so one can
-compile multiple versions of the code simultaneously in the same
-directory.
 
 Contact Erik Draeger (draeger1@llnl.gov) or Xavier Andrade
 (xavier@llnl.gov) with any questions or problems.
 
 ## Running
 
-To run Qbox, one needs an input file (.i), a coordinate file (.sys)
+To run Qball, one needs an input file (.i), a coordinate file (.sys)
 and pseudopotential file(s) (.xml).  Input examples can be found in
 the examples/ directory.
 
-The input file can be specified either as an argument or as stdin to Qbox, e.g.
+The input file can be specified either as an argument or as stdin to qball, e.g.
 
-    srun -n 16384 ./qb-bgq_ctf_essl gold.N992.i > gold.N992.out
+    srun -n 16384 qball gold.N992.i > gold.N992.out
 
-    srun -n 64 ./qb-linux < test.i > test.out
+    srun -n 64 qball < test.i > test.out
 
 ## Release
 
