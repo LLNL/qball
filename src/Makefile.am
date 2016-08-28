@@ -171,6 +171,7 @@ noinst_HEADERS =                            \
 	RandomizeRealWfCmd.h                \
 	RandomizeVelCmd.h                   \
 	RandomizeWfCmd.h                    \
+	RMMDIISWavefunctionStepper.h        \
 	readTSC.h                           \
 	RefCell.h                           \
 	release.h                           \
@@ -262,6 +263,7 @@ libqbLink_a_SOURCES =                        \
 	Symmetry.C                          \
 	Species.C                           \
 	Wavefunction.C                      \
+	RMMDIISWavefunctionStepper.C        \
 	SlaterDet.C                         \
 	EnergyFunctional.C                  \
 	SampleStepper.C                     \

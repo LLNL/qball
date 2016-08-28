@@ -60,13 +60,22 @@ class WfDyn : public Var
     string v = argv[1];
     // AS: TDEULER enables first-order wave-function propagation according to |psi(t+tddt)> = |psi(t)> - i*tddt*|H psi(t)>
     // AS: SOTD enables second-order wave-function propagation according to |psi(t+tddt)> = |psi(t-tddt)> - 2*i*tddt*|H psi(t)>
-    if ( !( v == "LOCKED" || v == "SD" || v == "PSD" ||
-            v == "PSDA" || v == "JD" || v == "MD" || 
-            v == "TDEULER" || v == "SOTD" || v == "SORKTD" ||
-            v == "FORKTD" || v == "ETRS" || v == "AETRS" ) )
+    if ( !( v == "LOCKED"  ||
+	    v == "SD"      ||
+	    v == "PSD"     ||
+            v == "PSDA"    ||
+	    v == "RMMDIIS" ||
+	    v == "JD"      ||
+	    v == "MD"      || 
+            v == "TDEULER" ||
+	    v == "SOTD"    ||
+	    v == "SORKTD"  ||
+            v == "FORKTD"  ||
+	    v == "ETRS"    ||
+	    v == "AETRS" ) )
     {
        if ( ui->oncoutpe() )
-          cout << " wf_dyn must be in [LOCKED,SD,PSD,PSDA,JD,MD,TDEULER,SOTD,SORKTD,FORKTD,ETRS,AETRS]" << endl;
+          cout << " wf_dyn must be in [LOCKED,SD,PSD,PSDA,RMMDIIS,JD,MD,TDEULER,SOTD,SORKTD,FORKTD,ETRS,AETRS]" << endl;
        return 1;
     }
 
