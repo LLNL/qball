@@ -428,13 +428,13 @@ int main(int argc, char **argv, char **envp)
     {
       in.open(argv[1],ios::in);
     }
-    ui->processCmds(in, "[qbox]", echo, /*interactive =*/ false);
+    ui->processCmds(in, "[qball]", echo, /*interactive =*/ false);
   }
   else
   {
     // use standard input
     bool echo = !isatty(0);
-    ui->processCmds(cin, "[qbox]", echo);
+    ui->processCmds(cin, "[qball]", echo);
   }
 
   // exit using the quit command when a encountering EOF in a script
