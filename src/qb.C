@@ -251,7 +251,7 @@ int main(int argc, char **argv, char **envp)
     cout << "                   ===========================\n\n";
     cout << "-->\n";
     cout << "<qbox:simulation xmlns:qbox=\"" << qbox_xmlns() << "\">" << endl;
-    cout << "<release> " << release() << " " << ARCH << " </release>" << endl;
+    cout << "<release> " << release() << " </release>" << endl;
     cout << "<npes> " << ctxt.size() << " </npes>" << endl;
     int nthreads = omp_get_max_threads();
     cout << "<nthreads> " << nthreads << " </nthreads>" << endl;

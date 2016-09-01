@@ -30,5 +30,5 @@
 
 #include "release.h"
 std::string release(void) {
-  return std::string("qb@LL-r274");
+  return std::string(PACKAGE_STRING);
 }
