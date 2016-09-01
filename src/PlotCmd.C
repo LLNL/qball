@@ -363,7 +363,7 @@ int PlotCmd::action(int argc, char **argv)
         const double a0 = 0.529177;
         int natoms = s->atoms.size();
         os << natoms << endl;
-        os << "Created " << isodate() << " by qbox-" << release() << endl;
+        os << "Created " << isodate() << " by " << release() << endl;
         const int nsp = s->atoms.nsp();
         for ( int is = 0; is < nsp; is++ )
         {
@@ -381,7 +381,7 @@ int PlotCmd::action(int argc, char **argv)
       else
       {
         // write header and atoms
-        os << "Created " << isodate() << " by qbox-" << release() << endl;
+        os << "Created " << isodate() << " by " << release() << endl;
         os << endl;
 
         int natoms = s->atoms.size();
