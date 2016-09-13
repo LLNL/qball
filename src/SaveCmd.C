@@ -49,6 +49,10 @@
 #include <cstdlib>
 #include <sstream>
 #endif
+
+#include <sys/stat.h>
+#include <sys/types.h>
+
 using namespace std;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -368,10 +372,27 @@ int SaveCmd::action(int argc, char **argv) {
   }
 
   else if (encoding == "states" ) {
-     if ( ui->oncoutpe() )
-        cout << "<!-- SaveCmd:  writing wf " << filestr << "... -->" << endl;
-     s->wf.write_states(filestr,format);
-     s->wf.write_mditer(filestr,s->ctrl.mditer);
+    if ( ui->oncoutpe() ) {
+      cout << "<!-- SaveCmd:  writing wf " << filestr << "... -->" << endl;
+      string dirstr = filestr.substr(0, filestr.find_last_of('/'));
+      
+      int mode = 0775;
+      struct stat statbuf;
+      int rc = stat(dirstr.c_str(), &statbuf);
+      if (rc == -1) {
+	cout << "<!-- Creating directory: " << dirstr << "/ -->" << endl;
+	rc = mkdir(dirstr.c_str(), mode);
+	rc = stat(dirstr.c_str(), &statbuf);
+      }
+      if (rc != 0 || !(statbuf.st_mode)) {
+	cout << "<ERROR> Can't stat directory " << dirstr << " </ERROR> " << endl;
+	MPI_Abort(MPI_COMM_WORLD,2);
+	}
+      
+    }
+    
+    s->wf.write_states(filestr,format);
+    s->wf.write_mditer(filestr,s->ctrl.mditer);
 
     if (s->ctrl.tddft_involved)
     {
