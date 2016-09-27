@@ -242,7 +242,7 @@ void SampleReader::readSample (Sample& s, const string uri, bool serial)
     delete parser;
     XMLPlatformUtils::Terminate();
     // parsing of sample is complete, send end of sample tag to tasks > 0
-    event_type event = end;
+    event_type event = event_end;
     ctxt_.ibcast_send(1,1,(int*)&event,1);
   } // oncoutpe
   else
@@ -255,7 +255,7 @@ void SampleReader::readSample (Sample& s, const string uri, bool serial)
     while ( !done )
     {
       ctxt_.ibcast_recv(1,1,(int*)&event,1,0,0);
-      if ( event == end )
+      if ( event == event_end )
         done = true;
       else if ( event == unit_cell )
       {

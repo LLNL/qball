@@ -32,7 +32,7 @@
 #define SAMPLEREADER_H
 
 enum event_type { unit_cell, species, atom, wavefunction, wavefunction_velocity,
-                  slater_determinant, end, invalid };
+                  slater_determinant, event_end, invalid };
 
 class Context;
 class Sample;
