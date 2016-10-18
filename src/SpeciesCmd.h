@@ -47,9 +47,9 @@ class SpeciesCmd : public Cmd
 
   SpeciesCmd(Sample *sample) : s(sample) { s->ctrl.ultrasoft = false; s->ctrl.nlcc = false; };
 
-  char *name(void) const { return "species"; }
+  char const*name(void) const { return "species"; }
 
-  char *help_msg(void) const
+  char const*help_msg(void) const
   {
     return 
     "\n species\n\n"

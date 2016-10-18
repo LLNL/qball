@@ -49,7 +49,7 @@ class Non_Selfconsistent_Energy_Output : public Var
 
   public:
 
-  char *name ( void ) const { return "non_selfc_energy"; };
+  char const*name ( void ) const { return "non_selfc_energy"; };
 
   int set ( int argc, char **argv )
   {

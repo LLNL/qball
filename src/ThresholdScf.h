@@ -43,7 +43,7 @@ class ThresholdScf : public Var {
 
   public:
 
-  char *name ( void ) const { return "threshold_scf"; };
+  char const*name ( void ) const { return "threshold_scf"; };
 
   int set ( int argc, char **argv ) {
     if ( argc < 2 || argc > 3 ) {

@@ -70,7 +70,7 @@ int MDSaveCmd::action(int argc, char **argv) {
   string encoding = "states";
   //string encoding = "fast";
   string dirbase = "md.";
-  char* filename = "mdchk";
+  char const* filename = "mdchk";
 
   // parse arguments
   for ( int i = 1; i < argc; i++ ) {

@@ -45,7 +45,7 @@ class FcpPmass : public Var
 
   public:
 
-  char *name ( void ) const { return "fcp_pmass"; };
+  char const*name ( void ) const { return "fcp_pmass"; };
 
   int set ( int argc, char **argv )
   {

@@ -48,7 +48,7 @@ class WF_Phase_RealVar : public Var
 
   public:
 
-  char *name ( void ) const { return "phase_real_wf"; };
+  char const*name ( void ) const { return "phase_real_wf"; };
 
   int set ( int argc, char **argv )
   {

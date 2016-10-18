@@ -44,7 +44,7 @@ class Nempty : public Var
 
   public:
 
-  char *name ( void ) const { return "nempty"; };
+  char const*name ( void ) const { return "nempty"; };
 
   int set ( int argc, char **argv )
   {

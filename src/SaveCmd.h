@@ -47,9 +47,9 @@ class SaveCmd : public Cmd
 
   SaveCmd(Sample *sample) : s(sample) {};
 
-  char *name(void) const { return "save"; }
+  char const*name(void) const { return "save"; }
 
-  char *help_msg(void) const
+  char const*help_msg(void) const
   {
     return 
     "\n save\n\n"

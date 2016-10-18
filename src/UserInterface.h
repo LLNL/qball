@@ -47,8 +47,8 @@ class Cmd
 {
   public:
   UserInterface *ui;
-  virtual char *name(void) const = 0;
-  virtual char *help_msg(void) const = 0;
+  virtual char const*name(void) const = 0;
+  virtual char const*help_msg(void) const = 0;
   virtual int action(int argc, char **argv) = 0;
 };
 
@@ -56,7 +56,7 @@ class Var
 {
   public:
   UserInterface *ui;
-  virtual char *name ( void ) const = 0;
+  virtual char const*name ( void ) const = 0;
   virtual int set ( int argc, char **argv ) = 0;
   virtual string print ( void ) const = 0;
 };
@@ -93,7 +93,7 @@ class UserInterface
     cmdlist.push_back( newcmd );
   };
 
-  Cmd *findCmd(char *cmdname)
+  Cmd *findCmd(char const*cmdname)
   {
     list<Cmd*>::iterator cmd;
     for ( cmd = cmdlist.begin();
@@ -116,7 +116,7 @@ class UserInterface
     varlist.push_back( newvar );
   };
 
-  Var *findVar(char *varname)
+  Var *findVar(char const*varname)
   {
     list<Var*>::iterator var;
     for ( var = varlist.begin();
@@ -133,7 +133,7 @@ class UserInterface
     }
   };
 
-  void processCmds(istream &cmdstream, char *prompt, bool echo, bool interactive = true);
+  void processCmds(istream &cmdstream, char const*prompt, bool echo, bool interactive = true);
   
   void terminate(void) { terminate_ = true; };
 

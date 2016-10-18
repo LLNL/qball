@@ -43,7 +43,7 @@ class MDIter : public Var {
 
   public:
 
-  char *name ( void ) const { return "mditer"; };
+  char const*name ( void ) const { return "mditer"; };
 
   int set ( int argc, char **argv ) {
     if ( argc != 2 ) {

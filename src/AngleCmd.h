@@ -44,8 +44,8 @@ class AngleCmd : public Cmd
 
   AngleCmd(Sample *sample) : s(sample) {};
 
-  char *name(void) const { return "angle"; }
-  char *help_msg(void) const
+  char const*name(void) const { return "angle"; }
+  char const*help_msg(void) const
   {
     return
     "\n angle\n\n"

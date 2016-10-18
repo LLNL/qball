@@ -44,7 +44,7 @@ class Ecuts : public Var
 
   public:
 
-  char *name ( void ) const { return "ecuts"; };
+  char const*name ( void ) const { return "ecuts"; };
 
   int set ( int argc, char **argv )
   {

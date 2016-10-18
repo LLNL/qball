@@ -45,8 +45,8 @@ class RandomizeRealWfCmd : public Cmd
 
   RandomizeRealWfCmd(Sample *sample) : s(sample) {};
 
-  char *name(void) const { return "randomize_real_wf"; }
-  char *help_msg(void) const
+  char const*name(void) const { return "randomize_real_wf"; }
+  char const*help_msg(void) const
   {
     return
     "\n randomize_real_wf\n\n"

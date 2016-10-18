@@ -44,7 +44,7 @@ class SaveFreq : public Var
 
   public:
 
-  char *name ( void ) const { return "savefreq"; };
+  char const*name ( void ) const { return "savefreq"; };
 
   int set ( int argc, char **argv )
   {

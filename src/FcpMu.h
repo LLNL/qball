@@ -45,7 +45,7 @@ class FcpMu : public Var
 
   public:
 
-  char *name ( void ) const { return "fcp_mu"; };
+  char const*name ( void ) const { return "fcp_mu"; };
 
   int set ( int argc, char **argv )
   {

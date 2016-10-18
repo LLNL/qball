@@ -47,8 +47,8 @@ class WFPhaseRealCmd : public Cmd
 
   WFPhaseRealCmd(Sample *sample) : s(sample) {};
 
-  char *name(void) const { return "wf_phase_real"; }
-  char *help_msg(void) const
+  char const*name(void) const { return "wf_phase_real"; }
+  char const*help_msg(void) const
   {
     return
     "\n wf_phase_real\n\n"

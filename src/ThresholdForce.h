@@ -43,7 +43,7 @@ class ThresholdForce : public Var {
 
   public:
 
-  char *name ( void ) const { return "threshold_force"; };
+  char const*name ( void ) const { return "threshold_force"; };
 
   int set ( int argc, char **argv ) {
     if ( argc < 2 || argc > 3 ) {

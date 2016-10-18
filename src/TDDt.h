@@ -48,7 +48,7 @@ class TDDt : public Var
 
   public:
 
-  char *name ( void ) const { return "TD_dt"; };
+  char const*name ( void ) const { return "TD_dt"; };
 
   int set ( int argc, char **argv )
   {

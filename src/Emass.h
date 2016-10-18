@@ -44,7 +44,7 @@ class Emass : public Var
 
   public:
 
-  char *name ( void ) const { return "emass"; };
+  char const*name ( void ) const { return "emass"; };
 
   int set ( int argc, char **argv )
   {

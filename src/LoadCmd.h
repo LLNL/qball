@@ -47,9 +47,9 @@ class LoadCmd : public Cmd
 
   LoadCmd(Sample *sample) : s(sample) {};
 
-  char *name(void) const { return "load"; }
+  char const*name(void) const { return "load"; }
 
-  char *help_msg(void) const
+  char const*help_msg(void) const
   {
     return 
     "\n load\n\n"

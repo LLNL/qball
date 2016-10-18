@@ -45,7 +45,7 @@ class FcpThermostat : public Var
 
   public:
 
-  char *name ( void ) const { return "fcp_thermostat"; };
+  char const*name ( void ) const { return "fcp_thermostat"; };
 
   int set ( int argc, char **argv )
   {

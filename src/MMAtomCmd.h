@@ -46,8 +46,8 @@ class MMAtomCmd : public Cmd {
 
   MMAtomCmd(Sample *sample) : s(sample) {};
 
-  char *name(void) const { return "mmatom"; }
-  char *help_msg(void) const {
+  char const*name(void) const { return "mmatom"; }
+  char const*help_msg(void) const {
     return 
     "\n mmatom\n\n"
     " syntax: mmatom name species x y z [vx vy vz]\n\n"

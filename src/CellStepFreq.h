@@ -43,7 +43,7 @@ class CellStepFreq : public Var {
 
   public:
 
-  char *name ( void ) const { return "cell_stepfreq"; };
+  char const*name ( void ) const { return "cell_stepfreq"; };
 
   int set ( int argc, char **argv ) {
     if ( argc != 2 ) {

@@ -47,8 +47,8 @@ class ResetVcmCmd : public Cmd
 
   ResetVcmCmd(Sample *sample) : s(sample) {};
 
-  char *name(void) const { return "reset_vcm"; }
-  char *help_msg(void) const
+  char const*name(void) const { return "reset_vcm"; }
+  char const*help_msg(void) const
   {
     return
     "\n reset_vcm\n\n"

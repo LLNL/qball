@@ -43,7 +43,7 @@ class ChargeMixing : public Var {
 
   public:
 
-  char *name ( void ) const { return "charge_mixing"; };
+  char const*name ( void ) const { return "charge_mixing"; };
 
   int set ( int argc, char **argv ) {
     if ( argc != 2 ) {

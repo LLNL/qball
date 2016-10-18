@@ -44,7 +44,7 @@ class Spin : public Var
 
   public:
 
-  char *name ( void ) const { return "spin"; };
+  char const*name ( void ) const { return "spin"; };
 
   int set ( int argc, char **argv )
   {

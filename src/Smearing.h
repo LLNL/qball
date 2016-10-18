@@ -47,7 +47,7 @@ class Smearing : public Var {
 
   public:
 
-  char *name ( void ) const { return "smearing"; };
+  char const*name ( void ) const { return "smearing"; };
 
   int set ( int argc, char **argv ) {
     if ( argc != 2 && argc != 3) {

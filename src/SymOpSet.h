@@ -48,7 +48,7 @@ class SymOpSet {
   SymOpSet();
   ~SymOpSet();
 
-  void generateOps(char* name);
+  void generateOps(char const* name);
   void convertOpsToXtal(const UnitCell& uc);
   void printXtal(ostream& os);  
   vector<SymOp*> returnAllOps(void) const {return symset_; }

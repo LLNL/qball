@@ -48,8 +48,8 @@ class ShiftWFCmd : public Cmd
 
   ShiftWFCmd(Sample *sample) : s(sample) {};
 
-  char *name(void) const { return "shift_wf"; }
-  char *help_msg(void) const
+  char const*name(void) const { return "shift_wf"; }
+  char const*help_msg(void) const
   {
     return
     "\n shift_wf\n\n"

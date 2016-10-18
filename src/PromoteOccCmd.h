@@ -44,8 +44,8 @@ class PromoteOccCmd : public Cmd
 
   PromoteOccCmd(Sample *sample) : s(sample) {};
 
-  char *name(void) const { return "promote_occ"; }
-  char *help_msg(void) const
+  char const*name(void) const { return "promote_occ"; }
+  char const*help_msg(void) const
   {
     return
     "\n promote_occ\n\n"

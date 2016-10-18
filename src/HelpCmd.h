@@ -47,9 +47,9 @@ class HelpCmd : public Cmd
 
   HelpCmd(Sample *sample) : s(sample) {};
 
-  char *name(void) const { return "help"; }
+  char const*name(void) const { return "help"; }
 
-  char *help_msg(void) const
+  char const*help_msg(void) const
   {
     return 
     "\n help\n\n"

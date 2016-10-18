@@ -44,7 +44,7 @@ class Xc : public Var
 
   public:
 
-  char *name ( void ) const { return "xc"; };
+  char const*name ( void ) const { return "xc"; };
 
   int set ( int argc, char **argv )
   {

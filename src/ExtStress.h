@@ -44,7 +44,7 @@ class ExtStress : public Var
 
   public:
 
-  char *name ( void ) const { return "ext_stress"; };
+  char const*name ( void ) const { return "ext_stress"; };
 
   int set ( int argc, char **argv )
   {
