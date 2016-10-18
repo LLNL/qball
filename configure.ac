@@ -194,7 +194,9 @@ AC_MSG_NOTICE([
 ================================================================================
   IBM MASS LIBRARY
 ================================================================================])
-AC_CHECK_LIB(mass, sincos)
+
+dnl For the moment we do not use MASS because it conflicts with xlfmath
+dnl AC_CHECK_LIB(mass, sincos)
 
 ACX_MASSV
 
