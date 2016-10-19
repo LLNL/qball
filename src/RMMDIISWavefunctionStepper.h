@@ -39,11 +39,16 @@ class RMMDIISWavefunctionStepper : public WavefunctionStepper
   private:
   
   Preconditioner& prec_;
+  int iter_;
 
   public:
 
   void update(Wavefunction& dwf);
-  
+
+  virtual void preprocess(void);
+
+  virtual void postprocess(void);
+
   RMMDIISWavefunctionStepper(Wavefunction& wf, Preconditioner& p, TimerMap& tmap);
   ~RMMDIISWavefunctionStepper(){};
 };
