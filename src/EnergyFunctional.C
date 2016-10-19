@@ -1061,7 +1061,7 @@ void EnergyFunctional::update_exc_ehart_eps(void)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-double EnergyFunctional::energy(bool compute_hpsi, Wavefunction& dwf,
+double EnergyFunctional::energy(Wavefunction& psi, bool compute_hpsi, Wavefunction& dwf,
               bool compute_forces, vector<vector<double> >& fion,
                                 bool compute_stress, valarray<double>& sigma) {
   const bool debug_stress = compute_stress && 

@@ -372,7 +372,7 @@ double ParallelOptimizer::runtime(int nrowmax, int npark, int nspin, bool print_
   {
     Timer tm_ef;
     tm_ef.start();
-    double energy = ef_.energy(true,dwf,false,fion,false,sigma_eks);
+    double energy = ef_.energy(s_.wf, true,dwf,false,fion,false,sigma_eks);
     tm_ef.stop();
     time_ef_nonscf = tm_ef.real();
     s_.ctxt_.dmax(1,1,&time_ef_nonscf,1);
@@ -382,7 +382,7 @@ double ParallelOptimizer::runtime(int nrowmax, int npark, int nspin, bool print_
   if ( compute_forces || compute_stress ) {
     Timer tm_ef;
     tm_ef.start();
-    double energy = ef_.energy(false,dwf,compute_forces,fion,
+    double energy = ef_.energy(s_.wf, false,dwf,compute_forces,fion,
                                compute_stress,sigma_eks);
     tm_ef.stop();
     time_ef_ionic = tm_ef.real();
