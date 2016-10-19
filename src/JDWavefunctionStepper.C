@@ -202,7 +202,7 @@ void JDWavefunctionStepper::update(Wavefunction& dwf)
   const bool compute_stress = false;
   vector<vector<double> > fion;
   valarray<double> sigma;
-  ef_.energy(compute_hpsi,dwf,compute_forces,fion,
+  ef_.energy(wf_, compute_hpsi,dwf,compute_forces,fion,
              compute_stress,sigma);
   
   for ( int ispin = 0; ispin < wf_.nspin(); ispin++ ) {

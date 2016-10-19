@@ -504,7 +504,7 @@ int SaveCmd::action(int argc, char **argv) {
     for ( int is = 0; is < fion.size(); is++ )
       fion[is].resize(3*s->atoms.na(is));
 
-    ef_.energy(false,dwf,false,fion,false,sigma_eks);
+    ef_.energy(s->wf, false, dwf, false, fion, false, sigma_eks);
     double eewald = ef_.casino_ewald();
     double evloc = ef_.casino_vloc();
 

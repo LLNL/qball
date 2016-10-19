@@ -63,7 +63,7 @@ void ExponentialWavefunctionStepper::exponential(int num_exp, double dt1, double
   {
     dwf = &wfhalf_;
     tmap_["expowf_ef"].start();
-    ef_.energy(true, *dwf, false, fion, false, sigma);
+    ef_.energy(wf_, true, *dwf, false, fion, false, sigma);
     tmap_["expowf_ef"].stop();
   }
 
@@ -112,7 +112,7 @@ void ExponentialWavefunctionStepper::exponential(int num_exp, double dt1, double
       
        // apply A
        tmap_["expowf_ef"].start();
-       ef_.energy(true, *dwf, false, fion, false, sigma);
+       ef_.energy(wf_, true, *dwf, false, fion, false, sigma);
        tmap_["expowf_ef"].stop();
     }
     
