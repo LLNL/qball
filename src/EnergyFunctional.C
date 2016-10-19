@@ -141,7 +141,7 @@ EnergyFunctional::EnergyFunctional(const Sample& s, const Wavefunction& wf, Char
   for ( int ispin = 0; ispin < wf_.nspin(); ispin++ )
     if (wf_.spinactive(ispin)) 
       for (int kloc=0; kloc<wf_.nkptloc(); kloc++) 
-         nlp[ispin][kloc] = new NonLocalPotential((AtomSet&)s_.atoms, *wf_.sdloc(ispin,kloc),compute_stress);
+	nlp[ispin][kloc] = new NonLocalPotential((AtomSet&)s_.atoms, wf_.sdloc(ispin, kloc)->context(), wf_.sdloc(ispin, kloc)->basis(), compute_stress);
 
   if (s_.ctrl.extra_memory >= 5) // use extra memory in large, huge mode
     for ( int ispin = 0; ispin < wf_.nspin(); ispin++ )
@@ -1408,7 +1408,6 @@ double EnergyFunctional::energy(bool compute_hpsi, Wavefunction& dwf,
   for ( int ispin = 0; ispin < wf_.nspin(); ispin++ ) {
     if (wf_.spinactive(ispin)) {
       for (int kloc=0; kloc<wf_.nkptloc(); kloc++) {
-
         //ewd DEBUG:  calculate v_r*rhor to compare against PWSCF deband
         //double deband = 0.0;
         //for (int i=0; i<vft->np012loc(); i++)
@@ -1418,7 +1417,7 @@ double EnergyFunctional::energy(bool compute_hpsi, Wavefunction& dwf,
         //cout << "EF.DEBAND deband = " << deband << "    , fac = " << fac << endl;
 
         double wt = dwf.weight(dwf.kptloc(kloc));
-        enlsum[0] += wt*nlp[ispin][kloc]->energy(compute_hpsi,*dwf.sdloc(ispin,kloc),
+        enlsum[0] += wt*nlp[ispin][kloc]->energy(*wf_.sdloc(ispin, kloc), compute_hpsi,*dwf.sdloc(ispin,kloc),
                                               compute_forces, fion_nl, compute_stress,
                                               tsigma_enl,veff_g[ispin]);
         enlsum[1] += wt;
@@ -1890,7 +1889,7 @@ void EnergyFunctional::atoms_moved(void)
     for ( int ispin = 0; ispin < wf_.nspin(); ispin++ ) 
       if (wf_.spinactive(ispin)) 
         for (int k=0; k<nlp[ispin].size(); k++)
-          nlp[ispin][k]->update_usfns(vbasis_);
+          nlp[ispin][k]->update_usfns(*wf_.sdloc(ispin, k), vbasis_);
 
 }
 
@@ -1932,7 +1931,7 @@ void EnergyFunctional::cell_moved(const bool compute_stress) {
       for (int k=0; k<nlp[ispin].size(); k++) {
         nlp[ispin][k]->update_twnl(compute_stress);
         if (s_.ctrl.ultrasoft)
-          nlp[ispin][k]->update_usfns(vbasis_);
+          nlp[ispin][k]->update_usfns(*wf_.sdloc(ispin, k), vbasis_);
       }
   
   // update Hubbard potential
