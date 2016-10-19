@@ -39,7 +39,7 @@ SymOpSet::SymOpSet(void) {
 SymOpSet::~SymOpSet() {
 }
 
-void SymOpSet::generateOps(char* name) {
+void SymOpSet::generateOps(char const* name) {
 
   if (name == "cubic") {
 

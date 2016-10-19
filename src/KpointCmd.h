@@ -46,8 +46,8 @@ class KpointCmd : public Cmd {
 
   KpointCmd(Sample *sample) : s(sample) {};
 
-  char *name(void) const { return "kpoint"; }
-  char *help_msg(void) const {
+  char const*name(void) const { return "kpoint"; }
+  char const*help_msg(void) const {
     return 
     "\n kpoint\n\n"
     " syntax: kpoint kx ky kz weight\n\n"

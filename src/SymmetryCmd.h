@@ -46,8 +46,8 @@ class SymmetryCmd : public Cmd {
 
   SymmetryCmd(Sample *sample) : s(sample) {};
 
-  char *name(void) const { return "symmetry"; }
-  char *help_msg(void) const {
+  char const*name(void) const { return "symmetry"; }
+  char const*help_msg(void) const {
     return 
     "\n symmetry\n\n"
     " syntax: symmetry s11 s12 s13 s21 s22 s23 s31 s32 s33 [f1 f2 f3]\n\n"

@@ -43,7 +43,7 @@ class EnthalpyPressure : public Var {
 
   public:
 
-  char *name ( void ) const { return "enthalpy_pressure"; };
+  char const*name ( void ) const { return "enthalpy_pressure"; };
 
   int set ( int argc, char **argv ) {
     if ( argc != 2 ) {

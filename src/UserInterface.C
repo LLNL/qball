@@ -99,7 +99,7 @@ char *UserInterface::readCmd(char *s, int max, istream &fp, bool echo)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-void UserInterface::processCmds ( istream &cmdstream, char *prompt, bool echo, bool interactive)
+void UserInterface::processCmds ( istream &cmdstream, char const*prompt, bool echo, bool interactive)
 {
   // read and process commands from cmdstream until end of file is reached
 

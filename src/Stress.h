@@ -44,7 +44,7 @@ class Stress : public Var
 
   public:
 
-  char *name ( void ) const { return "stress"; };
+  char const*name ( void ) const { return "stress"; };
 
   int set ( int argc, char **argv )
   {

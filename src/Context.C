@@ -66,7 +66,7 @@ void Cblacs_gridmap(int *icontxt, int *pmap, int ldpmap, int nprow, int npcol)
     return;
 }
 
-void Cblacs_barrier(int icontxt, char* scope)
+void Cblacs_barrier(int icontxt, char const* scope)
 {
     return;
 }

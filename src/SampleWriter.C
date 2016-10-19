@@ -152,7 +152,7 @@ void SampleWriter::writeSample(const Sample& s, const string filename,
 
     if ( ctxt_.oncoutpe() )
     {
-      char *trailer = "</fpmd:sample>\n";
+      char const*trailer = "</fpmd:sample>\n";
       int len = strlen(trailer);
       err = MPI_File_write_at(sfp.file(),sfp.mpi_offset(),(void*)trailer,
               len,MPI_CHAR,&status);

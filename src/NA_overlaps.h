@@ -48,7 +48,7 @@ class NA_overlaps : public Var
 
   public:
 
-  char *name ( void ) const { return "NA_overlaps"; };
+  char const*name ( void ) const { return "NA_overlaps"; };
 
   int set ( int argc, char **argv )
   {

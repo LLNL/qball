@@ -47,9 +47,9 @@ class SaveESPCmd : public Cmd
 
   SaveESPCmd(Sample *sample) : s(sample) {};
 
-  char *name(void) const { return "saveesp"; }
+  char const*name(void) const { return "saveesp"; }
 
-  char *help_msg(void) const
+  char const*help_msg(void) const
   {
     return
     "\n saveesp\n\n"

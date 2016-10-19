@@ -49,9 +49,9 @@ class UnlockCmd : public Cmd {
 
   UnlockCmd(Sample *sample) : s(sample) {};
 
-  char *name(void) const { return "unlock"; }
+  char const*name(void) const { return "unlock"; }
 
-  char *help_msg(void) const {
+  char const*help_msg(void) const {
     return 
     "\n unlock\n\n"
     " syntax: unlock [atom name|species name]\n\n"

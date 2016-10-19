@@ -44,7 +44,7 @@ class MatrixLoc : public Var
 
   public:
 
-  char *name ( void ) const { return "matrix_loc"; };
+  char const*name ( void ) const { return "matrix_loc"; };
 
   int set ( int argc, char **argv )
   {

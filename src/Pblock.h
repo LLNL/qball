@@ -44,7 +44,7 @@ class Pblock : public Var
 
   public:
 
-  char *name ( void ) const { return "pblock"; };
+  char const*name ( void ) const { return "pblock"; };
 
   int set ( int argc, char **argv )
   {

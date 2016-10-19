@@ -49,9 +49,9 @@ class SetVelCmd : public Cmd {
 
   SetVelCmd(Sample *sample) : s(sample) { };
 
-  char *name(void) const { return "set_velocity"; }
+  char const*name(void) const { return "set_velocity"; }
 
-  char *help_msg(void) const {
+  char const*help_msg(void) const {
     return 
     "\n lock\n\n"
     " syntax: set_velocity [atom name] [vx] [vy] [vz]\n\n"

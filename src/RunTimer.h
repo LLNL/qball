@@ -44,7 +44,7 @@ class RunTimer : public Var
 
   public:
 
-  char *name ( void ) const { return "run_timer"; };
+  char const*name ( void ) const { return "run_timer"; };
 
   int set ( int argc, char **argv )
   {

@@ -47,9 +47,9 @@ class EmpiricalPotentialCmd : public Cmd {
 
   EmpiricalPotentialCmd(Sample *sample) : s(sample) {};
 
-  char *name(void) const { return "empirical_potential"; }
+  char const*name(void) const { return "empirical_potential"; }
 
-  char *help_msg(void) const {
+  char const*help_msg(void) const {
     return 
     "\n empirical_potential\n\n"
     " syntax: empirical_potential [species1] [species2] file [filename]\n"

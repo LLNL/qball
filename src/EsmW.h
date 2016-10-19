@@ -45,7 +45,7 @@ class EsmW : public Var
 
   public:
 
-  char *name ( void ) const { return "esm_w"; };
+  char const*name ( void ) const { return "esm_w"; };
 
   int set ( int argc, char **argv )
   {

@@ -43,7 +43,7 @@ class ThresholdStress : public Var {
 
   public:
 
-  char *name ( void ) const { return "threshold_stress"; };
+  char const*name ( void ) const { return "threshold_stress"; };
 
   int set ( int argc, char **argv ) {
     if ( argc < 2 || argc > 3 ) {

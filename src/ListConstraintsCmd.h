@@ -45,8 +45,8 @@ class ListConstraintsCmd : public Cmd
 
   ListConstraintsCmd(Sample *sample) : s(sample) {};
 
-  char *name(void) const { return "list_constraints"; }
-  char *help_msg(void) const
+  char const*name(void) const { return "list_constraints"; }
+  char const*help_msg(void) const
   {
     return
     "\n list_constraints\n\n"

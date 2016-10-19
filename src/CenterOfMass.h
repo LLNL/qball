@@ -48,7 +48,7 @@ class CenterOfMass : public Var {
 
   public:
 
-  char *name ( void ) const { return "center_of_mass"; };
+  char const*name ( void ) const { return "center_of_mass"; };
 
   int set ( int argc, char **argv ) {
     if ( argc != 2 ) {

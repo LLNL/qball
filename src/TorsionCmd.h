@@ -44,8 +44,8 @@ class TorsionCmd : public Cmd
 
   TorsionCmd(Sample *sample) : s(sample) {};
 
-  char *name(void) const { return "torsion"; }
-  char *help_msg(void) const
+  char const*name(void) const { return "torsion"; }
+  char const*help_msg(void) const
   {
     return
     "\n torsion\n\n"

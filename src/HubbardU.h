@@ -44,7 +44,7 @@ class HubbardU : public Var
 
   public:
 
-  char *name ( void ) const { return "hubbard_u"; };
+  char const*name ( void ) const { return "hubbard_u"; };
 
   int set ( int argc, char **argv )
   {

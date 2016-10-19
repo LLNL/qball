@@ -46,9 +46,9 @@ class SavedenCmd : public Cmd {
 
   SavedenCmd(Sample *sample) : s(sample) {};
 
-  char *name(void) const { return "saveden"; }
+  char const*name(void) const { return "saveden"; }
 
-  char *help_msg(void) const {
+  char const*help_msg(void) const {
     return 
     "\n saveden\n\n"
     " syntax: saveden filename \n\n"

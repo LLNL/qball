@@ -43,7 +43,7 @@ class HugDeltaTemp : public Var {
 
   public:
 
-  char *name ( void ) const { return "hug_deltatemp"; };
+  char const*name ( void ) const { return "hug_deltatemp"; };
 
   int set ( int argc, char **argv ) {
     if ( argc != 2 ) {

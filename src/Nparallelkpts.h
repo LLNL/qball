@@ -44,7 +44,7 @@ class Nparallelkpts : public Var
 
   public:
 
-  char *name ( void ) const { return "nparallelkpts"; };
+  char const*name ( void ) const { return "nparallelkpts"; };
 
   int set ( int argc, char **argv )
   {

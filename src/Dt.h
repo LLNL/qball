@@ -44,7 +44,7 @@ class Dt : public Var
 
   public:
 
-  char *name ( void ) const { return "dt"; };
+  char const*name ( void ) const { return "dt"; };
 
   int set ( int argc, char **argv )
   {

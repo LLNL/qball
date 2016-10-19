@@ -43,7 +43,7 @@ class HugoniostatVar : public Var {
 
   public:
 
-  char *name ( void ) const { return "hugoniostat"; };
+  char const*name ( void ) const { return "hugoniostat"; };
 
   int set ( int argc, char **argv ) {
     if ( argc != 4 ) {

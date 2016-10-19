@@ -46,7 +46,7 @@ class Nkpoints : public Var {
 
   public:
 
-  char *name ( void ) const { return "nkpoints"; };
+  char const*name ( void ) const { return "nkpoints"; };
 
   int set ( int argc, char **argv ) {
     if ( argc != 2 ) {

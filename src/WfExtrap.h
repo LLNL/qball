@@ -46,7 +46,7 @@ class WfExtrap : public Var
 
   public:
 
-  char *name ( void ) const { return "wf_extrapolation"; };
+  char const*name ( void ) const { return "wf_extrapolation"; };
 
   int set ( int argc, char **argv )
   {

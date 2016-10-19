@@ -46,9 +46,9 @@ class PrintCmd : public Cmd
 
   PrintCmd(Sample *sample) : s(sample) {};
 
-  char *name(void) const { return "print"; }
+  char const*name(void) const { return "print"; }
 
-  char *help_msg(void) const
+  char const*help_msg(void) const
   {
     return 
     "\n print\n\n"

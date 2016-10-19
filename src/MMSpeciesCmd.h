@@ -46,9 +46,9 @@ class MMSpeciesCmd : public Cmd {
 
   MMSpeciesCmd(Sample *sample) : s(sample) {};
 
-  char *name(void) const { return "mmspecies"; }
+  char const*name(void) const { return "mmspecies"; }
 
-  char *help_msg(void) const {
+  char const*help_msg(void) const {
     return 
     "\n mmspecies\n\n"
     " syntax: mmspecies name atom_mass\n\n"

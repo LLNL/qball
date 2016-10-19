@@ -44,8 +44,8 @@ class ParOptCmd : public Cmd {
 
   ParOptCmd(Sample *sample) : s(sample) {};
 
-  char *name(void) const { return "paropt"; }
-  char *help_msg(void) const {
+  char const*name(void) const { return "paropt"; }
+  char const*help_msg(void) const {
     return 
     "\n paropt\n\n"
     " syntax: paropt filename n [nscf] [nnonscf]\n\n"

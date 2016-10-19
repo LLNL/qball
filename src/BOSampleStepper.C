@@ -1303,8 +1303,8 @@ void BOSampleStepper::step(int niter)
 
             // reset stepper only if multiple non-selfconsistent steps
             if ( nite_ > 0 ) wf_stepper->preprocess();
-            int nitemin_ = ( nite_ > 0 ? nite_ : 1);
-            for ( int ite = 0; ite < nitemin_; ite++ )
+
+            for ( int ite = 0; ite < max(nite_, 1); ite++ )
             {
                //QB_Pstart(energy+hamiltonian_update);
                tmap["scf_ef"].start();
@@ -1397,6 +1397,8 @@ void BOSampleStepper::step(int niter)
                }
             } // for ite
 
+            if ( nite_ > 0 ) wf_stepper->postprocess();
+	    
             // subspace diagonalization
             if ( compute_eigvec || s_.ctrl.wf_diag == "EIGVAL" || usdiag)
             {
@@ -1586,7 +1588,6 @@ void BOSampleStepper::step(int niter)
            if ( onpe0 )
               cout << ef_;
         }
-        wf_stepper->postprocess();
       }
       else
       {

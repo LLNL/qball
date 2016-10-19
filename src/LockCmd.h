@@ -49,9 +49,9 @@ class LockCmd : public Cmd {
 
   LockCmd(Sample *sample) : s(sample) { };
 
-  char *name(void) const { return "lock"; }
+  char const*name(void) const { return "lock"; }
 
-  char *help_msg(void) const {
+  char const*help_msg(void) const {
     return 
     "\n lock\n\n"
     " syntax: lock [-rescale|-norescale] [atom name|species name]\n\n"

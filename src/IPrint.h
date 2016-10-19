@@ -46,7 +46,7 @@ class IPrint : public Var {
 
   public:
 
-  char *name ( void ) const { return "iprint"; };
+  char const*name ( void ) const { return "iprint"; };
 
   int set ( int argc, char **argv ) {
     if ( argc != 2 ) {

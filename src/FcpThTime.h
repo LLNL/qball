@@ -45,7 +45,7 @@ class FcpThTime : public Var
 
   public:
 
-  char *name ( void ) const { return "fcp_th_time"; };
+  char const*name ( void ) const { return "fcp_th_time"; };
 
   int set ( int argc, char **argv )
   {

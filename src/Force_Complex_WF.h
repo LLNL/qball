@@ -48,7 +48,7 @@ class Force_Complex_WF : public Var
 
   public:
 
-  char *name ( void ) const { return "force_complex_wf"; };
+  char const*name ( void ) const { return "force_complex_wf"; };
 
   int set ( int argc, char **argv )
   {

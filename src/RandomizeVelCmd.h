@@ -44,8 +44,8 @@ class RandomizeVelCmd : public Cmd
 
   RandomizeVelCmd(Sample *sample) : s(sample) {};
 
-  char *name(void) const { return "randomize_vel"; }
-  char *help_msg(void) const
+  char const*name(void) const { return "randomize_vel"; }
+  char const*help_msg(void) const
   {
     return 
     "\n randomize_vel\n\n"
