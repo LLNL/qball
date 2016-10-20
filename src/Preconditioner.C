@@ -82,3 +82,28 @@ void Preconditioner::update(void)
     }
   }
 }
+
+
+////////////////////////////////////////////////////////////////////////////////
+void Preconditioner::apply(SlaterDet & sd, int ispin, int ikp){
+          
+  const valarray<double>& precdiag = diag(ispin, ikp);
+  
+  double* dcoeff =  (double*) sd.c().cvalptr();
+  const int mloc = sd.c().mloc();
+  const int ngwl = sd.basis().localsize();
+  const int nloc = sd.c().nloc();
+  
+  for ( int n = 0; n < nloc; n++ ) {
+    // note: double mloc length for complex<double> indices
+    double* dc = &dcoeff[2*mloc*n];
+    
+    // loop to ngwl only since diag[i] is not defined on [0:mloc-1]
+    for ( int i = 0; i < ngwl; i++ ) {
+      double fac = precdiag[i];
+      dc[2*i]     *= fac;
+      dc[2*i + 1] *= fac;
+    }
+  }
+ 
+}

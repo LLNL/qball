@@ -37,6 +37,7 @@ class Wavefunction;
 
 #include <vector>
 #include <valarray>
+#include "SlaterDet.h"
 using namespace std;
 
 class Preconditioner
@@ -56,6 +57,9 @@ class Preconditioner
   { return diag_[ispin][ikp]; }
 
   Preconditioner(const Sample& s, const Wavefunction& wf, const EnergyFunctional& ef);
+
+  void apply(SlaterDet & sd, int ispin, int ikp);
+  
   //~Preconditioner();
 };
 #endif

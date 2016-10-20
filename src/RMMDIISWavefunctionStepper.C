@@ -78,9 +78,10 @@ void RMMDIISWavefunctionStepper::update(Wavefunction& dwf) {
 	  tmap_["rmmdiis_residual"].stop();
 	  
           // dwf.sd->c() now contains the descent direction (HV-VA)
-        
+
+	  prec_.apply(*dwf.sd(ispin, ikp), ispin, ikp);
+	  
           tmap_["rmmdiis_update_wf"].start();
-          const valarray<double>& diag = prec_.diag(ispin,ikp);
 
           double* coeff = (double*) wf_.sd(ispin,ikp)->c().valptr();
           const double* dcoeff = (const double*) dwf.sd(ispin,ikp)->c().cvalptr();
@@ -93,9 +94,8 @@ void RMMDIISWavefunctionStepper::update(Wavefunction& dwf) {
             double* c = &coeff[2*mloc*n];
             const double* dc = &dcoeff[2*mloc*n];
 
-            // loop to ngwl only since diag[i] is not defined on [0:mloc-1]
             for ( int i = 0; i < ngwl; i++ ) {
-              const double fac = diag[i];
+              const double fac = 1.0;
               const double delta_re = fac * dc[2*i];
               const double delta_im = fac * dc[2*i+1];
               c[2*i]   -= delta_re;
