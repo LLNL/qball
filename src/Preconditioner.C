@@ -85,7 +85,7 @@ void Preconditioner::update(void)
 
 
 ////////////////////////////////////////////////////////////////////////////////
-void Preconditioner::apply(SlaterDet & sd, int ispin, int ikp){
+void Preconditioner::apply(SlaterDet & sd, int ispin, int ikp, double scale){
           
   const valarray<double>& precdiag = diag(ispin, ikp);
   
@@ -101,8 +101,8 @@ void Preconditioner::apply(SlaterDet & sd, int ispin, int ikp){
     // loop to ngwl only since diag[i] is not defined on [0:mloc-1]
     for ( int i = 0; i < ngwl; i++ ) {
       double fac = precdiag[i];
-      dc[2*i]     *= fac;
-      dc[2*i + 1] *= fac;
+      dc[2*i]     *= scale*fac;
+      dc[2*i + 1] *= scale*fac;
     }
   }
  
