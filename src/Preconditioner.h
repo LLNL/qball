@@ -58,7 +58,7 @@ class Preconditioner
 
   Preconditioner(const Sample& s, const Wavefunction& wf, const EnergyFunctional& ef);
 
-  void apply(SlaterDet & sd, int ispin, int ikp);
+  void apply(SlaterDet & sd, int ispin, int ikp, double scale = 1.0);
   
   //~Preconditioner();
 };
