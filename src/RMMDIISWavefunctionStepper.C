@@ -80,29 +80,9 @@ void RMMDIISWavefunctionStepper::update(Wavefunction& dwf) {
           // dwf.sd->c() now contains the descent direction (HV-VA)
 
 	  prec_.apply(*dwf.sd(ispin, ikp), ispin, ikp);
-	  
-          tmap_["rmmdiis_update_wf"].start();
 
-          double* coeff = (double*) wf_.sd(ispin,ikp)->c().valptr();
-          const double* dcoeff = (const double*) dwf.sd(ispin,ikp)->c().cvalptr();
-          const int mloc = wf_.sd(ispin,ikp)->c().mloc();
-          const int ngwl = wf_.sd(ispin,ikp)->basis().localsize();
-          const int nloc = wf_.sd(ispin,ikp)->c().nloc();
+	  wf_.sd(ispin,ikp)->c().axpy(-1.0, dwf.sd(ispin, ikp)->c());
 
-          for ( int n = 0; n < nloc; n++ ) {
-            // note: double mloc length for complex<double> indices
-            double* c = &coeff[2*mloc*n];
-            const double* dc = &dcoeff[2*mloc*n];
-
-            for ( int i = 0; i < ngwl; i++ ) {
-              const double fac = 1.0;
-              const double delta_re = fac * dc[2*i];
-              const double delta_im = fac * dc[2*i+1];
-              c[2*i]   -= delta_re;
-              c[2*i+1] -= delta_im;
-            }
-          }
-          tmap_["rmmdiis_update_wf"].stop();
         }
       }
     }
