@@ -231,9 +231,9 @@ int main(int argc, char **argv, char **envp)
   {
     cout << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << endl;
     cout << "<!--\n\n";
-    cout << "                   ---------------------------\n";
-    cout << "                   | " << setw(22) << left << release() << "  |\n";
+    cout << "                   ___________________________\n";
     cout << "                   |                         |\n";
+    cout << "                   | " << setw(22) << left << release() << "  |\n";
     cout << "                   |                         |\n";
     cout << "                   |                         |\n";
     cout << "                   |                         |\n";
@@ -246,7 +246,7 @@ int main(int argc, char **argv, char **envp)
     cout << "                   |     National Laboratory |\n";
     cout << "                   |                         |\n";
     cout << "                   | Copyright (c) 2003-2016 |\n";     
-    cout << "                   ---------------------------\n\n";
+    cout << "                   |_________________________|\n\n";
     cout << "-->\n";
     cout << "<qbox:simulation xmlns:qbox=\"" << qbox_xmlns() << "\">" << endl;
     cout << "<release> " << release() << " </release>" << endl;
