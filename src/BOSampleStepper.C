@@ -71,8 +71,16 @@ using namespace std;
 
 ////////////////////////////////////////////////////////////////////////////////
 BOSampleStepper::BOSampleStepper(Sample& s, int nitscf, int nite) :
-  SampleStepper(s), cd_(s), ef_(s,s.wf,cd_),dwf(s.wf), wfv(s.wfv), nitscf_(nitscf),
-  nite_(nite), initial_atomic_density(false) {}
+  SampleStepper(s),
+  dwf(s.wf),
+  wfv(s.wfv),
+  nitscf_(nitscf),
+  nite_(nite),
+  cd_(s),
+  ef_(s,s.wf,cd_),
+  initial_atomic_density(false)
+{
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 BOSampleStepper::~BOSampleStepper()
@@ -128,7 +136,7 @@ void BOSampleStepper::initialize_density(void)
     rhops[is].resize(ngloc);
     Species *s = atoms.species_list[is];
     const int zval = s->zval();
-    const int atomic_number = s->atomic_number();
+    const unsigned atomic_number = s->atomic_number();
     assert(atomic_number < sizeof(atom_radius)/sizeof(double));
     // scaling factor 2.0 in next line is empirically adjusted
     double rc = 2.0 * atom_radius[atomic_number];
@@ -406,8 +414,7 @@ void BOSampleStepper::step(int niter)
   if ( rc1 != 0.0 )
   {
     const double q1 = 2.0 * M_PI / rc1;
-    for ( int i=0; i < wls.size(); i++ )
-    {
+    for (unsigned i = 0; i < wls.size(); i++){
       if ( g2[i] != 0.0 )
         wls[i] = sqrt(g2[i] / ( g2[i] + q1*q1 ));
       else
@@ -416,21 +423,18 @@ void BOSampleStepper::step(int niter)
   }
   else
   {
-    for ( int i=0; i < wls.size(); i++ )
-      wls[i] = 1.0;
+    for (unsigned i = 0; i < wls.size(); i++) wls[i] = 1.0;
   }
 
   if ( rc_Kerker > 0.0 )
   {
     const double q0_kerker = 2 * M_PI / rc_Kerker;
     const double q0_kerker2 = q0_kerker * q0_kerker;
-    for ( int i=0; i < wkerker.size(); i++ )
-      wkerker[i] = g2[i] / ( g2[i] + q0_kerker2 );
+    for(unsigned i = 0; i < wkerker.size(); i++) wkerker[i] = g2[i] / ( g2[i] + q0_kerker2 );
   }
   else
   {
-    for ( int i=0; i < wkerker.size(); i++ )
-      wkerker[i] = 1.0;
+    for(unsigned i = 0; i < wkerker.size(); i++) wkerker[i] = 1.0;
   }
 
   // if ultrasoft, calculate position-dependent functions
@@ -525,10 +529,13 @@ void BOSampleStepper::step(int niter)
         // calculate max force and stress values, add to convergence detectors
         if (atoms_move) {
           double maxforce = 0.0;
-          for ( int is = 0; is < atoms.atom_list.size(); is++ ) 
-            for ( int ia = 0; ia < atoms.atom_list[is].size(); ia++ ) 
-              for (int q=0; q<3; q++) 
+          for (unsigned is = 0; is < atoms.atom_list.size(); is++) { 
+            for (unsigned ia = 0; ia < atoms.atom_list[is].size(); ia++) {
+              for (int q=0; q<3; q++) {
                 if (fabs(fion[is][3*ia+q]) > maxforce) maxforce = fabs(fion[is][3*ia+q]);
+	      }
+	    }
+	  }
 
           conv_force.addValue(maxforce);
         }
@@ -2158,11 +2165,10 @@ void BOSampleStepper::get_forces(vector<vector<double> >& f) const {
       f[is+offset].resize(3*atoms.atom_list[is].size());
     int i = 0;
     for ( int ia = 0; ia < atoms.mmatom_list[is].size(); ia++ ) {
-      D3vector t = atoms.mmatom_list[is][ia]->position();
-      f[is+offset][i] = fion[is+offset][i];
-      f[is+offset][i+1] = fion[is+offset][i+1];
-      f[is+offset][i+2] = fion[is+offset][i+2];
-      i+=3;
+      f[is + offset][i    ] = fion[is + offset][i    ];
+      f[is + offset][i + 1] = fion[is + offset][i + 1];
+      f[is + offset][i + 2] = fion[is + offset][i + 2];
+      i += 3;
     }
   }
 }

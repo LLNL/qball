@@ -79,16 +79,30 @@ Wavefunction::Wavefunction(const Context& ctxt) : ctxt_(ctxt),nel_(0),nempty_(0)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-Wavefunction::Wavefunction(const Wavefunction& wf) : ctxt_(wf.ctxt_), 
-nel_(wf.nel_), nempty_(wf.nempty_), nspin_(wf.nspin_), 
-deltaspin_(wf.deltaspin_), nrowmax_(wf.nrowmax_), 
-nparallelkpts_(wf.nparallelkpts_), kpt_added_(wf.kpt_added_),
-nkptloc_(wf.nkptloc_), spinloc_(wf.spinloc_),
-cell_(wf.cell_), refcell_(wf.refcell_), 
-ecut_(wf.ecut_), weightsum_(wf.weightsum_), 
-ultrasoft_(wf.ultrasoft_), force_complex_wf_(wf.force_complex_wf_),
-wf_phase_real_(wf.wf_phase_real_),mbset_(wf.mbset_),nbset_(wf.nbset_),
-mblks_(wf.mblks_),nblks_(wf.nblks_),mu_(wf.mu_),deltacharge_(wf.deltacharge_)
+Wavefunction::Wavefunction(const Wavefunction& wf) :
+  ctxt_(wf.ctxt_), 
+  nel_(wf.nel_),
+  nempty_(wf.nempty_),
+  nspin_(wf.nspin_), 
+  deltaspin_(wf.deltaspin_),
+  nrowmax_(wf.nrowmax_), 
+  nparallelkpts_(wf.nparallelkpts_),
+  kpt_added_(wf.kpt_added_),
+  nkptloc_(wf.nkptloc_),
+  spinloc_(wf.spinloc_),
+  cell_(wf.cell_),
+  refcell_(wf.refcell_), 
+  ecut_(wf.ecut_),
+  weightsum_(wf.weightsum_), 
+  ultrasoft_(wf.ultrasoft_),
+  force_complex_wf_(wf.force_complex_wf_),
+  wf_phase_real_(wf.wf_phase_real_),
+  mbset_(wf.mbset_),
+  nbset_(wf.nbset_),
+  mblks_(wf.mblks_),
+  nblks_(wf.nblks_),
+  mu_(wf.mu_),
+  deltacharge_(wf.deltacharge_)
 {
   // Create a Wavefunction using the dimensions of the argument
   compute_nst();

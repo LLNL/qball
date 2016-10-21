@@ -81,7 +81,7 @@ class BMDIonicStepper : public IonicStepper
     atoms_.get_positions(r0_);
     atoms_.get_velocities(v0_);
     fm_.resize(r0_.size());
-    for ( int is = 0; is < fm_.size(); is++ )
+    for (unsigned is = 0; is < fm_.size(); is++ )
       fm_[is].resize(r0_[is].size());
     compute_ekin();
   }
