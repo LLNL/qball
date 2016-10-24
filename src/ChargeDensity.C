@@ -535,8 +535,14 @@ void ChargeDensity::update_density() {
         const double chgthresh = 1.E-7;
         int chgint = (int) (sum+chgthresh);
         double nonint = abs( sum - (double) chgint);
-        if (nonint > chgthresh && !tddft_involved_) 
-          cout << "<WARNING> Total electronic charge has non-integer value!! </WARNING>" << endl;
+	if (nonint > chgthresh && !tddft_involved_) {
+	  cout << "<WARNING>"<< endl;
+          cout << "  Total electronic charge has non-integer value!" << endl;
+	  cout << "    sum     = " << sum << endl;
+	  cout << "    chgint  = " << chgint << endl;
+	  cout << "    nonint  = " << nonint << endl;
+          cout << "</WARNING>" << endl;	  
+	}
       }
     }
     tmap["charge_integral"].stop();
