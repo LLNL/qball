@@ -75,8 +75,6 @@ int main(int argc, char** argv)
     
     bool iter_correct = true;
 
-    cout << "Iteration\t" << iter << "\t:\t";
-
     DOMElement * it1 = dynamic_cast<DOMElement*>(list1->item(iter));
     DOMElement * it2 = dynamic_cast<DOMElement*>(list2->item(iter));
     
@@ -87,8 +85,12 @@ int main(int argc, char** argv)
 
     double etotal1 = strtod(XMLString::transcode(child1->getTextContent()), NULL);
     double etotal2 = strtod(XMLString::transcode(child2->getTextContent()), NULL);
+
+    cout << endl;
     
-    //    cout << etotal1 << " " << etotal2 << " " << fabs(etotal1 - etotal2) << endl;
+    cout << "Energy 1   = " << scientific << etotal1 << endl;
+    cout << "Energy 2   = " << scientific << etotal2 << endl;
+    cout << "Difference = " << scientific << fabs(etotal1 - etotal2) << endl;
 
     if(fabs(etotal1 - etotal2) > energy_tol){
       iter_correct = false;
@@ -96,6 +98,10 @@ int main(int argc, char** argv)
 
     correct = correct && iter_correct;
 
+    cout << endl;
+
+    cout << "Iteration\t" << iter << "\t:\t";
+    
     if(iter_correct){
       cout << "[   OK   ]" << endl;
     } else {
