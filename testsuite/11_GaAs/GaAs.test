@@ -1,0 +1,22 @@
+Test       : GaAs unit cell 
+Program    : qball
+TestGroups : short-run
+Enabled    : Yes
+
+ExtraFile  : Ga_HSCV_PBE-1.0.xml
+ExtraFile  : As_HSCV_PBE-1.0.xml
+Input      : GaAs.inp
+Reference  : GaAs.reference.xml
+
+match ; ekin    ; GREPFIELD(out, '<ekin>',   2) ; 140.62329300 
+match ; econf   ; GREPFIELD(out, '<econf>',  2) ; 0.00000000
+match ; eps     ; GREPFIELD(out, '<eps>',    2) ; 72.84215162
+match ; enl     ; GREPFIELD(out, '<enl>',    2) ; -139.98805772
+match ; ecoul   ; GREPFIELD(out, '<ecoul>',  2) ; -196.34619280
+match ; exc     ; GREPFIELD(out, '<exc>',    2) ; -21.01738463 
+match ; esr     ; GREPFIELD(out, '<esr>',    2) ; 0.03254859
+match ; eself   ; GREPFIELD(out, '<eself>',  2) ; 211.62024765
+match ; ets     ; GREPFIELD(out, '<ets>',    2) ; 0.00000000
+match ; etotal  ; GREPFIELD(out, '<etotal>', 2) ; -143.88619052
+
+
