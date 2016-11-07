@@ -207,8 +207,9 @@ void BOSampleStepper::step(int niter)
   //ewd check for case where PSDA used (incorrectly) with nite = 1 and empty states
   if (wf_dyn == "PSDA" && nite_ == 0 && compute_eigvec) {
     if ( onpe0 ) {
-      cout << "<ERROR> BOSampleStepper:  PSDA unstable with empty states and nite = 0. </ERROR>" << endl;
-      cout << "<ERROR> BOSampleStepper:  Increase nite or use wf_dyn = PSD. </ERROR>" << endl;
+      cout << "<ERROR> BOSampleStepper:  PSDA unstable with nite = 0 and either empty states or an explicit request for wavefunction diagonalization. </ERROR>" << endl;
+      cout << "<ERROR> BOSampleStepper:  If your system has empty states, increase nite or use wf_dyn = PSD. </ERROR>" << endl;
+      cout << "<ERROR> BOSampleStepper:  If your system does not have empty states, set wf_diag to false or use wf_dyn = PSD. </ERROR>" << endl;
     }
     return;
   }
