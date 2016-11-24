@@ -147,7 +147,7 @@ class SlaterDet {
     { assert(eig_.size()==eig.size()); eig_ = eig; }
   void set_eig(valarray<double>& eig)
     { assert(eig_.size()==eig.size()); 
-      for ( int i = 0; i < eig.size(); i++ )
+      for (unsigned i = 0; i < eig.size(); i++ )
         eig_[i] = eig[i];
     }
   void promote_occ(double occ_change, int origin_level, int destination_level);
