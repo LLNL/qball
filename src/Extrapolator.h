@@ -43,7 +43,7 @@ class Extrapolator
 
   ~Extrapolator(){};
   Extrapolator();
-  void extrapolate_wavefunction(string extrap, Wavefunction & wf, Wavefunction* wfv, Wavefunction* wfmm, bool ultrasoft, int nspin, int iter, double dt, const Context& ctxt);
+  void extrapolate_wavefunction(string extrap, Wavefunction & wf, Wavefunction* wfv, Wavefunction* wfmm, int iter, double dt, const Context& ctxt);
 };
 
 #endif

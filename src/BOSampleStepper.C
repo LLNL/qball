@@ -857,9 +857,7 @@ void BOSampleStepper::step(int niter)
       // Recalculate ground state wavefunctions
       
       // wavefunction extrapolation
-      if ( atoms_move && extrapolate_wf ) {
-	extrapolator.extrapolate_wavefunction(s_.ctrl.wf_extrap, s_.wf, s_.wfv, wfmm, ultrasoft, nspin, iter, dt, s_.ctxt_);
-      }
+      if ( atoms_move && extrapolate_wf ) extrapolator.extrapolate_wavefunction(s_.ctrl.wf_extrap, s_.wf, s_.wfv, wfmm, iter, dt, s_.ctxt_);
 
       // do nitscf self-consistent iterations, each with nite electronic steps
       if ( wf_stepper != 0 )

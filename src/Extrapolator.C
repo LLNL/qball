@@ -37,9 +37,9 @@ using namespace std;
 Extrapolator::Extrapolator(){
 }
 
-void Extrapolator::extrapolate_wavefunction(string extrap, Wavefunction & wf, Wavefunction* wfv, Wavefunction* wfmm, bool ultrasoft, int nspin, int iter, double dt, const Context& ctxt){
+void Extrapolator::extrapolate_wavefunction(string extrap, Wavefunction & wf, Wavefunction* wfv, Wavefunction* wfmm, int iter, double dt, const Context& ctxt){
 
-  for ( int ispin = 0; ispin < nspin; ispin++ )
+  for ( int ispin = 0; ispin < wf.nspin(); ispin++ )
     {
       if (wf.spinactive(ispin))
 	{
@@ -71,7 +71,7 @@ void Extrapolator::extrapolate_wavefunction(string extrap, Wavefunction & wf, Wa
 			      cv[i] = x;
 			    }
 			  //ewd: 10-5-12b, uncomment this
-			  if (ultrasoft) {
+			  if (wf.ultrasoft()) {
 			    //tmap["usfns"].start();
 			    wf.sd(ispin,ikp)->update_usfns();
 			    //tmap["usfns"].stop();
@@ -92,7 +92,7 @@ void Extrapolator::extrapolate_wavefunction(string extrap, Wavefunction & wf, Wa
 			      cmm[i] = xm;
 			    }
 			  //ewd: 10-5-12b, uncomment this
-			  if (ultrasoft) {
+			  if (wf.ultrasoft()) {
 			    //tmap["usfns"].start();
 			    wf.sd(ispin,ikp)->update_usfns();
 			    //tmap["usfns"].stop();
@@ -120,7 +120,7 @@ void Extrapolator::extrapolate_wavefunction(string extrap, Wavefunction & wf, Wa
 
 			  // orthogonalize the extrapolated value
 			  //ewd: 10-5-12b, uncomment this
-			  if (ultrasoft) {
+			  if (wf.ultrasoft()) {
 			    //tmap["usfns"].start();
 			    wf.sd(ispin,ikp)->update_usfns();
 			    //tmap["usfns"].stop();
@@ -163,7 +163,7 @@ void Extrapolator::extrapolate_wavefunction(string extrap, Wavefunction & wf, Wa
 			      cv[i] = x;
 			    }
 			  //ewd: 10-5-12b, uncomment this
-			  if (ultrasoft) {
+			  if (wf.ultrasoft()) {
 			    //tmap["usfns"].start();
 			    wf.sd(ispin,ikp)->update_usfns();
 			    //tmap["usfns"].stop();
@@ -183,7 +183,7 @@ void Extrapolator::extrapolate_wavefunction(string extrap, Wavefunction & wf, Wa
 			      cv[i] = x;
 			      cmm[i] = xm;
 			    }
-			  if (ultrasoft) {
+			  if (wf.ultrasoft()) {
 			    //tmap["usfns"].start();
 			    wf.sd(ispin,ikp)->update_usfns();
 			    //tmap["usfns"].stop();
@@ -213,7 +213,7 @@ void Extrapolator::extrapolate_wavefunction(string extrap, Wavefunction & wf, Wa
 			    }
                     
 			  // orthogonalize the extrapolated value
-			  if (ultrasoft) {
+			  if (wf.ultrasoft()) {
 			    //tmap["usfns"].start();
 			    wf.sd(ispin,ikp)->update_usfns();
 			    //tmap["usfns"].stop();
@@ -252,7 +252,7 @@ void Extrapolator::extrapolate_wavefunction(string extrap, Wavefunction & wf, Wa
 			  //tmap["lowdin"].start();
 			  //wf.sd(ispin,ikp)->lowdin();
 			  //tmap["lowdin"].stop();
-			  if (ultrasoft) {
+			  if (wf.ultrasoft()) {
 			    //tmap["usfns"].start();
 			    wf.sd(ispin,ikp)->update_usfns();
 			    //tmap["usfns"].stop();
@@ -283,7 +283,7 @@ void Extrapolator::extrapolate_wavefunction(string extrap, Wavefunction & wf, Wa
 			  //wf.sd(ispin,ikp)->riccati(*wfv->sd(ispin,ikp));
 			  //tmap["riccati"].stop();
                     
-			  if (ultrasoft) {
+			  if (wf.ultrasoft()) {
 			    //tmap["usfns"].start();
 			    wf.sd(ispin,ikp)->update_usfns();
 			    //tmap["usfns"].stop();
