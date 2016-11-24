@@ -1,0 +1,34 @@
+set cell 15.306 0.0 0.0 0.0 15.306 0.0 0.0 0.0 15.306
+species aluminum Al.xml
+atom   Al1   aluminum   0.000000    0.000000    0.000000
+atom   Al2   aluminum   3.826500    3.826500    0.000000
+atom   Al3   aluminum   3.826500    0.000000    3.826500
+atom   Al4   aluminum   0.000000    3.826500    3.826500
+atom   Al5   aluminum  -7.653000    0.000000    0.000000
+atom   Al6   aluminum  -3.826500    3.826500    0.000000
+atom   Al7   aluminum  -3.826500    0.000000    3.826500
+atom   Al8   aluminum  -7.653000    3.826500    3.826500
+atom   Al9   aluminum   0.000000   -7.653000    0.000000
+atom   Al10  aluminum   3.826500   -3.826500    0.000000
+atom   Al11  aluminum   3.826500   -7.653000    3.826500
+atom   Al12  aluminum   0.000000   -3.826500    3.826500
+atom   Al13  aluminum   0.000000    0.000000   -7.653000
+atom   Al14  aluminum   3.826500    3.826500   -7.653000
+atom   Al15  aluminum   3.826500    0.000000   -3.826500
+atom   Al16  aluminum   0.000000    3.826500   -3.826500
+atom   Al17  aluminum   0.000000   -7.653000   -7.653000
+atom   Al18  aluminum   3.826500   -3.826500   -7.653000
+atom   Al19  aluminum   3.826500   -7.653000   -3.826500
+atom   Al20  aluminum   0.000000   -3.826500   -3.826500
+atom   Al21  aluminum  -7.653000    0.000000   -7.653000
+atom   Al22  aluminum  -3.826500    3.826500   -7.653000
+atom   Al23  aluminum  -3.826500    0.000000   -3.826500
+atom   Al24  aluminum  -7.653000    3.826500   -3.826500
+atom   Al25  aluminum  -7.653000   -7.653000    0.000000
+atom   Al26  aluminum  -3.826500   -3.826500    0.000000
+atom   Al27  aluminum  -3.826500   -7.653000    3.826500
+atom   Al28  aluminum  -7.653000   -3.826500    3.826500
+atom   Al29  aluminum  -7.653000   -7.653000   -7.653000
+atom   Al30  aluminum  -3.826500   -3.826500   -7.653000
+atom   Al31  aluminum  -3.826500   -7.653000   -3.826500
+atom   Al32  aluminum  -7.653000   -3.826500   -3.826500
