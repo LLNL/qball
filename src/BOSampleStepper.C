@@ -214,8 +214,9 @@ void BOSampleStepper::step(int niter)
     return;
   }
   
-  const bool extrapolate_wf = (atoms_dyn == "MD" && s_.ctrl.wf_extrap != "OFF");
-  Extrapolator extrapolator;
+  Extrapolator * extrapolate_wf = NULL;
+  if (atoms_dyn == "MD" && s_.ctrl.wf_extrap != "OFF") extrapolate_wf = new Extrapolator();
+  
   Wavefunction* wfmm;
   if ( extrapolate_wf && ( s_.ctrl.wf_extrap == "ASP" || s_.ctrl.wf_extrap == "NTC" ) ) 
     wfmm = new Wavefunction(wf);
@@ -857,7 +858,7 @@ void BOSampleStepper::step(int niter)
       // Recalculate ground state wavefunctions
       
       // wavefunction extrapolation
-      if ( atoms_move && extrapolate_wf ) extrapolator.extrapolate_wavefunction(s_.ctrl.wf_extrap, s_.wf, s_.wfv, wfmm, iter, dt, s_.ctxt_);
+      if ( atoms_move && extrapolate_wf ) extrapolate_wf->extrapolate_wavefunction(s_.ctrl.wf_extrap, s_.wf, s_.wfv, wfmm, iter, dt, s_.ctxt_);
 
       // do nitscf self-consistent iterations, each with nite electronic steps
       if ( wf_stepper != 0 )
@@ -1844,6 +1845,8 @@ void BOSampleStepper::step(int niter)
     s_.wfv = 0;
   }
 
+  if(extrapolate_wf != NULL) delete extrapolate_wf;
+  
   delete mlwft;
 
   // delete steppers
