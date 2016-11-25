@@ -30,7 +30,9 @@
 
 #include "BOSampleStepper.h"
 #include "EnergyFunctional.h"
-#include "Extrapolator.h"
+#include "ExtrapolatorASP.h"
+#include "ExtrapolatorNTC.h"
+#include "ExtrapolatorSimple.h"
 #include "SlaterDet.h"
 #include "Basis.h"
 #include "WavefunctionStepper.h"
@@ -215,7 +217,11 @@ void BOSampleStepper::step(int niter)
   }
   
   Extrapolator * extrapolate_wf = NULL;
-  if (atoms_dyn == "MD" && s_.ctrl.wf_extrap != "OFF") extrapolate_wf = new Extrapolator();
+  if (atoms_dyn == "MD") {
+    if(s_.ctrl.wf_extrap == "ASP") extrapolate_wf = new ExtrapolatorASP();
+    if(s_.ctrl.wf_extrap == "NTC") extrapolate_wf = new ExtrapolatorNTC();
+    if(s_.ctrl.wf_extrap == "Simple") extrapolate_wf = new ExtrapolatorSimple();
+  }
   
   Wavefunction* wfmm;
   if ( extrapolate_wf && ( s_.ctrl.wf_extrap == "ASP" || s_.ctrl.wf_extrap == "NTC" ) ) 

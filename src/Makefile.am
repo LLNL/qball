@@ -93,6 +93,9 @@ noinst_HEADERS =                            \
 	EsmW.h                              \
 	ExponentialWavefunctionStepper.h    \
 	Extrapolator.h                      \
+	ExtrapolatorASP.h                   \
+	ExtrapolatorNTC.h                   \
+	ExtrapolatorSimple.h                \
 	ExtStress.h                         \
 	FcpMu.h                             \
 	FcpPmass.h                          \
@@ -318,7 +321,9 @@ libqbLink_a_SOURCES =                        \
 	MMSpecies.C                         \
 	EmpiricalPotential.C                \
 	EnthalpyFunctional.C                \
-	Extrapolator.C                      \
+	ExtrapolatorASP.C                   \
+	ExtrapolatorNTC.C                   \
+	ExtrapolatorSimple.C                \
 	Hugoniostat.C                       \
 	release.C                           \
 	qbox_xmlns.C                        \

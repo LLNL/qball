@@ -29,22 +29,21 @@
 
 #include <config.h>
 #include <Wavefunction.h>
+#include <Extrapolator.h>
 
-#ifndef EXTRAPOLATOR_H
-#define EXTRAPOLATOR_H
+#ifndef EXTRAPOLATORASP_H
+#define EXTRAPOLATORASP_H
 
 #include <string>
 using namespace std;
 
-class Extrapolator
-{
+class ExtrapolatorASP : public Extrapolator {
   private:
   public:
 
-  virtual ~Extrapolator(){}
-  Extrapolator(){
-  }
-  virtual void extrapolate_wavefunction(string extrap, Wavefunction & wf, Wavefunction* wfv, Wavefunction* wfmm, int iter, double dt, const Context& ctxt)=0;
+  ~ExtrapolatorASP(){};
+  ExtrapolatorASP();
+  void extrapolate_wavefunction(string extrap, Wavefunction & wf, Wavefunction* wfv, Wavefunction* wfmm, int iter, double dt, const Context& ctxt);
 };
 
 #endif
