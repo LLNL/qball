@@ -37,7 +37,7 @@ using namespace std;
 ExtrapolatorSimple::ExtrapolatorSimple(){
 }
 
-void ExtrapolatorSimple::extrapolate_wavefunction(string extrap, Wavefunction & wf, Wavefunction* wfv, Wavefunction* wfmm, int iter, double dt, const Context& ctxt){
+void ExtrapolatorSimple::extrapolate_wavefunction(Wavefunction & wf, Wavefunction* wfv, Wavefunction* wfmm, int iter, double dt, const Context& ctxt){
 
   for ( int ispin = 0; ispin < wf.nspin(); ispin++ )
     {
@@ -48,76 +48,73 @@ void ExtrapolatorSimple::extrapolate_wavefunction(string extrap, Wavefunction & 
               if (wf.kptactive(ikp))
 		{
 		  assert(wf.sd(ispin,ikp) != 0);
-		  if (extrap == "SIMPLE")
-		    {
-		      if ( ctxt.mype()==0 )
-			cout << "Extrapolating wavefunction using simple algorithm." << endl;
+		  if ( ctxt.mype()==0 )
+		    cout << "Extrapolating wavefunction using simple algorithm." << endl;
                    
-		      double* c = (double*) wf.sd(ispin,ikp)->c().cvalptr();
-		      double* cv = (double*) wfv->sd(ispin,ikp)->c().cvalptr();
-		      const int mloc = wf.sd(ispin,ikp)->c().mloc();
-		      const int nloc = wf.sd(ispin,ikp)->c().nloc();
-		      const int len = 2*mloc*nloc;
-		      if ( iter == 0 )
+		  double* c = (double*) wf.sd(ispin,ikp)->c().cvalptr();
+		  double* cv = (double*) wfv->sd(ispin,ikp)->c().cvalptr();
+		  const int mloc = wf.sd(ispin,ikp)->c().mloc();
+		  const int nloc = wf.sd(ispin,ikp)->c().nloc();
+		  const int len = 2*mloc*nloc;
+		  if ( iter == 0 )
+		    {
+		      // copy c to cv
+		      for ( int i = 0; i < len; i++ )
 			{
-			  // copy c to cv
-			  for ( int i = 0; i < len; i++ )
-			    {
-			      const double x = c[i];
-			      const double v = cv[i];
-			      c[i] = x + dt * v;
-			      cv[i] = x;
-			    }
-			  //tmap["lowdin"].start();
-			  //wf.sd(ispin,ikp)->lowdin();
-			  //tmap["lowdin"].stop();
-			  if (wf.ultrasoft()) {
-			    //tmap["usfns"].start();
-			    wf.sd(ispin,ikp)->update_usfns();
-			    //tmap["usfns"].stop();
-			  }
-			  //tmap["gram"].start();
-			  wf.sd(ispin,ikp)->gram();
-			  //tmap["gram"].stop();
+			  const double x = c[i];
+			  const double v = cv[i];
+			  c[i] = x + dt * v;
+			  cv[i] = x;
 			}
-		      else
-			{
-			  //tmap["align"].start();
-			  wfv->align(wf);
-			  //tmap["align"].stop();
+		      //tmap["lowdin"].start();
+		      //wf.sd(ispin,ikp)->lowdin();
+		      //tmap["lowdin"].stop();
+		      if (wf.ultrasoft()) {
+			//tmap["usfns"].start();
+			wf.sd(ispin,ikp)->update_usfns();
+			//tmap["usfns"].stop();
+		      }
+		      //tmap["gram"].start();
+		      wf.sd(ispin,ikp)->gram();
+		      //tmap["gram"].stop();
+		    }
+		  else
+		    {
+		      //tmap["align"].start();
+		      wfv->align(wf);
+		      //tmap["align"].stop();
                   
-			  // linear extrapolation
-			  for ( int i = 0; i < len; i++ )
-			    {
-			      const double x = c[i];
-			      const double xm = cv[i];
-			      c[i] = 2.0 * x - xm;
-			      cv[i] = x;
-			    }
-			  //tmap["ortho_align"].start();
-			  //wf.sd(ispin,ikp)->ortho_align(*wfv->sd(ispin,ikp));
-			  //tmap["ortho_align"].stop();
-                    
-			  //tmap["riccati"].start();
-			  //wf.sd(ispin,ikp)->riccati(*wfv->sd(ispin,ikp));
-			  //tmap["riccati"].stop();
-                    
-			  if (wf.ultrasoft()) {
-			    //tmap["usfns"].start();
-			    wf.sd(ispin,ikp)->update_usfns();
-			    //tmap["usfns"].stop();
-			  }
-			  //ewd: lowdin doesn't yet work correctly with ultrasoft
-			  //tmap["lowdin"].start();
-			  //wf.sd(ispin,ikp)->lowdin();
-			  //tmap["lowdin"].stop();
-			  //tmap["gram"].start();
-			  wf.sd(ispin,ikp)->gram();
-			  //tmap["gram"].stop();
+		      // linear extrapolation
+		      for ( int i = 0; i < len; i++ )
+			{
+			  const double x = c[i];
+			  const double xm = cv[i];
+			  c[i] = 2.0 * x - xm;
+			  cv[i] = x;
 			}
+		      //tmap["ortho_align"].start();
+		      //wf.sd(ispin,ikp)->ortho_align(*wfv->sd(ispin,ikp));
+		      //tmap["ortho_align"].stop();
+                    
+		      //tmap["riccati"].start();
+		      //wf.sd(ispin,ikp)->riccati(*wfv->sd(ispin,ikp));
+		      //tmap["riccati"].stop();
+                    
+		      if (wf.ultrasoft()) {
+			//tmap["usfns"].start();
+			wf.sd(ispin,ikp)->update_usfns();
+			//tmap["usfns"].stop();
+		      }
+		      //ewd: lowdin doesn't yet work correctly with ultrasoft
+		      //tmap["lowdin"].start();
+		      //wf.sd(ispin,ikp)->lowdin();
+		      //tmap["lowdin"].stop();
+		      //tmap["gram"].start();
+		      wf.sd(ispin,ikp)->gram();
+		      //tmap["gram"].stop();
 		    }
 		}
-            }
+	    }
 	}
     }
 }

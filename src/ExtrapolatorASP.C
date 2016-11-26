@@ -37,7 +37,7 @@ using namespace std;
 ExtrapolatorASP::ExtrapolatorASP(){
 }
 
-void ExtrapolatorASP::extrapolate_wavefunction(string extrap, Wavefunction & wf, Wavefunction* wfv, Wavefunction* wfmm, int iter, double dt, const Context& ctxt){
+void ExtrapolatorASP::extrapolate_wavefunction(Wavefunction & wf, Wavefunction* wfv, Wavefunction* wfmm, int iter, double dt, const Context& ctxt){
 
   for ( int ispin = 0; ispin < wf.nspin(); ispin++ )
     {

@@ -37,7 +37,7 @@ using namespace std;
 ExtrapolatorNTC::ExtrapolatorNTC(){
 }
 
-void ExtrapolatorNTC::extrapolate_wavefunction(string extrap, Wavefunction & wf, Wavefunction* wfv, Wavefunction* wfmm, int iter, double dt, const Context& ctxt){
+void ExtrapolatorNTC::extrapolate_wavefunction(Wavefunction & wf, Wavefunction* wfv, Wavefunction* wfmm, int iter, double dt, const Context& ctxt){
 
   for ( int ispin = 0; ispin < wf.nspin(); ispin++ ) {
     if (wf.spinactive(ispin)) {

@@ -44,7 +44,7 @@ class Extrapolator
   virtual ~Extrapolator(){}
   Extrapolator(){
   }
-  virtual void extrapolate_wavefunction(string extrap, Wavefunction & wf, Wavefunction* wfv, Wavefunction* wfmm, int iter, double dt, const Context& ctxt)=0;
+  virtual void extrapolate_wavefunction(Wavefunction & wf, Wavefunction* wfv, Wavefunction* wfmm, int iter, double dt, const Context& ctxt)=0;
 };
 
 #endif
