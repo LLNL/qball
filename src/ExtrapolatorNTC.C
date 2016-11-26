@@ -44,8 +44,7 @@ void ExtrapolatorNTC::extrapolate_wavefunction(Wavefunction & wf, Wavefunction* 
       for ( int ikp = 0; ikp < wf.nkp(); ikp++ ) {
 	if (wf.kptactive(ikp)) {
 	  assert(wf.sd(ispin,ikp) != 0);
-	  if ( ctxt.mype()==0 )
-	    cout << "Extrapolating wavefunction using NTC algorithm." << endl;
+	  if (ctxt.mype() == 0) cout << "Extrapolating wavefunction using NTC algorithm." << endl;
                    
 	  double* c = (double*) wf.sd(ispin,ikp)->c().cvalptr();
 	  double* cv = (double*) wfv->sd(ispin,ikp)->c().cvalptr();
@@ -55,14 +54,13 @@ void ExtrapolatorNTC::extrapolate_wavefunction(Wavefunction & wf, Wavefunction* 
 	  const int len = 2*mloc*nloc;
 	  if ( iter == 0 ) {
 	    // copy c on cv
-	    for ( int i = 0; i < len; i++ )
-	      {
-		const double x = c[i];
-		const double v = cv[i];
-		// extrapolation using velocity in cv
-		c[i] = x + dt * v;
-		cv[i] = x;
-	      }
+	    for ( int i = 0; i < len; i++ ) {
+	      const double x = c[i];
+	      const double v = cv[i];
+	      // extrapolation using velocity in cv
+	      c[i] = x + dt * v;
+	      cv[i] = x;
+	    }
 	    //ewd: 10-5-12b, uncomment this
 	    if (wf.ultrasoft()) {
 	      //tmap["usfns"].start();
@@ -94,7 +92,7 @@ void ExtrapolatorNTC::extrapolate_wavefunction(Wavefunction & wf, Wavefunction* 
 	    // align wf with wfmm before extrapolation
 	    // wf.align(*wfmm);
 	    wfmm->align(wf);
-                  
+	    
 	    // extrapolate
 	    for ( int i = 0; i < len; i++ ) {
 	      const double x = c[i];   // current wf (scf converged) at t
@@ -125,7 +123,6 @@ void ExtrapolatorNTC::extrapolate_wavefunction(Wavefunction & wf, Wavefunction* 
 	      cv[i] = c[i];
 	    }
 	  }
-	  // c[i] is now ready for electronic iterations
 	}
       }
     }
