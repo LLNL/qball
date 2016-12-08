@@ -37,6 +37,7 @@
 #include<stdlib.h>
 
 #include "Sample.h"
+#include "Unit.h"
 
 class Ecut : public Var
 {
@@ -46,38 +47,45 @@ class Ecut : public Var
 
   char const*name ( void ) const { return "ecut"; };
 
-  int set ( int argc, char **argv )
-  {
-    if ( argc != 2 )
-    {
-      if ( ui->oncoutpe() )
-      cout << " <ERROR> ecut takes only one value </ERROR>" << endl;
+  int set ( int argc, char **argv ) {
+
+    string unit_name;
+    
+    if ( argc == 2 ) {
+      unit_name = "rydberg";
+      if ( ui->oncoutpe() ) cout << " <WARNING> units missing for variable ecut, assuming rydberg </WARNING>" << endl; 
+    } else if ( argc != 3 ) {
+      if ( ui->oncoutpe() ) cout << " <ERROR> ecut takes only one value followed by its units </ERROR>" << endl; 
+      return 1;
+    } else {
+      unit_name = argv[2];
+    }
+    
+    Unit unit = Unit::Energy(unit_name);
+
+    if(!unit.exists()) {
+      if ( ui->oncoutpe() ) cout << " <ERROR> unknown energy unit '" << unit_name << "' </ERROR>" << endl; 
       return 1;
     }
     
-    double v = atof(argv[1]);
-    if ( v < 0.0 )
-    {
-      if ( ui->oncoutpe() )
-        cout << " <ERROR> ecut must be non-negative </ERROR>" << endl;
+    double value = unit.to_atomic(atof(argv[1]));
+
+    if ( value < 0.0 ) {
+      if ( ui->oncoutpe() ) cout << " <ERROR> ecut must be non-negative </ERROR>" << endl;
       return 1;
     }
     
-    if ( s->wf.ecut() == 0.5 * v )
-      return 0;
+    if ( s->wf.ecut() == value ) return 0;
 
     if (s->wf.hasdata()) {
-      s->wf.resize(0.5*v);
-      if ( s->wfv != 0 ) 
-      {
-        s->wfv->resize(0.5*v);
+      s->wf.resize(value);
+      if ( s->wfv != 0 ) {
+        s->wfv->resize(value);
         s->wfv->clear();
       }
-    }
-    else {
-      s->wf.set_ecut(0.5*v);
-      if ( s->wfv != 0 )
-        s->wfv->set_ecut(0.5*v);
+    } else {
+      s->wf.set_ecut(value);
+      if ( s->wfv != 0 ) s->wfv->set_ecut(value);
     }
     
     return 0;
