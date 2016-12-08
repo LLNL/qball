@@ -22,9 +22,11 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 //
-// AtomSet.C
+// Unit.h
 //
 ////////////////////////////////////////////////////////////////////////////////
+#ifndef UNIT_H
+#define UNIT_H
 
 #include <config.h>
 
@@ -37,7 +39,7 @@ class Unit {
  public:
 
   // Unit conversion factors are obtained from the GNU Units program
-  // executed with 16 digit precision (unit -d 16).
+  // executed with 16 digit precision (units -d 16).
   
   static Unit Energy(string unit_name){
     //convert to lower case
@@ -49,8 +51,21 @@ class Unit {
 
     return Unit();
   }
+  
+  static Unit Length(string unit_name){
+    //convert to lower case
+    std::transform(unit_name.begin(), unit_name.end(), unit_name.begin(), ::tolower);
 
-  double to_atomic(const double & value) const {
+    if(unit_name == "bohr"      || unit_name == "bohrradius" || unit_name == "b") return Unit(1.0);
+    if(unit_name == "angstrom"  || unit_name == "a")                              return Unit(1.88972612544037);
+    if(unit_name == "nanometer" || unit_name == "nm")                             return Unit(18.8972612544037);
+    if(unit_name == "picometer" || unit_name == "pm")                             return Unit(0.0188972612544037);
+    
+    return Unit();
+  }
+
+  template <typename T>
+  T to_atomic(const T & value) const {
     return value*factor_;
   }
 
@@ -74,3 +89,5 @@ class Unit {
 // Local Variables:
 // mode: c++
 // End:
+
+#endif
