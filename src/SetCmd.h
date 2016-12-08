@@ -57,28 +57,23 @@ class SetCmd : public Cmd
     "   The set command sets the value of an interface variable.\n\n";
   }
 
-  int action(int argc, char **argv)
-  {
-    if ( argc < 3 && ui->oncoutpe() )
-    {
+  int action(int argc, char **argv) {
+    if ( argc < 3 && ui->oncoutpe() ) {
       cout << "<!-- use: set variable value[s] -->" << endl;
       return 1;
     }
 
     Var* varptr = ui->findVar(argv[1]);
-
-    if ( varptr ) 
-    {
-      varptr->set(argc-1,&argv[1]);
-    }
-    else
-    {
+    
+    if ( varptr ) {
+      return varptr->set(argc-1,&argv[1]);
+    } else {
       // variable is not in the variable list
       if ( ui->oncoutpe() )
         cout << "<WARNING> no such variable: " << argv[1] << " </WARNING>" << endl;
       return 1;
     }
-    return 0;
   }
+  
 };
 #endif
