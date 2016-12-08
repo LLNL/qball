@@ -64,7 +64,7 @@ class Ecut : public Var
     Unit unit = Unit::Energy(unit_name);
 
     if(!unit.exists()) {
-      ui->error("unknown energy unit '" + unit_name);
+      ui->error("Unknown energy unit '" + unit_name + "'.");
       return 1;
     }
     
