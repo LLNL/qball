@@ -57,9 +57,20 @@ class Unit {
     std::transform(unit_name.begin(), unit_name.end(), unit_name.begin(), ::tolower);
 
     if(unit_name == "bohr"      || unit_name == "bohrradius" || unit_name == "b") return Unit(1.0);
+    if(unit_name == "picometer" || unit_name == "pm")                             return Unit(0.0188972612544037);
     if(unit_name == "angstrom"  || unit_name == "a")                              return Unit(1.88972612544037);
     if(unit_name == "nanometer" || unit_name == "nm")                             return Unit(18.8972612544037);
-    if(unit_name == "picometer" || unit_name == "pm")                             return Unit(0.0188972612544037);
+    
+    return Unit();
+  }
+  
+  static Unit Time(string unit_name){
+    //convert to lower case
+    std::transform(unit_name.begin(), unit_name.end(), unit_name.begin(), ::tolower);
+
+    if(unit_name == "atomictime"  || unit_name == "hbar/hartree" || unit_name == "hbar/ha") return Unit(1.0);
+    if(unit_name == "attosecond"  || unit_name == "as")                                     return Unit(0.0413413733348933);
+    if(unit_name == "femtosecond" || unit_name == "fs")                                     return Unit(41.3413733348933);
     
     return Unit();
   }
