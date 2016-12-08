@@ -240,6 +240,7 @@ noinst_HEADERS =                            \
 	Timer.h                             \
 	TorsionCmd.h                        \
 	TorsionConstraint.h                 \
+	Unit.h                              \
 	UnitCell.h                          \
 	UnlockCmd.h                         \
 	UserInterface.h                     \
