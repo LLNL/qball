@@ -6,22 +6,29 @@ Program    : qball
 TestGroups : short-run
 Enabled    : Yes
 
+Processors : 4
 ExtraFile  : Al.xml
 ExtraFile  : geo_al32.sys
 Input      : 01_gs.inp
 Reference  : 01_gs.reference.xml
 
-match ; ekin    ; GREPFIELD(out, '<ekin>',   2) ;  27.68898340
+match ; ekin    ; GREPFIELD(out, '<ekin>',   2) ;  27.68898842
 match ; econf   ; GREPFIELD(out, '<econf>',  2) ;   0.00000000
-match ; eps     ; GREPFIELD(out, '<eps>',    2) ;  -5.91919014
-match ; enl     ; GREPFIELD(out, '<enl>',    2) ;  11.87202719
-match ; ecoul   ; GREPFIELD(out, '<ecoul>',  2) ; -74.73813647
-match ; exc     ; GREPFIELD(out, '<exc>',    2) ; -25.63679258
+match ; eps     ; GREPFIELD(out, '<eps>',    2) ;  -5.91921370
+match ; enl     ; GREPFIELD(out, '<enl>',    2) ;  11.87213023
+match ; ecoul   ; GREPFIELD(out, '<ecoul>',  2) ; -74.73821340
+match ; exc     ; GREPFIELD(out, '<exc>',    2) ; -25.63679332
 match ; esr     ; GREPFIELD(out, '<esr>',    2) ;   0.00008151
 match ; eself   ; GREPFIELD(out, '<eself>',  2) ; 109.42416834
-match ; ets     ; GREPFIELD(out, '<ets>',    2) ;  -0.02643679
-match ; etotal  ; GREPFIELD(out, '<etotal>', 2) ; -66.75954538
+match ; ets     ; GREPFIELD(out, '<ets>',    2) ;  -0.02644462
+match ; etotal  ; GREPFIELD(out, '<etotal>', 2) ; -66.75954638
 
 Input      : 02_md.inp
 Reference  : 02_md.reference.xml
+
+Input      : 03_md_asp.inp
+Reference  : 03_md_asp.reference.xml
+
+Input      : 04_md_ntc.inp
+Reference  : 04_md_ntc.reference.xml
 

@@ -1,0 +1,23 @@
+md.sys
+
+set ecut 30
+set ecutprec 4.0
+set threshold_scf 1.E-6 5
+
+set wf_dyn PSDA
+set nempty 12
+set smearing fermi
+set smearing_width 0.006333621
+set charge_mix_coeff 0.6
+
+set wf_extrapolation ASP
+
+set atoms_dyn MD
+set dt 41.341373
+
+randomize_v 1000
+reset_vcm
+
+load -states restart/md
+
+run 20 200 5
