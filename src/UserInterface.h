@@ -137,8 +137,17 @@ class UserInterface
   
   void terminate(void) { terminate_ = true; };
 
-  bool oncoutpe(void) { return oncoutpe_; };
+  bool oncoutpe(void) const { return oncoutpe_; };
   
   UserInterface(const Context& ctxt);
+
+  void error(const string & message) const {
+    if(oncoutpe()) cout << endl << "<ERROR>" << endl << " " << message << endl << "</ERROR>"<< endl << endl;
+  }
+  
+  void warning(const string & message) const {
+    if(oncoutpe()) cout << endl << "<WARNING>" << endl << " " << message << endl << "</WARNING>"<< endl << endl;
+  }
+  
 };
 #endif

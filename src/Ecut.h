@@ -53,9 +53,9 @@ class Ecut : public Var
     
     if ( argc == 2 ) {
       unit_name = "rydberg";
-      if ( ui->oncoutpe() ) cout << " <WARNING> units missing for variable ecut, assuming rydberg </WARNING>" << endl; 
+      ui->warning("Units missing for variable ecut, assuming rydberg.");
     } else if ( argc != 3 ) {
-      if ( ui->oncoutpe() ) cout << " <ERROR> ecut takes only one value followed by its units </ERROR>" << endl; 
+      ui->error("Ecut takes two arguments: the value followed by its units.");
       return 1;
     } else {
       unit_name = argv[2];
@@ -64,14 +64,14 @@ class Ecut : public Var
     Unit unit = Unit::Energy(unit_name);
 
     if(!unit.exists()) {
-      if ( ui->oncoutpe() ) cout << " <ERROR> unknown energy unit '" << unit_name << "' </ERROR>" << endl; 
+      ui->error("unknown energy unit '" + unit_name);
       return 1;
     }
     
     double value = unit.to_atomic(atof(argv[1]));
 
     if ( value < 0.0 ) {
-      if ( ui->oncoutpe() ) cout << " <ERROR> ecut must be non-negative </ERROR>" << endl;
+      ui->error("ecut must be non-negative");
       return 1;
     }
     
