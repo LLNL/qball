@@ -46,24 +46,36 @@ class Dt : public Var
 
   char const*name ( void ) const { return "dt"; };
 
-  int set ( int argc, char **argv )
-  {
-    if ( argc != 2 )
-    {
-      if ( ui->oncoutpe() )
-      cout << " <ERROR> dt takes only one value </ERROR>" << endl;
-      return 1;
-    }
-    
-    double v = atof(argv[1]);
-    if ( v < 0.0 )
-    {
-      if ( ui->oncoutpe() )
-        cout << " <ERROR> dt must be non-negative </ERROR>" << endl;
+  int set ( int argc, char **argv ) {
+    string unit_name;
+
+    if ( argc == 3 ){
+      unit_name = argv[2];
+    } else if ( argc == 2 ) {
+      unit_name = "atomictime";
+      ui->warning("Missing units for the 'dt' variable. Assuming 'atomictime'.");
+    } else {
+      ui->error("The variable 'dt' requires two arguments: the value and the units.");
       return 1;
     }
 
-    s->ctrl.dt = v;
+    cout << "NAME " << unit_name << " - " << argv[2] << endl;
+    
+    Unit unit = Unit::Time(unit_name);
+
+    if(!unit.exists()) {
+      ui->error("Unknown time unit '" + unit_name + "'.");
+      return 1;
+    }
+    
+    double value = unit.to_atomic(atof(argv[1]));
+    
+    if ( value < 0.0 ) {
+      ui->error("The variable 'dt' must be non-negative");
+      return 1;
+    }
+
+    s->ctrl.dt = value;
     return 0;
   }
 
