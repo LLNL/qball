@@ -148,7 +148,7 @@ class UserInterface
   }
   
   void warning(const string & message) const {
-    if(oncoutpe()) cout << endl << "<WARNING>" << endl << " " << message << endl << "</WARNING>"<< endl << endl;
+    if(oncoutpe()) cout << endl << "<WARNING>" << endl << message << endl << "</WARNING>"<< endl << endl;
   }
   
 };
