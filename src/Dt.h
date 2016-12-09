@@ -48,19 +48,7 @@ class Dt : public StandardVar
   char const*name ( void ) const { return "dt"; };
 
   int set ( int argc, char **argv ) {
-    
-    double value;
-    int error = parse(argc, argv, value);
-
-    if(error != 0) return error;
-    
-    if ( value < 0.0 ) {
-      ui->error("The variable 'dt' must be non-negative");
-      return 1;
-    }
-
-    s->ctrl.dt = value;
-    return 0;
+    return parse(argc, argv, s->ctrl.dt, StandardVar::non_negative);
   }
 
   string print (void) const

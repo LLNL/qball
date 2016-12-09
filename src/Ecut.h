@@ -48,14 +48,9 @@ class Ecut : public StandardVar {
 
     double value;
     
-    int error = parse(argc, argv, value);
+    int error = parse(argc, argv, value, StandardVar::non_negative);
     if(error != 0) return error;
 
-    if ( value < 0.0 ) {
-      ui->error("ecut must be non-negative");
-      return 1;
-    }
-    
     if ( s->wf.ecut() == value ) return 0;
 
     if (s->wf.hasdata()) {
