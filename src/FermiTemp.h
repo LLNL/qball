@@ -60,12 +60,10 @@ class FermiTemp : public Var {
 
     const double boltz = 1.0 / ( 11605.0 * 13.6058 ); // convert from Kelvin to Ry
 
-    if ( ui->oncoutpe() ) {
-      cout << "<!-- Note:  fermi_temp variable is deprecated.  Automatically converting input" << " -->" << endl;
-      cout << "<!-- to the following commands instead:" << " -->" << endl;
-      cout << "<!--   set smearing fermi" << " -->" << endl;
-      cout << "<!--   set smearing_width " << v*boltz << " -->" << endl;
-    }
+    ui->warning(string("\nThe fermi_temp variable is deprecated. Automatically converting input\n") +
+		string("to the following commands instead:\n\n") +
+		string("  set smearing fermi\n") +
+		string("  set smearing_width ") + argv[1] + string(" kelvin\n"));
 
     s->ctrl.smearing = "fermi";
     s->ctrl.smearing_width = v*boltz;
