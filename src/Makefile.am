@@ -216,6 +216,7 @@ noinst_HEADERS =                            \
 	SphericalIntegration.h              \
 	Spin.h                              \
 	Spline.h                            \
+	StandardVar.h                       \
 	StatusCmd.h                         \
 	StrainCmd.h                         \
 	Stress.h                            \

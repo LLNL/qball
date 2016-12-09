@@ -39,13 +39,10 @@
 #include "Sample.h"
 #include "Unit.h"
 
-class Ecut : public Var
-{
+class Ecut : public StandardVar {
   Sample *s;
 
   public:
-
-  char const*name ( void ) const { return "ecut"; };
 
   int set ( int argc, char **argv ) {
 
@@ -101,7 +98,7 @@ class Ecut : public Var
      return st.str();
   }
 
-  Ecut(Sample *sample) : Var(Dimensions::energy), s(sample) {};
+  Ecut(Sample *sample) : StandardVar("ecut", Dimensions::energy, "rydberg"), s(sample) {};
 };
 #endif
 

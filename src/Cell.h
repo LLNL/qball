@@ -38,14 +38,12 @@
 
 #include "Sample.h"
 #include "Unit.h"
+#include "StandardVar.h"
 
-class Cell : public Var
-{
+class Cell : public StandardVar {
   Sample *s;
 
   public:
-
-  char const*name ( void ) const { return "cell"; };
 
   int set ( int argc, char **argv )
   {
@@ -117,7 +115,7 @@ class Cell : public Var
      return st.str();
   }
 
-  Cell(Sample *sample) : Var(Dimensions::length), s(sample) {};
+  Cell(Sample *sample) : StandardVar("cell", Dimensions::length, "bohr"), s(sample) {};
 };
 #endif
 

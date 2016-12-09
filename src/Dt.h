@@ -36,9 +36,10 @@
 #include<sstream>
 #include<stdlib.h>
 
+#include "StandardVar.h"
 #include "Sample.h"
 
-class Dt : public Var
+class Dt : public StandardVar
 {
   Sample *s;
 
@@ -89,7 +90,7 @@ class Dt : public Var
      return st.str();
   }
 
-  Dt(Sample *sample) : Var(Dimensions::time), s(sample) { s->ctrl.dt = 3.0; }
+  Dt(Sample *sample) : StandardVar("dt", Dimensions::time, "atomictime"), s(sample) { s->ctrl.dt = 3.0; }
 };
 #endif
 

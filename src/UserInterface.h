@@ -60,11 +60,7 @@ public:
   virtual char const*name ( void ) const = 0;
   virtual int set ( int argc, char **argv ) = 0;
   virtual string print ( void ) const = 0;
-  const Dimensions & dimensions() const { return dims_; }
-protected:
-  Var(Dimensions dims = Dimensions::one):dims_(dims){}
-private:
-  Dimensions dims_;
+  virtual const Dimensions & dimensions() const {return Dimensions::one;}
 };
 
 class UserInterface
