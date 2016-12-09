@@ -61,7 +61,7 @@ class Dt : public Var
 
     cout << "NAME " << unit_name << " - " << argv[2] << endl;
     
-    Unit unit(Dimensions::time, unit_name);
+    Unit unit(dimensions(), unit_name);
 
     if(!unit.exists()) {
       ui->error("Unknown time unit '" + unit_name + "'.");
@@ -89,7 +89,7 @@ class Dt : public Var
      return st.str();
   }
 
-  Dt(Sample *sample) : s(sample) { s->ctrl.dt = 3.0; }
+  Dt(Sample *sample) : Var(Dimensions::time), s(sample) { s->ctrl.dt = 3.0; }
 };
 #endif
 

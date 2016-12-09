@@ -39,6 +39,8 @@
 #include <list>
 #include <algorithm>
 #include "Context.h"
+#include "Dimensions.h"
+
 using namespace std;
 
 class UserInterface;
@@ -52,13 +54,17 @@ class Cmd
   virtual int action(int argc, char **argv) = 0;
 };
 
-class Var
-{
-  public:
+class Var {
+public:
   UserInterface *ui;
   virtual char const*name ( void ) const = 0;
   virtual int set ( int argc, char **argv ) = 0;
   virtual string print ( void ) const = 0;
+  const Dimensions & dimensions() const { return dims_; }
+protected:
+  Var(Dimensions dims = Dimensions::one):dims_(dims){}
+private:
+  Dimensions dims_;
 };
 
 class UserInterface
@@ -150,6 +156,11 @@ class UserInterface
   }
   
 };
+
+// Local Variables:
+// mode: c++
+// End:
+
 #endif
 
 // Local Variables:

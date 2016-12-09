@@ -60,7 +60,7 @@ class Cell : public Var
       return 1;
     }
     
-    Unit unit(Dimensions::length, unit_name);
+    Unit unit(dimensions(), unit_name);
 
     if(!unit.exists()){
       ui->error("Unknown length unit '" + unit_name + "'.");
@@ -117,7 +117,7 @@ class Cell : public Var
      return st.str();
   }
 
-  Cell(Sample *sample) : s(sample) {};
+  Cell(Sample *sample) : Var(Dimensions::length), s(sample) {};
 };
 #endif
 

@@ -61,7 +61,7 @@ class Ecut : public Var
       unit_name = argv[2];
     }
     
-    Unit unit(Dimensions::energy, unit_name);
+    Unit unit(dimensions(), unit_name);
 
     if(!unit.exists()) {
       ui->error("Unknown energy unit '" + unit_name + "'.");
@@ -101,7 +101,7 @@ class Ecut : public Var
      return st.str();
   }
 
-  Ecut(Sample *sample) : s(sample) {};
+  Ecut(Sample *sample) : Var(Dimensions::energy), s(sample) {};
 };
 #endif
 
