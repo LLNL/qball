@@ -45,9 +45,10 @@ public:
   virtual const char * name() const { return name_.c_str(); }
   const Dimensions & dimensions() const { return dims_; }
 
-  typedef unsigned Validation;
+  typedef unsigned Attributes;
 
-  static const Validation non_negative = 1 << 0;
+  static const Attributes any_value    = 0;
+  static const Attributes non_negative = 1 << 0;
   
 protected:
   
@@ -57,7 +58,7 @@ protected:
     default_unit_name_(default_unit_name){
   }
 
-  int parse(int argc, char **argv, double & value, Validation val = 0){
+  int parse(int argc, char **argv, double & value, Attributes attr = 0){
     
     string unit_name;
     
@@ -80,19 +81,20 @@ protected:
     
     value = unit.to_atomic(atof(argv[1]));
 
-    if ( val & non_negative && value < 0.0 ) {
+    if ( attr & non_negative && value < 0.0 ) {
       ui->error("The variable '" + string(name()) + "' must be non-negative.");
       return 1;
     }
     
     return 0;
   }  
-  
-  string default_unit_name_;
 
 private:
   string name_;
   Dimensions dims_;
+  string default_unit_name_;
+
+  
 };
 
 // Local Variables:
