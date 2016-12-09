@@ -76,3 +76,7 @@ class EmpiricalPotential {
 };
 
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

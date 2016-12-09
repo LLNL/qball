@@ -32,3 +32,7 @@
 #include <string>
 std::string qbox_xmlns(void);
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

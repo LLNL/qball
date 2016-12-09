@@ -72,3 +72,7 @@ class AtomSetHandler : public StructureHandler
   ~AtomSetHandler();
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

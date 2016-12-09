@@ -76,3 +76,7 @@ std::ostream& operator << ( std::ostream &os, Constraint &c );
 #endif
 
 
+
+// Local Variables:
+// mode: c++
+// End:

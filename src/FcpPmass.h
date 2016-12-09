@@ -81,3 +81,7 @@ class FcpPmass : public Var
   FcpPmass(Sample *sample) : s(sample) { s->ctrl.fcp_pmass = 0.0; }
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

@@ -57,3 +57,7 @@ class Symmetry {
 
 ostream& operator << ( ostream &os, Symmetry &s );
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

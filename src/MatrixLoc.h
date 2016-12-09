@@ -74,3 +74,7 @@ class MatrixLoc : public Var
   MatrixLoc(Sample *sample) : s(sample) {}
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

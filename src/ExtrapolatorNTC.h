@@ -47,3 +47,7 @@ class ExtrapolatorNTC : public Extrapolator {
 };
 
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

@@ -81,3 +81,7 @@ class WfDiag : public Var
   WfDiag(Sample *sample) : s(sample) { s->ctrl.wf_diag = "F"; };
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

@@ -68,3 +68,7 @@ class ListSpeciesCmd : public Cmd
   }
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

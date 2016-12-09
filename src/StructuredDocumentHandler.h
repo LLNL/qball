@@ -103,3 +103,7 @@ class StructuredDocumentHandler : public DefaultHandler
 
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

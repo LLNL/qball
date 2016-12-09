@@ -69,3 +69,7 @@ class EnthalpyFunctional {
 };
 
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

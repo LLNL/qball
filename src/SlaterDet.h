@@ -185,3 +185,7 @@ class SlaterDetException
   SlaterDetException(string s) : msg(s) {}
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

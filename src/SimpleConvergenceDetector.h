@@ -55,3 +55,7 @@ class SimpleConvergenceDetector : public ConvergenceDetector {
     
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

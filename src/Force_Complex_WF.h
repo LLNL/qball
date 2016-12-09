@@ -109,3 +109,7 @@ class Force_Complex_WF : public Var
   Force_Complex_WF(Sample *sample) : s(sample) { s->wf.force_complex( false ); }
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

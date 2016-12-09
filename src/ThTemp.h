@@ -80,3 +80,7 @@ class ThTemp : public Var
   ThTemp(Sample *sample) : s(sample) { s->ctrl.th_temp = 0.0; }
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

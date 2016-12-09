@@ -116,3 +116,7 @@ class Nparallelkpts : public Var
   Nparallelkpts(Sample *sample) : s(sample) {};
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

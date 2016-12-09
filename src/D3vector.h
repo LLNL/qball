@@ -177,3 +177,7 @@ class D3vector
 
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

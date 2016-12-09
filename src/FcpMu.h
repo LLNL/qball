@@ -75,3 +75,7 @@ class FcpMu : public Var
   FcpMu(Sample *sample) : s(sample) { s->ctrl.fcp_mu = 0.0; }
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

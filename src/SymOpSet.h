@@ -61,3 +61,7 @@ class SymOpSet {
 };
 
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

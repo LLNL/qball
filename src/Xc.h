@@ -81,3 +81,7 @@ class Xc : public Var
   Xc(Sample *sample) : s(sample) { s->ctrl.xc = "LDA"; };
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

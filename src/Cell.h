@@ -120,3 +120,7 @@ class Cell : public Var
   Cell(Sample *sample) : s(sample) {};
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

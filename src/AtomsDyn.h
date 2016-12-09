@@ -82,3 +82,7 @@ class AtomsDyn : public Var
   AtomsDyn(Sample *sample) : s(sample) { s->ctrl.atoms_dyn = "LOCKED"; };
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

@@ -551,3 +551,7 @@ class ComplexMatrix
 };
 ostream& operator << ( ostream& os, const ComplexMatrix& a );
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

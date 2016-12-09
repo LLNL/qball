@@ -65,3 +65,7 @@ class TestHandler : public DefaultHandler
        const XMLCh* const data) {};
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

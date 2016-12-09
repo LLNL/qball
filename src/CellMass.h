@@ -80,3 +80,7 @@ class CellMass : public Var
   CellMass(Sample *sample) : s(sample) { s->ctrl.cell_mass = 10000.0; }
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

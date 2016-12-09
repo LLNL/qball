@@ -47,3 +47,7 @@ class ExtrapolatorSimple : public Extrapolator {
 };
 
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

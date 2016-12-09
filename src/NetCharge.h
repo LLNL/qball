@@ -97,3 +97,7 @@ class NetCharge : public Var
   NetCharge(Sample *sample) : s(sample) {};
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

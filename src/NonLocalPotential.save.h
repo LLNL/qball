@@ -86,3 +86,7 @@ class NonLocalPotential
     bool compute_stress, valarray<double>& sigma_enl);
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

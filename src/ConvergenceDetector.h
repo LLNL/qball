@@ -46,3 +46,7 @@ class ConvergenceDetector {
     
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

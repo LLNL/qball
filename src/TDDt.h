@@ -84,3 +84,7 @@ class TDDt : public Var
   TDDt(Sample *sample) : s(sample) { s->ctrl.tddt = 0.01; }
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

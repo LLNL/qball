@@ -92,3 +92,7 @@ class Smearing : public Var {
   }
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

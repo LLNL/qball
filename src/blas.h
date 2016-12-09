@@ -145,3 +145,7 @@ void dnaxpy(int*,int*,double*,int*,double*,int*,int*,double*,int*,int*);
 #endif
  
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

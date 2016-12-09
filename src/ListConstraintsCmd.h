@@ -62,3 +62,7 @@ class ListConstraintsCmd : public Cmd
   }
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

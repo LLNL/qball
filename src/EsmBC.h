@@ -83,3 +83,7 @@ class EsmBC : public Var
   EsmBC(Sample *sample) : s(sample) { s->ctrl.esm_bc = ""; };
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

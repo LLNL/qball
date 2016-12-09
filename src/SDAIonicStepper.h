@@ -57,3 +57,7 @@ class SDAIonicStepper : public IonicStepper
 };
 
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

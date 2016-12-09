@@ -82,3 +82,7 @@ class EsmW : public Var
   EsmW(Sample *sample) : s(sample) { s->ctrl.esm_w = 0.0; }
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

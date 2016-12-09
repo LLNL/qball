@@ -52,3 +52,7 @@ class XMLGFPreprocessor
   void process(const char* const filename,
     DoubleMatrix& gfdata, std::string& xmlcontent);
 };
+
+// Local Variables:
+// mode: c++
+// End:

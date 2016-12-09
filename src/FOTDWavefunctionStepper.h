@@ -65,3 +65,7 @@ class FOTDWavefunctionStepper : public WavefunctionStepper
   ~FOTDWavefunctionStepper() {};
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

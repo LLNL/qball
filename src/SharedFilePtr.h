@@ -66,3 +66,7 @@ class SharedFilePtr
   ~SharedFilePtr() {}
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

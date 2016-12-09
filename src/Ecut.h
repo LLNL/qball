@@ -104,3 +104,7 @@ class Ecut : public Var
   Ecut(Sample *sample) : s(sample) {};
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

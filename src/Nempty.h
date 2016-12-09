@@ -81,3 +81,7 @@ class Nempty : public Var
   Nempty(Sample *sample) : s(sample) {};
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

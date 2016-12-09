@@ -142,3 +142,7 @@ class EmpiricalPotentialCmd : public Cmd {
 
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

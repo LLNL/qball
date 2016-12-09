@@ -80,3 +80,7 @@ class Thermostat : public Var {
   Thermostat(Sample *sample) : s(sample) { s->ctrl.thermostat = "OFF"; };
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

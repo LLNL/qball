@@ -75,3 +75,7 @@ class SmearingWidth : public Var {
   SmearingWidth(Sample *sample) : s(sample) { s->ctrl.smearing_width = 0.0; }
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

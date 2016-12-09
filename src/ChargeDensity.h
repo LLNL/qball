@@ -106,3 +106,7 @@ class ChargeDensity {
   ~ChargeDensity();
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

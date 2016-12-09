@@ -88,3 +88,7 @@ class XCPotentialException
   XCPotentialException(string s) : msg(s) {}
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

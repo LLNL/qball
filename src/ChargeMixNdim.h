@@ -79,3 +79,7 @@ class ChargeMixNdim : public Var
   ChargeMixNdim(Sample *sample) : s(sample) { s->ctrl.charge_mix_ndim = 3; };
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

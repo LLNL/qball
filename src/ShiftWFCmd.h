@@ -112,3 +112,7 @@ class ShiftWFCmd : public Cmd
   }
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

@@ -78,3 +78,7 @@ class ChargeMixing : public Var {
   ChargeMixing(Sample *sample) : s(sample) { s->ctrl.charge_mixing = "anderson"; }
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

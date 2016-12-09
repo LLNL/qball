@@ -180,3 +180,7 @@ class FourierTransform
   
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

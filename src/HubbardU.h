@@ -93,3 +93,7 @@ class HubbardU : public Var
   HubbardU(Sample *sample) : s(sample) { s->ctrl.dft_plus_u = false; };
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

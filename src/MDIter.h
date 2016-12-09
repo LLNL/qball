@@ -77,3 +77,7 @@ class MDIter : public Var {
   MDIter(Sample *sample) : s(sample) { s->ctrl.mditer = 0; }
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

@@ -53,3 +53,7 @@ class SpeciesReader
 class SpeciesReaderException {};
 
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

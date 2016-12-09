@@ -114,3 +114,7 @@ class qbLink {
   ~qbLink();
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

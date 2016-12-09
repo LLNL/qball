@@ -63,3 +63,7 @@ class SaveESPCmd : public Cmd
   ~SaveESPCmd();
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

@@ -82,3 +82,7 @@ class FcpThWidth : public Var
   FcpThWidth(Sample *sample) : s(sample) { s->ctrl.fcp_th_width = -1.0; }
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

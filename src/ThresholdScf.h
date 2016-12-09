@@ -86,3 +86,7 @@ class ThresholdScf : public Var {
   };
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

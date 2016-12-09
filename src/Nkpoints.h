@@ -78,3 +78,7 @@ class Nkpoints : public Var {
   Nkpoints(Sample *sample) : s(sample) { s->ctrl.nkpoints = 1; }
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

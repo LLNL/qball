@@ -214,3 +214,7 @@ class SpeciesInitException
   SpeciesInitException(string s) : msg(s) {}
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

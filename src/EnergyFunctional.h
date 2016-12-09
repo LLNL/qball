@@ -164,3 +164,7 @@ class EnergyFunctional
 };
 ostream& operator << ( ostream& os, const EnergyFunctional& e );
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

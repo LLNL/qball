@@ -84,3 +84,7 @@ class PositionConstraint : public Constraint
 
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

@@ -78,3 +78,7 @@ class IPrint : public Var {
   IPrint(Sample *sample) : s(sample) { s->ctrl.iprint = 1; }
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

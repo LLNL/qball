@@ -80,3 +80,7 @@ class SaveWfFreq : public Var
   }
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

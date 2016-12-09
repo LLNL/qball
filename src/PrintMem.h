@@ -43,3 +43,7 @@ class PrintMem
   ~PrintMem(void);
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

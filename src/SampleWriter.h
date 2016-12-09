@@ -56,3 +56,7 @@ class SampleWriterException
 };
 
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

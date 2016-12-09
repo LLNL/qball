@@ -64,3 +64,7 @@ class SORKTDWavefunctionStepper : public WavefunctionStepper
   ~SORKTDWavefunctionStepper() {};
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

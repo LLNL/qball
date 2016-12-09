@@ -114,3 +114,7 @@ class WfDyn : public Var
   WfDyn(Sample *sample) : s(sample) { s->ctrl.wf_dyn = "SD"; s->ctrl.tddft_involved = false;};
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

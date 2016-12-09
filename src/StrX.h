@@ -79,3 +79,7 @@ inline ostream& operator<<(ostream& target, const StrX& toDump)
     return target;
 }
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

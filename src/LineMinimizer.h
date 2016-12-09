@@ -190,3 +190,7 @@ class LineMinimizer
   }
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

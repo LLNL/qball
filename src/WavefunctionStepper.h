@@ -58,3 +58,7 @@ class WavefunctionStepper
   virtual ~WavefunctionStepper() {}
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

@@ -64,3 +64,7 @@ class StructureHandler
   virtual ~StructureHandler() {}
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

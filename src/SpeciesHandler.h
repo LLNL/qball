@@ -68,3 +68,7 @@ class SpeciesHandler : public StructureHandler
   ~SpeciesHandler();
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

@@ -187,3 +187,7 @@ class Context
 ostream& operator << ( ostream& os, const Context& ctxt );
 
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

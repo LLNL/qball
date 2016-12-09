@@ -47,3 +47,7 @@ class ExtrapolatorASP : public Extrapolator {
 };
 
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

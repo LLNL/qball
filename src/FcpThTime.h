@@ -82,3 +82,7 @@ class FcpThTime : public Var
   FcpThTime(Sample *sample) : s(sample) { s->ctrl.fcp_th_time = -1.0; }
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

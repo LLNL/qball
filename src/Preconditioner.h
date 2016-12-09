@@ -59,3 +59,7 @@ class Preconditioner
   //~Preconditioner();
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

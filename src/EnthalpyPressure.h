@@ -69,3 +69,7 @@ class EnthalpyPressure : public Var {
   EnthalpyPressure(Sample *sample) : s(sample) { s->ctrl.enthalpy_pressure = 0.0; };
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

@@ -75,3 +75,7 @@ class CellStepFreq : public Var {
   CellStepFreq(Sample *sample) : s(sample) { s->ctrl.cell_stepfreq = 1; }
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

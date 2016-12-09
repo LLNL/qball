@@ -67,3 +67,7 @@ class Atom
 
 ostream& operator << ( ostream &os, Atom &a );
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

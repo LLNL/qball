@@ -116,3 +116,7 @@ class RunTimer : public Var
   RunTimer(Sample *sample) : s(sample) { s->ctrl.run_timer = 0.0; };
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

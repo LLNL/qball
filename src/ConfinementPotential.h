@@ -57,3 +57,7 @@ class ConfinementPotential
   ~ConfinementPotential();
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

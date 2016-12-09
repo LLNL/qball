@@ -69,3 +69,7 @@ class EnthalpyThreshold : public Var {
   EnthalpyThreshold(Sample *sample) : s(sample) { s->ctrl.enthalpy_threshold = 1.E-4; };
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

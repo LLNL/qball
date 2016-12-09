@@ -68,3 +68,7 @@ class Hugoniostat {
 };
 
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

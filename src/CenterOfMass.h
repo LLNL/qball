@@ -87,3 +87,7 @@ class CenterOfMass : public Var {
   CenterOfMass(Sample *sample) : s(sample) { s->ctrl.center_of_mass = "unset"; }
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

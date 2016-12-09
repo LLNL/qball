@@ -81,3 +81,7 @@ class Ecuts : public Var
   Ecuts(Sample *sample) : s(sample) { s->ctrl.ecuts = 0.0; }
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

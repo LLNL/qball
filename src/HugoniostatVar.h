@@ -75,3 +75,7 @@ class HugoniostatVar : public Var {
   HugoniostatVar(Sample *sample) : s(sample) { s->ctrl.hugoniostat = "OFF"; };
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

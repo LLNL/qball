@@ -110,3 +110,7 @@ class UnitCell
 };
 ostream& operator << ( ostream& os, const UnitCell& cell );
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

@@ -57,3 +57,7 @@ class CellStepper
   virtual ~CellStepper() {}
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

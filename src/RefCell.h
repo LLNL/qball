@@ -103,3 +103,7 @@ class RefCell : public Var
   RefCell(Sample *sample) : s(sample) {}
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

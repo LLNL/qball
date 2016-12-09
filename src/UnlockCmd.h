@@ -108,3 +108,7 @@ class UnlockCmd : public Cmd {
 
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

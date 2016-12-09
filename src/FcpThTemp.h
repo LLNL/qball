@@ -82,3 +82,7 @@ class FcpThTemp : public Var
   FcpThTemp(Sample *sample) : s(sample) { s->ctrl.fcp_th_temp = -1.0; }
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

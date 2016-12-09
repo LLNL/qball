@@ -80,3 +80,7 @@ class ThTime : public Var
   ThTime(Sample *sample) : s(sample) { s->ctrl.th_time = 5000.0; }
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

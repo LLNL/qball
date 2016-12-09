@@ -81,3 +81,7 @@ class Ecutprec : public Var
   Ecutprec(Sample *sample) : s(sample) { s->ctrl.ecutprec = 0.0; }
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

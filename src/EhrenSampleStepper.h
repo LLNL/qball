@@ -76,3 +76,7 @@ class EhrenSampleStepper : public SampleStepper
   ~EhrenSampleStepper();
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

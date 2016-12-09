@@ -95,3 +95,7 @@ class Non_Selfconsistent_Energy_Output : public Var
   Non_Selfconsistent_Energy_Output(Sample *sample) : s(sample) { s->ctrl.non_selfc_energy=false; }
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

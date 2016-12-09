@@ -170,3 +170,7 @@ class Basis
 };
 std::ostream& operator << ( std::ostream& os, Basis& b );
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

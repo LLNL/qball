@@ -81,3 +81,7 @@ class Stress : public Var
   Stress(Sample *sample) : s(sample) { s->ctrl.stress = "OFF"; }
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

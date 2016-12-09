@@ -80,3 +80,7 @@ class WFPhaseRealCmd : public Cmd
   }
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

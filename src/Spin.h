@@ -99,3 +99,7 @@ class Spin : public Var
   Spin(Sample *sample) : s(sample) { s->ctrl.delta_spin = 0; };
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

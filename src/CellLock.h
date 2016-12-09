@@ -89,3 +89,7 @@ class CellLock : public Var
   CellLock(Sample *sample) : s(sample) { s->ctrl.cell_lock = "OFF"; }
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

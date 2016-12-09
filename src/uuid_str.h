@@ -24,3 +24,7 @@
 #include <config.h>
 #include <string>
 std::string uuid_str(void);
+
+// Local Variables:
+// mode: c++
+// End:

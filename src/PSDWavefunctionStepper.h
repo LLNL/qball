@@ -48,3 +48,7 @@ class PSDWavefunctionStepper : public WavefunctionStepper
   ~PSDWavefunctionStepper() {};
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

@@ -81,3 +81,7 @@ class Ecutden : public Var
   Ecutden(Sample *sample) : s(sample) { s->ctrl.ecutden = 0.0; }
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

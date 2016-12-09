@@ -71,3 +71,7 @@ class MLWFTransform
   ~MLWFTransform(void);
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

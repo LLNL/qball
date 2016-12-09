@@ -67,3 +67,7 @@ class ComputeMLWFCmd : public Cmd
   ~ComputeMLWFCmd();
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

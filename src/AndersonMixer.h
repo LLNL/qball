@@ -69,3 +69,7 @@ class AndersonMixer
   void restart(void);
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

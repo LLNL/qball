@@ -94,3 +94,7 @@ class WF_Phase_RealVar : public Var
   WF_Phase_RealVar(Sample *sample) : s(sample) { s->wf.phase_real( false ); }
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

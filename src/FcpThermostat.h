@@ -83,3 +83,7 @@ class FcpThermostat : public Var
   FcpThermostat(Sample *sample) : s(sample) { s->ctrl.fcp_thermostat = "OFF"; };
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

@@ -59,3 +59,7 @@ class MMSpecies {
 };
 ostream& operator << ( ostream &os, MMSpecies &a );
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

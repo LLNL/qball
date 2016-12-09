@@ -95,3 +95,7 @@ class DistanceCmd : public Cmd
   }
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

@@ -151,3 +151,7 @@ class UserInterface
   
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

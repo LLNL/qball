@@ -69,3 +69,7 @@ class HugDeltaTemp : public Var {
   HugDeltaTemp(Sample *sample) : s(sample) { s->ctrl.hug_deltatemp = 10.0; }
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

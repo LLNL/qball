@@ -61,3 +61,7 @@ class LoadCmd : public Cmd
   int action(int argc, char **argv);
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

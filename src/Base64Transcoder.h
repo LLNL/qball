@@ -61,3 +61,7 @@ class Base64Transcoder
 };
 
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

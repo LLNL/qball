@@ -46,3 +46,7 @@ class SphericalIntegration {
 
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

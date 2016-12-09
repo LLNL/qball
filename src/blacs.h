@@ -91,3 +91,7 @@ int Csys2blacs_handle(MPI_Comm);
 #endif
 
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

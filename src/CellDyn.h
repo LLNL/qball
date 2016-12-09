@@ -83,3 +83,7 @@ class CellDyn : public Var
   CellDyn(Sample *sample) : s(sample) { s->ctrl.cell_dyn = "LOCKED"; };
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

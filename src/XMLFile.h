@@ -143,3 +143,7 @@ private:
 // Local Variables:
 // mode: c++
 // End:
+
+// Local Variables:
+// mode: c++
+// End:

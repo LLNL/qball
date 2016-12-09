@@ -93,3 +93,7 @@ class NA_overlaps : public Var
   NA_overlaps(Sample *sample) : s(sample) { s->ctrl.na_overlap_min = -1 ; s->ctrl.na_overlap_max = -1 ; }
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

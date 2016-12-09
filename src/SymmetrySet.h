@@ -59,3 +59,7 @@ class SymmetrySet {
 };
 ostream& operator << ( ostream &os, SymmetrySet &ss );
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

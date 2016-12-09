@@ -103,3 +103,7 @@ class TorsionConstraint : public Constraint
 
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

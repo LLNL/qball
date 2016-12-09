@@ -72,3 +72,7 @@ class SaveFreq : public Var
   SaveFreq(Sample *sample) : s(sample) { s->ctrl.savefreq = -1 ; }
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

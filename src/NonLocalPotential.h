@@ -97,3 +97,7 @@ class NonLocalPotential
   void print_timing();
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

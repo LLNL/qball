@@ -75,3 +75,7 @@ class HugFreq : public Var {
   HugFreq(Sample *sample) : s(sample) { s->ctrl.hug_freq = 5; }
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

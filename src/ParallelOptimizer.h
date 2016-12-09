@@ -62,3 +62,7 @@ class ParallelOptimizer {
   ~ParallelOptimizer();
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

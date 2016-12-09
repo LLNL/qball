@@ -85,3 +85,7 @@ class ChargeMixCoeff : public Var
   ChargeMixCoeff(Sample *sample) : s(sample) { s->ctrl.charge_mix_coeff = 0.5; };
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

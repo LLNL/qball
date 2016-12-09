@@ -78,3 +78,7 @@ class Spline {
 };
 
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

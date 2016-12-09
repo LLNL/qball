@@ -93,3 +93,7 @@ class WfExtrap : public Var
   WfExtrap(Sample *sample) : s(sample) { s->ctrl.wf_extrap = "SIMPLE"; };
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

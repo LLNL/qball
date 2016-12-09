@@ -68,3 +68,7 @@ class CPSampleStepper : public SampleStepper
   ~CPSampleStepper();
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

@@ -65,3 +65,7 @@ class FORKTDWavefunctionStepper : public WavefunctionStepper
   ~FORKTDWavefunctionStepper() {};
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

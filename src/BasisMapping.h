@@ -84,3 +84,7 @@ class BasisMapping
                      std::complex<double> *zvec);
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

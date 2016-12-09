@@ -32,3 +32,7 @@
 #include <string>
 std::string release(void);
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

@@ -47,3 +47,7 @@ class SDWavefunctionStepper : public WavefunctionStepper
   ~SDWavefunctionStepper() {};
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

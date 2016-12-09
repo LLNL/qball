@@ -64,3 +64,7 @@ class SymOp {
 
 ostream& operator << ( ostream &os, SymOp &s );
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

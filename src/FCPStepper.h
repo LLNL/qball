@@ -109,3 +109,7 @@ class FCPStepper
 };
 
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

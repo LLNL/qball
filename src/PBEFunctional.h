@@ -66,3 +66,7 @@ class PBEFunctional : public XCFunctional
   void setxc(void); 
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

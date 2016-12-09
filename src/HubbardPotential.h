@@ -75,3 +75,7 @@ class HubbardPotential
 
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

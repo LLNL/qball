@@ -79,3 +79,7 @@ class ChargeMixRcut : public Var
   ChargeMixRcut(Sample *sample) : s(sample) { s->ctrl.charge_mix_rcut = 10.0; };
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

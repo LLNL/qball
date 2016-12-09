@@ -51,3 +51,7 @@ class TDEULERWavefunctionStepper : public WavefunctionStepper
   ~TDEULERWavefunctionStepper() {};
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

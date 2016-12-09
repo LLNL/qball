@@ -55,3 +55,7 @@ class JDWavefunctionStepper : public WavefunctionStepper
   ~JDWavefunctionStepper() {};
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

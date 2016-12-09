@@ -32,3 +32,7 @@
 #include <string>
 std::string isodate(void);
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

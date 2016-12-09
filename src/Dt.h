@@ -92,3 +92,7 @@ class Dt : public Var
   Dt(Sample *sample) : s(sample) { s->ctrl.dt = 3.0; }
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

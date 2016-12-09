@@ -134,3 +134,7 @@ struct Control
   double fcp_mu;
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

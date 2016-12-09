@@ -206,3 +206,7 @@ class StrainCmd : public Cmd
   }
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

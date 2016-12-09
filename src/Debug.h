@@ -96,3 +96,7 @@ class Debug : public Var
   Debug(Sample *sample) : s(sample) { s->ctrl.debug = "OFF"; }
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

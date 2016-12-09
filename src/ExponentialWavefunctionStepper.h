@@ -73,3 +73,7 @@ class ExponentialWavefunctionStepper : public WavefunctionStepper
 // mode: c++
 // coding: utf-8
 // End:
+
+// Local Variables:
+// mode: c++
+// End:

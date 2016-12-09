@@ -56,3 +56,7 @@
 
 
 #endif// __PROFILE_H__
+
+// Local Variables:
+// mode: c++
+// End:

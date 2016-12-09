@@ -74,3 +74,7 @@ class Pblock : public Var
   Pblock(Sample *sample) : s(sample) {}
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

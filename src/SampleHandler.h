@@ -78,3 +78,7 @@ class SampleHandler : public StructureHandler
   ~SampleHandler();
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

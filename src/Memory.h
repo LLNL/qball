@@ -78,3 +78,7 @@ class Memory : public Var {
   Memory(Sample *sample) : s(sample) { s->ctrl.extra_memory = 3; }
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

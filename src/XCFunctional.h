@@ -103,3 +103,7 @@ class XCFunctional {
   virtual void setxc(void) = 0; 
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

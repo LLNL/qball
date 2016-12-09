@@ -85,3 +85,7 @@ class FermiTemp : public Var {
   FermiTemp(Sample *sample) : s(sample) { }
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

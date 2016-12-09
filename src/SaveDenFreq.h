@@ -78,3 +78,7 @@ class SaveDenFreq : public Var
   }
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

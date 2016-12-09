@@ -86,3 +86,7 @@ class ThresholdStress : public Var {
   };
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

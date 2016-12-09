@@ -56,3 +56,7 @@ class MDWavefunctionStepper : public WavefunctionStepper
   ~MDWavefunctionStepper() {};
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

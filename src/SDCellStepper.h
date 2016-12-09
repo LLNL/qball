@@ -46,3 +46,7 @@ class SDCellStepper : public CellStepper
   double ekin(void) const { return 0.0; }
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

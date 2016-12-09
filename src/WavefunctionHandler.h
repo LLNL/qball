@@ -90,3 +90,7 @@ class WavefunctionHandler : public StructureHandler
   ~WavefunctionHandler();
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

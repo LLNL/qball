@@ -83,3 +83,7 @@ class ExtStress : public Var
   };
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

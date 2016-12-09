@@ -62,3 +62,7 @@ class SOTDWavefunctionStepper : public WavefunctionStepper
   ~SOTDWavefunctionStepper() {};
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

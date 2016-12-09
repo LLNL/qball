@@ -73,3 +73,7 @@ class BOSampleStepper : public SampleStepper
   ~BOSampleStepper();
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

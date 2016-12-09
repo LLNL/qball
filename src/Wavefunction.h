@@ -226,3 +226,7 @@ class Wavefunction {
 };
 ostream& operator << ( ostream& os, Wavefunction& wf );
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

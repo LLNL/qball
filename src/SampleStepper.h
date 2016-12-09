@@ -73,3 +73,7 @@ class SampleStepper
   virtual ~SampleStepper(void);
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

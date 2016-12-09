@@ -149,3 +149,7 @@ class AtomSet
  };
 std::ostream& operator << ( std::ostream &os, const AtomSet &as );
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

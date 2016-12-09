@@ -80,3 +80,7 @@ class ThWidth : public Var
   ThWidth(Sample *sample) : s(sample) { s->ctrl.th_width = 100.0; }
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

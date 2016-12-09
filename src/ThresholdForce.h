@@ -86,3 +86,7 @@ class ThresholdForce : public Var {
   };
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

@@ -71,3 +71,7 @@ class ConstraintSet
   void reset(void);
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:

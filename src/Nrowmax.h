@@ -119,3 +119,7 @@ class Nrowmax : public Var
   Nrowmax(Sample *sample) : s(sample) {};
 };
 #endif
+
+// Local Variables:
+// mode: c++
+// End:
