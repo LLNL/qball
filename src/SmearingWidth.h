@@ -37,30 +37,15 @@
 #include<stdlib.h>
 
 #include "Sample.h"
+#include "StandardVar.h"
 
-class SmearingWidth : public Var {
+class SmearingWidth : public StandardVar {
   Sample *s;
 
   public:
 
-  char const*name ( void ) const { return "smearing_width"; };
-
   int set ( int argc, char **argv ) {
-    if ( argc != 2 ) {
-      if ( ui->oncoutpe() )
-      cout << " <ERROR> smearing_width takes only one value </ERROR>" << endl;
-      return 1;
-    }
-    
-    double v = atof(argv[1]);
-    if ( v < 0.0 ) {
-      if ( ui->oncoutpe() )
-        cout << " <ERROR> smearing_width must be non-negative </ERROR>" << endl;
-      return 1;
-    }
-
-    s->ctrl.smearing_width = v;
-    return 0;
+    return parse(argc, argv,  s->ctrl.smearing_width, StandardVar::non_negative);
   }
 
   string print (void) const {
@@ -72,7 +57,11 @@ class SmearingWidth : public Var {
      return st.str();
   }
 
-  SmearingWidth(Sample *sample) : s(sample) { s->ctrl.smearing_width = 0.0; }
+  SmearingWidth(Sample *sample):
+    StandardVar("smearing_width", Dimensions::energy, "hartree"),
+    s(sample) {
+    s->ctrl.smearing_width = 0.0;
+  }
 };
 #endif
 
