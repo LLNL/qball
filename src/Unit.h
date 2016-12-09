@@ -41,7 +41,7 @@ class Unit {
  public:
 
   // Unit conversion factors are obtained from the GNU Units program
-  // executed with 16 digit precision (units -d 16).
+  // executed with 15 digit precision (units -d 15).
   
   Unit(Dimensions dims, string unit_name = "unknown"):
     factor_(0.0),
@@ -60,6 +60,7 @@ class Unit {
       if(unit_name == "hartree"      || unit_name == "ha") set_(1.0);
       if(unit_name == "rydberg"      || unit_name == "ry") set_(0.5);
       if(unit_name == "electronvolt" || unit_name == "ev") set_(0.0367493224862429);
+      if(unit_name == "kelvin"       || unit_name == "k")  set_(3.1668105153288e-06);
       break;
 
     case(Dimensions::length):
