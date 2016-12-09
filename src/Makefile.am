@@ -74,6 +74,7 @@ noinst_HEADERS =                            \
 	CPSampleStepper.h                   \
 	D3vector.h                          \
 	Debug.h                             \
+	Dimensions.h                        \
 	DistanceCmd.h                       \
 	DistanceConstraint.h                \
 	Dt.h                                \

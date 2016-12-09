@@ -60,7 +60,7 @@ class Cell : public Var
       return 1;
     }
     
-    Unit unit = Unit::Length(unit_name);
+    Unit unit(Dimensions::length, unit_name);
 
     if(!unit.exists()){
       ui->error("Unknown length unit '" + unit_name + "'.");

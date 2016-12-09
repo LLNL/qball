@@ -61,7 +61,7 @@ class Dt : public Var
 
     cout << "NAME " << unit_name << " - " << argv[2] << endl;
     
-    Unit unit = Unit::Time(unit_name);
+    Unit unit(Dimensions::time, unit_name);
 
     if(!unit.exists()) {
       ui->error("Unknown time unit '" + unit_name + "'.");

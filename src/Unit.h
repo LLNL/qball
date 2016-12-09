@@ -32,6 +32,8 @@
 
 #include <string>
 
+#include "Dimensions.h"
+
 using namespace std;
 
 class Unit {
@@ -41,38 +43,43 @@ class Unit {
   // Unit conversion factors are obtained from the GNU Units program
   // executed with 16 digit precision (units -d 16).
   
-  static Unit Energy(string unit_name){
-    //convert to lower case
-    std::transform(unit_name.begin(), unit_name.end(), unit_name.begin(), ::tolower);
+  Unit(Dimensions dims, string unit_name = "unknown"):
+    factor_(0.0),
+    init_(false),
+    dims_(dims){
     
-    if(unit_name == "hartree"      || unit_name == "ha") return Unit(1.0);
-    if(unit_name == "rydberg"      || unit_name == "ry") return Unit(0.5);
-    if(unit_name == "electronvolt" || unit_name == "ev") return Unit(0.0367493224862429);
-
-    return Unit();
-  }
-  
-  static Unit Length(string unit_name){
     //convert to lower case
     std::transform(unit_name.begin(), unit_name.end(), unit_name.begin(), ::tolower);
 
-    if(unit_name == "bohr"      || unit_name == "bohrradius" || unit_name == "b") return Unit(1.0);
-    if(unit_name == "picometer" || unit_name == "pm")                             return Unit(0.0188972612544037);
-    if(unit_name == "angstrom"  || unit_name == "a")                              return Unit(1.88972612544037);
-    if(unit_name == "nanometer" || unit_name == "nm")                             return Unit(18.8972612544037);
-    
-    return Unit();
-  }
-  
-  static Unit Time(string unit_name){
-    //convert to lower case
-    std::transform(unit_name.begin(), unit_name.end(), unit_name.begin(), ::tolower);
+    switch(dims_){
+    case(Dimensions::one):
+      set_(1.0);
+      break;
+      
+    case(Dimensions::energy):
+      if(unit_name == "hartree"      || unit_name == "ha") set_(1.0);
+      if(unit_name == "rydberg"      || unit_name == "ry") set_(0.5);
+      if(unit_name == "electronvolt" || unit_name == "ev") set_(0.0367493224862429);
+      break;
 
-    if(unit_name == "atomictime"  || unit_name == "hbar/hartree" || unit_name == "hbar/ha") return Unit(1.0);
-    if(unit_name == "attosecond"  || unit_name == "as")                                     return Unit(0.0413413733348933);
-    if(unit_name == "femtosecond" || unit_name == "fs")                                     return Unit(41.3413733348933);
-    
-    return Unit();
+    case(Dimensions::length):
+      if(unit_name == "bohr"      || unit_name == "bohrradius" || unit_name == "b") set_(1.0);
+      if(unit_name == "picometer" || unit_name == "pm")                             set_(0.0188972612544037);
+      if(unit_name == "angstrom"  || unit_name == "a")                              set_(1.88972612544037);
+      if(unit_name == "nanometer" || unit_name == "nm")                             set_(18.8972612544037);
+      break;
+      
+    case(Dimensions::time):
+      if(unit_name == "atomictime"  || unit_name == "hbar/hartree" || unit_name == "hbar/ha") set_(1.0);
+      if(unit_name == "attosecond"  || unit_name == "as")                                     set_(0.0413413733348933);
+      if(unit_name == "femtosecond" || unit_name == "fs")                                     set_(41.3413733348933);
+      break;
+
+    case(Dimensions::velocity):
+      if(unit_name == "atomicvelocity"  || unit_name == "bohr*hbar/hartree" || unit_name == "b*hbar/ha") set_(1.0);
+      break;
+    }
+
   }
 
   template <typename T>
@@ -86,14 +93,14 @@ class Unit {
   
  private:
 
-  Unit():factor_(0.0), init_(false){
-  }
-  
-  Unit(double factor):factor_(factor), init_(true){
+  void set_(const double factor){
+    init_ = true;
+    factor_ = factor;
   }
   
   double factor_;
   bool init_;
+  Dimensions dims_;
   
 };
 
