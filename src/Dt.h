@@ -48,28 +48,11 @@ class Dt : public StandardVar
   char const*name ( void ) const { return "dt"; };
 
   int set ( int argc, char **argv ) {
-    string unit_name;
-
-    if ( argc == 3 ){
-      unit_name = argv[2];
-    } else if ( argc == 2 ) {
-      unit_name = "atomictime";
-      ui->warning("Missing units for the 'dt' variable. Assuming 'atomictime'.");
-    } else {
-      ui->error("The variable 'dt' requires two arguments: the value and the units.");
-      return 1;
-    }
-
-    cout << "NAME " << unit_name << " - " << argv[2] << endl;
     
-    Unit unit(dimensions(), unit_name);
+    double value;
+    int error = parse(argc, argv, value);
 
-    if(!unit.exists()) {
-      ui->error("Unknown time unit '" + unit_name + "'.");
-      return 1;
-    }
-    
-    double value = unit.to_atomic(atof(argv[1]));
+    if(error != 0) return error;
     
     if ( value < 0.0 ) {
       ui->error("The variable 'dt' must be non-negative");

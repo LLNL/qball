@@ -53,6 +53,32 @@ protected:
     default_unit_name_(default_unit_name){
   }
 
+  int parse(int argc, char **argv, double & value){
+    
+    string unit_name;
+    
+    if ( argc == 2 ) {
+      unit_name = default_unit_name_;
+      ui->warning("Units missing for variable '" + string(name()) + "', assuming '" + default_unit_name_ + "'.");
+    } else if ( argc != 3 ) {
+      ui->error("The variable '" + string(name()) + "' takes two arguments: the value followed by its units.");
+      return 1;
+    } else {
+      unit_name = argv[2];
+    }
+    
+    Unit unit(dimensions(), unit_name);
+
+    if(!unit.exists()) {
+      ui->error("Unknown energy unit '" + unit_name + "'.");
+      return 1;
+    }
+    
+    value = unit.to_atomic(atof(argv[1]));
+
+    return 0;
+  }  
+  
   string default_unit_name_;
 
 private:

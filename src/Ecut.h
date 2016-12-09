@@ -46,26 +46,10 @@ class Ecut : public StandardVar {
 
   int set ( int argc, char **argv ) {
 
-    string unit_name;
+    double value;
     
-    if ( argc == 2 ) {
-      unit_name = "rydberg";
-      ui->warning("Units missing for variable ecut, assuming rydberg.");
-    } else if ( argc != 3 ) {
-      ui->error("Ecut takes two arguments: the value followed by its units.");
-      return 1;
-    } else {
-      unit_name = argv[2];
-    }
-    
-    Unit unit(dimensions(), unit_name);
-
-    if(!unit.exists()) {
-      ui->error("Unknown energy unit '" + unit_name + "'.");
-      return 1;
-    }
-    
-    double value = unit.to_atomic(atof(argv[1]));
+    int error = parse(argc, argv, value);
+    if(error != 0) return error;
 
     if ( value < 0.0 ) {
       ui->error("ecut must be non-negative");
