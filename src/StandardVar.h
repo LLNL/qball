@@ -49,6 +49,7 @@ public:
 
   static const Attributes any_value    = 0;
   static const Attributes non_negative = 1 << 0;
+  static const Attributes non_zero     = 1 << 1;
   
 protected:
   
@@ -86,6 +87,11 @@ protected:
       return 1;
     }
     
+    if ( attr & non_zero && value == 0.0 ) {
+      ui->error("The variable '" + string(name()) + "' must not be zero.");
+      return 1;
+    }
+     
     return 0;
   }  
 
