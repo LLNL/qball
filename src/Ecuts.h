@@ -38,34 +38,13 @@
 
 #include "Sample.h"
 
-class Ecuts : public Var
-{
+class Ecuts : public StandardVar {
   Sample *s;
 
   public:
 
-  char const*name ( void ) const { return "ecuts"; };
-
-  int set ( int argc, char **argv )
-  {
-    if ( argc != 2 )
-    {
-      if ( ui->oncoutpe() )
-      cout << " <ERROR> ecuts takes only one value </ERROR>" << endl;
-      return 1;
-    }
-    
-    double v = atof(argv[1]);
-    if ( v < 0.0 )
-    {
-      if ( ui->oncoutpe() )
-        cout << " <ERROR> ecuts must be non-negative </ERROR>" << endl;
-      return 1;
-    }
-
-    s->ctrl.ecuts = 0.5 * v;
-    
-    return 0;
+  int set ( int argc, char **argv ) {
+    return parse(argc, argv, s->ctrl.ecuts, StandardVar::non_negative);
   }
 
   string print (void) const
@@ -78,7 +57,8 @@ class Ecuts : public Var
      return st.str();
   }
 
-  Ecuts(Sample *sample) : s(sample) { s->ctrl.ecuts = 0.0; }
+  Ecuts(Sample *sample) : StandardVar("ecuts", Dimensions::energy, "rydberg"), s(sample) { s->ctrl.ecuts = 0.0; }
+  
 };
 #endif
 

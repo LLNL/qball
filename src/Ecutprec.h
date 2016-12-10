@@ -38,36 +38,15 @@
 
 #include "Sample.h"
 
-class Ecutprec : public Var
-{
+class Ecutprec : public StandardVar {
   Sample *s;
 
   public:
 
-  char const*name ( void ) const { return "ecutprec"; };
-
-  int set ( int argc, char **argv )
-  {
-    if ( argc != 2 )
-    {
-      if ( ui->oncoutpe() )
-      cout << " <ERROR> ecutprec takes only one value </ERROR>" << endl;
-      return 1;
-    }
-    
-    double v = atof(argv[1]);
-    if ( v < 0.0 )
-    {
-      if ( ui->oncoutpe() )
-        cout << " <ERROR> ecutprec must be non-negative </ERROR>" << endl;
-      return 1;
-    }
-
-    s->ctrl.ecutprec = 0.5*v;
-    
-    return 0;
+  int set ( int argc, char **argv ) {
+    return parse(argc, argv, s->ctrl.ecutprec, StandardVar::non_negative);
   }
-
+  
   string print (void) const
   {
      ostringstream st;
@@ -78,7 +57,12 @@ class Ecutprec : public Var
      return st.str();
   }
 
-  Ecutprec(Sample *sample) : s(sample) { s->ctrl.ecutprec = 0.0; }
+  Ecutprec(Sample *sample) :
+    StandardVar("ecutprec", Dimensions::energy, "rydberg"),
+    s(sample) {
+    s->ctrl.ecutprec = 0.0;
+  }
+
 };
 #endif
 

@@ -38,34 +38,13 @@
 
 #include "Sample.h"
 
-class Ecutden : public Var
-{
+class Ecutden : public StandardVar {
   Sample *s;
 
   public:
 
-  char const*name ( void ) const { return "ecutden"; };
-
-  int set ( int argc, char **argv )
-  {
-    if ( argc != 2 )
-    {
-      if ( ui->oncoutpe() )
-      cout << " <ERROR> ecutden takes only one value </ERROR>" << endl;
-      return 1;
-    }
-    
-    double v = atof(argv[1]);
-    if ( v < 0.0 )
-    {
-      if ( ui->oncoutpe() )
-        cout << " <ERROR> ecutden must be non-negative </ERROR>" << endl;
-      return 1;
-    }
-
-    s->ctrl.ecutden = 0.5*v;
-    
-    return 0;
+  int set ( int argc, char **argv ) {
+    return parse(argc, argv, s->ctrl.ecutden, StandardVar::non_negative);
   }
 
   string print (void) const
@@ -78,7 +57,12 @@ class Ecutden : public Var
      return st.str();
   }
 
-  Ecutden(Sample *sample) : s(sample) { s->ctrl.ecutden = 0.0; }
+  Ecutden(Sample *sample) :
+    StandardVar("ecutden", Dimensions::energy, "rydberg"),
+    s(sample) {
+    s->ctrl.ecutden = 0.0;
+  }
+  
 };
 #endif
 
