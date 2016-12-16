@@ -47,7 +47,7 @@ To compile Qbox:
   export LIBS_BLAS="-L/usr/local/tools/essl/5.1/lib/ -lesslsmpbg"
   export LDFLAGS="-qsmp=omp"
   export CFLAGS="-O3 -qsmp=omp -qarch=qp -qtune=qp"
-  export CXXFLAGS=$CFLAGS
+  export CXXFLAGS="$CFLAGS -qlanglvl=extended0x"
   export FCFLAGS=$CFLAGS" -qxlf90=autodealloc -qessl -I$HOME/$xarch/fftw-3.3.4/include"
   ./configure --with-essl-prefix=/usr/local/tools/essl/5.1/ --with-xerces-prefix=$QBALLDEPS \
     --with-lapack=$QBALLDEPS/lib/liblapack.a --with-blacs=$QBALLDEPS/lib/libscalapack.a --prefix=$QBALLPREFIX
