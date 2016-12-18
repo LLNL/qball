@@ -241,8 +241,7 @@ void UserInterface::processCmds ( istream &cmdstream, char const*prompt, bool ec
 
             ctxt_.ibcast_recv(1,1,&status,1,irow,icol);
           }
-          if ( !status )
-          {
+	  if ( !status ) {
             // create new prompt in the form: prompt<filename>
             char *newprompt=0;
             if ( ctxt_.oncoutpe() )
@@ -259,12 +258,14 @@ void UserInterface::processCmds ( istream &cmdstream, char const*prompt, bool ec
             processCmds (cmdstr, newprompt, true);
             if ( ctxt_.oncoutpe() )
               delete newprompt;
-          }
-          else
-          {
-            if ( ctxt_.oncoutpe() )
-              cout << "<WARNING> no such command or file name: " << tok << " </WARNING>"
-                   << endl;
+          } else {
+	    if(interactive){
+	      warning(string("No such command or file name: ") + tok);
+	    } else {
+	      error(string("No such command or file name: ") + tok);
+	      exit(1);
+	    }
+	    
           }
         }
       }
