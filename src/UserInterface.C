@@ -257,7 +257,7 @@ void UserInterface::processCmds ( istream &cmdstream, char const*prompt, bool ec
               // Note: echo == true for scripts
             processCmds (cmdstr, newprompt, true);
             if ( ctxt_.oncoutpe() )
-              delete newprompt;
+              delete [] newprompt;
           } else {
 	    if(interactive){
 	      warning(string("No such command or file name: ") + tok);
