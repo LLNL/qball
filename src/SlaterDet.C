@@ -265,6 +265,9 @@ void SlaterDet::resize(const UnitCell& cell, const UnitCell& refcell,
     
     //ewd: if maxlocalsize is not a multiple of mb, increase to next highest multiple
     int maxlocal = basis_->maxlocalsize();
+
+    assert(maxlocal != 0);
+    
     if (maxlocal%mb != 0)
     {
        int mult = maxlocal/mb + 1;
