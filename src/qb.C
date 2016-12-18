@@ -422,9 +422,12 @@ int main(int argc, char **argv, char **envp)
     // input file was given as a command line argument
     bool echo = true;
     ifstream in;
-    if ( ctxt.oncoutpe() )
-    {
-      in.open(argv[1],ios::in);
+    if ( ctxt.oncoutpe() ) {
+      in.open(argv[1], ios::in);
+      if(!in.is_open()) {
+	ui->error(string("Cannot open input file: ") + argv[1]);
+	exit(1);
+      }
     }
     ui->processCmds(in, "[qball]", echo, /*interactive =*/ false);
   }
