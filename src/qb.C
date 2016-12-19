@@ -442,6 +442,9 @@ int main(int argc, char **argv, char **envp)
   Cmd *c = ui->findCmd("quit");
   c->action(1,NULL);
 
+  delete ui;
+  delete s;
+  
   if ( ctxt.oncoutpe() )
   {
     cout << "<real_time> " << tm.real() << " </real_time>" << endl;
