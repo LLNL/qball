@@ -150,6 +150,12 @@ class UserInterface
   void warning(const string & message) const {
     if(oncoutpe()) cout << endl << "<WARNING>" << endl << message << endl << "</WARNING>"<< endl << endl;
   }
+
+  ~UserInterface(){
+    for(list<Cmd*>::iterator cmd = cmdlist.begin(); cmd != cmdlist.end(); cmd++ ) delete *cmd;
+    for(list<Var*>::iterator var = varlist.begin(); var != varlist.end(); var++ ) delete *var;
+  }
+  
   
 };
 
