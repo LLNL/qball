@@ -179,6 +179,14 @@ m4_define([_AX_CXX_COMPILE_STDCXX_testbody_new_in_11], [[
 namespace cxx11
 {
 
+  namespace test_enum_class
+  {
+    enum class Color { red, green = 33, blue };
+  }
+
+#if 0 
+//Disabled because they are not supported by BG/Q XLF
+
   namespace test_static_assert
   {
 
@@ -440,6 +448,8 @@ namespace cxx11
     void test() { func<foo>(0); }
 
   }
+
+#endif
 
 }  // namespace cxx11
 
