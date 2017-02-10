@@ -182,8 +182,11 @@ int main(int argc, char **argv, char **envp)
   
   //Check command line arguments for -c (print configuration options)
   if ( argc == 2 && argv[1] == string("-c") ){
-#if USE_MPI
+#ifdef USE_MPI
     cout << "mpi ";
+#endif
+#ifdef HAVE_OPENMP
+    cout << "openmp ";
 #endif
     cout << endl;
     return 0;
