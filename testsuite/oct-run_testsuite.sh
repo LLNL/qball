@@ -304,8 +304,8 @@ if [ -z $OCT_TEST_NJOBS ] ; then
 	    OCT_TEST_NJOBS=$(($OCT_TEST_NJOBS/$OMP_NUM_THREADS))
 	    echo "  - This is an OpenMP run. OMP_NUM_THREADS is set to $OMP_NUM_THREADS processors per job."
         else
-	    echo "  - This is an OpenMP run. Each jobs uses all processors."
-	    OCT_TEST_NJOBS=1
+	    echo "  - This is an OpenMP run but OMP_NUM_THREADS is not set. Setting it to 1."
+	    export OMP_NUM_THREADS=1
 	fi
     fi
 
