@@ -181,7 +181,8 @@ namespace cxx11
 
   namespace test_enum_class
   {
-    enum class Color { red, green = 33, blue };
+    enum class Dimensions { one, energy, length, time, velocity };
+    Dimensions dimensions() {return Dimensions::one;}
   }
 
 #if 0 
