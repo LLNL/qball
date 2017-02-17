@@ -72,6 +72,7 @@ noinst_HEADERS =                            \
 	Control.h                           \
 	ConvergenceDetector.h               \
 	CPSampleStepper.h                   \
+	CurrentDensity.h                    \
 	D3vector.h                          \
 	Debug.h                             \
 	Dimensions.h                        \
@@ -272,6 +273,7 @@ libqbLink_a_SOURCES =                        \
 	EnergyFunctional.C                  \
 	SampleStepper.C                     \
 	Basis.C                             \
+	CurrentDensity.C                    \
 	FourierTransform.C                  \
 	Matrix.C                            \
 	Context.C                           \
