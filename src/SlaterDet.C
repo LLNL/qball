@@ -955,7 +955,7 @@ void SlaterDet::compute_density(FourierTransform& ft, double weight, std::comple
 	  const int norig = lj*c_.nb()+jj;
 	  if ( fac > 0.0 ) {
 	    ft.backward(c_.cvalptr(norig*c_.mloc()), &tmp1[0]);
-	    ft.backward(c_.cvalptr(norig*c_.mloc()), &tmp2[0]);
+	    ft.backward(sd2.c_.cvalptr(norig*c_.mloc()), &tmp2[0]);
 	    
 	    //ewd DEBUG:  try threading this loop:
 #pragma omp parallel for
