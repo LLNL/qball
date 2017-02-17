@@ -128,7 +128,6 @@ class AtomSet
   void findSymmetricAtoms(const SymmetrySet& symset);
   void set_rcps(const double& ecut) const;
   int symatomid(int is, int ia, int isym) { return symatomid_[is][ia][isym];};
-  int size(void);
   void printsys(ostream& os) const;
   void print_casino(ostream& os) const;
 

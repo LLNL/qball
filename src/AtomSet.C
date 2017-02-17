@@ -459,7 +459,7 @@ int AtomSet::na_mm(int is) const {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-int AtomSet::size(void) {
+int AtomSet::size(void) const {
   int n = 0;
   for ( int is = 0; is < atom_list.size(); is++ )
     n += atom_list[is].size();
