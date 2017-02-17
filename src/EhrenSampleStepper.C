@@ -69,7 +69,7 @@ using namespace std;
 
 ////////////////////////////////////////////////////////////////////////////////
 EhrenSampleStepper::EhrenSampleStepper(Sample& s, int nitscf, int nite) :
-  SampleStepper(s), cd_(s), ef_(s,s.wf,cd_),dwf(s.wf), wfv(s.wfv), nitscf_(nitscf),
+  SampleStepper(s), cd_(s), currd_(s, s.wf), ef_(s,s.wf,cd_),dwf(s.wf), wfv(s.wfv), nitscf_(nitscf),
   nite_(nite)
 {
    const string wf_dyn = s_.ctrl.wf_dyn;
@@ -354,6 +354,10 @@ void EhrenSampleStepper::step(int niter)
     double energy =
         ef_.energy(false,dwf,compute_forces,fion,compute_stress,sigma_eks);
     tmap["efn"].stop();
+
+    tmap["current"].start();
+    currd_.update_current(ef_, dwf);
+    tmap["current"].start();
 
     // average forces over symmetric atoms
     if ( compute_forces && s_.symmetries.nsym() > 0) {
@@ -1240,6 +1244,13 @@ void EhrenSampleStepper::step(int niter)
                 os.close();
              }
           }
+
+	  {
+	    // PRINT THE CURRENT
+	    std::ostringstream oss; 
+	    oss << std::setfill('0') << std::setw(6) << iter;
+	    currd_.plot(&s_, "current" + oss.str());
+	  }
        }
     }
 

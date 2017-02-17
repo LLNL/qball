@@ -37,6 +37,8 @@
 #include "Wavefunction.h"
 #include "PlotCmd.h"
 #include <deque>
+#include "CurrentDensity.h"
+
 class WavefunctionStepper;
 class IonicStepper;
 using namespace std;
@@ -52,6 +54,7 @@ class EhrenSampleStepper : public SampleStepper
   int nitscf_;
   int nite_;
   ChargeDensity cd_;
+  CurrentDensity currd_;
   EnergyFunctional ef_;
   
   WavefunctionStepper* wf_stepper;
