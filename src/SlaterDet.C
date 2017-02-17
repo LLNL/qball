@@ -932,6 +932,42 @@ void SlaterDet::compute_density(FourierTransform& ft,
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+void SlaterDet::compute_density(FourierTransform& ft, double weight, std::complex<double> * rho, const SlaterDet & sd2) const {
+
+  //Timer tm_ft, tm_rhosum;
+  // compute density of the states residing on my column of ctxt_
+  assert(occ_.size() == c_.n());
+  vector<complex<double> > tmp1(ft.np012loc());
+  vector<complex<double> > tmp2(ft.np012loc());
+  
+  assert(basis_->cell().volume() > 0.0);
+  const double prefac = weight / basis_->cell().volume();  // weight = kpoint weight/total weightsum
+  const int np012loc = ft.np012loc();
+  
+  // only one transform at a time
+  for ( int lj=0; lj < c_.nblocks(); lj++ )
+    {
+      for ( int jj=0; jj < c_.nbs(lj); jj++ )
+        {
+	  // global state index
+	  const int nn = c_.j(lj,jj);
+	  const double fac = prefac * occ_[nn];
+	  const int norig = lj*c_.nb()+jj;
+	  if ( fac > 0.0 ) {
+	    ft.backward(c_.cvalptr(norig*c_.mloc()), &tmp1[0]);
+	    ft.backward(c_.cvalptr(norig*c_.mloc()), &tmp2[0]);
+	    
+	    //ewd DEBUG:  try threading this loop:
+#pragma omp parallel for
+	    for ( int i = 0; i < np012loc; i++ )
+	      rho[i] += fac*std::conj(tmp1[i])*tmp2[i];
+	  }
+        }
+    }
+  
+}
+
+////////////////////////////////////////////////////////////////////////////////
 void SlaterDet::rs_mul_add(FourierTransform& ft, 
  const double* v, SlaterDet& sdp) const {
 
