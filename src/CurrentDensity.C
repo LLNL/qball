@@ -152,8 +152,16 @@ void CurrentDensity::plot(const Sample * s, const std::string & filename){
 	    for ( int ia = 0; ia < na; ia++ )
 	      {
 		Atom *ap = s->atoms.atom_list[is][ia];
+		D3vector pos =  ap->position();
+		while((pos-(a0 + a1 + a2)/2.0)*a0/length(a0) > 1) pos -= a0;
+		while((pos-(a0 + a1 + a2)/2.0)*a0/length(a0) < 0) pos += a0;
+		while((pos-(a0 + a1 + a2)/2.0)*a1/length(a1) > 1) pos -= a1;
+		while((pos-(a0 + a1 + a2)/2.0)*a1/length(a1) < 0) pos += a1;
+		while((pos-(a0 + a1 + a2)/2.0)*a2/length(a2) > 1) pos -= a2;
+		while((pos-(a0 + a1 + a2)/2.0)*a2/length(a2) < 0) pos += a2;
+		
 		os << setprecision(5);
-		os << z << " " << ((double) z) << " " << ap->position() << endl;
+		os << z << " " << ((double) z) << " " << pos << endl;
 	      }
 	  }
 
