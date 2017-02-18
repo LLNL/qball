@@ -29,6 +29,7 @@
 #include "release.h"
 #include "Species.h"
 #include <iomanip>
+#include "Base64Transcoder.h"
 
 CurrentDensity::CurrentDensity(const Sample& s, const Wavefunction & wf):
   ChargeDensity(s), wf_(wf){
@@ -182,4 +183,61 @@ void CurrentDensity::plot(const Sample * s, const std::string & filename){
       }
 
     }
+}
+
+void CurrentDensity::plot_vtk(const Sample * s, const std::string & filename){
+  using namespace std;
+  Base64Transcoder xcdr;
+  
+  if ( s->ctxt_.onpe0() ) {
+
+    const int np0 = vft()->np0();
+    const int np1 = vft()->np1();
+    const int np2 = vft()->np2();
+    
+    D3vector a0 = s->atoms.cell().a(0);
+    D3vector a1 = s->atoms.cell().a(1);
+    D3vector a2 = s->atoms.cell().a(2);
+    
+    std::ofstream os;
+    
+    os.open((filename + ".vtk").c_str(), ios::binary);
+    
+    // write header and atoms
+    os << "# vtk DataFile Version 2.0" << endl;
+    os << "Created " << isodate() << " by " << release() << endl;
+    os << "BINARY" << endl;
+    os << "DATASET STRUCTURED_POINTS" << endl;
+    os << "DIMENSIONS\t" << np0 << '\t' << np1 << '\t' << np2 << endl;
+    os << "ORIGIN\t" << -a0[0]/2.0 << "\t" << -a1[1]/2.0 << "\t" << -a2[2]/2.0 << "\t" << endl;
+    os << "SPACING\t" << a0[0]/np0 << '\t' << a1[1]/np1 << '\t' << a2[2]/np2 << endl;
+    os << "POINT_DATA\t" << np0*np1*np2 << endl;
+    os << "SCALARS current double 3" << endl;
+    os << "LOOKUP_TABLE default" << endl;
+
+    for ( int k = 0; k < np2; k++ ) {
+      const int kp = (k + np2/2 ) % np2;
+      
+      for ( int j = 0; j < np1; j++ ) {
+	const int jp = (j + np1/2 ) % np1;
+
+	for ( int i = 0; i < np0; i++ ) {
+	  const int ip = (i + np0/2 ) % np0;
+	  
+	  for(int idir = 0; idir < 3; idir++) {
+	    double value = current[idir][0][ip + np0*(jp + np1*kp)];
+#ifndef WORDS_BIGENDIAN
+	    //Convert to big endian	    
+	    xcdr.byteswap_double(1, &value);
+#endif
+	    os.write((char *)&value, sizeof(double));
+	  }
+	}
+      }
+    }
+      
+    os.close();
+    
+  }
+
 }

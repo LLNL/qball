@@ -44,6 +44,7 @@ class CurrentDensity : private ChargeDensity
   void update_current(EnergyFunctional & energy, const Wavefunction & dwf);
 
   void plot(const Sample *, const std::string &);
+  void plot_vtk(const Sample *, const std::string &);
 
 };
 

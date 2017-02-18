@@ -1250,6 +1250,7 @@ void EhrenSampleStepper::step(int niter)
 	    std::ostringstream oss; 
 	    oss << std::setfill('0') << std::setw(6) << iter;
 	    currd_.plot(&s_, "current" + oss.str());
+	    currd_.plot_vtk(&s_, "current" + oss.str());
 	  }
        }
     }
