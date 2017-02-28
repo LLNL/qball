@@ -15,7 +15,6 @@ set wf_extrapolation NTC
 set atoms_dyn MD
 set dt 41.341373
 
-randomize_v 1000
 reset_vcm
 
 load -states restart/md
