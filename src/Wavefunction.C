@@ -2848,8 +2848,10 @@ void Wavefunction::read_states(string filebase) {
                               else {
                                  fileFound = -1;
                                  checkPointFound = -1;
-                                 if ( ctxt_.oncoutpe())
-                                    cout << "<!-- LoadCmd: " << filebase << " checkpoint files not found, skipping load. -->" << endl;
+                                 if ( ctxt_.oncoutpe()) {
+				   cout << "<!-- Error on load: " << statefile << " checkpoint file not found. -->" << endl;
+				 }
+				 MPI_Abort(MPI_COMM_WORLD, 1);
                               }
                            }
 
