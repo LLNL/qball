@@ -391,6 +391,9 @@ int SaveCmd::action(int argc, char **argv) {
       
     }
     
+    //this barrier insures that the directory is created before writing the states
+    MPI_Barrier(MPI_COMM_WORLD);
+
     s->wf.write_states(filestr,format);
     s->wf.write_mditer(filestr,s->ctrl.mditer);
 
