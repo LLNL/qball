@@ -1459,7 +1459,7 @@ void BOSampleStepper::step(int niter)
                      for (int jj = 0; jj < np1; jj++) {
                         const int jp = (jj + np1/2) % np1;
                         for (int kk = 0; kk < np2; kk++) {
-                           const int kp = (KK + np2/2) % np2;
+                           const int kp = (kk + np2/2) % np2;
                            int index = ip + jp*np0 + kp*np0*np1;
                            oss << tmprecv[index] << " ";
                            cnt++;
