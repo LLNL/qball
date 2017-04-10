@@ -748,8 +748,7 @@ int SaveCmd::action(int argc, char **argv) {
               natoms_total += as.na(is);
             }
             as.get_positions(rion,true);
-            D3vector origin(0.0,0.0,0.0);
-            os << natoms_total << " " << origin << endl;
+            os << natoms_total << " " << -0.5*(a0+a1+a2) << endl;
 
             // print FFT grid info
             os << np0 << " " << dft0 << endl;
@@ -769,12 +768,15 @@ int SaveCmd::action(int argc, char **argv) {
         // write density data to file
         int cnt = 0;
         for (int ii = 0; ii < np0; ii++) {
+	  const ip = (ii + np0/2) % np0;
           ostringstream oss;
           oss.setf(ios::scientific,ios::floatfield);
           oss << setprecision(5);
           for (int jj = 0; jj < np1; jj++) {
+	    const jp = (jj + np1/2) % np1;
             for (int kk = 0; kk < np2; kk++) {
-              int index = ii + jj*np0 + kk*np0*np1;
+	      const kp = (kk + np2/2) % np2;
+              int index = ip + jp*np0 + kp*np0*np1;
               oss << tmprecv[index] << " ";
               cnt++;
               if (cnt >= 6) {
