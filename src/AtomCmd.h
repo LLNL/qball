@@ -38,6 +38,7 @@ using namespace std;
 
 #include "UserInterface.h"
 #include "Sample.h"
+#include "Unit.h"
 
 class AtomCmd : public Cmd
 {
@@ -66,43 +67,72 @@ class AtomCmd : public Cmd
     string species;
     D3vector position;
     D3vector velocity;
-  
+    string pos_unit_name = "bohr";
+    string vel_unit_name = "atomicvelocity";
+
     // atom must be defined with either 3 or 6 arguments
-    if ( argc != 6 && argc != 9 )
-    {
-      if ( ui->oncoutpe() )
-        cout << "<!-- use: atom name species x y z [vx vy vz] -->" << endl;
+    if (argc != 6 && argc != 9 && argc != 7 && argc != 11) {
+      ui->error("<!-- use: atom name species x y z units [vx vy vz units] -->");
       return 1;
+    } else if (argc == 6) {
+      ui->warning("Units missing for the atom command, assuming 'bohr'.");
+    } else if (argc == 9) {
+      ui->warning("Units missing for the atom command, assuming 'bohr' and 'atomicvelocity'.");
     }
   
     name = argv[1];
     species = argv[2];
-    position.x = atof(argv[3]);
-    position.y = atof(argv[4]);
-    position.z = atof(argv[5]);
-    if ( argc == 9 )
-    {
+
+    if(argc == 7 || argc == 11) pos_unit_name = argv[6];
+    
+    Unit pos_unit(Dimensions::length, pos_unit_name);
+
+    if(!pos_unit.exists()) {
+      ui->error("Unknown energy unit '" + pos_unit_name + "'.");
+      return 1;
+    }
+
+    position.x = pos_unit.to_atomic(atof(argv[3]));
+    position.y = pos_unit.to_atomic(atof(argv[4]));
+    position.z = pos_unit.to_atomic(atof(argv[5]));
+    
+    if ( argc == 9 ) {
       velocity.x = atof(argv[6]);
       velocity.y = atof(argv[7]);
       velocity.z = atof(argv[8]);
     }
-  
-    Atom *a = new Atom(name,species,position,velocity);
+
+    if ( argc == 11 ) {
+      vel_unit_name = argv[10];
+      velocity.x = atof(argv[7]);
+      velocity.y = atof(argv[8]);
+      velocity.z = atof(argv[9]);
+    }
+
+    Unit vel_unit(Dimensions::velocity, vel_unit_name);
+
+    if(!vel_unit.exists()) {
+      ui->error("Unknown energy unit '" + vel_unit_name + "'.");
+      return 1;
+    }
+    
+    velocity = vel_unit.to_atomic(velocity);
+    
+    Atom *a = new Atom(name, species, position, velocity);
 
     const int atoms_nel_before = s->atoms.nel();
-    if ( !(s->atoms.addAtom( a ) ) )
-    {
-       if ( ui->oncoutpe() )
-          cout << " AtomCmd: could not add atom " << name << endl;
+
+    if ( !(s->atoms.addAtom( a ) ) ) {
+       if ( ui->oncoutpe() ) cout << " AtomCmd: could not add atom " << name << endl;
        delete a;
        return 1;
     }
+    
     const int atoms_nel_after = s->atoms.nel();
     const int delta_nel = (name[0] != '+' ? (atoms_nel_after - atoms_nel_before) : 0);
     const int wf_nel = s->wf.nel();
 
-    if (delta_nel != 0)
-    {
+    if (delta_nel != 0) {
        s->wf.set_nel(wf_nel+delta_nel);
        //ewd s->wf.update_occ(0.0,0);
        if ( s->wfv != 0 )
@@ -110,9 +140,7 @@ class AtomCmd : public Cmd
           s->wfv->set_nel(wf_nel+delta_nel);
           s->wfv->clear();
        }
-    }
-    else
-    {
+    } else {
        if ( ui->oncoutpe() )
           cout << " AtomCmd: added ion but no electrons " << endl;
     }
