@@ -60,9 +60,11 @@ void Atom::set_velocity(D3vector v) {
 void Atom::printsys(ostream& os, string atomcmd) const {
   os.setf(ios::fixed,ios::floatfield);
   os << setprecision(8);
-  os << atomcmd << " " << name_ << " " << species_ << " " 
-     << setw(14) << position_.x << " " << setw(14) << position_.y << " " << setw(14) << position_.z << " " 
-     << setw(14) << velocity_.x << " " << setw(14) << velocity_.y << " " << setw(14) << velocity_.z << " " 
+  os << atomcmd << " " << name_ << " " << species_ << "\t " 
+     << setw(14) << position_.x << " " << setw(14) << position_.y << " " << setw(14) << position_.z
+     << " bohr "
+     << setw(14) << velocity_.x << " " << setw(14) << velocity_.y << " " << setw(14) << velocity_.z
+     << " atomicvelocity "
      << endl;
   if (locked_)
      os << "lock " << name_ << endl;
