@@ -399,7 +399,8 @@ void UnitCell::printsys(ostream& os, string setcmd) const {
   os << setcmd.c_str()
      << setw(12) << a_[0].x << " " << setw(12) << a_[0].y << " " << setw(12) << a_[0].z << " " 
      << setw(12) << a_[1].x << " " << setw(12) << a_[1].y << " " << setw(12) << a_[1].z << " " 
-     << setw(12) << a_[2].x << " " << setw(12) << a_[2].y << " " << setw(12) << a_[2].z << endl;
+     << setw(12) << a_[2].x << " " << setw(12) << a_[2].y << " " << setw(12) << a_[2].z
+     << " bohr" << endl;
 }
   
 ////////////////////////////////////////////////////////////////////////////////
