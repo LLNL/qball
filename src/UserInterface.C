@@ -211,10 +211,13 @@ void UserInterface::processCmds ( istream &cmdstream, char const*prompt, bool ec
           ctxt_.barrier();
           int rv = cmdptr->action(ac,av);
 	  if(!interactive && rv != 0){
+	    error("Command failed.");
 #if USE_MPI
 	    MPI_Abort(ctxt_.comm(), rv);
 #endif
 	    exit(rv);
+	  } else if(rv != 0){
+	    warning("Command failed.");
 	  }
           ctxt_.barrier();
         }
