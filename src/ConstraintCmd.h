@@ -63,44 +63,39 @@ class ConstraintCmd : public Cmd
   int action(int argc, char **argv)
   {
     const bool oncoutpe = s->ctxt_.oncoutpe();
+    bool success = true;
+    
     if ( argc < 2 )
     {
       if ( oncoutpe )
         cout << help_msg();
       return 1;
     }
+    
     string subcmd(argv[1]);
-    if ( subcmd == "define" )
+    if ( subcmd == "define" ) {
+      success = s->constraints.define_constraint(s->atoms,argc,argv);
+    } else if ( subcmd == "set" )
     {
-      return s->constraints.define_constraint(s->atoms,argc,argv);
+      success = s->constraints.set_constraint(argc,argv);
     }
-    else if ( subcmd == "set" )
-    {
-      return s->constraints.set_constraint(argc,argv);
-    }
-    else if ( subcmd == "delete" )
-    {
-      return s->constraints.delete_constraint(argc,argv);
-    }
-    else if ( subcmd == "enforce" )
-    {
+    else if ( subcmd == "delete" ) {
+       success = s->constraints.delete_constraint(argc,argv);
+    } else if ( subcmd == "enforce" ) {
       s->constraints.enforce(s->atoms);
       // reset velocities to zero to avoid jump in temperature
       s->atoms.reset_velocities();
       // Note: should catch exception here if constraints could not be enforced
-    }
-    else if ( subcmd == "list" )
-    {
+    } else if ( subcmd == "list" ) {
       if ( oncoutpe )
         s->constraints.list_constraints(cout);
-    }
-    else
-    {
+    } else {
       if ( oncoutpe )
         cout << help_msg();
     }
 
-    return 0;
+    return success ? 0 : 1;
+    
   }
 };
 #endif
