@@ -31,6 +31,7 @@
 
 #include "ConstraintSet.h"
 #include "PositionConstraint.h"
+#include "CoordinateConstraint.h"
 #include "DistanceConstraint.h"
 #include "AngleConstraint.h"
 #include "TorsionConstraint.h"
@@ -54,10 +55,11 @@ ConstraintSet::~ConstraintSet(void)
 ////////////////////////////////////////////////////////////////////////////////
 bool ConstraintSet::define_constraint(AtomSet &atoms, int argc, char **argv)
 {
-  enum constraint_type { unknown, position_type, distance_type,
+  enum constraint_type { unknown, position_type, coordinate_type, distance_type,
                          angle_type, torsion_type }
     type = unknown;
   const double position_tolerance = 1.0e-7;
+  const double coordinate_tolerance = 1.0e-7;
   const double distance_tolerance = 1.0e-7;
   const double angle_tolerance = 1.0e-4;
   const bool oncoutpe = ctxt_.oncoutpe();
@@ -76,6 +78,8 @@ bool ConstraintSet::define_constraint(AtomSet &atoms, int argc, char **argv)
     {
       cout << " Use: constraint define position constraint_name atom_name"
            << endl;
+      cout << " Use: constraint define coordinate constraint_name atom_name coordinate"
+           << endl;
       cout << " Use: constraint define distance constraint_name "
            << "atom_name1 atom_name2 distance_value [velocity]"
            << endl;
@@ -93,6 +97,10 @@ bool ConstraintSet::define_constraint(AtomSet &atoms, int argc, char **argv)
   if ( constraint_type == "position" )
   {
     type = position_type;
+  }
+  else if ( constraint_type == "coordinate" )
+  {
+    type = coordinate_type;
   }
   else if ( constraint_type == "distance" )
   {
@@ -164,9 +172,57 @@ bool ConstraintSet::define_constraint(AtomSet &atoms, int argc, char **argv)
         new PositionConstraint(name,atom_name,position_tolerance);
       constraint_list.push_back(c);
     }
-  }
-  else if ( type == distance_type )
-  {
+  } else if ( type == coordinate_type ) {
+    // define coordinate name A
+
+    if ( argc != 5 )
+    {
+      if ( oncoutpe )
+        cout << " Incorrect number of arguments for coordinate constraint"
+             << endl;
+      return false;
+    }
+    string name = argv[3];
+    string atom_name = argv[4];
+
+    Atom *a1 = atoms.findAtom(atom_name);
+
+    if ( a1 == 0 )
+    {
+      if ( oncoutpe )
+      {
+        cout << " ConstraintSet: could not find atom " << atom_name << endl;
+        cout << " ConstraintSet: could not define constraint" << endl;
+      }
+      return false;
+    }
+
+    // check if constraint is already defined
+    bool found = false;
+    Constraint *pc = 0;
+    for ( int i = 0; i < constraint_list.size(); i++ )
+    {
+      pc = constraint_list[i];
+      assert(pc != 0);
+      // check if a constraint with same name or with same atom is defined
+      if ( pc->type() == "coordinate" )
+        found = ( pc->name() == name ) || ( pc->names(0) == atom_name );
+    }
+
+    if ( found )
+    {
+      if ( oncoutpe )
+        cout << " ConstraintSet: constraint is already defined:\n"
+             << " cannot define constraint" << endl;
+      return false;
+    }
+    else
+    {
+      CoordinateConstraint *c =
+        new CoordinateConstraint(name,atom_name,coordinate_tolerance);
+      constraint_list.push_back(c);
+    }
+  } else if ( type == distance_type ) {
     // define distance name A B value
     // define distance name A B value velocity
 

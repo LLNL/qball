@@ -71,6 +71,7 @@ noinst_HEADERS =                            \
 	Context.h                           \
 	Control.h                           \
 	ConvergenceDetector.h               \
+	CoordinateConstraint.h              \
 	CPSampleStepper.h                   \
 	CurrentDensity.h                    \
 	D3vector.h                          \
@@ -262,9 +263,10 @@ noinst_HEADERS =                            \
 	XMLFile.h                           \
 	XMLGFPreprocessor.h
 
-libqbLink_a_SOURCES =                        \
+libqbLink_a_SOURCES =                       \
 	AtomSet.C                           \
 	Atom.C                              \
+	CoordinateConstraint.C              \
 	SymmetrySet.C                       \
 	Symmetry.C                          \
 	Species.C                           \
