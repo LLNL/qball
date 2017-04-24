@@ -125,15 +125,15 @@ bool ConstraintSet::define_constraint(AtomSet &atoms, int argc, char **argv)
       return false;
     }
     string name = argv[3];
-    string name1 = argv[4];
+    string atom_name = argv[4];
 
-    Atom *a1 = atoms.findAtom(name1);
+    Atom *a1 = atoms.findAtom(atom_name);
 
     if ( a1 == 0 )
     {
       if ( oncoutpe )
       {
-        cout << " ConstraintSet: could not find atom " << name1 << endl;
+        cout << " ConstraintSet: could not find atom " << atom_name << endl;
         cout << " ConstraintSet: could not define constraint" << endl;
       }
       return false;
@@ -148,7 +148,7 @@ bool ConstraintSet::define_constraint(AtomSet &atoms, int argc, char **argv)
       assert(pc != 0);
       // check if a constraint with same name or with same atom is defined
       if ( pc->type() == "position" )
-        found = ( pc->name() == name ) || ( pc->names(0) == name1 );
+        found = ( pc->name() == name ) || ( pc->names(0) == atom_name );
     }
 
     if ( found )
@@ -161,7 +161,7 @@ bool ConstraintSet::define_constraint(AtomSet &atoms, int argc, char **argv)
     else
     {
       PositionConstraint *c =
-        new PositionConstraint(name,name1,position_tolerance);
+        new PositionConstraint(name,atom_name,position_tolerance);
       constraint_list.push_back(c);
     }
   }

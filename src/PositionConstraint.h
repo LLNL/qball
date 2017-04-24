@@ -39,18 +39,18 @@ class AtomSet;
 
 class PositionConstraint : public Constraint
 {
-  std::string name1_;
+  std::string atom_name_;
   int    ia1_, is1_;
   double force_, weight_, tol_;
 
   public:
 
-  PositionConstraint(std::string name, std::string name1, double tolerance):
-  name1_(name1), tol_(tolerance)
+  PositionConstraint(std::string name, std::string atom_name, double tolerance):
+  atom_name_(atom_name), tol_(tolerance)
   {
     name_ = name;
     names_.resize(1);
-    names_[0] = name1_;
+    names_[0] = atom_name_;
     force_ = 0.0;
     weight_ = 1.0;
   }

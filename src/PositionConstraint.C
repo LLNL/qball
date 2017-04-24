@@ -41,9 +41,9 @@ using namespace std;
 ////////////////////////////////////////////////////////////////////////////////
 void PositionConstraint::setup(const AtomSet& atoms)
 {
-  // find position in tau array corresponding to atom name1
-  is1_ = atoms.is(name1_);
-  ia1_ = atoms.ia(name1_);
+  // find position in tau array corresponding to atom atom_name
+  is1_ = atoms.is(atom_name_);
+  ia1_ = atoms.ia(atom_name_);
   assert(is1_>=0);
   assert(ia1_>=0);
 }
@@ -111,7 +111,7 @@ ostream& PositionConstraint::print( ostream &os )
   os.setf(ios::left,ios::adjustfield);
   os << " <constraint name=\"" << name();
   os << "\" type=\"" << type();
-  os << "\" atoms=\"" << name1_ << "\"\n";
+  os << "\" atoms=\"" << atom_name_ << "\"\n";
   os.setf(ios::fixed,ios::floatfield);
   os.setf(ios::right,ios::adjustfield);
   os << "  value=\"" << setprecision(6) << 0;
