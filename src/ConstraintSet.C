@@ -173,9 +173,8 @@ bool ConstraintSet::define_constraint(AtomSet &atoms, int argc, char **argv)
       constraint_list.push_back(c);
     }
   } else if ( type == coordinate_type ) {
-    // define coordinate name A
 
-    if ( argc != 5 )
+    if ( argc != 6 )
     {
       if ( oncoutpe )
         cout << " Incorrect number of arguments for coordinate constraint"
@@ -197,6 +196,14 @@ bool ConstraintSet::define_constraint(AtomSet &atoms, int argc, char **argv)
       return false;
     }
 
+    //convert from 'x, y, z' to '0, 1, 2'
+    int icoord = argv[5][0] - 'x';
+
+    if(icoord < 0 || icoord > 2){
+      cout << "ConstraintSet: wrong coordinate '" << argv[5] << "'. Use 'x', 'y' or 'z'." << endl;
+      return false;
+    }
+    
     // check if constraint is already defined
     bool found = false;
     Constraint *pc = 0;
@@ -219,7 +226,7 @@ bool ConstraintSet::define_constraint(AtomSet &atoms, int argc, char **argv)
     else
     {
       CoordinateConstraint *c =
-        new CoordinateConstraint(name,atom_name,coordinate_tolerance);
+        new CoordinateConstraint(name, atom_name, icoord, coordinate_tolerance);
       constraint_list.push_back(c);
     }
   } else if ( type == distance_type ) {
