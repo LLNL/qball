@@ -177,7 +177,7 @@ void CurrentDensity::plot(const Sample * s, const std::string & filename){
 		for ( int k = 0; k < np2; k++ )
 		  {
 		    const int kp = (k + np2/2 ) % np2;
-		    os << setw(13) << current[0][0][ip+np0*(jp+np1*kp)];
+		    os << setw(13) << current[idir][0][ip+np0*(jp+np1*kp)];
 		    if ( ( k % 6 ) == 5 )
 		      os << endl;
 		  }
