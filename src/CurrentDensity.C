@@ -90,6 +90,8 @@ void CurrentDensity::update_current(EnergyFunctional & energy_functional, const 
 	total_current[idir] += volume_element*current[idir][ispin][ip];
       }
 
+      wf_.spincontext(ispin)->dsum('c', 1, 1, &total_current[idir], 1);
+
     }
     
   }
