@@ -119,13 +119,13 @@ void CurrentDensity::plot(const Sample * s, const std::string & filename){
 
 	switch(idir){
 	case 0:
-	  os.open(("x" + filename + ".cub").c_str());
+	  os.open(("x" + filename + ".cube").c_str());
 	  break;
 	case 1:
-	  os.open(("y" + filename + ".cub").c_str());
+	  os.open(("y" + filename + ".cube").c_str());
 	  break;
 	case 2:
-	  os.open(("z" + filename + ".cub").c_str());
+	  os.open(("z" + filename + ".cube").c_str());
 	  break;
 	}
 
@@ -179,10 +179,10 @@ void CurrentDensity::plot(const Sample * s, const std::string & filename){
 		    const int kp = (k + np2/2 ) % np2;
 		    os << setw(13) << current[idir][0][ip+np0*(jp+np1*kp)];
 		    if ( ( k % 6 ) == 5 )
-		      os << endl;
+		      os << '\n';
 		  }
 		if ( ( np2 % 6 ) != 0 )
-		  os << endl;
+		  os << '\n';
 	      }
 	  }
 
