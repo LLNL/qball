@@ -1148,6 +1148,7 @@ void EhrenSampleStepper::step(int niter)
           ostringstream oss;
           oss.width(7);  oss.fill('0');  oss << s_.ctrl.mditer;
           string denfilename = filebase + "." + oss.str() + ".cube";
+          string curfilename = filebase + "-current." + oss.str();
           string format = "binary";
 
           const Context* wfctxt = s_.wf.spincontext(0);
@@ -1247,10 +1248,11 @@ void EhrenSampleStepper::step(int niter)
 
 	  {
 	    // PRINT THE CURRENT
-	    std::ostringstream oss; 
-	    oss << std::setfill('0') << std::setw(6) << iter;
-	    currd_.plot(&s_, "current" + oss.str());
-	    currd_.plot_vtk(&s_, "current" + oss.str());
+	    currd_.plot_vtk(&s_, curfilename);
+	    //std::ostringstream oss; 
+	    //	    oss << std::setfill('0') << std::setw(6) << iter;
+	    // CUBE files are not very useful for the current
+	    //currd_.plot(&s_, "current" + oss.str());
 	  }
        }
     }
