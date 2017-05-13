@@ -199,6 +199,12 @@ void CurrentDensity::plot_vtk(const Sample * s, const std::string & filename){
   using namespace std;
   Base64Transcoder xcdr;
   
+  std::vector<std::vector<double> > global_current(3);
+  
+  for(int idir = 0; idir < 3; idir++) {
+    vft()->gather(*s->wf.spincontext(0), current[idir][0], global_current[idir]);
+  }
+
   if ( s->ctxt_.onpe0() ) {
 
     const int np0 = vft()->np0();
@@ -235,7 +241,7 @@ void CurrentDensity::plot_vtk(const Sample * s, const std::string & filename){
 	  const int ip = (i + np0/2 ) % np0;
 	  
 	  for(int idir = 0; idir < 3; idir++) {
-	    double value = current[idir][0][ip + np0*(jp + np1*kp)];
+	    double value = global_current[idir][ip + np0*(jp + np1*kp)];
 #ifndef WORDS_BIGENDIAN
 	    //Convert to big endian	    
 	    xcdr.byteswap_double(1, &value);
