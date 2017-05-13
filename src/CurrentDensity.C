@@ -108,6 +108,12 @@ void CurrentDensity::update_current(EnergyFunctional & energy_functional, const 
 void CurrentDensity::plot(const Sample * s, const std::string & filename){
   using namespace std;
 
+  std::vector<std::vector<double> > global_current(3);
+
+  for(int idir = 0; idir < 3; idir++) {
+    vft()->gather(*s->wf.spincontext(0), current[idir][0], global_current[idir]);
+  }
+
   if ( s->ctxt_.onpe0() )
     {
 
@@ -179,7 +185,7 @@ void CurrentDensity::plot(const Sample * s, const std::string & filename){
 		for ( int k = 0; k < np2; k++ )
 		  {
 		    const int kp = (k + np2/2 ) % np2;
-		    os << setw(13) << current[idir][0][ip+np0*(jp+np1*kp)];
+		    os << setw(13) << global_current[idir][ip+np0*(jp+np1*kp)];
 		    if ( ( k % 6 ) == 5 )
 		      os << '\n';
 		  }
