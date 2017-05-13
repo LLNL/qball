@@ -2049,3 +2049,45 @@ void FourierTransform::fft_1z( vector<complex<double> >& val_in,
   }
 }
 
+void FourierTransform::gather(const Context & ctxt, const std::vector<double> & local, std::vector<double> & global){
+
+  if (ctxt.oncoutpe()){
+    global.resize(np012());
+    int istart = np0()*np1()*np2_first(ctxt.myrow());
+    for(int i = 0; i < np012loc(); i++) global[istart + i] = local[i];
+  }
+
+  // send blocks of global to pe0
+  // send from first context column only
+  for ( int i = 0; i < ctxt.nprow(); i++ ) {
+    bool iamsending = (ctxt.mycol() == 0) && (i == ctxt.myrow());
+    
+    // send size of global block
+    int size = -1;
+
+    if ( ctxt.oncoutpe() ) {
+      if ( iamsending ) {
+	// sending to self, size not needed
+      } else {
+	ctxt.irecv(1, 1, &size, 1, i, 0);
+      }
+    } else if ( iamsending ) {
+      size = np012loc();
+      ctxt.isend(1, 1, &size, 1, 0, 0);
+    }
+    
+    // send tmpr block
+    if ( ctxt.oncoutpe() ) {
+      if ( iamsending ) {
+	// do nothing, data is already in place
+      } else {
+	int istart = np0()*np1()*np2_first(i);
+	ctxt.drecv(size, 1, &global[istart], 1, i, 0);
+      }
+    } else if ( iamsending ) {
+      ctxt.dsend(size, 1, const_cast<double *>(&local[0]), 1, 0, 0);
+    }
+
+  }
+
+}

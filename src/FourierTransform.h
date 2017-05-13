@@ -65,6 +65,8 @@
 
 #include "Timer.h"
 
+#include "Context.h"
+
 class Basis;
 
 class FourierTransform
@@ -178,6 +180,8 @@ class FourierTransform
   void fft_1z( std::vector<std::complex<double> >& val_in,
                std::vector<std::complex<double> >& val_out, int isign );
   
+  void gather(const Context & ctxt, const std::vector<double> & local, std::vector<double> & global);
+
 };
 #endif
 
