@@ -76,7 +76,7 @@ class Nparallelkpts : public Var
       cd_ = new ChargeDensity(*s);
       oldvctxt = cd_->vcontext();
       for (int ispin = 0; ispin < s->wf.nspin(); ispin++) {
-        for ( int i=0; i < s->rhog_last.size(); i++ )
+        for (unsigned i=0; i < s->rhog_last.size(); i++ )
           cd_->rhog[ispin][i] = s->rhog_last[ispin][i];
         cd_->update_rhor();
       }
@@ -92,7 +92,6 @@ class Nparallelkpts : public Var
       for (int ispin = 0; ispin < s->wf.nspin(); ispin++) {
         int rhogsize = cd_->rhog[ispin].size();
         s->rhog_last[ispin].resize(rhogsize);
-        complex<double> *rhogp = &s->rhog_last[ispin][0];
         complex<double> *rhogpold = &cd_->rhog[ispin][0];
         for (int j = 0; j < rhogsize; j++)
           s->rhog_last[ispin][j] = rhogpold[j];

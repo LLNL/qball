@@ -92,41 +92,19 @@ void PSDAWavefunctionStepper::update(Wavefunction& dwf) {
             // dwf.sd->c() now contains the descent direction (HV-VA)
             
             // Apply preconditioner K and store -K(HV-VA) in dwf
-            tmap_["psda_prec"].start();
-            const valarray<double>& diag = prec_.diag(ispin,ikp);
+	    prec_.apply(*dwf.sd(ispin, ikp), ispin, ikp, /* scale = */ -1.0);
  
-            double* c = (double*) wf_.sd(ispin,ikp)->c().valptr();
+            // dwf now contains the preconditioned descent
+            // direction -K(HV-VA)
+            
+	    double* c = (double*) wf_.sd(ispin,ikp)->c().valptr();
             double* c_last = (double*) wf_last_.sd(ispin,ikp)->c().valptr();
             double* dc = (double*) dwf.sd(ispin,ikp)->c().valptr();
             double* dc_last = (double*) dwf_last_.sd(ispin,ikp)->c().valptr();
             const int mloc = wf_.sd(ispin,ikp)->c().mloc();
             const int ngwl = wf_.sd(ispin,ikp)->basis().localsize();
             const int nloc = wf_.sd(ispin,ikp)->c().nloc();
-            
-            // next line: add enhancement factor to descent direction
-            // since there is no instability of the Anderson iteration
-            // This improves convergence in most cases
-            
-            //const double psda_enhancement_factor = 2.0;
-            for ( int n = 0; n < nloc; n++ ) {
-              // note: double mloc length for complex<double> indices
-              double* dcn = &dc[2*mloc*n];
-              // loop to ngwl only since diag[i] is not defined on [0:mloc-1]
-              for ( int i = 0; i < ngwl; i++ ) {
-                const double fac = diag[i];
-                //const double f0 = -psda_enhancement_factor*fac * dcn[2*i];
-                //const double f1 = -psda_enhancement_factor*fac * dcn[2*i+1];
-                const double f0 = -fac * dcn[2*i];
-                const double f1 = -fac * dcn[2*i+1];
-                dcn[2*i] = f0;
-                dcn[2*i+1] = f1;
-              }
-            }
-            tmap_["psda_prec"].stop();
-            
-            // dwf now contains the preconditioned descent
-            // direction -K(HV-VA)
-            
+
             tmap_["psda_update_wf"].start();
             // Anderson extrapolation
             if ( extrapolate_[ispin][ikp] ) {
@@ -302,9 +280,11 @@ void PSDAWavefunctionStepper::update(Wavefunction& dwf) {
             // dwf.sd->c() now contains the descent direction (HV-VA)
           
             // Apply preconditioner K and store -K(HV-VA) in dwf
-            tmap_["psda_prec"].start();
-            const valarray<double>& diag = prec_.diag(ispin,ikp);
- 
+	    prec_.apply(*dwf.sd(ispin, ikp), ispin, ikp, /* scale = */ -1.0);
+
+            // dwf now contains the preconditioned descent
+            // direction -K(HV-VA)
+	    
             double* c = (double*) wf_.sd(ispin,ikp)->c().valptr();
             double* c_last = (double*) wf_last_.sd(ispin,ikp)->c().valptr();
             double* dc = (double*) dwf.sd(ispin,ikp)->c().valptr();
@@ -312,30 +292,7 @@ void PSDAWavefunctionStepper::update(Wavefunction& dwf) {
             const int mloc = wf_.sd(ispin,ikp)->c().mloc();
             const int ngwl = wf_.sd(ispin,ikp)->basis().localsize();
             const int nloc = wf_.sd(ispin,ikp)->c().nloc();
-            
-            // next line: add enhancement factor to descent direction
-            // since there is no instability of the Anderson iteration
-            // This improves convergence in most cases
-            
-            //const double psda_enhancement_factor = 2.0;
-            for ( int n = 0; n < nloc; n++ ) {
-              // note: double mloc length for complex<double> indices
-              double* dcn = &dc[2*mloc*n];
-              // loop to ngwl only since diag[i] is not defined on [0:mloc-1]
-              for ( int i = 0; i < ngwl; i++ ) {
-                const double fac = diag[i];
-                //const double f0 = -psda_enhancement_factor*fac * dcn[2*i];
-                //const double f1 = -psda_enhancement_factor*fac * dcn[2*i+1];
-                const double f0 = -fac * dcn[2*i];
-                const double f1 = -fac * dcn[2*i+1];
-                dcn[2*i] = f0;
-                dcn[2*i+1] = f1;
-              }
-            }
-            tmap_["psda_prec"].stop();
-          
-            // dwf now contains the preconditioned descent
-            // direction -K(HV-VA)
+
             tmap_["psda_update_wf"].start();
             // Anderson extrapolation
             if ( extrapolate_[ispin][ikp] ) {

@@ -145,8 +145,7 @@ void CPSampleStepper::step(int niter)
   tmap["charge"].stop();
 
   ef_.update_vhxc();
-  double energy =
-      ef_.energy(compute_hpsi,dwf,compute_forces,fion,compute_stress,sigma_eks);
+  double energy = ef_.energy(s_.wf, compute_hpsi,dwf,compute_forces,fion,compute_stress,sigma_eks);
 
   mdwf_stepper->compute_wfm(dwf);
 
@@ -287,8 +286,7 @@ void CPSampleStepper::step(int niter)
     cd_.update_density();
     tmap["charge"].stop();
     ef_.update_vhxc();
-    energy =
-        ef_.energy(compute_hpsi,dwf,compute_forces,fion,compute_stress,sigma_eks);
+    energy = ef_.energy(s_.wf, compute_hpsi, dwf, compute_forces, fion, compute_stress, sigma_eks);
 
     if ( s_.ctxt_.mype() == 0 )
       cout << "</iteration>" << endl;

@@ -22,13 +22,13 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 //
-// PSDWavefunctionStepper.C
+// RMMDIISWavefunctionStepper.C
 //
 ////////////////////////////////////////////////////////////////////////////////
 
 #include <config.h>
 
-#include "PSDWavefunctionStepper.h"
+#include "RMMDIISWavefunctionStepper.h"
 #include "Wavefunction.h"
 #include "SlaterDet.h"
 #include "Preconditioner.h"
@@ -36,62 +36,47 @@
 using namespace std;
 
 ////////////////////////////////////////////////////////////////////////////////
-PSDWavefunctionStepper::PSDWavefunctionStepper(Wavefunction& wf, 
+RMMDIISWavefunctionStepper::RMMDIISWavefunctionStepper(Wavefunction& wf, 
   Preconditioner& p, TimerMap& tmap) : 
   WavefunctionStepper(wf,tmap), prec_(p)
 {}
 
+void RMMDIISWavefunctionStepper::preprocess(void) {
+  iter_ = 0;
+  std::cout << "etotal PREPROCESS " << iter_ << std::endl;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
-void PSDWavefunctionStepper::update(Wavefunction& dwf) {
+void RMMDIISWavefunctionStepper::update(Wavefunction& dwf) {
   for ( int ispin = 0; ispin < wf_.nspin(); ispin++ ) {
     if (wf_.spinactive(ispin)) {
       for ( int ikp=0; ikp<wf_.nkp(); ikp++) {
         if (wf_.kptactive(ikp)) {
           assert(wf_.sd(ispin,ikp) != 0);
-          // compute A = V^T H V  and descent direction HV - VA
- 
-          tmap_["psd_residual"].start();
-          if ( wf_.sd(ispin,ikp)->basis().real() ) {
-            // proxy real matrices c, cp
-            DoubleMatrix c(wf_.sd(ispin,ikp)->c());
-            DoubleMatrix cp(dwf.sd(ispin,ikp)->c());
+          assert(wf_.sd(ispin,ikp)->basis().real());
+	  assert(! wf_.ultrasoft());
+
+	  std::cout << "etotal update " << iter_ << std::endl;
+	  
+          tmap_["rmmdiis_residual"].start();
+
+	  // proxy real matrices c, cp
+	  DoubleMatrix c(wf_.sd(ispin,ikp)->c());
+	  DoubleMatrix cp(dwf.sd(ispin,ikp)->c());
           
-            DoubleMatrix a(c.context(),c.n(),c.n(),c.nb(),c.nb());
- 
-            // factor 2.0 in next line: G and -G
-            a.gemm('t','n',2.0,c,cp,0.0);
-            // rank-1 update correction
-            a.ger(-1.0,c,0,cp,0);
-            // cp = cp - c * a
-            if (wf_.ultrasoft()) {
-              // cp = cp - spsi * a
-              DoubleMatrix spsi(wf_.sd(ispin,ikp)->spsi());
-              cp.gemm('n','n',-1.0,spsi,a,1.0);
-            }
-            else {
-              // cp = cp - c * a
-              cp.gemm('n','n',-1.0,c,a,1.0);
-            }
-          }
-          else {
-            ComplexMatrix &c = wf_.sd(ispin,ikp)->c();
-            ComplexMatrix &cp = dwf.sd(ispin,ikp)->c();
-            ComplexMatrix a(c.context(),c.n(),c.n(),c.nb(),c.nb());
+	  DoubleMatrix a(c.context(), c.n(), c.n(), c.nb(), c.nb());
+	  
+	  // factor 2.0 in next line: G and -G
+	  a.gemm('t', 'n', 2.0, c, cp, 0.0);
+	  
+	  // rank-1 update correction
+	  a.ger(-1.0, c, 0, cp, 0);
 
-            a.gemm('c','n',1.0,c,cp,0.0);
-
-            if (wf_.ultrasoft()) {
-              // cp = cp - spsi * a
-              ComplexMatrix &spsi = wf_.sd(ispin,ikp)->spsi();
-              cp.gemm('n','n',-1.0,spsi,a,1.0);
-            }
-            else {
-              // cp = cp - c * a
-              cp.gemm('n','n',-1.0,c,a,1.0);
-            }
-          }
-          tmap_["psd_residual"].stop();
-        
+	  // cp = cp - c * a
+	  cp.gemm('n','n',-1.0,c,a,1.0);
+	
+	  tmap_["rmmdiis_residual"].stop();
+	  
           // dwf.sd->c() now contains the descent direction (HV-VA)
 
 	  prec_.apply(*dwf.sd(ispin, ikp), ispin, ikp);
@@ -102,4 +87,10 @@ void PSDWavefunctionStepper::update(Wavefunction& dwf) {
       }
     }
   }
+
+  iter_++;
+}
+
+void RMMDIISWavefunctionStepper::postprocess(void) {
+  std::cout << "etotal PostPROCESS " << iter_ << std::endl;
 }

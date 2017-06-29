@@ -45,7 +45,6 @@ class NonLocalPotential
   
   const Context& ctxt_;
   AtomSet& atoms_;
-  SlaterDet& sd_;
   const Basis& basis_;
   Basis* cdbasis_;  // pointer to charge density basis, needed for ultrasoft
   
@@ -80,15 +79,15 @@ class NonLocalPotential
    
   public:
   
-  NonLocalPotential(AtomSet& as, SlaterDet& sd, const bool compute_stress) :  
-    ctxt_(sd.context()), atoms_(as), sd_(sd), basis_(sd.basis()) { init(compute_stress); }
+ NonLocalPotential(AtomSet& as, const Context& ctxt, const Basis & basis, const bool compute_stress) :  
+    ctxt_(ctxt), atoms_(as), basis_(basis) { init(compute_stress); }
   ~NonLocalPotential(void);
                
   void update_twnl(const bool compute_stress);
-  void update_usfns(Basis* cdbasis);  // update Q_nm^I(G), beta^I(G) when atoms
+  void update_usfns(SlaterDet& sd, Basis* cdbasis);  // update Q_nm^I(G), beta^I(G) when atoms
                                       // move or basis changes
   void use_highmem(void) { highmem_ = true; }  // use extra memory to speed calculation
-  double energy(bool compute_hpsi, SlaterDet& dsd, 
+  double energy(SlaterDet& sd, bool compute_hpsi, SlaterDet& dsd, 
     bool compute_forces, vector<vector<double> >& fion, 
     bool compute_stress, valarray<double>& sigma_enl,
     vector<complex<double> >& veff);

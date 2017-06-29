@@ -1502,15 +1502,15 @@ void NonLocalPotential::update_twnl(const bool compute_stress) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd, 
+double NonLocalPotential::energy(SlaterDet& sd, bool compute_hpsi, SlaterDet& dsd, 
     bool compute_forces, vector<vector<double> >& fion, 
     bool compute_stress, valarray<double>& sigma_enl,
     vector<complex<double> >& veff) {
-  const vector<double>& occ = sd_.occ();
-  const vector<double>& eig = sd_.eig();
+  const vector<double>& occ = sd.occ();
+  const vector<double>& eig = sd.eig();
   const int ngwl = basis_.localsize();
   //const int mloc = basis_.maxlocalsize();
-  const int mloc = sd_.c().mloc();
+  const int mloc = sd.c().mloc();
   // define atom block size
 
   //const int na_block_size = 32;
@@ -1533,7 +1533,7 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
 
   if (ultrasoft_) {
     tmap["usnl_calcbpsi"].start();
-    sd_.calc_betapsi();  // update betapsi w. latest wf
+    sd.calc_betapsi();  // update betapsi w. latest wf
     tmap["usnl_calcbpsi"].stop();
     const int ngloc = cdbasis_->localsize();
     assert(veff.size() >= ngloc);
@@ -1548,10 +1548,10 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
         const int nqtot = s->nqtot();
         const int nbeta = s->nbeta();
         const int nbetalm = s->nbetalm();
-        const int nstloc = sd_.nstloc();
+        const int nstloc = sd.nstloc();
 
-        const ComplexMatrix* betag = sd_.betag(is);
-        const ComplexMatrix* betapsi = sd_.betapsi(is);
+        const ComplexMatrix* betag = sd.betag(is);
+        const ComplexMatrix* betapsi = sd.betapsi(is);
         const complex<double>* bg = betag->cvalptr();
         const complex<double>* bp = betapsi->cvalptr();
         int qsize = nqtot*na;
@@ -1617,13 +1617,13 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
         tmap["usnl_enl"].start();
         if (betapsi->size() > 0) { 
            const int bp_mloc = betapsi->mloc(); // nbetalm*naloc_t
-           for ( int lj=0; lj < sd_.c().nblocks(); lj++ )
+           for ( int lj=0; lj < sd.c().nblocks(); lj++ )
            {
-              for ( int jj=0; jj < sd_.c().nbs(lj); jj++ )
+              for ( int jj=0; jj < sd.c().nbs(lj); jj++ )
               {
                  // global state index
-                 const int nglobal = sd_.c().j(lj,jj);
-                 const int norig = lj*sd_.c().nb()+jj;
+                 const int nglobal = sd.c().j(lj,jj);
+                 const int norig = lj*sd.c().nb()+jj;
                  const double occn = occ[nglobal];
                  for (int ibl = 0; ibl < naloc_t; ibl++) {
                     for (int qind=0; qind < nqtot; qind++) {
@@ -1669,7 +1669,7 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
             }
           }
           
-          if (sd_.highmem()) {
+          if (sd.highmem()) {
             // add contribution to hpsi from amat*betapsi    
             ComplexMatrix& cp = dsd.c();
 #ifdef PRINTALL
@@ -1687,7 +1687,7 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
             ComplexMatrix bgsf(ctxt_,betag->m(),betag->n(),betag->mb(),betag->nb());
             complex<double>* bgsfp = bgsf.valptr();
             int tbp_m = nbetalm*ctxt_.npcol();
-            ComplexMatrix tbpsum(ctxt_,tbp_m,sd_.c().n(),nbetalm,sd_.c().nb());
+            ComplexMatrix tbpsum(ctxt_,tbp_m,sd.c().n(),nbetalm,sd.c().nb());
             complex<double>* tbpp = tbpsum.valptr();
             for (int ibl = 0; ibl < naloc_max; ibl++) {
               vector<complex<double> > bpsum(nstloc*nbetalm);
@@ -1743,18 +1743,18 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
           vector<double> ddmat(qsize);
           
           for ( int j = 0; j < 3; j++ ) {
-            sd_.calc_dbetapsi(j);
-            const ComplexMatrix* dbetapsi = sd_.dbetapsi(is);
+            sd.calc_dbetapsi(j);
+            const ComplexMatrix* dbetapsi = sd.dbetapsi(is);
             const complex<double>* dbpj = dbetapsi->cvalptr();
             if (dbetapsi->size() > 0) { 
                const int bp_mloc = dbetapsi->mloc(); // nbetalm*naloc_t
-               for ( int lj=0; lj < sd_.c().nblocks(); lj++ )
+               for ( int lj=0; lj < sd.c().nblocks(); lj++ )
                {
-                  for ( int jj=0; jj < sd_.c().nbs(lj); jj++ )
+                  for ( int jj=0; jj < sd.c().nbs(lj); jj++ )
                   {
                      // global state index
-                     const int nglobal = sd_.c().j(lj,jj);
-                     const int norig = lj*sd_.c().nb()+jj;
+                     const int nglobal = sd.c().j(lj,jj);
+                     const int norig = lj*sd.c().nb()+jj;
                      const double occn = occ[nglobal];
                      const double eign = eig[nglobal];
                      for (int ibl = 0; ibl < naloc_t; ibl++) {
@@ -1766,7 +1766,7 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
                            int ind2 = bp_mloc*norig + ibl*nbetalm + lm2;
                            double mult = 2.0;
                            if (lm1 == lm2) mult = 1.0;
-                           double dmateq = dmat[qind+ia*nqtot] - eign*sd_.qaug(is,qind);
+                           double dmateq = dmat[qind+ia*nqtot] - eign*sd.qaug(is,qind);
                            tmpfion[3*ia+j] -= omega_inv * mult * occn * dmateq *
                                real(conj(dbpj[ind1])*bp[ind2] + conj(bp[ind1])*dbpj[ind2]);
                         }
@@ -1825,13 +1825,13 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
                     s->qind_to_betalm(qind,lm1,lm2);
                     double mult = 2.0;
                     if (lm1 == lm2) mult = 1.0;
-                    for ( int lj=0; lj < sd_.c().nblocks(); lj++ )
+                    for ( int lj=0; lj < sd.c().nblocks(); lj++ )
                     {
-                       for ( int jj=0; jj < sd_.c().nbs(lj); jj++ )
+                       for ( int jj=0; jj < sd.c().nbs(lj); jj++ )
                        {
                           // global state index
-                          const int nglobal = sd_.c().j(lj,jj);
-                          const int norig = lj*sd_.c().nb()+jj;
+                          const int nglobal = sd.c().j(lj,jj);
+                          const int norig = lj*sd.c().nb()+jj;
                           const double occn = occ[nglobal];
                           int ind1 = bp_mloc*norig + ibl*nbetalm + lm1;
                           int ind2 = bp_mloc*norig + ibl*nbetalm + lm2;
@@ -1850,13 +1850,13 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
                     s->qind_to_betalm(qind,lm1,lm2);
                     double mult = 2.0;
                     if (lm1 == lm2) mult = 1.0;
-                    for ( int lj=0; lj < sd_.c().nblocks(); lj++ )
+                    for ( int lj=0; lj < sd.c().nblocks(); lj++ )
                     {
-                       for ( int jj=0; jj < sd_.c().nbs(lj); jj++ )
+                       for ( int jj=0; jj < sd.c().nbs(lj); jj++ )
                        {
                           // global state index
-                          const int nglobal = sd_.c().j(lj,jj);
-                          const int norig = lj*sd_.c().nb()+jj;
+                          const int nglobal = sd.c().j(lj,jj);
+                          const int norig = lj*sd.c().nb()+jj;
                           const double occn = occ[nglobal];
                           int ind1 = bp_mloc*norig + ibl*nbetalm + lm1;
                           int ind2 = bp_mloc*norig + ibl*nbetalm + lm2;
@@ -1913,7 +1913,7 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
       else 
          anl_loc.resize(npr[is]*na_block_size*mloc,complex<double>(0.0,0.0));
         
-      const int nstloc = sd_.nstloc();
+      const int nstloc = sd.nstloc();
       // fnl_loc[ipra][n]
       valarray<double> fnl_loc_gamma;
       valarray<double> fnl_buf_gamma;
@@ -2023,10 +2023,10 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
         int twomloc = 2 * mloc;                                              
         int nprnaloc = ia_block_size * npr[is];                              
         int c_lda;
-        const complex<double>* c = sd_.c().cvalptr();                        
+        const complex<double>* c = sd.c().cvalptr();                        
 
         if (basis_.real()) {
-          c_lda = 2*sd_.c().mloc();                                        
+          c_lda = 2*sd.c().mloc();                                        
           tmap["fnl_gemm"].start();                                            
           dgemm(&ct,&cn,&nprnaloc,(int*)&nstloc,&twongwl,&one,
                 &anl_loc_gamma[0],&twongwl, (double*)c, &c_lda,
@@ -2085,13 +2085,13 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
         if (basis_.real()) {
           for ( int ipr = 0; ipr < npr[is]; ipr++ ) { 
             const double fac = wt[is][ipr] * omega_inv;                        
-            for ( int lj=0; lj < sd_.c().nblocks(); lj++ )
+            for ( int lj=0; lj < sd.c().nblocks(); lj++ )
             {
-               for ( int jj=0; jj < sd_.c().nbs(lj); jj++ )
+               for ( int jj=0; jj < sd.c().nbs(lj); jj++ )
                {
                   // global state index
-                  const int nglobal = sd_.c().j(lj,jj);
-                  const int norig = lj*sd_.c().nb()+jj;
+                  const int nglobal = sd.c().j(lj,jj);
+                  const int norig = lj*sd.c().nb()+jj;
                   const double facn = fac * occ[nglobal];
                   for ( int ia = 0; ia < ia_block_size; ia++ ) {
                      const int i = ia + ipr*ia_block_size + norig * nprnaloc;           
@@ -2106,13 +2106,13 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
         else {
           for ( int ipr = 0; ipr < npr[is]; ipr++ ) { 
             const double fac = wt[is][ipr] * omega_inv;                        
-            for ( int lj=0; lj < sd_.c().nblocks(); lj++ )
+            for ( int lj=0; lj < sd.c().nblocks(); lj++ )
             {
-               for ( int jj=0; jj < sd_.c().nbs(lj); jj++ )
+               for ( int jj=0; jj < sd.c().nbs(lj); jj++ )
                {
                   // global state index
-                  const int nglobal = sd_.c().j(lj,jj);
-                  const int norig = lj*sd_.c().nb()+jj;
+                  const int nglobal = sd.c().j(lj,jj);
+                  const int norig = lj*sd.c().nb()+jj;
                   const double facn = fac * occ[nglobal];
                   for ( int ia = 0; ia < ia_block_size; ia++ ) {
                      const int i = ia + ipr*ia_block_size + norig * nprnaloc;           
@@ -2218,7 +2218,7 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
             // dfnl.gemm('t','n',2.0,anl,c_proxy,0.0);                       
             // compute dfnl[npra][nstloc] = anl^T * c                         
             const int nprnaloc = ia_block_size * npr[is];                    
-            const complex<double>* c = sd_.c().cvalptr();                    
+            const complex<double>* c = sd.c().cvalptr();                    
             if (basis_.real()) {
               double one=1.0;
               char ct='t';        
@@ -2247,13 +2247,13 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
             if (basis_.real()) {
                for ( int ipr = 0; ipr < npr[is]; ipr++ )
                {
-                  for ( int lj=0; lj < sd_.c().nblocks(); lj++ )
+                  for ( int lj=0; lj < sd.c().nblocks(); lj++ )
                   {
-                     for ( int jj=0; jj < sd_.c().nbs(lj); jj++ )
+                     for ( int jj=0; jj < sd.c().nbs(lj); jj++ )
                      {
                         // global state index
-                        const int nglobal = sd_.c().j(lj,jj);
-                        const int norig = lj*sd_.c().nb()+jj;
+                        const int nglobal = sd.c().j(lj,jj);
+                        const int norig = lj*sd.c().nb()+jj;
                         // Factor 2.0 in next line from derivative of |Fnl|^2        
                         const double facn = 2.0 * occ[nglobal];                    
                         for ( int ia = 0; ia < ia_block_size; ia++ ) {
@@ -2269,13 +2269,13 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
             else {
                for ( int ipr = 0; ipr < npr[is]; ipr++ )
                {
-                  for ( int lj=0; lj < sd_.c().nblocks(); lj++ )
+                  for ( int lj=0; lj < sd.c().nblocks(); lj++ )
                   {
-                     for ( int jj=0; jj < sd_.c().nbs(lj); jj++ )
+                     for ( int jj=0; jj < sd.c().nbs(lj); jj++ )
                      {
                         // global state index
-                        const int nglobal = sd_.c().j(lj,jj);
-                        const int norig = lj*sd_.c().nb()+jj;
+                        const int nglobal = sd.c().j(lj,jj);
+                        const int norig = lj*sd.c().nb()+jj;
                         // Factor 2.0 in next line from derivative of |Fnl|^2        
                         const double facn = 2.0 * occ[nglobal];                    
                         for ( int ia = 0; ia < ia_block_size; ia++ ) {
@@ -2520,7 +2520,7 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
             // dfnl.gemm('t','n',2.0,anl,c_proxy,0.0);                        
             // compute dfnl[npra][nstloc] = anl^T * c                         
             const int nprnaloc = ia_block_size * npr[is];                     
-            const complex<double>* c = sd_.c().cvalptr();                     
+            const complex<double>* c = sd.c().cvalptr();                     
             if (basis_.real()) {
               double one=1.0;      
               char ct='t';         
@@ -2548,13 +2548,13 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
             // accumulate non-local contributions to sigma_ij                 
             if (basis_.real())
             {
-               for ( int lj=0; lj < sd_.c().nblocks(); lj++ )
+               for ( int lj=0; lj < sd.c().nblocks(); lj++ )
                {
-                  for ( int jj=0; jj < sd_.c().nbs(lj); jj++ )
+                  for ( int jj=0; jj < sd.c().nbs(lj); jj++ )
                   {
                      // global state index
-                     const int nglobal = sd_.c().j(lj,jj);
-                     const int norig = lj*sd_.c().nb()+jj;
+                     const int nglobal = sd.c().j(lj,jj);
+                     const int norig = lj*sd.c().nb()+jj;
                      // Factor 2.0 in next line from derivative of |Fnl|^2           
                      const double facn = 2.0 * occ[nglobal];                       
                      for ( int ipra = 0; ipra < npr[is]*ia_block_size; ipra++ ) {
@@ -2565,13 +2565,13 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
                }
             }
             else {
-               for ( int lj=0; lj < sd_.c().nblocks(); lj++ )
+               for ( int lj=0; lj < sd.c().nblocks(); lj++ )
                {
-                  for ( int jj=0; jj < sd_.c().nbs(lj); jj++ )
+                  for ( int jj=0; jj < sd.c().nbs(lj); jj++ )
                   {
                      // global state index
-                     const int nglobal = sd_.c().j(lj,jj);
-                     const int norig = lj*sd_.c().nb()+jj;
+                     const int nglobal = sd.c().j(lj,jj);
+                     const int norig = lj*sd.c().nb()+jj;
                      // Factor 2.0 in next line from derivative of |Fnl|^2           
                      const double facn = 2.0 * occ[nglobal];                       
                      for ( int ipra = 0; ipra < npr[is]*ia_block_size; ipra++ ) {
@@ -2616,13 +2616,13 @@ double NonLocalPotential::energy(bool compute_hpsi, SlaterDet& dsd,
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-void NonLocalPotential::update_usfns(Basis* cdbasis) {
+void NonLocalPotential::update_usfns(SlaterDet& sd, Basis* cdbasis) {
 
   // update ultrasoft potential functions Q_nm^I(G), beta^I(G) whenever atoms
   // move or basis changes
   cdbasis_ = cdbasis;
-  sd_.init_usfns(&atoms_);
-  //ewd:12-21-2011 sd_.calc_betag();
+  sd.init_usfns(&atoms_);
+  //ewd:12-21-2011 sd.calc_betag();
   
   vector<vector<double> > tau;
   atoms_.get_positions(tau,true);
@@ -2651,7 +2651,7 @@ void NonLocalPotential::update_usfns(Basis* cdbasis) {
         vector<complex<double> > qnm;
         vector<double> qaug;
         s->calc_qnmg(cdbasis_,qnm,qaug);
-        sd_.set_qaug(is,qaug);          // store qaug in SlaterDet
+        sd.set_qaug(is,qaug);          // store qaug in SlaterDet
       
         for (int ibl = 0; ibl < naloc; ibl++) {
           int ia = atoms_.usloc_atind[is][ibl];
@@ -2686,7 +2686,7 @@ void NonLocalPotential::update_usfns(Basis* cdbasis) {
         sfactwf_[is].resize(naloc*ngwl);
         vector<double> qaug;
         s->calc_qnmg(cdbasis_,qnmg_[is],qaug);
-        sd_.set_qaug(is,qaug);          // store qaug in SlaterDet
+        sd.set_qaug(is,qaug);          // store qaug in SlaterDet
     
         for (int ibl = 0; ibl < naloc; ibl++) {
           int ia = atoms_.usloc_atind[is][ibl];

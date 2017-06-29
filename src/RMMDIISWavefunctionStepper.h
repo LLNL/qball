@@ -22,48 +22,34 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Preconditioner.h
+// RMMDIISWavefunctionStepper.h
 //
 ////////////////////////////////////////////////////////////////////////////////
 
 #include <config.h>
 
-#ifndef PRECONDITIONER_H
-#define PRECONDITIONER_H
+#ifndef RMMDIISWAVEFUNCTIONSTEPPER_H
+#define RMMDIISWAVEFUNCTIONSTEPPER_H
 
-class Sample;
-class EnergyFunctional;
-class Wavefunction;
+#include "WavefunctionStepper.h"
+class Preconditioner;
 
-#include <vector>
-#include <valarray>
-#include "SlaterDet.h"
-using namespace std;
-
-class Preconditioner
+class RMMDIISWavefunctionStepper : public WavefunctionStepper
 {
   private:
   
-  const Sample& s_;
-  const EnergyFunctional& ef_;
-  const Wavefunction& wf_;
-  vector<vector<valarray<double> > > diag_; // diag_[ispin][ikp][ig]
+  Preconditioner& prec_;
+  int iter_;
 
   public:
 
-  void update(void);
-  
-  const valarray<double>& diag(int ispin, int ikp) const
-  { return diag_[ispin][ikp]; }
+  void update(Wavefunction& dwf);
 
-  Preconditioner(const Sample& s, const Wavefunction& wf, const EnergyFunctional& ef);
+  virtual void preprocess(void);
 
-  void apply(SlaterDet & sd, int ispin, int ikp, double scale = 1.0);
-  
-  //~Preconditioner();
+  virtual void postprocess(void);
+
+  RMMDIISWavefunctionStepper(Wavefunction& wf, Preconditioner& p, TimerMap& tmap);
+  ~RMMDIISWavefunctionStepper(){};
 };
 #endif
-
-// Local Variables:
-// mode: c++
-// End:

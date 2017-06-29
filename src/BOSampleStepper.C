@@ -40,6 +40,7 @@
 #include "JDWavefunctionStepper.h"
 #include "PSDWavefunctionStepper.h"
 #include "PSDAWavefunctionStepper.h"
+#include "RMMDIISWavefunctionStepper.h"
 #include "SDIonicStepper.h"
 #include "SDAIonicStepper.h"
 #include "CGIonicStepper.h"
@@ -73,8 +74,16 @@ using namespace std;
 
 ////////////////////////////////////////////////////////////////////////////////
 BOSampleStepper::BOSampleStepper(Sample& s, int nitscf, int nite) :
-  SampleStepper(s), cd_(s), ef_(s,s.wf,cd_),dwf(s.wf), wfv(s.wfv), nitscf_(nitscf),
-  nite_(nite), initial_atomic_density(false) {}
+  SampleStepper(s),
+  dwf(s.wf),
+  wfv(s.wfv),
+  nitscf_(nitscf),
+  nite_(nite),
+  cd_(s),
+  ef_(s,s.wf,cd_),
+  initial_atomic_density(false)
+{
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 BOSampleStepper::~BOSampleStepper()
@@ -130,7 +139,7 @@ void BOSampleStepper::initialize_density(void)
     rhops[is].resize(ngloc);
     Species *s = atoms.species_list[is];
     const int zval = s->zval();
-    const int atomic_number = s->atomic_number();
+    const unsigned atomic_number = s->atomic_number();
     assert(atomic_number < sizeof(atom_radius)/sizeof(double));
     // scaling factor 2.0 in next line is empirically adjusted
     double rc = 2.0 * atom_radius[atomic_number];
@@ -264,7 +273,8 @@ void BOSampleStepper::step(int niter)
   
   Timer tm_iter;
 
-  const bool use_preconditioner = wf_dyn == "PSD" || wf_dyn == "PSDA" || wf_dyn == "JD";
+  const bool use_preconditioner = wf_dyn == "PSD" || wf_dyn == "PSDA" || wf_dyn == "JD" || wf_dyn == "RMMDIIS";
+  
   Preconditioner *preconditioner = 0;
   if ( use_preconditioner )
   {
@@ -293,7 +303,9 @@ void BOSampleStepper::step(int niter)
   else if ( wf_dyn == "PSD" )
     wf_stepper = new PSDWavefunctionStepper(wf,*preconditioner,tmap);
   else if ( wf_dyn == "PSDA" )
-    wf_stepper = new PSDAWavefunctionStepper(wf,*preconditioner,tmap);  
+    wf_stepper = new PSDAWavefunctionStepper(wf,*preconditioner,tmap);
+  else if ( wf_dyn == "RMMDIIS" )
+    wf_stepper = new RMMDIISWavefunctionStepper(wf,*preconditioner,tmap);
   else if ( wf_dyn == "JD" )
     wf_stepper = new JDWavefunctionStepper(wf,*preconditioner,ef_,tmap);  
   // wf_stepper == 0 indicates that wf_dyn == LOCKED
@@ -412,8 +424,7 @@ void BOSampleStepper::step(int niter)
   if ( rc1 != 0.0 )
   {
     const double q1 = 2.0 * M_PI / rc1;
-    for ( int i=0; i < wls.size(); i++ )
-    {
+    for (unsigned i = 0; i < wls.size(); i++){
       if ( g2[i] != 0.0 )
         wls[i] = sqrt(g2[i] / ( g2[i] + q1*q1 ));
       else
@@ -422,21 +433,18 @@ void BOSampleStepper::step(int niter)
   }
   else
   {
-    for ( int i=0; i < wls.size(); i++ )
-      wls[i] = 1.0;
+    for (unsigned i = 0; i < wls.size(); i++) wls[i] = 1.0;
   }
 
   if ( rc_Kerker > 0.0 )
   {
     const double q0_kerker = 2 * M_PI / rc_Kerker;
     const double q0_kerker2 = q0_kerker * q0_kerker;
-    for ( int i=0; i < wkerker.size(); i++ )
-      wkerker[i] = g2[i] / ( g2[i] + q0_kerker2 );
+    for(unsigned i = 0; i < wkerker.size(); i++) wkerker[i] = g2[i] / ( g2[i] + q0_kerker2 );
   }
   else
   {
-    for ( int i=0; i < wkerker.size(); i++ )
-      wkerker[i] = 1.0;
+    for(unsigned i = 0; i < wkerker.size(); i++) wkerker[i] = 1.0;
   }
 
   // if ultrasoft, calculate position-dependent functions
@@ -531,10 +539,13 @@ void BOSampleStepper::step(int niter)
         // calculate max force and stress values, add to convergence detectors
         if (atoms_move) {
           double maxforce = 0.0;
-          for ( int is = 0; is < atoms.atom_list.size(); is++ ) 
-            for ( int ia = 0; ia < atoms.atom_list[is].size(); ia++ ) 
-              for (int q=0; q<3; q++) 
+          for (unsigned is = 0; is < atoms.atom_list.size(); is++) { 
+            for (unsigned ia = 0; ia < atoms.atom_list[is].size(); ia++) {
+              for (int q=0; q<3; q++) {
                 if (fabs(fion[is][3*ia+q]) > maxforce) maxforce = fabs(fion[is][3*ia+q]);
+	      }
+	    }
+	  }
 
           conv_force.addValue(maxforce);
         }
@@ -593,7 +604,7 @@ void BOSampleStepper::step(int niter)
           tmap["gram"].start();
           s_.wf.gram();
           tmap["gram"].stop();
-          ef_.energy(true,dwf,false,fion,false,sigma_eks);
+          ef_.energy(s_.wf, true,dwf,false,fion,false,sigma_eks);
           tmap["diag"].start();
           s_.wf.diag(dwf,true);
           tmap["diag"].stop();
@@ -603,8 +614,7 @@ void BOSampleStepper::step(int niter)
           s_.wf.printeig();
         }
         
-        double energy =
-            ef_.energy(false,dwf,compute_forces,fion,compute_stress,sigma_eks);
+        double energy = ef_.energy(s_.wf, false, dwf, compute_forces, fion, compute_stress, sigma_eks);
 
         // average forces over symmetric atoms
         if ( compute_forces && s_.symmetries.nsym() > 0) {
@@ -1043,12 +1053,12 @@ void BOSampleStepper::step(int niter)
 
             // reset stepper only if multiple non-selfconsistent steps
             if ( nite_ > 0 ) wf_stepper->preprocess();
-            int nitemin_ = ( nite_ > 0 ? nite_ : 1);
-            for ( int ite = 0; ite < nitemin_; ite++ )
+
+            for ( int ite = 0; ite < max(nite_, 1); ite++ )
             {
                //QB_Pstart(energy+hamiltonian_update);
                tmap["scf_ef"].start();
-               double energy = ef_.energy(true,dwf,false,fion,false,sigma_eks);
+               double energy = ef_.energy(s_.wf, true,dwf,false,fion,false,sigma_eks);
                tmap["scf_ef"].stop();
                //QB_Pstop(energy+hamiltonian_update);
 
@@ -1137,11 +1147,13 @@ void BOSampleStepper::step(int niter)
                }
             } // for ite
 
+            if ( nite_ > 0 ) wf_stepper->postprocess();
+	    
             // subspace diagonalization
             if ( compute_eigvec || s_.ctrl.wf_diag == "EIGVAL" || usdiag)
             {
                tmap["scf_ef"].start();
-               ef_.energy(true,dwf,false,fion,false,sigma_eks);
+               ef_.energy(s_.wf, true,dwf,false,fion,false,sigma_eks);
                tmap["scf_ef"].stop();
                tmap["diag"].start();
                s_.wf.diag(dwf,compute_eigvec);
@@ -1253,19 +1265,19 @@ void BOSampleStepper::step(int niter)
            tmap["postscf"].start();
            // need eigenvalues to compute forces w. ultrasoft
            if (ultrasoft) { 
-              ef_.energy(true,dwf,false,fion,false,sigma_eks);
-              //tmap["diag"].start();
-              s_.wf.diag(dwf,compute_eigvec);
-              //s_.wf.diag(dwf,true);  // ewd:  why true?  Why did I do this??
-              //tmap["diag"].stop();
-              
-              // update ultrasoft functions w. new eigenvectors
-              if (compute_eigvec && ultrasoft) { 
-                 //tmap["usfns"].start();
-                 s_.wf.update_usfns();
-                 //tmap["usfns"].stop();
-              }
-              s_.wf.printeig();
+	     ef_.energy(s_.wf, true,dwf,false,fion,false,sigma_eks);
+	     //tmap["diag"].start();
+	     s_.wf.diag(dwf,compute_eigvec);
+	     //s_.wf.diag(dwf,true);  // ewd:  why true?  Why did I do this??
+	     //tmap["diag"].stop();
+             
+	     // update ultrasoft functions w. new eigenvectors
+	     if (compute_eigvec && ultrasoft) { 
+	       //tmap["usfns"].start();
+	       s_.wf.update_usfns();
+	       //tmap["usfns"].stop();
+	     }
+	     s_.wf.printeig();
            }
            
            //tmap["charge"].start();
@@ -1275,7 +1287,7 @@ void BOSampleStepper::step(int niter)
 
           ef_.update_vhxc();
           const bool compute_forces = true;
-          ef_.energy(false,dwf,compute_forces,fion,compute_stress,sigma_eks);
+          ef_.energy(s_.wf, false,dwf,compute_forces,fion,compute_stress,sigma_eks);
 
           if (s_.atoms.add_fion_ext()) {
             for ( int is = 0; is < atoms.atom_list.size(); is++ ) {
@@ -1326,7 +1338,6 @@ void BOSampleStepper::step(int niter)
            if ( onpe0 )
               cout << ef_;
         }
-        wf_stepper->postprocess();
       }
       else
       {
@@ -1337,7 +1348,7 @@ void BOSampleStepper::step(int niter)
          cd_.update_density();
          //tmap["charge"].stop();
          ef_.update_vhxc();
-         ef_.energy(true,dwf,false,fion,false,sigma_eks);
+         ef_.energy(s_.wf, true,dwf,false,fion,false,sigma_eks);
          if ( onpe0 )
          {
             cout << ef_;
@@ -1502,8 +1513,7 @@ void BOSampleStepper::step(int niter)
 
             ef_.update_vhxc();
             const bool compute_forces = true;
-            double energy =
-                ef_.energy(false,dwf,compute_forces,fion,compute_stress,sigma_eks);
+            double energy = ef_.energy(s_.wf, false, dwf, compute_forces, fion, compute_stress, sigma_eks);
 
             // average forces over symmetric atoms
             if ( compute_forces && s_.symmetries.nsym() > 0) {
@@ -1674,7 +1684,7 @@ void BOSampleStepper::step(int niter)
 
     // need eigenvalues to compute forces w. ultrasoft
     if (ultrasoft) { 
-       ef_.energy(true,dwf,false,fion,false,sigma_eks);
+      ef_.energy(s_.wf, true, dwf, false, fion, false, sigma_eks);
       tmap["diag"].start();
       //s_.wf.diag(dwf,compute_eigvec);
       s_.wf.diag(dwf,true);
@@ -1690,8 +1700,7 @@ void BOSampleStepper::step(int niter)
 
     ef_.update_vhxc();
     const bool compute_forces = true;
-    double energy =
-        ef_.energy(false,dwf,compute_forces,fion,compute_stress,sigma_eks);
+    double energy = ef_.energy(s_.wf, false,dwf,compute_forces,fion,compute_stress,sigma_eks);
 
     // average forces over symmetric atoms
     if ( compute_forces && s_.symmetries.nsym() > 0) {
@@ -1806,8 +1815,7 @@ void BOSampleStepper::step(int niter)
 
     ef_.update_vhxc();
     const bool compute_forces = true;
-    double energy =
-        ef_.energy(false,dwf,compute_forces,fion,compute_stress,sigma_eks);
+    double energy = ef_.energy(s_.wf, false,dwf,compute_forces,fion,compute_stress,sigma_eks);
 
     // average forces over symmetric atoms
     if ( compute_forces && s_.symmetries.nsym() > 0) {
@@ -1903,11 +1911,10 @@ void BOSampleStepper::get_forces(vector<vector<double> >& f) const {
       f[is+offset].resize(3*atoms.atom_list[is].size());
     int i = 0;
     for ( int ia = 0; ia < atoms.mmatom_list[is].size(); ia++ ) {
-      D3vector t = atoms.mmatom_list[is][ia]->position();
-      f[is+offset][i] = fion[is+offset][i];
-      f[is+offset][i+1] = fion[is+offset][i+1];
-      f[is+offset][i+2] = fion[is+offset][i+2];
-      i+=3;
+      f[is + offset][i    ] = fion[is + offset][i    ];
+      f[is + offset][i + 1] = fion[is + offset][i + 1];
+      f[is + offset][i + 2] = fion[is + offset][i + 2];
+      i += 3;
     }
   }
 }

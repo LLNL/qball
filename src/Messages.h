@@ -1,11 +1,11 @@
 ////////////////////////////////////////////////////////////////////////////////  
-// Copyright (c) 2013, Lawrence Livermore National Security, LLC. 
+// Copyright (c) 2016, Lawrence Livermore National Security, LLC. 
 // qb@ll:  Qbox at Lawrence Livermore
 //
 // This file is part of qb@ll.
 //
 // Produced at the Lawrence Livermore National Laboratory. 
-// Written by Erik Draeger (draeger1@llnl.gov) and Francois Gygi (fgygi@ucdavis.edu).
+// Written by Xavier Andrade <xavier@llnl.gov>
 // Based on the Qbox code by Francois Gygi Copyright (c) 2008 
 // LLNL-CODE-635376. All rights reserved. 
 //
@@ -22,48 +22,36 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Preconditioner.h
+// Messages.h
 //
 ////////////////////////////////////////////////////////////////////////////////
 
 #include <config.h>
 
-#ifndef PRECONDITIONER_H
-#define PRECONDITIONER_H
+#ifndef MESSAGES_H
+#define MESSAGES_H
 
-class Sample;
-class EnergyFunctional;
-class Wavefunction;
-
-#include <vector>
-#include <valarray>
-#include "SlaterDet.h"
+#include "D3vector.h"
+#include <string>
 using namespace std;
 
-class Preconditioner
+class Messages
 {
-  private:
-  
-  const Sample& s_;
-  const EnergyFunctional& ef_;
-  const Wavefunction& wf_;
-  vector<vector<valarray<double> > > diag_; // diag_[ispin][ikp][ig]
 
   public:
-
-  void update(void);
   
-  const valarray<double>& diag(int ispin, int ikp) const
-  { return diag_[ispin][ikp]; }
-
-  Preconditioner(const Sample& s, const Wavefunction& wf, const EnergyFunctional& ef);
-
-  void apply(SlaterDet & sd, int ispin, int ikp, double scale = 1.0);
+  static void fatal(const string & info){
+    cerr << endl;
+    cerr << "**********************************************************************************" << endl;
+    cerr << endl;
+    cerr << "    Error: " << info << "." << endl;
+    cerr << endl;
+    cerr << "**********************************************************************************" << endl;
+    cerr << endl;
+    exit(1);
+  }
   
-  //~Preconditioner();
 };
+
 #endif
 
-// Local Variables:
-// mode: c++
-// End:

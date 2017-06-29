@@ -141,7 +141,7 @@ EnergyFunctional::EnergyFunctional(const Sample& s, const Wavefunction& wf, Char
   for ( int ispin = 0; ispin < wf_.nspin(); ispin++ )
     if (wf_.spinactive(ispin)) 
       for (int kloc=0; kloc<wf_.nkptloc(); kloc++) 
-         nlp[ispin][kloc] = new NonLocalPotential((AtomSet&)s_.atoms, *wf_.sdloc(ispin,kloc),compute_stress);
+	nlp[ispin][kloc] = new NonLocalPotential((AtomSet&)s_.atoms, wf_.sdloc(ispin, kloc)->context(), wf_.sdloc(ispin, kloc)->basis(), compute_stress);
 
   if (s_.ctrl.extra_memory >= 5) // use extra memory in large, huge mode
     for ( int ispin = 0; ispin < wf_.nspin(); ispin++ )
@@ -1061,14 +1061,14 @@ void EnergyFunctional::update_exc_ehart_eps(void)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-double EnergyFunctional::energy(bool compute_hpsi, Wavefunction& dwf,
+double EnergyFunctional::energy(Wavefunction& psi, bool compute_hpsi, Wavefunction& dwf,
               bool compute_forces, vector<vector<double> >& fion,
                                 bool compute_stress, valarray<double>& sigma) {
   const bool debug_stress = compute_stress && 
     s_.ctrl.debug.find("STRESS") != string::npos;
   const double fpi = 4.0 * M_PI;
 
-  const UnitCell& cell(wf_.cell());
+  const UnitCell& cell(psi.cell());
   const double omega = cell.volume();
   const double omega_inv = 1.0 / omega;
   const int ngloc = vbasis_->localsize();
@@ -1101,14 +1101,14 @@ double EnergyFunctional::energy(bool compute_hpsi, Wavefunction& dwf,
   sigma_ekin = 0.0;
   sigma_econf = 0.0;
   valarray<double> sum(0.0,14), tsum(0.0,14);
-  for ( int ispin = 0; ispin < wf_.nspin(); ispin++ ) {
-     if (wf_.spinactive(ispin)) {
-        for ( int ikp=0; ikp<wf_.nkp(); ikp++) {
-           if (wf_.kptactive(ikp)) {
-              assert(wf_.sd(ispin,ikp) != 0);
-              const double weight = wf_.weight(ikp);
-              const SlaterDet& sd = *(wf_.sd(ispin,ikp));
-              const Basis& wfbasis = wf_.sd(ispin,ikp)->basis();
+  for ( int ispin = 0; ispin < psi.nspin(); ispin++ ) {
+     if (psi.spinactive(ispin)) {
+        for ( int ikp=0; ikp<psi.nkp(); ikp++) {
+           if (psi.kptactive(ikp)) {
+              assert(psi.sd(ispin,ikp) != 0);
+              const double weight = psi.weight(ikp);
+              const SlaterDet& sd = *(psi.sd(ispin,ikp));
+              const Basis& wfbasis = psi.sd(ispin,ikp)->basis();
 
               // factor fac in next lines: 2.0 for G and -G (if basis is real) and
               // 0.5 from 1/(2m)
@@ -1207,11 +1207,11 @@ double EnergyFunctional::energy(bool compute_hpsi, Wavefunction& dwf,
         }
      }
   }
-  assert(wf_.weightsum() > 0.0);
-  sum /= wf_.weightsum();
+  assert(psi.weightsum() > 0.0);
+  sum /= psi.weightsum();
 
   // sum contains the contributions to ekin, etc.. from this task
-  wf_.wfcontext()->dsum(14,1,&sum[0],14);
+  psi.wfcontext()->dsum(14,1,&sum[0],14);
  
   ekin_  = sum[0];
   econf_ = sum[7];
@@ -1239,7 +1239,7 @@ double EnergyFunctional::energy(bool compute_hpsi, Wavefunction& dwf,
       valarray<double> sigma_ekin_xtal(6);
       valarray<double> sigma_ekin_xtal_sym(6);
       // convert sigma to crystal coordinates to match symmetry operators
-      wf_.cell().cart_to_crystal(&sigma_ekin[0],&sigma_ekin_xtal[0]);
+      psi.cell().cart_to_crystal(&sigma_ekin[0],&sigma_ekin_xtal[0]);
 
       // symmetrize sigma_ekin_xtal
       valarray<double> sigma_sum(6);
@@ -1255,11 +1255,11 @@ double EnergyFunctional::energy(bool compute_hpsi, Wavefunction& dwf,
         sigma_sum[i] *= nsyminv;
     
       // convert sigma back to Cartesian coordinates
-      wf_.cell().crystal_to_cart(&sigma_sum[0],&sigma_ekin[0]);
+      psi.cell().crystal_to_cart(&sigma_sum[0],&sigma_ekin[0]);
 
       valarray<double> sigma_econf_xtal(6);
       valarray<double> sigma_econf_xtal_sym(6);
-      wf_.cell().cart_to_crystal(&sigma_econf[0],&sigma_econf_xtal[0]);
+      psi.cell().cart_to_crystal(&sigma_econf[0],&sigma_econf_xtal[0]);
       // symmetrize sigma_econf_xtal
       for (int i=0; i<6; i++)
         sigma_sum[i] = sigma_econf_xtal[i];  // identity operation
@@ -1272,7 +1272,7 @@ double EnergyFunctional::energy(bool compute_hpsi, Wavefunction& dwf,
         sigma_sum[i] *= nsyminv;
     
       // convert sigma back to Cartesian coordinates
-      wf_.cell().crystal_to_cart(&sigma_sum[0],&sigma_econf[0]);
+      psi.cell().crystal_to_cart(&sigma_sum[0],&sigma_econf[0]);
     }
   }  
 
@@ -1405,10 +1405,9 @@ double EnergyFunctional::energy(bool compute_hpsi, Wavefunction& dwf,
     for (int i=0; i<6; i++) 
       sigma_enl[i] = 0.0;
 
-  for ( int ispin = 0; ispin < wf_.nspin(); ispin++ ) {
-    if (wf_.spinactive(ispin)) {
-      for (int kloc=0; kloc<wf_.nkptloc(); kloc++) {
-
+  for ( int ispin = 0; ispin < psi.nspin(); ispin++ ) {
+    if (psi.spinactive(ispin)) {
+      for (int kloc=0; kloc<psi.nkptloc(); kloc++) {
         //ewd DEBUG:  calculate v_r*rhor to compare against PWSCF deband
         //double deband = 0.0;
         //for (int i=0; i<vft->np012loc(); i++)
@@ -1418,7 +1417,7 @@ double EnergyFunctional::energy(bool compute_hpsi, Wavefunction& dwf,
         //cout << "EF.DEBAND deband = " << deband << "    , fac = " << fac << endl;
 
         double wt = dwf.weight(dwf.kptloc(kloc));
-        enlsum[0] += wt*nlp[ispin][kloc]->energy(compute_hpsi,*dwf.sdloc(ispin,kloc),
+        enlsum[0] += wt*nlp[ispin][kloc]->energy(*psi.sdloc(ispin, kloc), compute_hpsi,*dwf.sdloc(ispin,kloc),
                                               compute_forces, fion_nl, compute_stress,
                                               tsigma_enl,veff_g[ispin]);
         enlsum[1] += wt;
@@ -1439,7 +1438,7 @@ double EnergyFunctional::energy(bool compute_hpsi, Wavefunction& dwf,
   }
   dwf.wfcontext()->dsum('r',2,1,&enlsum[0],2);     // weighted average over all kpoints
   assert(enlsum[1] != 0.0);
-  if (wf_.nspin() == 2)
+  if (psi.nspin() == 2)
     enlsum[1] *= 0.5;
   enl_ = enlsum[0]/enlsum[1];
 
@@ -1468,7 +1467,7 @@ double EnergyFunctional::energy(bool compute_hpsi, Wavefunction& dwf,
       valarray<double> sigma_enl_xtal(6);
       valarray<double> sigma_enl_xtal_sym(6);
       // convert sigma to crystal coordinates to match symmetry operators
-      wf_.cell().cart_to_crystal(&sigma_enl[0],&sigma_enl_xtal[0]);
+      psi.cell().cart_to_crystal(&sigma_enl[0],&sigma_enl_xtal[0]);
 
       // symmetrize sigma_enl_xtal
       valarray<double> sigma_sum(6);
@@ -1484,7 +1483,7 @@ double EnergyFunctional::energy(bool compute_hpsi, Wavefunction& dwf,
         sigma_sum[i] *= nsyminv;
 
       // convert sigma back to Cartesian coordinates
-      wf_.cell().crystal_to_cart(&sigma_sum[0],&sigma_enl[0]);
+      psi.cell().crystal_to_cart(&sigma_sum[0],&sigma_enl[0]);
     }
   }
   tmap["nonlocal"].stop();
@@ -1500,9 +1499,9 @@ double EnergyFunctional::energy(bool compute_hpsi, Wavefunction& dwf,
     /*
     double ehubsum[2] = {0.0, 0.0};
 
-    for ( int ispin = 0; ispin < wf_.nspin(); ispin++ ) {
-      if (wf_.spinactive(ispin)) {
-        for (int kloc=0; kloc<wf_.nkptloc(); kloc++) {
+    for ( int ispin = 0; ispin < psi.nspin(); ispin++ ) {
+      if (psi.spinactive(ispin)) {
+        for (int kloc=0; kloc<psi.nkptloc(); kloc++) {
           double wt = dwf.weight(dwf.kptloc(kloc));
           ehubsum[0] += wt*hubp[ispin][kloc]->energy(compute_hpsi,*dwf.sdloc(ispin,kloc),ispin,dwf.kpoint(dwf.kptloc(kloc)));
           ehubsum[1] += wt;
@@ -1511,7 +1510,7 @@ double EnergyFunctional::energy(bool compute_hpsi, Wavefunction& dwf,
     }
     dwf.wfcontext()->dsum('r',2,1,&ehubsum[0],2);     // weighted average over all kpoints
     assert(ehubsum[1] != 0.0);
-    if (wf_.nspin() == 2)
+    if (psi.nspin() == 2)
       ehubsum[1] *= 0.5;
     ehub_ = ehubsum[0]/ehubsum[1];
     */
@@ -1522,11 +1521,11 @@ double EnergyFunctional::energy(bool compute_hpsi, Wavefunction& dwf,
 
   ets_ = 0.0;
   if ( s_.ctrl.smearing_width > 0.0 ) {
-    const double wf_entropy = wf_.entropy();
+    const double psientropy = psi.entropy();
     // used when smearing was in Kelvin
     //const double boltz = 1.0 / ( 11605.0 * 2.0 * 13.6058 );
     const double boltz = 0.5; // convert from Ry to Ha
-    ets_ = - wf_entropy * s_.ctrl.smearing_width * boltz;
+    ets_ = - psientropy * s_.ctrl.smearing_width * boltz;
   }
   etotal_ = ekin_ + econf_ + eps_ + enl_ + ecoul_ + exc_ + ets_ + epv_ + ehub_;
 
@@ -1559,13 +1558,13 @@ double EnergyFunctional::energy(bool compute_hpsi, Wavefunction& dwf,
   
   if ( compute_hpsi ) {
     tmap["hpsi"].start();
-    //assert(wf_.nspin()==1);
-    for ( int ispin = 0; ispin < wf_.nspin(); ispin++ ) {
-      if (wf_.spinactive(ispin)) {
-        for ( int ikp=0; ikp<wf_.nkp(); ikp++) {
-          if (wf_.kptactive(ikp)) {
-            assert(wf_.sd(ispin,ikp) != 0);
-            const SlaterDet& sd = *(wf_.sd(ispin,ikp));
+    //assert(psi.nspin()==1);
+    for ( int ispin = 0; ispin < psi.nspin(); ispin++ ) {
+      if (psi.spinactive(ispin)) {
+        for ( int ikp=0; ikp<psi.nkp(); ikp++) {
+          if (psi.kptactive(ikp)) {
+            assert(psi.sd(ispin,ikp) != 0);
+            const SlaterDet& sd = *(psi.sd(ispin,ikp));
             SlaterDet& sdp = *(dwf.sd(ispin,ikp));
             const ComplexMatrix& c = sd.c();
             const Basis& wfbasis = sd.basis();
@@ -1643,9 +1642,9 @@ double EnergyFunctional::energy(bool compute_hpsi, Wavefunction& dwf,
        if (s->nlcc())
        {
           cd_.nlcc_forceden(is,trhog);
-          const double spinfac = 1./(double)wf_.nspin();
+          const double spinfac = 1./(double)psi.nspin();
           for ( int ig = 0; ig < ngloc; ig++ )
-             for ( int ispin = 0; ispin < wf_.nspin(); ispin++ )
+             for ( int ispin = 0; ispin < psi.nspin(); ispin++ )
                 vtemp[ig] += spinfac*omega_inv*trhog[ig]*conj(vxc_g[ispin][ig]);
        }
        
@@ -1890,7 +1889,7 @@ void EnergyFunctional::atoms_moved(void)
     for ( int ispin = 0; ispin < wf_.nspin(); ispin++ ) 
       if (wf_.spinactive(ispin)) 
         for (int k=0; k<nlp[ispin].size(); k++)
-          nlp[ispin][k]->update_usfns(vbasis_);
+          nlp[ispin][k]->update_usfns(*wf_.sdloc(ispin, k), vbasis_);
 
 }
 
@@ -1932,7 +1931,7 @@ void EnergyFunctional::cell_moved(const bool compute_stress) {
       for (int k=0; k<nlp[ispin].size(); k++) {
         nlp[ispin][k]->update_twnl(compute_stress);
         if (s_.ctrl.ultrasoft)
-          nlp[ispin][k]->update_usfns(vbasis_);
+          nlp[ispin][k]->update_usfns(*wf_.sdloc(ispin, k), vbasis_);
       }
   
   // update Hubbard potential
