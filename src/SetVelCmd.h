@@ -61,18 +61,34 @@ class SetVelCmd : public Cmd {
 
   int action(int argc, char **argv) {
     string name;
-    // atom must be defined with only one or two arguments
-    if ( argc != 5) {
-      if ( ui->oncoutpe() )
-        cout << "<!-- use: set_velocity [atom name] [vx] [vy] [vz] -->" << endl;
+
+    string vel_unit_name = "atomicvelocity";
+ 
+    if ( argc != 5 && argc != 6) {
+      ui->error("<!-- use: set_velocity [atom name] [vx] [vy] [vz] [units] -->");
       return 1;
     }
-  
+
+    if (argc == 5) {
+      ui->warning("Units missing for the set_velocity command, assuming 'atomicvelocity'.");
+    } else {
+      vel_unit_name = string(argv[5]);
+    }
+    
+    Unit vel_unit(Dimensions::velocity, vel_unit_name);
+    
+    if(!vel_unit.exists()) {
+      ui->error("Unknown energy unit '" + vel_unit_name + "'.");
+      return 1;
+    }
+    
     name = argv[1];
     double vx = atof(argv[2]);
     double vy = atof(argv[3]);
     double vz = atof(argv[4]);
     D3vector newvel(vx,vy,vz);
+
+    newvel = vel_unit.to_atomic(newvel);
     
     if (s->atoms.findAtom(name) ) {
       Atom *a = s->atoms.findAtom(name);
