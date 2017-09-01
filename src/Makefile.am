@@ -128,6 +128,7 @@ noinst_HEADERS =                            \
 	jade.h                              \
 	JDWavefunctionStepper.h             \
 	KpointCmd.h                         \
+        LIBXCFunctional.h                   \
 	LDAFunctional.h                     \
 	LineMinimizer.h                     \
 	ListAtomsCmd.h                      \
@@ -298,6 +299,7 @@ libqbLink_a_SOURCES =                       \
 	SpeciesHandler.C                    \
 	XCPotential.C                       \
 	LDAFunctional.C                     \
+        LIBXCFunctional.C                   \
 	PBEFunctional.C                     \
 	PBESolFunctional.C                  \
 	PBERevFunctional.C                  \

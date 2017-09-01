@@ -771,14 +771,14 @@ int SaveCmd::action(int argc, char **argv) {
         // write density data to file
         int cnt = 0;
         for (int ii = 0; ii < np0; ii++) {
-	  const ip = (ii + np0/2) % np0;
+	  const int ip = (ii + np0/2) % np0;
           ostringstream oss;
           oss.setf(ios::scientific,ios::floatfield);
           oss << setprecision(5);
           for (int jj = 0; jj < np1; jj++) {
-	    const jp = (jj + np1/2) % np1;
+	    const int jp = (jj + np1/2) % np1;
             for (int kk = 0; kk < np2; kk++) {
-	      const kp = (kk + np2/2) % np2;
+	      const int kp = (kk + np2/2) % np2;
               int index = ip + jp*np0 + kp*np0*np1;
               oss << tmprecv[index] << " ";
               cnt++;
