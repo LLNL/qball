@@ -16,6 +16,12 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 // $Id: LIBXCFunctional.h,v Yi Yao $
+// 
+// usage: 
+// LDA: set xc LDA_X LDA_C_PZ_MOD
+// PBE: set xc GGA_X_PBE:1.0 GGA_C_PBE:1.0
+// BLYP: set xc GGA_X_B88:1.0 GGA_C_LYP:1.0
+// PBESOL: set xc GGA_X_PBE_SOL:1.0 GGA_C_PBE_SOL:1.0
 
 #include <config.h>
 

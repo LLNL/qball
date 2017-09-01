@@ -175,7 +175,7 @@ void PBESolFunctional::excpbe(double rho, double grad, double *exc, double *vxc1
   const double third  = 1.0 / 3.0;
   const double third4 = 4.0 / 3.0;
   const double ax = -0.7385587663820224058; /* -0.75*pow(3.0/pi,third) */
-  const double um = 11. / 81.; /* see [c] */
+  const double um = 10. / 81.; /* see [c] */
   const double uk = 0.804;
   const double ul = um / uk;
   const double pi32third = 3.09366772628014; /* (3*pi^2 ) ^(1/3) */
@@ -293,7 +293,7 @@ void PBESolFunctional::excpbe_sp(double rho_up, double rho_dn,
   const double third4 =  4.0 / 3.0;
   const double sixthm = -1.0 / 6.0;
   const double ax = -0.7385587663820224058; /* -0.75*pow(3.0/pi,third) */
-  const double um = 11. / 81.; /* see [c] */
+  const double um = 10. / 81.; /* see [c] */
   const double uk = 0.804;
   const double ul = um / uk;
   const double pi32third = 3.09366772628014; /* (3*pi^2 ) ^(1/3) */
