@@ -623,7 +623,7 @@ void EhrenSampleStepper::step(int niter)
     // AS: code taken from Wavefunction::diag(Wavefunction& dwf, bool eigvec)
     if ( s_.ctrl.wf_diag == "EIGVAL" )
     {
-       if ( oncoutpe ) cout << "<" << wf_dyn << " expectation set>" << endl;
+       if ( oncoutpe ) cout << "<" << wf_dyn << "_expectation_set>" << endl;
 
        // AS: this is the new version, not copying code, but copying the wave function instead
        Wavefunction* to_diag_wf1 = new Wavefunction(s_.wf);
@@ -640,7 +640,7 @@ void EhrenSampleStepper::step(int niter)
              {
                 const int nst = (*to_diag_wf1).sd(ispin,ikp)->nst();
                 const double eVolt = 2.0 * 13.6058;
-                cout <<    "  <" << wf_dyn << " expectation values spin=\"" << ispin
+                cout <<    "  <" << wf_dyn << "_expectation_values spin=\"" << ispin
                      << "\" kpoint=\"" << s_.wf.sd(ispin,ikp)->kpoint()
                      << "\" n=\"" << nst << "\">" << endl;
                 cout << "  ";
@@ -651,12 +651,12 @@ void EhrenSampleStepper::step(int niter)
                    if ( i%5 == 4 ) cout << endl;
                 }
                 if ( nst%5 != 0 ) cout << endl;
-                cout << "  </" << wf_dyn << " expectation values>" << endl;
+                cout << "  </" << wf_dyn << "_expectation_values>" << endl;
              }
           }
        }
 
-       if ( oncoutpe ) cout << "</" << wf_dyn << " expectation set>" << endl;
+       if ( oncoutpe ) cout << "</" << wf_dyn << "_expectation_set>" << endl;
        delete(to_diag_wf1);
     }
              
