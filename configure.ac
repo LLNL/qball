@@ -221,6 +221,8 @@ AC_MSG_NOTICE([
   CONFIGURATION DONE, GENERATING MAKEFILES
 ================================================================================])
 AC_CONFIG_FILES([Makefile
+                 external_libs/Makefile
+		 external_libs/dftd3/Makefile
                  src/Makefile
                  testsuite/Makefile])
 
