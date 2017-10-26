@@ -1496,7 +1496,7 @@ void EhrenSampleStepper::step(int niter)
      }
   }
       
-  ionic_stepper->compute_v(energy,fion);
+  if(ionic_stepper) ionic_stepper->compute_v(energy, fion);
   // positions r0 and velocities v0 are consistent
 
   if (wf_dyn != "SOTD")
@@ -1512,7 +1512,7 @@ void EhrenSampleStepper::step(int niter)
 
   // delete steppers
   delete wf_stepper;
-  delete ionic_stepper;
+  if(ionic_stepper) delete ionic_stepper;
   delete cell_stepper;
 
 }
