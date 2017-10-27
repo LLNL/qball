@@ -1,8 +1,10 @@
 #-------------------------------------------------------------------------------
 # $Id: Makefile,v 1.46 2010/08/26 17:44:16 draeger1 Exp $
 #------------------------------------------------------------------------------
-#
-# Get name of architecture-specific include file from hostname
+
+external_LIBS = \
+	$(top_builddir)/external_libs/dftd3/libdftd3.a
+
 
 bin_PROGRAMS  =                             \
 	qball                               \
@@ -373,13 +375,15 @@ qball_SOURCES =                             \
 	qb.C
 
 qball_LDADD =                               \
-	libqbLink.a
+	libqbLink.a                         \
+	$(external_LIBS)
 
 qball_nruns_SOURCES =                       \
 	qb-nruns.C
 
 qball_nruns_LDADD =                         \
-	libqbLink.a
+	libqbLink.a                         \
+	$(external_LIBS)
 
 qball_setupkpts_SOURCES =                   \
 	qb-setupkpts.C                      \
@@ -387,7 +391,8 @@ qball_setupkpts_SOURCES =                   \
 	SymOp.C
 
 qball_setupkpts_LDADD =                     \
-	libqbLink.a
+	libqbLink.a                         \
+	$(external_LIBS)
 
 qballdiff_SOURCES =                         \
 	qbdiff.C
