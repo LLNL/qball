@@ -116,6 +116,7 @@ class EnergyFunctional
   double ehart(void) const { return ehart_; }
   double ecoul(void) const { return ecoul_; }
   double exc(void) const { return exc_; }
+  double evdw(void) const { return evdw_; }
   double esr(void) const { return esr_; }
   double eself(void) const { return eself_; }
   double ets(void) const { return ets_; }

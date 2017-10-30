@@ -2027,6 +2027,7 @@ void EnergyFunctional::print(ostream& os) const
      << "  <enl>    " << setw(15) << enl() << " </enl>\n"
      << "  <ecoul>  " << setw(15) << ecoul() << " </ecoul>\n"
      << "  <exc>    " << setw(15) << exc() << " </exc>\n"
+     << "  <evdw>   " << setw(15) << evdw() << " </evdw>\n"
      << "  <esr>    " << setw(15) << esr() << " </esr>\n"
      << "  <eself>  " << setw(15) << eself() << " </eself>\n"
      << "  <ets>    " << setw(15) << ets() << " </ets>\n";
