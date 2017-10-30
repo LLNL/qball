@@ -164,6 +164,8 @@ using namespace std;
 #include "FcpThWidth.h"
 #include "FcpPmass.h"
 #include "FcpMu.h"
+#include "VdW.h"
+
 #ifdef HAVE_BGQLIBS
 #include <spi/include/kernel/process.h>
 #include <spi/include/kernel/location.h>
@@ -415,6 +417,7 @@ int main(int argc, char **argv, char **envp)
   ui->addVar(new FcpThWidth(s));
   ui->addVar(new FcpPmass(s));
   ui->addVar(new FcpMu(s));
+  ui->addVar(new VdW(s));
   
 #ifdef USE_JAGGEMM
   setup_grid();
