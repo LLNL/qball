@@ -76,6 +76,7 @@ noinst_HEADERS =                            \
 	CoordinateConstraint.h              \
 	CPSampleStepper.h                   \
 	CurrentDensity.h                    \
+	dftd3.h                             \
 	D3vector.h                          \
 	Debug.h                             \
 	Dimensions.h                        \
@@ -253,6 +254,7 @@ noinst_HEADERS =                            \
 	UnlockCmd.h                         \
 	UserInterface.h                     \
 	uuid_str.h                          \
+	VdW.h                               \
 	Wavefunction.h                      \
 	WavefunctionHandler.h               \
 	WavefunctionStepper.h               \
