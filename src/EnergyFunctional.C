@@ -40,6 +40,7 @@
 #include "ConfinementPotential.h"
 #include "EnthalpyFunctional.h"
 #include "HubbardPotential.h"
+#include "dftd3.h"
 
 #include "Timer.h"
 #include "blas.h"
@@ -238,11 +239,16 @@ EnergyFunctional::EnergyFunctional(const Sample& s, const Wavefunction& wf, Char
     epvf = new EnthalpyFunctional(cd_,s_.ctrl.enthalpy_pressure,s_.ctrl.enthalpy_threshold);
 
   eharris_ = 0.0;
+
+  if(s_.ctrl.vdw == "D3") dftd3_init();
   
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 EnergyFunctional::~EnergyFunctional(void) {
+
+  if(s_.ctrl.vdw == "D3") dftd3_end();
+  
   delete xcp;
   for ( int ispin = 0; ispin < wf_.nspin(); ispin++ )
     if (wf_.spinactive(ispin)) {
@@ -910,6 +916,27 @@ void EnergyFunctional::update_vhxc(void) {
         v_r[1][i] += vloc;
      }
   }
+
+
+  // The vdW part
+  evdw_ = 0.0;  
+  if(s_.ctrl.vdw == "D3") {
+    vector<double> coords;
+    vector<int> species;
+    vector<double> lattice_vectors;
+    
+    s_.atoms.get_positions(coords);
+    s_.atoms.get_atomic_numbers(species);
+
+    const int natoms = species.size();
+
+    vector<double> force(3*natoms);
+    vector<double> stress(9);
+
+    dftd3_pbc_dispersion(&natoms, coords.data(), species.data(), s_.atoms.cell().amat(), &evdw_, force.data(), stress.data());
+
+  }
+  
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -90,6 +90,7 @@ class EnergyFunctional
   double ekin_, econf_, eps_, enl_, ehub_, ehart_, 
       ecoul_, exc_, esr_, eself_, ets_, epv_, eexf_, etotal_;
   double eharris_;  // terms for Harris-Foulkes estimate for convergence detection
+  double evdw_; //van der Waals energy
   
   valarray<double> sigma_ekin,sigma_econf,sigma_eps,sigma_ehart,sigma_exc,
     sigma_enl, sigma_esr, sigma;
