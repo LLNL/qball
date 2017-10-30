@@ -540,6 +540,20 @@ void AtomSet::get_positions(vector<vector<double> >& tau, bool qmonly) const {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+void AtomSet::get_positions(vector<double> & coords) const {
+  coords.clear();
+  for ( int is = 0; is < atom_list.size(); is++ ) {
+    for ( int ia = 0; ia < atom_list[is].size(); ia++ ) {
+      D3vector pos = atom_list[is][ia]->position();
+      coords.push_back(pos.x);
+      coords.push_back(pos.y);
+      coords.push_back(pos.z);
+    }
+  }
+
+}
+
+////////////////////////////////////////////////////////////////////////////////
 void AtomSet::set_positions(const vector<vector<double> >& tau, bool cellrescale) {
 
   assert(tau.size() == atom_list.size() || tau.size() == atom_list.size() + mmatom_list.size());
@@ -567,20 +581,6 @@ void AtomSet::set_positions(const vector<vector<double> >& tau, bool cellrescale
       }
     }
   }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-void AtomSet::get_positions(vector<vector<double> >& tau) const
-{
-  // default value of qmonly = false
-  get_positions(tau,false);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-void AtomSet::set_positions(const vector<vector<double> >& tau)
-{
-  // default value of cellrescale = false
-  set_positions(tau,false);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -646,13 +646,6 @@ void AtomSet::set_velocities(const vector<vector<double> >& vel) {
       }
     }
   }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-void AtomSet::get_velocities(vector<vector<double> >& vel) const
-{
-  // default value of qmonly = false
-  get_velocities(vel,false);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
