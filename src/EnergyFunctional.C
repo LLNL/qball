@@ -241,7 +241,27 @@ EnergyFunctional::EnergyFunctional(const Sample& s, const Wavefunction& wf, Char
 
   eharris_ = 0.0;
 
-  if(s_.ctrl.vdw == "D3") dftd3_init();
+  if(s_.ctrl.vdw == "D3") {
+    
+    int functional;
+    if(s_.ctrl.xc == "LDA") {
+      cerr << "The DFT-D3 has not been parametrized for LDA functional. Please select a different XC functional, or turn off the DFT-D3 correction" << endl;
+      exit(1);
+    } else if (s_.ctrl.xc == "PBE") {
+      functional = dftd3_functional::PBE;
+    } else if (s_.ctrl.xc == "PBEsol") {
+      functional = dftd3_functional::PBEsol;
+    } else if (s_.ctrl.xc == "PBErev") {
+      functional = dftd3_functional::PBErev;
+    } else if (s_.ctrl.xc == "BLYP") {
+      functional = dftd3_functional::BLYP;
+    } else {
+      cerr << "Unknown DFT-D3 parametrization for the XC functional '"<< s_.ctrl.xc << "'."<< endl;
+      exit(1);
+    }
+
+    dftd3_init(&functional);
+  }
   
 }
 

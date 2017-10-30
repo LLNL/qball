@@ -29,10 +29,18 @@
 #define dftd3_init FC_FUNC_(f90_dftd3_init, F90_DFTD3_INIT) 
 #define dftd3_end FC_FUNC_(f90_dftd3_end, F90_DFTD3_END)
 #define dftd3_pbc_dispersion FC_FUNC_(f90_dftd3_pbc_dispersion, F90_DFTD3_PBC_DISPERSION) 
-  
+
+namespace dftd3_functional {
+  // These values must match with the ones defined in external_libs/dftd3/interface.h
+  const int PBE    = 1;
+  const int PBEsol = 2;
+  const int PBErev = 3;
+  const int BLYP   = 4;
+}
+
 extern "C" {
   
-  void dftd3_init();
+  void dftd3_init(const int * functional);
   void dftd3_end();
   void dftd3_pbc_dispersion(const int * natoms, const double * coords, const int * izp, const double * latvecs, double * disp, double * grads, double * stress);
 

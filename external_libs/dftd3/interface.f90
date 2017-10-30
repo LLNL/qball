@@ -23,21 +23,41 @@ module dftd3_data
   
   implicit none
 
+  ! These values must match the ones in src/dftd3.h
+  integer, parameter :: PBE    = 1;
+  integer, parameter :: PBEsol = 2;
+  integer, parameter :: PBErev = 3;
+  integer, parameter :: BLYP   = 4;
+  
   type(dftd3_calc) :: calc
   
 end module dftd3_data
 
 ! ---------------------------------------
 
-subroutine f90_dftd3_init()
+subroutine f90_dftd3_init(func_id)
   use dftd3_data
 
   implicit none
 
+  integer, intent(in) :: func_id
+  
   type(dftd3_input) :: input
+  character(len=20) :: func
+
+  select case(func_id)
+  case(PBE)
+    func = 'pbe'
+  case(PBEsol)
+    func = 'pbesol'
+  case(PBErev)
+    func = 'revpbe'
+  case(BLYP)
+    func = 'b_lyp'
+  end select
   
   call dftd3_init(calc, input)
-  call dftd3_set_functional(calc, func = 'pbe', version = 4, tz = .false.)
+  call dftd3_set_functional(calc, func = func, version = 4, tz = .false.)
   
 end subroutine f90_dftd3_init
 
