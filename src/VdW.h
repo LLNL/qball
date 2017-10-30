@@ -76,7 +76,7 @@ class VdW : public Var
      return st.str();
   }
 
-  VdW(Sample *sample) : s(sample) { s->ctrl.vdw = "OFF"; };
+  VdW(Sample *sample) : s(sample) { s->ctrl.vdw = "NONE"; };
   
 };
 
