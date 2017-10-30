@@ -503,6 +503,17 @@ bool AtomSet::reset(void)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+void AtomSet::get_atomic_numbers(vector<int> & numbers) const {
+  numbers.clear();
+  for ( int is = 0; is < atom_list.size(); is++ ) {
+    for ( int ia = 0; ia < atom_list[is].size(); ia++ ) {
+      numbers.push_back(atomic_number(is));
+    }
+  }
+  
+}
+
+////////////////////////////////////////////////////////////////////////////////
 void AtomSet::get_positions(vector<vector<double> >& tau, bool qmonly) const {
   if (tau.size() < atom_list.size()) 
     tau.resize(atom_list.size());
@@ -647,6 +658,7 @@ void AtomSet::set_velocities(const vector<vector<double> >& vel) {
     }
   }
 }
+
 
 ////////////////////////////////////////////////////////////////////////////////
 void AtomSet::get_fion_ext(vector<vector<double> >& fion_ext) const {

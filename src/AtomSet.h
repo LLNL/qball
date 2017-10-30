@@ -113,6 +113,7 @@ class AtomSet
   double mass(int isp);
   double mass_mm(int isp);
   int atomic_number(int isp) const;
+  void get_atomic_numbers(vector<int> & atomic_numbers) const;
 
   void get_positions(vector<vector<double> >& tau, bool qmonly = false) const;
   void get_positions(vector<double> & coords) const; // returns the coordinates in a linear array
