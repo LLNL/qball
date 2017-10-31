@@ -90,8 +90,11 @@ class EnergyFunctional
   double ekin_, econf_, eps_, enl_, ehub_, ehart_, 
       ecoul_, exc_, esr_, eself_, ets_, epv_, eexf_, etotal_;
   double eharris_;  // terms for Harris-Foulkes estimate for convergence detection
+  double evdw_; //van der Waals energy
+
+  vector<double> fion_vdw_;
   
-  valarray<double> sigma_ekin,sigma_econf,sigma_eps,sigma_ehart,sigma_exc,
+  valarray<double> sigma_ekin,sigma_econf,sigma_eps,sigma_ehart,sigma_exc, sigma_vdw,
     sigma_enl, sigma_esr, sigma;
 
   public:
@@ -115,6 +118,7 @@ class EnergyFunctional
   double ehart(void) const { return ehart_; }
   double ecoul(void) const { return ecoul_; }
   double exc(void) const { return exc_; }
+  double evdw(void) const { return evdw_; }
   double esr(void) const { return esr_; }
   double eself(void) const { return eself_; }
   double ets(void) const { return ets_; }

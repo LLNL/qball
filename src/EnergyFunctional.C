@@ -40,6 +40,7 @@
 #include "ConfinementPotential.h"
 #include "EnthalpyFunctional.h"
 #include "HubbardPotential.h"
+#include "dftd3.h"
 
 #include "Timer.h"
 #include "blas.h"
@@ -61,6 +62,7 @@ EnergyFunctional::EnergyFunctional(const Sample& s, const Wavefunction& wf, Char
   sigma_eps.resize(6);
   sigma_ehart.resize(6);
   sigma_exc.resize(6);
+  sigma_vdw.resize(6);
   sigma_enl.resize(6);
   sigma_esr.resize(6);
   sigma.resize(6);
@@ -238,11 +240,36 @@ EnergyFunctional::EnergyFunctional(const Sample& s, const Wavefunction& wf, Char
     epvf = new EnthalpyFunctional(cd_,s_.ctrl.enthalpy_pressure,s_.ctrl.enthalpy_threshold);
 
   eharris_ = 0.0;
+
+  if(s_.ctrl.vdw == "D3") {
+    
+    int functional;
+    if(s_.ctrl.xc == "LDA") {
+      cerr << "The DFT-D3 has not been parametrized for LDA functional. Please select a different XC functional, or turn off the DFT-D3 correction" << endl;
+      exit(1);
+    } else if (s_.ctrl.xc == "PBE") {
+      functional = dftd3_functional::PBE;
+    } else if (s_.ctrl.xc == "PBEsol") {
+      functional = dftd3_functional::PBEsol;
+    } else if (s_.ctrl.xc == "PBErev") {
+      functional = dftd3_functional::PBErev;
+    } else if (s_.ctrl.xc == "BLYP") {
+      functional = dftd3_functional::BLYP;
+    } else {
+      cerr << "Unknown DFT-D3 parametrization for the XC functional '"<< s_.ctrl.xc << "'."<< endl;
+      exit(1);
+    }
+
+    dftd3_init(&functional);
+  }
   
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 EnergyFunctional::~EnergyFunctional(void) {
+
+  if(s_.ctrl.vdw == "D3") dftd3_end();
+  
   delete xcp;
   for ( int ispin = 0; ispin < wf_.nspin(); ispin++ )
     if (wf_.spinactive(ispin)) {
@@ -910,6 +937,35 @@ void EnergyFunctional::update_vhxc(void) {
         v_r[1][i] += vloc;
      }
   }
+
+ 
+  // The vdW part
+  evdw_ = 0.0;
+  sigma_vdw = 0.0;
+  if(s_.ctrl.vdw == "D3") {
+    vector<double> coords;
+    vector<int> species;
+    vector<double> lattice_vectors;
+    
+    s_.atoms.get_positions(coords);
+    s_.atoms.get_atomic_numbers(species);
+
+    const int natoms = species.size();
+
+    fion_vdw_.resize(3*natoms);
+    vector<double> stress(9);
+ 
+    dftd3_pbc_dispersion(&natoms, coords.data(), species.data(), s_.atoms.cell().amat(), &evdw_, fion_vdw_.data(), stress.data());
+
+    sigma_vdw[0] = stress[0];
+    sigma_vdw[1] = stress[1];
+    sigma_vdw[2] = stress[2];
+    sigma_vdw[3] = stress[4];
+    sigma_vdw[4] = stress[5];
+    sigma_vdw[5] = stress[8];
+    
+  }
+  
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1527,7 +1583,7 @@ double EnergyFunctional::energy(Wavefunction& psi, bool compute_hpsi, Wavefuncti
     const double boltz = 0.5; // convert from Ry to Ha
     ets_ = - psientropy * s_.ctrl.smearing_width * boltz;
   }
-  etotal_ = ekin_ + econf_ + eps_ + enl_ + ecoul_ + exc_ + ets_ + epv_ + ehub_;
+  etotal_ = ekin_ + econf_ + eps_ + enl_ + ecoul_ + exc_ + evdw_ + ets_ + epv_ + ehub_;
 
   //ewd DEBUG
   //print(cout);
@@ -1707,10 +1763,22 @@ double EnergyFunctional::energy(Wavefunction& psi, bool compute_hpsi, Wavefuncti
           fion[is][i] += fion_esr[is][i] - vfac * ftmp[i];
     }
   }
-  
+
+  if (compute_forces && s_.ctrl.vdw != "NONE") {
+    int ii = 0;
+    for (int is = 0; is < nsp_; is++) {
+      for (int ia = 0; ia < na_[is]; ia++) {
+	fion[is][3*ia + 0] += fion_vdw_[ii + 0];
+        fion[is][3*ia + 1] += fion_vdw_[ii + 1];
+        fion[is][3*ia + 2] += fion_vdw_[ii + 2];
+	ii += 3;
+      }
+    }
+  }
+      
   if (compute_stress)
     sigma = sigma_ekin + sigma_econf + sigma_eps + sigma_enl +
-          sigma_ehart + sigma_exc + sigma_esr;
+          sigma_ehart + sigma_exc + sigma_vdw + sigma_esr;
   if ( debug_stress && s_.ctxt_.oncoutpe() ) {
   //if ( compute_stress && s_.ctxt_.oncoutpe() ) {
     // ewd:  add more significant figures to conversion
@@ -1761,6 +1829,13 @@ double EnergyFunctional::energy(Wavefunction& psi, bool compute_hpsi, Wavefuncti
          << "   <debugsigma_exc_xy> " << setw(12) << gpa*sigma_exc[3] << " </debugsigma_exc_xy>\n"
          << "   <debugsigma_exc_yz> " << setw(12) << gpa*sigma_exc[4] << " </debugsigma_exc_yz>\n"
          << "   <debugsigma_exc_xz> " << setw(12) << gpa*sigma_exc[5] << " </debugsigma_exc_xz>\n"
+         << endl
+	 << "   <debugsigma_evdw_xx> " << setw(12) << gpa*sigma_vdw[0] << " </debugsigma_evdw_xx>\n"
+         << "   <debugsigma_evdw_yy> " << setw(12) << gpa*sigma_vdw[1] << " </debugsigma_evdw_yy>\n"
+         << "   <debugsigma_evdw_zz> " << setw(12) << gpa*sigma_vdw[2] << " </debugsigma_evdw_zz>\n"
+         << "   <debugsigma_evdw_xy> " << setw(12) << gpa*sigma_vdw[3] << " </debugsigma_evdw_xy>\n"
+         << "   <debugsigma_evdw_yz> " << setw(12) << gpa*sigma_vdw[4] << " </debugsigma_evdw_yz>\n"
+         << "   <debugsigma_evdw_xz> " << setw(12) << gpa*sigma_vdw[5] << " </debugsigma_evdw_xz>\n"
          << endl
          << "   <debugsigma_esr_xx> " << setw(12) << gpa*sigma_esr[0] << " </debugsigma_esr_xx>\n"
          << "   <debugsigma_esr_yy> " << setw(12) << gpa*sigma_esr[1] << " </debugsigma_esr_yy>\n"
@@ -2000,6 +2075,7 @@ void EnergyFunctional::print(ostream& os) const
      << "  <enl>    " << setw(15) << enl() << " </enl>\n"
      << "  <ecoul>  " << setw(15) << ecoul() << " </ecoul>\n"
      << "  <exc>    " << setw(15) << exc() << " </exc>\n"
+     << "  <evdw>   " << setw(15) << evdw() << " </evdw>\n"
      << "  <esr>    " << setw(15) << esr() << " </esr>\n"
      << "  <eself>  " << setw(15) << eself() << " </eself>\n"
      << "  <ets>    " << setw(15) << ets() << " </ets>\n";
