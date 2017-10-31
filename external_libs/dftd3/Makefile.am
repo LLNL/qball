@@ -28,8 +28,9 @@ libdftd3_a_SOURCES =            \
 	sizes.f90               \
 	interface.f90
 
-core.o: core.f90 common.o pars.o
-api.o: api.f90 sizes.o core.o
 interface.o: interface.f90 api.o
+api.o: api.f90 sizes.o core.o common.o
+core.o: core.f90 pars.o sizes.o common.o
+pars.o: pars.f90 common.o sizes.o
 
 CLEANFILES = *~ *.bak *.mod *.MOD *.il *.d *.pc* ifc*
