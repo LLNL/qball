@@ -55,22 +55,35 @@ class CoordinatesCmd : public Cmd
   {
     return 
     "\n coordinates\n\n"
-    " syntax: coordinates filename\n\n"
-    " The coordinates command adds atoms from an xyz coordinate file.\n\n";
+    " syntax: coordinates filename [units]\n\n"
+    " The coordinates command adds atoms from an xyz coordinate file.\n"
+    " Optionally,  it is possible to specify the units of the coordi-\n"
+    " nates (angstrom by default).  You can specify coordinates rela-\n"
+    " tive to the unit cell with the 'crystal' units.\n\n";
   }
 
   int action(int argc, char **argv){
 
-    string pos_unit_name = "angstrom";
-
     string filename(argv[1]);
     
-    // coordinates must be defined with either 3 or 6 arguments
-    if (argc != 2) {
-      ui->error("<!-- use: coordinates filename -->");
+    // coordinates must be defined with either 2 or 3 arguments
+    if (argc != 2 && argc != 3) {
+      ui->error("<!-- use: coordinates filename [units] -->");
       return 1;
     }
+    
+    string pos_unit_name = "angstrom";
+    bool crystal_units = false;
+      
+    if(argc == 3){
+      pos_unit_name = argv[2];     
+    }
 
+    if(pos_unit_name == "crystal" || pos_unit_name == "direct" || pos_unit_name == "reduced"){
+      crystal_units = true;
+      pos_unit_name = "bohr";
+    }
+    
     std::ifstream file(filename);
 
     if(!file){
@@ -97,8 +110,10 @@ class CoordinatesCmd : public Cmd
       string species;
       D3vector position;
       D3vector velocity(0.0, 0.0, 0.0);
- 
+
       file >> species >> position.x >> position.y >> position.z;
+
+      if(crystal_units) position = s->atoms.cell().crystal_to_cart(position);
 
       position = pos_unit.to_atomic(position);
       
