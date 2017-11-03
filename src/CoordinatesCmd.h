@@ -92,17 +92,16 @@ class CoordinatesCmd : public Cmd
     }
 
     int natoms;
-
     file >> natoms;
 
     cout << "CoordinateCmd: Adding " <<  natoms <<  " atoms from coordinate file '" + filename + "'." << endl;
 
-    string comment_line;
+    string dump_line;
     
-    getline(file, comment_line);
-    cout << comment_line << endl;
-    getline(file, comment_line);
-    cout << comment_line << endl;  
+    getline(file, dump_line);
+    cout << dump_line << endl;
+    getline(file, dump_line);
+    cout << dump_line << endl;  
 
     Unit pos_unit(Dimensions::length, pos_unit_name);
     
@@ -112,13 +111,12 @@ class CoordinatesCmd : public Cmd
       D3vector velocity(0.0, 0.0, 0.0);
 
       file >> species >> position.x >> position.y >> position.z;
-
+      getline(file, dump_line);
+      
       if(crystal_units) position = s->atoms.cell().crystal_to_cart(position);
 
       position = pos_unit.to_atomic(position);
       
-      cout << species << ' ' << position << endl;
-
       stringstream atom_name;
       atom_name << species << iatom;
 
