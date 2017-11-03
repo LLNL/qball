@@ -94,15 +94,15 @@ class CoordinatesCmd : public Cmd
     int natoms;
     file >> natoms;
 
-    cout << "CoordinateCmd: Adding " <<  natoms <<  " atoms from coordinate file '" + filename + "'." << endl;
+    if(ui->oncoutpe()) {
+      cout << "CoordinateCmd: Adding " <<  natoms <<  " atoms from coordinate file '" + filename + "'." << endl;
+    }
 
     string dump_line;
     
     getline(file, dump_line);
-    cout << dump_line << endl;
     getline(file, dump_line);
-    cout << dump_line << endl;  
-
+    
     Unit pos_unit(Dimensions::length, pos_unit_name);
     
     for(int iatom = 0; iatom < natoms; iatom++){
