@@ -55,10 +55,10 @@ class AtomCmd : public Cmd
     "\n atom\n\n"
     " syntax: atom name species x y z [vx vy vz]\n\n"
     "   The atom command defines a new atom and adds it to the atom list.\n"
-    "   The name can be any character string, the species must be the name\n"
-    "   of a file containing the definition of the pseudopotential for this\n"
-    "   atomic species. The position of the atom is specified by x y and z.\n"
-    "   Optionally, the atom velocity can be specified by vx vy and vz.\n\n";
+    "   The name can be any character string,  the species must be have been\n"
+    "   previously defined using the 'species' command.  The position of the\n"
+    "   atom is specified by x y and z. Optionally, the atom velocity can be\n"
+    "   specified by vx vy and vz.\n\n";
   }
 
   int action(int argc, char **argv)
