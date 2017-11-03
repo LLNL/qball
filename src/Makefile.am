@@ -74,6 +74,7 @@ noinst_HEADERS =                            \
 	Control.h                           \
 	ConvergenceDetector.h               \
 	CoordinateConstraint.h              \
+	CoordinatesCmd.h                    \
 	CPSampleStepper.h                   \
 	CurrentDensity.h                    \
 	dftd3.h                             \

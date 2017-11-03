@@ -95,6 +95,7 @@ using namespace std;
 #include "ResetVcmCmd.h"
 #include "ListConstraintsCmd.h"
 #include "PlotCmd.h"
+#include "CoordinatesCmd.h"
 
 #include "AtomsDyn.h"
 #include "Cell.h"
@@ -358,6 +359,7 @@ void qbLink::init(void) {
   ui->addCmd(new WFPhaseRealCmd(s));
   ui->addCmd(new PlotCmd(s));
   ui->addCmd(new ResetVcmCmd(s));
+  ui->addCmd(new CoordinatesCmd(s));
   
   ui->addVar(new AtomsDyn(s));
   ui->addVar(new Cell(s));
