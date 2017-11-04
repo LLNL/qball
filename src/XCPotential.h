@@ -37,6 +37,11 @@
 #include "PBESolFunctional.h"
 #include "PBERevFunctional.h"
 #include "BLYPFunctional.h"
+
+#ifdef HAVE_LIBXC
+#include "LIBXCFunctional.h"
+#endif
+
 #include <vector>
 #include <valarray>
 #include <complex>

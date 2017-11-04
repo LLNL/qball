@@ -38,6 +38,10 @@
 
 #include "Sample.h"
 
+#ifdef HAVE_LIBXC
+#include "xc.h"
+#endif
+
 class Xc : public Var
 {
   Sample *s;
@@ -48,15 +52,26 @@ class Xc : public Var
 
   int set ( int argc, char **argv )
   {
-    if ( argc != 2 )
+    string v;
+    v = argv[1];
+#ifdef HAVE_LIBXC
+    if ( (argc > 2) && (v == "LIBXC") ) {
+      for ( int n = 2; n < argc ; n ++ ) {
+        v = v + " " + argv[n];
+        }
+    }
+#else
+    if (false) {
+    }
+#endif
+    else if ( argc != 2 )
     {
       if ( ui->oncoutpe() )
       cout << " <ERROR> xc takes only one value </ERROR>" << endl;
       return 1;
     }
     
-    string v = argv[1];
-    if ( !( v == "LDA" || v == "PBE" || v == "PBEsol" || v == "PBErev" || v == "BLYP" ) )
+    else if ( !( v == "LDA" || v == "PBE" || v == "PBEsol" || v == "PBErev" || v == "BLYP" ) )
     {
       if ( ui->oncoutpe() )
         cout << " <ERROR> xc must be LDA, PBE, PBEsol, PBErev or BLYP </ERROR>" << endl;
@@ -72,9 +87,9 @@ class Xc : public Var
   {
      ostringstream st;
      st.setf(ios::left,ios::adjustfield);
-     st << setw(10) << name() << " = ";
+     st << setw(50) << name() << " = ";
      st.setf(ios::right,ios::adjustfield);
-     st << setw(10) << s->ctrl.xc;
+     st << setw(50) << s->ctrl.xc;
      return st.str();
   }
 

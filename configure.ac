@@ -207,6 +207,19 @@ fi
 
 AC_MSG_NOTICE([
 ================================================================================
+  LIBXC LIBRARY
+================================================================================])
+
+ACX_LIBXC
+
+if test x$acx_libxc_ok == xyes; then
+  LIBS="$LIBS_LIBXC $LIBS"
+  CFLAGS="$CFLAGS $CFLAGS_LIBXC"
+  CXXFLAGS="$CXXFLAGS $CFLAGS_LIBXC"
+fi
+
+AC_MSG_NOTICE([
+================================================================================
   CHECKING FOR BLUEGENE/Q LIBRARIES
 ================================================================================])
 
@@ -248,5 +261,6 @@ SCALAPACK        :  $acx_scalapack_ok ($LIBS_SCALAPACK)
 SCALAPACK 2      :  $acx_scalapack2_ok
 MASSV            :  $acx_massv_ok
 BlueGene/Q       :  $acx_bgq
+LIBXC            :  $acx_libxc_ok
 ])
 

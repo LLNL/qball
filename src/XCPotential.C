@@ -29,6 +29,7 @@
 #include <config.h>
 
 #include "XCPotential.h"
+
 #include "Basis.h"
 #include "FourierTransform.h"
 #include "blas.h" // daxpy, dcopy
@@ -53,8 +54,18 @@ XCPotential::XCPotential(ChargeDensity& cd, const string functional_name, Charge
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-void XCPotential::initialize(string functional_name)
+void XCPotential::initialize(string functional_name_input)
 {
+
+  string functional_name;
+  string tempbuf;
+  stringstream ss(functional_name_input);
+  vector<string> functional_full_name;
+  while ( ss >> tempbuf )
+    functional_full_name.push_back(tempbuf);
+
+  functional_name = functional_full_name[0];
+
   if ( functional_name == "LDA" ) {
      if (cd_.nlcc())
         xcf_ = new LDAFunctional(cd_.xcrhor);
@@ -85,6 +96,16 @@ void XCPotential::initialize(string functional_name)
      else
         xcf_ = new BLYPFunctional(cd_.rhor);
   }
+  else if ( functional_name == "LIBXC" )
+  {
+#ifdef HAVE_LIBXC
+     if (cd_.nlcc())
+        xcf_ = new LIBXCFunctional(cd_.xcrhor, functional_name_input);
+     else
+        xcf_ = new LIBXCFunctional(cd_.rhor, functional_name_input);
+#endif
+  }
+
   else {
     throw XCPotentialException("unknown functional name");
   }
