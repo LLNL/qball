@@ -671,12 +671,16 @@ void EhrenSampleStepper::step(int niter)
              ComplexMatrix ortho(wf.sd(ispin,ikp)->context(),(wf.sd(ispin,ikp)->c()).n(),(wf.sd(ispin,ikp)->c()).n(),(wf.sd(ispin,ikp)->c()).nb(),(wf.sd(ispin,ikp)->c()).nb());
                                                                                                       
              ortho.gemm('c','n',1.0,(wf).sd(ispin,ikp)->c(),(wf).sd(ispin,ikp)->c(),0.0);
+
+	     
+#if 0  //This is disabled, as it does produce a segmentation fault.
              if ( oncoutpe )
              {
                 cout << "ortho: " << endl;
              }
              //ewd:  this is not going to print correctly, as tasks will not print data in order
-             cout << ortho;   
+	     cout << ortho;
+#endif
           }
        }
     }
@@ -1492,7 +1496,7 @@ void EhrenSampleStepper::step(int niter)
      }
   }
       
-  ionic_stepper->compute_v(energy,fion);
+  if(ionic_stepper) ionic_stepper->compute_v(energy, fion);
   // positions r0 and velocities v0 are consistent
 
   if (wf_dyn != "SOTD")
@@ -1508,7 +1512,7 @@ void EhrenSampleStepper::step(int niter)
 
   // delete steppers
   delete wf_stepper;
-  delete ionic_stepper;
+  if(ionic_stepper) delete ionic_stepper;
   delete cell_stepper;
 
 }

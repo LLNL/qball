@@ -55,10 +55,10 @@ class AtomCmd : public Cmd
     "\n atom\n\n"
     " syntax: atom name species x y z [vx vy vz]\n\n"
     "   The atom command defines a new atom and adds it to the atom list.\n"
-    "   The name can be any character string, the species must be the name\n"
-    "   of a file containing the definition of the pseudopotential for this\n"
-    "   atomic species. The position of the atom is specified by x y and z.\n"
-    "   Optionally, the atom velocity can be specified by vx vy and vz.\n\n";
+    "   The name can be any character string,  the species must be have been\n"
+    "   previously defined using the 'species' command.  The position of the\n"
+    "   atom is specified by x y and z. Optionally, the atom velocity can be\n"
+    "   specified by vx vy and vz.\n\n";
   }
 
   int action(int argc, char **argv)
@@ -84,7 +84,16 @@ class AtomCmd : public Cmd
     species = argv[2];
 
     if(argc == 7 || argc == 11) pos_unit_name = argv[6];
-    
+
+    position.x = atof(argv[3]);
+    position.y = atof(argv[4]);
+    position.z = atof(argv[5]);
+
+    if(pos_unit_name == "crystal" || pos_unit_name == "direct" || pos_unit_name == "reduced"){
+      pos_unit_name = "bohr";
+      position = s->atoms.cell().crystal_to_cart(position);
+    }
+        
     Unit pos_unit(Dimensions::length, pos_unit_name);
 
     if(!pos_unit.exists()) {
@@ -92,9 +101,7 @@ class AtomCmd : public Cmd
       return 1;
     }
 
-    position.x = pos_unit.to_atomic(atof(argv[3]));
-    position.y = pos_unit.to_atomic(atof(argv[4]));
-    position.z = pos_unit.to_atomic(atof(argv[5]));
+    position = pos_unit.to_atomic(position);
     
     if ( argc == 9 ) {
       velocity.x = atof(argv[6]);

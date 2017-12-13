@@ -77,6 +77,7 @@ struct Control
   double ext_stress[6]; // external stress tensor: xx,yy,zz,xy,yz,xz
   
   string xc;
+  string vdw;
   string spin;
   int delta_spin;
   int nkpoints; // number of kpoints; wait to allocate Wavefunction until all are input

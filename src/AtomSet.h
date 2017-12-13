@@ -113,13 +113,12 @@ class AtomSet
   double mass(int isp);
   double mass_mm(int isp);
   int atomic_number(int isp) const;
+  void get_atomic_numbers(vector<int> & atomic_numbers) const;
 
-  void get_positions(vector<vector<double> >& tau, bool qmonly) const;
-  void get_positions(vector<vector<double> >& tau) const;
-  void set_positions(const vector<vector<double> >& tau, bool ignorelock);
-  void set_positions(const vector<vector<double> >& tau);
-  void get_velocities(vector<vector<double> >& vel, bool qmonly) const;
-  void get_velocities(vector<vector<double> >& vel) const;
+  void get_positions(vector<vector<double> >& tau, bool qmonly = false) const;
+  void get_positions(vector<double> & coords) const; // returns the coordinates in a linear array
+  void set_positions(const vector<vector<double> >& tau, bool cellrescale = false);
+  void get_velocities(vector<vector<double> >& vel, bool qmonly = false) const;
   void set_velocities(const vector<vector<double> >& vel);
   bool add_fion_ext(void) { return add_fion_ext_; }
   void get_fion_ext(vector<vector<double> >& fion_ext) const;
