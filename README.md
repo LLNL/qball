@@ -45,6 +45,7 @@ To compile Qbox:
   export CXX=mpixlcxx_r
   export FC=mpixlf95_r
   export LIBS_BLAS="-L/usr/local/tools/essl/5.1/lib/ -lesslsmpbg"
+  export LIBS_BLACS="-lmpiblacs"
   export LDFLAGS="-qsmp=omp"
   export CFLAGS="-O3 -qsmp=omp -qarch=qp -qtune=qp"
   export CXXFLAGS="$CFLAGS -qlanglvl=extended0x"
