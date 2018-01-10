@@ -628,9 +628,9 @@ void EhrenSampleStepper::step(int niter)
        // AS: this is the new version, not copying code, but copying the wave function instead
        Wavefunction* to_diag_wf1 = new Wavefunction(s_.wf);
        (*to_diag_wf1) = (s_.wf);
-       tmap["diag"].start();
-       (*to_diag_wf1).diag(dwf,false);
-       tmap["diag"].stop();
+       tmap["expect"].start();
+       (*to_diag_wf1).expectation_values(dwf);
+       tmap["expect"].stop();
 
        if ( oncoutpe )
        {

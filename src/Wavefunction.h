@@ -192,6 +192,7 @@ class Wavefunction {
   void riccati(Wavefunction& wf);
   void align(Wavefunction& wf);
   void diag(Wavefunction& dwf, bool eigvec);
+  void expectation_values(Wavefunction const& dwf);
   void extrap_real(const double dt, const AtomSet& as);
   
   double dot(const Wavefunction& wf) const;

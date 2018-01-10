@@ -1713,6 +1713,68 @@ void Wavefunction::diag(Wavefunction& dwf, bool eigvec) {
   }
   QB_Pstop(diag);
 }
+
+////////////////////////////////////////////////////////////////////////////////
+void Wavefunction::expectation_values(Wavefunction const& dwf) {
+//	QB_Pstart(13,diag);
+  // subspace diagonalization of <*this | dwf>
+  // if eigvec==true, eigenvectors are computed and stored in *this, dwf is 
+  // overwritten
+  for ( int ispin = 0; ispin < nspin_; ispin++ ) {
+    if (spinactive(ispin)) {
+      for ( int ikp = 0; ikp < sdcontext_[ispin].size(); ikp++ ) {
+        if (sdcontext_[ispin][ikp] != 0 ) {
+          if (sdcontext_[ispin][ikp]->active() ) {
+            for ( int kloc=0; kloc<nkptloc_; kloc++) {
+              int kp = kptloc_[kloc];
+              if ( sd_[ispin][kp] != 0 ) {
+				assert(not sd(ispin,kp)->basis().real());
+                // compute eigenvalues
+                {
+                  ComplexMatrix& c = sd(ispin,kp)->c();
+                  ComplexMatrix& cp = dwf.sd(ispin,kp)->c();
+                  ComplexMatrix h(c.context(),c.n(),c.n(),c.nb(),c.nb());
+//                  tmap["diag-gemm1"].start();
+                  h.gemm('c','n',1.0,c,cp,0.0);
+//                  tmap["diag-gemm1"].stop();
+                  valarray<double> w(h.m());  
+					for(int i = 0; i != w.size(); ++i) w[i] = 0.0;
+					
+					for (int m = 0; m < h.nblocks(); ++m){
+						for(int l = 0; l < h.mblocks(); ++l){
+							for(int y = 0; y < h.nbs(m); ++y){
+								for(int x = 0; x < h.mbs(l); x++){
+									int i = h.i(l,x);
+									int j = h.j(m,y);
+									if (i == j){
+										// diagonal element, save it
+										int itmp = x + l*h.mb();
+										int jtmp = y + m*h.nb();
+										int ival = itmp + jtmp * h.mloc();
+										w[i] = real( h[ival] );
+									}
+								}
+							}
+						}
+					}
+               //    tmap["diag-heev"].start();
+               //    h.heev('l',w);
+               //    tmap["diag-heev"].stop();
+                  // set eigenvalues in SlaterDet
+                  	MPI_Allreduce(MPI_IN_PLACE, &w[0], w.size(), MPI_DOUBLE, MPI_SUM, h.context().comm());
+                  sd(ispin,kp)->set_eig(w);      // need to copy w to !ctxtsq_.active() tasks?
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+//  QB_Pstop(diag);
+}
+
+
 ////////////////////////////////////////////////////////////////////////////////
 void Wavefunction::extrap_real(const double dt, const AtomSet& as) {
   // transform states to real space and move them according to distance
