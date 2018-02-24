@@ -4,7 +4,7 @@
 
 include $(srcdir)/../common-rules.make
 
-bin_PROGRAMS  =                             \
+noinst_PROGRAMS  =                             \
 	testMatrix                          \
 	testBasis                           \
 	testRowBcast                        \
