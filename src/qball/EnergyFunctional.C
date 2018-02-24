@@ -43,7 +43,7 @@
 #include "dftd3.h"
 
 #include "Timer.h"
-#include "blas.h"
+#include <math/blas.h>
 
 #include <iostream>
 #include <iomanip>

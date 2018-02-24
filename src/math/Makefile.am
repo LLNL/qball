@@ -1,10 +1,11 @@
 include $(srcdir)/../common-rules.make
 
 lib_LIBRARIES =                             \
-	libpseudo.a
+	libmath.a
 
 noinst_HEADERS =                            \
-	Spline.h
+	blas.h                              \
+	Matrix.h
 
-libpseudo_a_SOURCES =                       \
-	Spline.cc
+libmath_a_SOURCES =                         \
+	Matrix.cc

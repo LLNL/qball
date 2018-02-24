@@ -36,14 +36,14 @@ using namespace std;
 #include <mpi.h>
 #endif
 
-#include "Context.h"
+#include <qball/Context.h>
 #ifdef HAVE_SCALAPACK
-#include "blacs.h"
+#include <qball/blacs.h>
 #endif
 
 
 #include "Matrix.h"
-#include "profile.h"
+#include <qball/profile.h>
 
 #define numroc     FC_FUNC(numroc, NUMROC)
 #define pdtran     FC_FUNC(pdtran, PDTRAN)

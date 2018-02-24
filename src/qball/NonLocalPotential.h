@@ -35,7 +35,7 @@
 #include "Basis.h"
 #include "SlaterDet.h"
 #include "Context.h"
-#include "Matrix.h"
+#include <math/Matrix.h>
 
 class StructureFactor;
 

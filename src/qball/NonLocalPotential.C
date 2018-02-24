@@ -30,9 +30,9 @@
 
 #include "NonLocalPotential.h"
 #include "Species.h"
-#include "Matrix.h"
+#include <math/Matrix.h>
 #include "PrintMem.h"
-#include "blas.h"
+#include <math/blas.h>
 #include <iomanip>
 using namespace std;
 

@@ -31,7 +31,7 @@
 #include "XCPotential.h"
 #include "Basis.h"
 #include "FourierTransform.h"
-#include "blas.h" // daxpy, dcopy
+#include <math/blas.h> // daxpy, dcopy
 #include <cassert>
 using namespace std;
 

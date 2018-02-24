@@ -44,7 +44,7 @@
 #include "Basis.h"
 #include "FourierTransform.h"
 #include "SlaterDet.h"
-#include "Matrix.h"
+#include <math/Matrix.h>
 #include "Species.h"
 #include "Atom.h"
 #include "ChargeDensity.h"

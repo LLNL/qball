@@ -1,4 +1,5 @@
 SUBDIRS =              \
+	math           \
 	pseudo         \
 	functionals    \
 	qball          \

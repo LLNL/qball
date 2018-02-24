@@ -42,7 +42,7 @@
 #include "Timer.h"
 #include "Context.h"
 #include "Base64Transcoder.h"
-#include "Matrix.h"
+#include <math/Matrix.h>
 #include "XMLGFPreprocessor.h"
 using namespace std;
 

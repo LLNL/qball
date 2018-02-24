@@ -39,7 +39,7 @@
 #include "Species.h"
 #include "PrintMem.h"
 #include "StructureFactor.h"
-#include "blas.h"
+#include <math/blas.h>
 #include <iomanip>
 #ifdef HAVE_BGQLIBS
 extern "C" void cdLoop(const int size, complex<double>* v1, complex<double>* v2, complex<double>* vout);

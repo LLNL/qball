@@ -30,7 +30,7 @@
 #include <string>
 #include <vector>
 #include <omp.h>
-#include <qball/blas.h>
+#include <math/blas.h>
 #include <qball/Timer.h>
 using namespace std;
 

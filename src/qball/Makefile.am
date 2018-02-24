@@ -32,7 +32,6 @@ noinst_HEADERS =                            \
 	Basis.h                             \
 	BasisMapping.h                      \
 	blacs.h                             \
-	blas.h                              \
 	BMDIonicStepper.h                   \
 	BOSampleStepper.h                   \
 	CellDyn.h                           \
@@ -124,7 +123,6 @@ noinst_HEADERS =                            \
 	LoadCmd.h                           \
 	LoaddenCmd.h                        \
 	LockCmd.h                           \
-	Matrix.h                            \
 	MatrixLoc.h                         \
 	MDIonicStepper.h                    \
 	MDIter.h                            \
@@ -264,7 +262,6 @@ libqbLink_a_SOURCES =                       \
 	Basis.C                             \
 	CurrentDensity.C                    \
 	FourierTransform.C                  \
-	Matrix.C                            \
 	Context.C                           \
 	sinft.C                             \
 	UnitCell.C                          \

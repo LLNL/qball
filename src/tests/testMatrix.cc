@@ -45,7 +45,7 @@
 #include <valarray>
 #include <vector>
 #include <map>
-#include <qball/blas.h>
+#include <math/blas.h>
 #include <omp.h>
 #include <qball/Timer.h>
 

@@ -58,7 +58,7 @@ using namespace std;
 #endif
 
 #include <qball/Context.h>
-#include <qball/Matrix.h>
+#include <math/Matrix.h>
 
 // mpi_trace functions
 //extern "C" {

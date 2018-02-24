@@ -29,7 +29,7 @@
 #include <config.h>
 
 #include "AndersonMixer.h"
-#include "blas.h"
+#include <math/blas.h>
 #include <iostream>
 using namespace std;
 

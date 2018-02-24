@@ -224,6 +224,7 @@ AC_CONFIG_FILES([Makefile
                  external_libs/Makefile
 		 external_libs/dftd3/Makefile
                  src/Makefile
+		 src/math/Makefile
                  src/pseudo/Makefile
                  src/functionals/Makefile
 		 src/qball/Makefile

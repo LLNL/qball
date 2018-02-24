@@ -31,7 +31,7 @@
 #include "SlaterDet.h"
 #include "FourierTransform.h"
 #include "Context.h"
-#include "blas.h" // daxpy
+#include <math/blas.h> // daxpy
 #include "Base64Transcoder.h"
 #include "SharedFilePtr.h"
 #include "AtomSet.h"

@@ -33,7 +33,7 @@
 #include "SlaterDet.h"
 #include "Species.h"
 #include "Basis.h"
-#include "blas.h"
+#include <math/blas.h>
 #include "D3vector.h"
 #include <iomanip>
 #include <vector>

@@ -39,7 +39,7 @@
 #include "SlaterDet.h"
 #include "UnitCell.h"
 #include "jade.h"
-#include "blas.h"
+#include <math/blas.h>
 using namespace std;
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -30,7 +30,7 @@
 
 #include "FourierTransform.h"
 #include "Basis.h"
-#include "blas.h"
+#include <math/blas.h>
 
 #include <complex>
 #include <algorithm>

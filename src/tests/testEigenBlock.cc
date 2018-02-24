@@ -50,7 +50,7 @@ extern "C" void HPM_Stop(char *);
 #endif
 
 #include <qball/Context.h>
-#include <qball/Matrix.h>
+#include <math/Matrix.h>
 
 const double nrandinv = 1./(1.0*RAND_MAX + 1.0);
 const double maxrand = 0.0001;  // maximum random perturbation to identity matrix

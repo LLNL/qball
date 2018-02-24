@@ -53,7 +53,7 @@ extern "C" void HPM_Stop(char *);
 #endif
 
 #include <qball/Context.h>
-#include <qball/Matrix.h>
+#include <math/Matrix.h>
 #include <qball/jacobi.h>
 
 bool runsyevd = false;
