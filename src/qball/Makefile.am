@@ -21,9 +21,7 @@ include_HEADERS =                           \
 
 noinst_HEADERS =                            \
 	AndersonMixer.h                     \
-	AngleCmd.h                          \
 	AngleConstraint.h                   \
-	AtomCmd.h                           \
 	Atom.h                              \
 	AtomsDyn.h                          \
 	AtomSet.h                           \
@@ -49,23 +47,19 @@ noinst_HEADERS =                            \
 	ChargeMixRcut.h                     \
 	ClebschGordan.h                     \
 	clooper.h                           \
-	ComputeMLWFCmd.h                    \
 	ConfinementPotential.h              \
-	ConstraintCmd.h                     \
 	Constraint.h                        \
 	ConstraintSet.h                     \
 	Context.h                           \
 	Control.h                           \
 	ConvergenceDetector.h               \
 	CoordinateConstraint.h              \
-	CoordinatesCmd.h                    \
 	CPSampleStepper.h                   \
 	CurrentDensity.h                    \
 	dftd3.h                             \
 	D3vector.h                          \
 	Debug.h                             \
 	Dimensions.h                        \
-	DistanceCmd.h                       \
 	DistanceConstraint.h                \
 	Dt.h                                \
 	Ecutden.h                           \
@@ -74,7 +68,6 @@ noinst_HEADERS =                            \
 	Ecuts.h                             \
 	EhrenSampleStepper.h                \
 	Emass.h                             \
-	EmpiricalPotentialCmd.h             \
 	EmpiricalPotential.h                \
 	EnergyFunctional.h                  \
 	EnthalpyFunctional.h                \
@@ -97,12 +90,10 @@ noinst_HEADERS =                            \
 	FcpThTime.h                         \
 	FcpThWidth.h                        \
 	FermiTemp.h                         \
-	FoldInWsCmd.h                       \
 	Force_Complex_WF.h                  \
 	FORKTDWavefunctionStepper.h         \
 	FOTDWavefunctionStepper.h           \
 	FourierTransform.h                  \
-	HelpCmd.h                           \
 	HubbardPotential.h                  \
 	HubbardU.h                          \
 	HugDeltaTemp.h                      \
@@ -115,24 +106,14 @@ noinst_HEADERS =                            \
 	jacobi.h                            \
 	jade.h                              \
 	JDWavefunctionStepper.h             \
-	KpointCmd.h                         \
 	LineMinimizer.h                     \
-	ListAtomsCmd.h                      \
-	ListConstraintsCmd.h                \
-	ListSpeciesCmd.h                    \
-	LoadCmd.h                           \
-	LoaddenCmd.h                        \
-	LockCmd.h                           \
 	MatrixLoc.h                         \
 	MDIonicStepper.h                    \
 	MDIter.h                            \
-	MDSaveCmd.h                         \
 	MDWavefunctionStepper.h             \
 	Memory.h                            \
 	Messages.h                          \
 	MLWFTransform.h                     \
-	MMAtomCmd.h                         \
-	MMSpeciesCmd.h                      \
 	MMSpecies.h                         \
 	NameOf.h                            \
 	NA_overlaps.h                       \
@@ -145,50 +126,33 @@ noinst_HEADERS =                            \
 	Nparallelkpts.h                     \
 	Nrowmax.h                           \
 	ParallelOptimizer.h                 \
-	ParOptCmd.h                         \
 	Pblock.h                            \
-	PlotCmd.h                           \
 	PositionConstraint.h                \
 	Preconditioner.h                    \
-	PrintCmd.h                          \
 	PrintMem.h                          \
 	profile.h                           \
-	PromoteOccCmd.h                     \
 	PSDAWavefunctionStepper.h           \
 	PSDWavefunctionStepper.h            \
 	qbox_xmlns.h                        \
-	QuitCmd.h                           \
-	RandomizeRealWfCmd.h                \
-	RandomizeVelCmd.h                   \
-	RandomizeWfCmd.h                    \
 	RMMDIISWavefunctionStepper.h        \
 	readTSC.h                           \
 	RefCell.h                           \
 	release.h                           \
-	ResetVcmCmd.h                       \
-	RunCmd.h                            \
 	RunTimer.h                          \
 	Sample.h                            \
 	SampleHandler.h                     \
 	SampleReader.h                      \
 	SampleStepper.h                     \
 	SampleWriter.h                      \
-	SaveCmd.h                           \
-	SavedenCmd.h                        \
 	SaveDenFreq.h                       \
-	SaveESPCmd.h                        \
 	SaveFreq.h                          \
-	SavesysCmd.h                        \
 	SaveWfFreq.h                        \
 	SDAIonicStepper.h                   \
 	SDCellStepper.h                     \
 	SDIonicStepper.h                    \
 	SDWavefunctionStepper.h             \
 	SelfConsistentPotential.h           \
-	SetCmd.h                            \
-	SetVelCmd.h                         \
 	SharedFilePtr.h                     \
-	ShiftWFCmd.h                        \
 	SimpleConvergenceDetector.h         \
 	sinft.h                             \
 	SlaterDet.h                         \
@@ -196,21 +160,17 @@ noinst_HEADERS =                            \
 	SmearingWidth.h                     \
 	SORKTDWavefunctionStepper.h         \
 	SOTDWavefunctionStepper.h           \
-	SpeciesCmd.h                        \
 	Species.h                           \
 	SpeciesHandler.h                    \
 	SpeciesReader.h                     \
 	SphericalIntegration.h              \
 	Spin.h                              \
 	StandardVar.h                       \
-	StatusCmd.h                         \
-	StrainCmd.h                         \
 	Stress.h                            \
 	StructuredDocumentHandler.h         \
 	StructureFactor.h                   \
 	StructureHandler.h                  \
 	StrX.h                              \
-	SymmetryCmd.h                       \
 	Symmetry.h                          \
 	SymmetrySet.h                       \
 	SymOp.h                             \
@@ -226,12 +186,9 @@ noinst_HEADERS =                            \
 	ThTime.h                            \
 	ThWidth.h                           \
 	Timer.h                             \
-	TorsionCmd.h                        \
 	TorsionConstraint.h                 \
 	Unit.h                              \
 	UnitCell.h                          \
-	UnlockCmd.h                         \
-	UserInterface.h                     \
 	uuid_str.h                          \
 	VdW.h                               \
 	Wavefunction.h                      \
@@ -240,7 +197,6 @@ noinst_HEADERS =                            \
 	WfDiag.h                            \
 	WfDyn.h                             \
 	WfExtrap.h                          \
-	WFPhaseRealCmd.h                    \
 	WFPhaseRealVar.h                    \
 	Xc.h                                \
 	XCPotential.h                       \
@@ -248,131 +204,119 @@ noinst_HEADERS =                            \
 	XMLGFPreprocessor.h
 
 libqbLink_a_SOURCES =                       \
-	AtomSet.C                           \
-	Atom.C                              \
-	CoordinateConstraint.C              \
-	SymmetrySet.C                       \
-	Symmetry.C                          \
-	Species.C                           \
-	Wavefunction.C                      \
-	RMMDIISWavefunctionStepper.C        \
-	SlaterDet.C                         \
-	EnergyFunctional.C                  \
-	SampleStepper.C                     \
-	Basis.C                             \
-	CurrentDensity.C                    \
-	FourierTransform.C                  \
-	Context.C                           \
-	sinft.C                             \
-	UnitCell.C                          \
-	StructureFactor.C                   \
-	ChargeDensity.C                     \
-	UserInterface.C                     \
-	RunCmd.C                            \
-	LoadCmd.C                           \
-	SaveCmd.C                           \
-	SavesysCmd.C                        \
-	SavedenCmd.C                        \
-	SpeciesCmd.C                        \
-	SpeciesReader.C                     \
-	SpeciesHandler.C                    \
-	XCPotential.C                       \
-	NonLocalPotential.C                 \
-	SampleReader.C                      \
-	SampleWriter.C                      \
-	StructuredDocumentHandler.C         \
-	SampleHandler.C                     \
-	AtomSetHandler.C                    \
-	WavefunctionHandler.C               \
-	XMLGFPreprocessor.C                 \
-	Base64Transcoder.C                  \
-	CPSampleStepper.C                   \
-	BOSampleStepper.C                   \
-	ParOptCmd.C                         \
-	ParallelOptimizer.C                 \
-	WavefunctionStepper.C               \
-	SDWavefunctionStepper.C             \
-	MDWavefunctionStepper.C             \
-	SDIonicStepper.C                    \
-	MDIonicStepper.C                    \
-	BMDIonicStepper.C                   \
-	PSDWavefunctionStepper.C            \
-	PSDAWavefunctionStepper.C           \
-	JDWavefunctionStepper.C             \
-	SDCellStepper.C                     \
-	ConfinementPotential.C              \
-	Preconditioner.C                    \
-	SimpleConvergenceDetector.C         \
-	MMSpecies.C                         \
-	EmpiricalPotential.C                \
-	EnthalpyFunctional.C                \
-	ExtrapolatorASP.C                   \
-	ExtrapolatorNTC.C                   \
-	ExtrapolatorSimple.C                \
-	Hugoniostat.C                       \
-	release.C                           \
-	qbox_xmlns.C                        \
-	isodate.C                           \
-	ComputeMLWFCmd.C                    \
-	BasisMapping.C                      \
-	MLWFTransform.C                     \
-	jade.C                              \
-	ConstraintSet.C                     \
-	Constraint.C                        \
-	DistanceConstraint.C                \
-	PositionConstraint.C                \
-	AngleConstraint.C                   \
-	TorsionConstraint.C                 \
-	SaveESPCmd.C                        \
-	AndersonMixer.C                     \
-	SDAIonicStepper.C                   \
-	CGIonicStepper.C                    \
-	jacobi.C                            \
-	HubbardPotential.C                  \
-	SphericalIntegration.C              \
-	PrintMem.C                          \
-	PlotCmd.C                           \
-	SOTDWavefunctionStepper.C           \
-	SORKTDWavefunctionStepper.C         \
-	FORKTDWavefunctionStepper.C         \
-	TDEULERWavefunctionStepper.C        \
-	EhrenSampleStepper.C                \
-	MDSaveCmd.C                         \
-	FCPStepper.C                        \
-	ExponentialWavefunctionStepper.C    \
-	SelfConsistentPotential.C           \
+	AtomSet.cc                           \
+	Atom.cc                              \
+	CoordinateConstraint.cc              \
+	SymmetrySet.cc                       \
+	Symmetry.cc                          \
+	Species.cc                           \
+	Wavefunction.cc                      \
+	RMMDIISWavefunctionStepper.cc        \
+	SlaterDet.cc                         \
+	EnergyFunctional.cc                  \
+	SampleStepper.cc                     \
+	Basis.cc                             \
+	CurrentDensity.cc                    \
+	FourierTransform.cc                  \
+	Context.cc                           \
+	sinft.cc                             \
+	UnitCell.cc                          \
+	StructureFactor.cc                   \
+	ChargeDensity.cc                     \
+	SpeciesReader.cc                     \
+	SpeciesHandler.cc                    \
+	XCPotential.cc                       \
+	NonLocalPotential.cc                 \
+	SampleReader.cc                      \
+	SampleWriter.cc                      \
+	StructuredDocumentHandler.cc         \
+	SampleHandler.cc                     \
+	AtomSetHandler.cc                    \
+	WavefunctionHandler.cc               \
+	XMLGFPreprocessor.cc                 \
+	Base64Transcoder.cc                  \
+	CPSampleStepper.cc                   \
+	BOSampleStepper.cc                   \
+	ParallelOptimizer.cc                 \
+	WavefunctionStepper.cc               \
+	SDWavefunctionStepper.cc             \
+	MDWavefunctionStepper.cc             \
+	SDIonicStepper.cc                    \
+	MDIonicStepper.cc                    \
+	BMDIonicStepper.cc                   \
+	PSDWavefunctionStepper.cc            \
+	PSDAWavefunctionStepper.cc           \
+	JDWavefunctionStepper.cc             \
+	SDCellStepper.cc                     \
+	ConfinementPotential.cc              \
+	Preconditioner.cc                    \
+	SimpleConvergenceDetector.cc         \
+	MMSpecies.cc                         \
+	EmpiricalPotential.cc                \
+	EnthalpyFunctional.cc                \
+	ExtrapolatorASP.cc                   \
+	ExtrapolatorNTC.cc                   \
+	ExtrapolatorSimple.cc                \
+	Hugoniostat.cc                       \
+	release.cc                           \
+	qbox_xmlns.cc                        \
+	isodate.cc                           \
+	BasisMapping.cc                      \
+	MLWFTransform.cc                     \
+	jade.cc                              \
+	ConstraintSet.cc                     \
+	Constraint.cc                        \
+	DistanceConstraint.cc                \
+	PositionConstraint.cc                \
+	AngleConstraint.cc                   \
+	TorsionConstraint.cc                 \
+	AndersonMixer.cc                     \
+	SDAIonicStepper.cc                   \
+	CGIonicStepper.cc                    \
+	jacobi.cc                            \
+	HubbardPotential.cc                  \
+	SphericalIntegration.cc              \
+	PrintMem.cc                          \
+	SOTDWavefunctionStepper.cc           \
+	SORKTDWavefunctionStepper.cc         \
+	FORKTDWavefunctionStepper.cc         \
+	TDEULERWavefunctionStepper.cc        \
+	EhrenSampleStepper.cc                \
+	FCPStepper.cc                        \
+	ExponentialWavefunctionStepper.cc    \
+	SelfConsistentPotential.cc           \
 	clooper.c                           \
-	qbLink.C
+	qbLink.cc
 
 qball_SOURCES =                             \
-	qb.C
+	qb.cc
 
 qball_LDADD =                               \
 	$(all_LIBS)
 
 qball_nruns_SOURCES =                       \
-	qb-nruns.C
+	qb-nruns.cc
 
 qball_nruns_LDADD =                         \
 	$(all_LIBS)
 
 qball_setupkpts_SOURCES =                   \
-	qb-setupkpts.C                      \
-	SymOpSet.C                          \
-	SymOp.C
+	qb-setupkpts.cc                      \
+	SymOpSet.cc                          \
+	SymOp.cc
 
 qball_setupkpts_LDADD =                     \
 	$(all_LIBS)
 
 qballdiff_SOURCES =                         \
-	qbdiff.C
+	qbdiff.cc
 
 xmlSpecies_SOURCES =                        \
-	xmlSpecies.C                        \
-	qbox_xmlns.C
+	xmlSpecies.cc                        \
+	qbox_xmlns.cc
 
 xmlget_SOURCES =                            \
-	xmlget.C
+	xmlget.cc
 
 xmlextract_SOURCES =                        \
-	xmlextract.C
+	xmlextract.cc

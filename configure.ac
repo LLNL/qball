@@ -4,7 +4,7 @@
 AC_PREREQ([2.63])
 AC_INIT(qball, alsos, xavier@llnl.gov)
 AM_INIT_AUTOMAKE
-AC_CONFIG_SRCDIR([src/qball/FoldInWsCmd.h])
+AC_CONFIG_SRCDIR([src/ui/FoldInWsCmd.h])
 AC_CONFIG_HEADERS([config.h])
 
 AC_CONFIG_MACRO_DIR([m4])
@@ -227,6 +227,7 @@ AC_CONFIG_FILES([Makefile
 		 src/math/Makefile
                  src/pseudo/Makefile
                  src/functionals/Makefile
+		 src/ui/Makefile
 		 src/qball/Makefile
 		 src/tests/Makefile
                  testsuite/Makefile])
