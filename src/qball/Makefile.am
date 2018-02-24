@@ -33,7 +33,6 @@ noinst_HEADERS =                            \
 	BasisMapping.h                      \
 	blacs.h                             \
 	blas.h                              \
-	BLYPFunctional.h                    \
 	BMDIonicStepper.h                   \
 	BOSampleStepper.h                   \
 	CellDyn.h                           \
@@ -118,7 +117,6 @@ noinst_HEADERS =                            \
 	jade.h                              \
 	JDWavefunctionStepper.h             \
 	KpointCmd.h                         \
-	LDAFunctional.h                     \
 	LineMinimizer.h                     \
 	ListAtomsCmd.h                      \
 	ListConstraintsCmd.h                \
@@ -150,9 +148,6 @@ noinst_HEADERS =                            \
 	Nrowmax.h                           \
 	ParallelOptimizer.h                 \
 	ParOptCmd.h                         \
-	PBEFunctional.h                     \
-	PBERevFunctional.h                  \
-	PBESolFunctional.h                  \
 	Pblock.h                            \
 	PlotCmd.h                           \
 	PositionConstraint.h                \
@@ -249,7 +244,6 @@ noinst_HEADERS =                            \
 	WfExtrap.h                          \
 	WFPhaseRealCmd.h                    \
 	WFPhaseRealVar.h                    \
-	XCFunctional.h                      \
 	Xc.h                                \
 	XCPotential.h                       \
 	XMLFile.h                           \
@@ -286,11 +280,6 @@ libqbLink_a_SOURCES =                       \
 	SpeciesReader.C                     \
 	SpeciesHandler.C                    \
 	XCPotential.C                       \
-	LDAFunctional.C                     \
-	PBEFunctional.C                     \
-	PBESolFunctional.C                  \
-	PBERevFunctional.C                  \
-	BLYPFunctional.C                    \
 	NonLocalPotential.C                 \
 	SampleReader.C                      \
 	SampleWriter.C                      \

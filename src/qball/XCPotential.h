@@ -32,11 +32,11 @@
 #define XCPOTENTIAL_H
 
 #include "ChargeDensity.h"
-#include "LDAFunctional.h"
-#include "PBEFunctional.h"
-#include "PBESolFunctional.h"
-#include "PBERevFunctional.h"
-#include "BLYPFunctional.h"
+#include <functionals/LDAFunctional.h>
+#include <functionals/PBEFunctional.h>
+#include <functionals/PBESolFunctional.h>
+#include <functionals/PBERevFunctional.h>
+#include <functionals/BLYPFunctional.h>
 #include <vector>
 #include <valarray>
 #include <complex>
