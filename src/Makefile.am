@@ -1,3 +1,4 @@
 SUBDIRS =              \
 	pseudo         \
-	qball
+	qball          \
+	tests

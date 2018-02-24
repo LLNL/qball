@@ -45,9 +45,9 @@
 #include <valarray>
 #include <vector>
 #include <map>
-#include "blas.h"
-#include "omp.h"
-#include "Timer.h"
+#include <qball/blas.h>
+#include <omp.h>
+#include <qball/Timer.h>
 
 #ifdef HPM
 #include <bgpm/include/bgpm.h>

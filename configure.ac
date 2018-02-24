@@ -226,6 +226,7 @@ AC_CONFIG_FILES([Makefile
                  src/Makefile
                  src/pseudo/Makefile
 		 src/qball/Makefile
+		 src/tests/Makefile
                  testsuite/Makefile])
 
 AC_OUTPUT

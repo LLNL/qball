@@ -11,19 +11,7 @@ bin_PROGRAMS  =                             \
 	qballdiff                           \
 	xmlSpecies                          \
 	xmlget                              \
-	xmlextract                          \
-	testMatrix                          \
-	testBasis                           \
-	testRowBcast                        \
-	testFourierTransform                \
-	testBlas                            \
-	testGram                            \
-	testGramBlock                       \
-	testPgemm                           \
-	testPgemmBlock                      \
-	testPzheev                          \
-	testEigenSolvers                    \
-	testEigenBlock
+	xmlextract
 
 lib_LIBRARIES =                             \
 	libqbLink.a
@@ -374,14 +362,12 @@ qball_SOURCES =                             \
 	qb.C
 
 qball_LDADD =                               \
-	libqbLink.a                         \
 	$(all_LIBS)
 
 qball_nruns_SOURCES =                       \
 	qb-nruns.C
 
 qball_nruns_LDADD =                         \
-	libqbLink.a                         \
 	$(all_LIBS)
 
 qball_setupkpts_SOURCES =                   \
@@ -390,73 +376,10 @@ qball_setupkpts_SOURCES =                   \
 	SymOp.C
 
 qball_setupkpts_LDADD =                     \
-	libqbLink.a                         \
 	$(all_LIBS)
 
 qballdiff_SOURCES =                         \
 	qbdiff.C
-
-testMatrix_SOURCES =                        \
-	testMatrix.C                        \
-	Matrix.C                            \
-	Context.C
-
-testBasis_SOURCES =                         \
-	testBasis.C                         \
-	Basis.C                             \
-	UnitCell.C                          \
-	Context.C
-
-testRowBcast_SOURCES =                       \
-	testRowBcast.C                      \
-	Context.C
-
-testFourierTransform_SOURCES =              \
-	testFourierTransform.C              \
-	FourierTransform.C                  \
-	Basis.C                             \
-	UnitCell.C                          \
-	Context.C
-
-testBlas_SOURCES =                          \
-	testBlas.C
-
-testGram_SOURCES =                          \
-	testGram.C                          \
-	Matrix.C                            \
-	Context.C
-
-testGramBlock_SOURCES =                     \
-	testGramBlock.C                     \
-	Matrix.C                            \
-	Context.C
-
-testPgemm_SOURCES =                         \
-	testPgemm.C                         \
-	Matrix.C                            \
-	Context.C
-
-testPgemmBlock_SOURCES =                    \
-	testPgemmBlock.C                    \
-	Matrix.C                            \
-	Context.C
-
-testPzheev_SOURCES =                        \
-	testPzheev.C                        \
-	Matrix.C                            \
-	Context.C
-
-testEigenSolvers_SOURCES =                  \
-	testEigenSolvers.C                  \
-	Matrix.C                            \
-	Context.C                           \
-	jacobi.C
-
-testEigenBlock_SOURCES =                    \
-	testEigenBlock.C                    \
-	Matrix.C                            \
-	Context.C                           \
-	jacobi.C
 
 xmlSpecies_SOURCES =                        \
 	xmlSpecies.C                        \
