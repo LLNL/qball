@@ -30,10 +30,10 @@
 #include <iomanip>
 using namespace std;
 
-#include "Context.h"
-#include "Basis.h"
-#include "FourierTransform.h"
-#include "Timer.h"
+#include <qball/Context.h>
+#include <qball/Basis.h>
+#include <qball/FourierTransform.h>
+#include <qball/Timer.h>
 #ifdef HPM
 #include <bgpm/include/bgpm.h>
 extern "C" void HPM_Start(char *);

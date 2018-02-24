@@ -37,7 +37,7 @@
 #include <map>
 using namespace std;
 
-#include "Timer.h"
+#include <qball/Timer.h>
 
 #ifdef HPM
 #include <bgpm/include/bgpm.h>
@@ -49,8 +49,8 @@ extern "C" void HPM_Stop(char *);
 #include <mpi.h>
 #endif
 
-#include "Context.h"
-#include "Matrix.h"
+#include <qball/Context.h>
+#include <qball/Matrix.h>
 
 const double nrandinv = 1./(1.0*RAND_MAX + 1.0);
 const double maxrand = 0.0001;  // maximum random perturbation to identity matrix

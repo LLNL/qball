@@ -28,8 +28,8 @@
 
 #include <config.h>
 
-#include "Basis.h"
-#include "Context.h"
+#include <qball/Basis.h>
+#include <qball/Context.h>
 #include <iostream>
 #include <new>
 #include <cstdlib>

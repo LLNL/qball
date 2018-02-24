@@ -46,14 +46,14 @@
 #include <valarray>
 using namespace std;
 
-#include "Timer.h"
+#include <qball/Timer.h>
 
 #ifdef USE_MPI
 #include <mpi.h>
 #endif
 
-#include "Context.h"
-#include "Matrix.h"
+#include <qball/Context.h>
+#include <qball/Matrix.h>
 
 double aa(int i, int j) { return 1.0/(i+1)+2.0*i/(j+1); }
 double bb(int i, int j) { return i-j-3; }

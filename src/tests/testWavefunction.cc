@@ -28,10 +28,10 @@
 
 #include <config.h>
 
-#include "Context.h"
+#include <qball/Context.h>
 #include "Wavefunction.h"
 #include "SlaterDet.h"
-#include "Timer.h"
+#include <qball/Timer.h>
 
 #include <iostream>
 #include <cassert>

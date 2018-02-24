@@ -27,7 +27,7 @@
 #include <cstring>
 #include <string>
 using namespace std;
-#include "Context.h"
+#include <qball/Context.h>
 #include "D3vector.h"
 #include "EmpiricalPotential.h"
 

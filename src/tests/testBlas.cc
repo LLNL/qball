@@ -30,8 +30,8 @@
 #include <string>
 #include <vector>
 #include <omp.h>
-#include "blas.h"
-#include "Timer.h"
+#include <qball/blas.h>
+#include <qball/Timer.h>
 using namespace std;
 
 #ifdef HAVE_BGQLIBS

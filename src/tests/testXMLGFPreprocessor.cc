@@ -35,8 +35,8 @@
 #include <string>
 using namespace std;
 
-#include "Context.h"
-#include "Matrix.h"
+#include <qball/Context.h>
+#include <qball/Matrix.h>
 #include "XMLGFPreprocessor.h"
 
 int main(int argc, char** argv)

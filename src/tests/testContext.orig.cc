@@ -37,7 +37,7 @@ using namespace std;
 #include <mpi.h>
 #endif
 
-#include "Context.h"
+#include <qball/Context.h>
 
 int main(int argc, char **argv)
 {

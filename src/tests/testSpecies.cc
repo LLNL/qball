@@ -29,7 +29,7 @@
 #include <config.h>
 
 #include "Species.h"
-#include "Context.h"
+#include <qball/Context.h>
 #include "SpeciesReader.h"
 #include <iostream>
 #include <cassert>

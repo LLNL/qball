@@ -33,7 +33,7 @@
 #include <iostream>
 #include <vector>
 #include <mpi.h>
-#include "Context.h"
+#include <qball/Context.h>
 using namespace std;
 
 int main(int argc, char **argv)

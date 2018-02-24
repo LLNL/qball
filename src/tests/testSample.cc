@@ -31,7 +31,7 @@
 #include <iostream>
 using namespace std;
 
-#include "Context.h"
+#include <qball/Context.h>
 #include "SlaterDet.h"
 #include "Sample.h"
 #include "D3vector.h"

@@ -28,11 +28,11 @@
 
 #include <config.h>
 
-#include "Context.h"
-#include "Basis.h"
+#include <qball/Context.h>
+#include <qball/Basis.h>
 #include "UnitCell.h"
 #include "BasisMapping.h"
-#include "Timer.h"
+#include <qball/Timer.h>
 
 #include <iostream>
 #include <fstream>

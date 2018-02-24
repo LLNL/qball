@@ -28,10 +28,10 @@
 
 #include <config.h>
 
-#include "Context.h"
+#include <qball/Context.h>
 #include "SlaterDet.h"
-#include "FourierTransform.h"
-#include "Timer.h"
+#include <qball/FourierTransform.h>
+#include <qball/Timer.h>
 
 #include <iostream>
 #include <fstream>

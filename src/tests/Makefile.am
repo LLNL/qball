@@ -18,8 +18,7 @@ bin_PROGRAMS  =                             \
 	testEigenSolvers                    \
 	testEigenBlock
 
-AM_LDADD =                                   \
-	$(all_LIBS)
+LDADD = $(all_LIBS)
 
 testMatrix_SOURCES = testMatrix.cc
 testBasis_SOURCES = testBasis.cc

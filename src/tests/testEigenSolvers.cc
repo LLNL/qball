@@ -39,7 +39,7 @@
 #include <map>
 using namespace std;
 
-#include "Timer.h"
+#include <qball/Timer.h>
 #ifdef TAU
 #include "profile.h"
 #endif
@@ -52,9 +52,9 @@ extern "C" void HPM_Start(char *);
 extern "C" void HPM_Stop(char *);
 #endif
 
-#include "Context.h"
-#include "Matrix.h"
-#include "jacobi.h"
+#include <qball/Context.h>
+#include <qball/Matrix.h>
+#include <qball/jacobi.h>
 
 bool runsyevd = false;
 bool runjacobi = false;

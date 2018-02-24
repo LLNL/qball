@@ -28,7 +28,7 @@
 
 #include <config.h>
 
-#include "Timer.h"
+#include <qball/Timer.h>
 
 #include <iostream>
 #include <complex>

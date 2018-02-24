@@ -32,7 +32,7 @@
 #include <iostream>
 using namespace std;
 
-#include "Context.h"
+#include <qball/Context.h>
 #include "AndersonMixer.h"
 
 int main(int argc, char** argv)

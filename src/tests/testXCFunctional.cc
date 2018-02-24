@@ -38,7 +38,7 @@
 #include <vector>
 #include "LDAFunctional.h"
 #include "PBEFunctional.h"
-#include "Timer.h"
+#include <qball/Timer.h>
 #include <cassert>
 #include <cmath>
 using namespace std;

@@ -37,7 +37,7 @@
 #include <string>
 #include <cstring>
 using namespace std;
-#include "Context.h"
+#include <qball/Context.h>
 #ifdef USE_MPI
 #include <mpi.h>
 #endif

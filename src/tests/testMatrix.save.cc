@@ -47,7 +47,7 @@
 #include <map>
 using namespace std;
 
-#include "Timer.h"
+#include <qball/Timer.h>
 
 #ifdef USE_MPI
 #include <mpi.h>
@@ -57,8 +57,8 @@ using namespace std;
 #include "apc.h"
 #endif
 
-#include "Context.h"
-#include "Matrix.h"
+#include <qball/Context.h>
+#include <qball/Matrix.h>
 
 // mpi_trace functions
 //extern "C" {
