@@ -30,7 +30,6 @@
 #include <config.h>
 
 #include "Species.h"
-#include "Spline.h"
 #include "sinft.h"
 #include "SphericalIntegration.h"
 #include <cmath>

@@ -29,7 +29,7 @@
 #include <config.h>
 
 #include "Context.h"
-#include "Spline.h"
+#include <pseudo/Spline.h>
 #include "EmpiricalPotential.h"
 #include <iostream>
 #include <iomanip>
