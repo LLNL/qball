@@ -44,6 +44,11 @@ using namespace std;
 
 class CoordinatesCmd : public Cmd
 {
+
+private:
+
+  enum Format { XYZ, POSCAR };
+  
   public:
 
   Sample *s;
@@ -64,6 +69,14 @@ class CoordinatesCmd : public Cmd
 
   int action(int argc, char **argv){
 
+    Format file_format = XYZ;   
+    
+    
+    
+    
+
+    
+    
     string filename(argv[1]);
     
     // coordinates must be defined with either 2 or 3 arguments
