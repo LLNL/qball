@@ -23,7 +23,6 @@ noinst_HEADERS =                            \
 	AndersonMixer.h                     \
 	AngleConstraint.h                   \
 	Atom.h                              \
-	AtomsDyn.h                          \
 	AtomSet.h                           \
 	AtomSetHandler.h                    \
 	Base64Transcoder.h                  \
@@ -32,19 +31,9 @@ noinst_HEADERS =                            \
 	blacs.h                             \
 	BMDIonicStepper.h                   \
 	BOSampleStepper.h                   \
-	CellDyn.h                           \
-	Cell.h                              \
-	CellLock.h                          \
-	CellMass.h                          \
-	CellStepFreq.h                      \
 	CellStepper.h                       \
-	CenterOfMass.h                      \
 	CGIonicStepper.h                    \
 	ChargeDensity.h                     \
-	ChargeMixCoeff.h                    \
-	ChargeMixing.h                      \
-	ChargeMixNdim.h                     \
-	ChargeMixRcut.h                     \
 	ClebschGordan.h                     \
 	clooper.h                           \
 	ConfinementPotential.h              \
@@ -58,75 +47,39 @@ noinst_HEADERS =                            \
 	CurrentDensity.h                    \
 	dftd3.h                             \
 	D3vector.h                          \
-	Debug.h                             \
 	Dimensions.h                        \
 	DistanceConstraint.h                \
-	Dt.h                                \
-	Ecutden.h                           \
-	Ecut.h                              \
-	Ecutprec.h                          \
-	Ecuts.h                             \
 	EhrenSampleStepper.h                \
-	Emass.h                             \
 	EmpiricalPotential.h                \
 	EnergyFunctional.h                  \
 	EnthalpyFunctional.h                \
-	EnthalpyPressure.h                  \
-	EnthalpyThreshold.h                 \
-	EsmBC.h                             \
-	EsmW.h                              \
 	ExponentialWavefunctionStepper.h    \
 	Extrapolator.h                      \
 	ExtrapolatorASP.h                   \
 	ExtrapolatorNTC.h                   \
 	ExtrapolatorSimple.h                \
-	ExtStress.h                         \
-	FcpMu.h                             \
-	FcpPmass.h                          \
 	FCPStepper.h                        \
 	FcpThemostat.h                      \
-	FcpThermostat.h                     \
-	FcpThTemp.h                         \
-	FcpThTime.h                         \
-	FcpThWidth.h                        \
-	FermiTemp.h                         \
-	Force_Complex_WF.h                  \
 	FORKTDWavefunctionStepper.h         \
 	FOTDWavefunctionStepper.h           \
 	FourierTransform.h                  \
 	HubbardPotential.h                  \
-	HubbardU.h                          \
-	HugDeltaTemp.h                      \
-	HugFreq.h                           \
 	Hugoniostat.h                       \
-	HugoniostatVar.h                    \
 	IonicStepper.h                      \
-	IPrint.h                            \
 	isodate.h                           \
 	jacobi.h                            \
 	jade.h                              \
 	JDWavefunctionStepper.h             \
 	LineMinimizer.h                     \
-	MatrixLoc.h                         \
 	MDIonicStepper.h                    \
-	MDIter.h                            \
 	MDWavefunctionStepper.h             \
-	Memory.h                            \
 	Messages.h                          \
 	MLWFTransform.h                     \
 	MMSpecies.h                         \
 	NameOf.h                            \
-	NA_overlaps.h                       \
-	Nempty.h                            \
-	NetCharge.h                         \
-	Nkpoints.h                          \
 	NonLocalPotential.h                 \
 	NonLocalPotential.save.h            \
-	Non_Selfconsistent_Energy_Output.h  \
-	Nparallelkpts.h                     \
-	Nrowmax.h                           \
 	ParallelOptimizer.h                 \
-	Pblock.h                            \
 	PositionConstraint.h                \
 	Preconditioner.h                    \
 	PrintMem.h                          \
@@ -136,17 +89,12 @@ noinst_HEADERS =                            \
 	qbox_xmlns.h                        \
 	RMMDIISWavefunctionStepper.h        \
 	readTSC.h                           \
-	RefCell.h                           \
 	release.h                           \
-	RunTimer.h                          \
 	Sample.h                            \
 	SampleHandler.h                     \
 	SampleReader.h                      \
 	SampleStepper.h                     \
 	SampleWriter.h                      \
-	SaveDenFreq.h                       \
-	SaveFreq.h                          \
-	SaveWfFreq.h                        \
 	SDAIonicStepper.h                   \
 	SDCellStepper.h                     \
 	SDIonicStepper.h                    \
@@ -156,17 +104,12 @@ noinst_HEADERS =                            \
 	SimpleConvergenceDetector.h         \
 	sinft.h                             \
 	SlaterDet.h                         \
-	Smearing.h                          \
-	SmearingWidth.h                     \
 	SORKTDWavefunctionStepper.h         \
 	SOTDWavefunctionStepper.h           \
 	Species.h                           \
 	SpeciesHandler.h                    \
 	SpeciesReader.h                     \
 	SphericalIntegration.h              \
-	Spin.h                              \
-	StandardVar.h                       \
-	Stress.h                            \
 	StructuredDocumentHandler.h         \
 	StructureFactor.h                   \
 	StructureHandler.h                  \
@@ -175,30 +118,16 @@ noinst_HEADERS =                            \
 	SymmetrySet.h                       \
 	SymOp.h                             \
 	SymOpSet.h                          \
-	TDDt.h                              \
 	TDEULERWavefunctionStepper.h        \
 	TestHandler.h                       \
-	Thermostat.h                        \
-	ThresholdForce.h                    \
-	ThresholdScf.h                      \
-	ThresholdStress.h                   \
-	ThTemp.h                            \
-	ThTime.h                            \
-	ThWidth.h                           \
 	Timer.h                             \
 	TorsionConstraint.h                 \
 	Unit.h                              \
 	UnitCell.h                          \
 	uuid_str.h                          \
-	VdW.h                               \
 	Wavefunction.h                      \
 	WavefunctionHandler.h               \
 	WavefunctionStepper.h               \
-	WfDiag.h                            \
-	WfDyn.h                             \
-	WfExtrap.h                          \
-	WFPhaseRealVar.h                    \
-	Xc.h                                \
 	XCPotential.h                       \
 	XMLFile.h                           \
 	XMLGFPreprocessor.h

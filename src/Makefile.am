@@ -3,5 +3,6 @@ SUBDIRS =              \
 	pseudo         \
 	functionals    \
 	ui             \
+	vars           \
 	qball          \
 	tests

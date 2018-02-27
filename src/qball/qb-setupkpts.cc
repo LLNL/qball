@@ -39,8 +39,8 @@
 #include <ui/AtomCmd.h>
 #include <ui/SpeciesCmd.h>
 #include <ui/SetCmd.h>
-#include "Cell.h"
-#include "RefCell.h"
+#include <vars/Cell.h>
+#include <vars/RefCell.h>
 #include <qball/UnitCell.h>
 #include "Basis.h"
 
