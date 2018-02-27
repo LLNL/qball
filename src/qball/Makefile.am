@@ -59,7 +59,6 @@ noinst_HEADERS =                            \
 	ExtrapolatorNTC.h                   \
 	ExtrapolatorSimple.h                \
 	FCPStepper.h                        \
-	FcpThemostat.h                      \
 	FORKTDWavefunctionStepper.h         \
 	FOTDWavefunctionStepper.h           \
 	FourierTransform.h                  \
