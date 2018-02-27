@@ -32,7 +32,7 @@
 #define SYMOP_H
 
 #include "D3vector.h"
-#include "UnitCell.h"
+#include <qball/UnitCell.h>
 #include <vector>
 using namespace std;
 

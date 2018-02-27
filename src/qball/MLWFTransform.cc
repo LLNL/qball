@@ -37,7 +37,7 @@
 #include "D3vector.h"
 #include "Basis.h"
 #include "SlaterDet.h"
-#include "UnitCell.h"
+#include <qball/UnitCell.h>
 #include "jade.h"
 #include <math/blas.h>
 using namespace std;

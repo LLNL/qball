@@ -37,7 +37,7 @@
 #include "MMSpecies.h"
 #include "EmpiricalPotential.h"
 #include "SymmetrySet.h"
-#include "UnitCell.h"
+#include <qball/UnitCell.h>
 #include <vector>
 #include <string>
 #include <list>

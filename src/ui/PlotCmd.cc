@@ -29,7 +29,7 @@
 
 #include <config.h>
 
-#include "PlotCmd.h"
+#include <ui/PlotCmd.h>
 #include <qball/isodate.h>
 #include <qball/release.h>
 

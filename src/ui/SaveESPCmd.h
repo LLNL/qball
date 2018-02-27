@@ -35,7 +35,7 @@
 #include <stdlib.h>
 #include <string>
 
-#include "UserInterface.h"
+#include <ui/UserInterface.h>
 #include <qball/Sample.h>
 
 class SaveESPCmd : public Cmd

@@ -34,7 +34,7 @@
 #include "AtomSet.h"
 #include "Species.h"
 #include "SpeciesHandler.h"
-#include "SpeciesReader.h"
+#include <qball/SpeciesReader.h>
 #include "StrX.h"
 #include "SampleReader.h"
 using namespace xercesc;

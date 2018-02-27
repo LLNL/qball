@@ -29,19 +29,19 @@
 
 #include <config.h>
 
-#include "UserInterface.h"
+#include <ui/UserInterface.h>
 #include "Context.h"
 #include "Sample.h"
 #include "AtomSet.h"
 #include "SymOpSet.h"
 #include "SymOp.h"
 
-#include "AtomCmd.h"
-#include "SpeciesCmd.h"
-#include "SetCmd.h"
+#include <ui/AtomCmd.h>
+#include <ui/SpeciesCmd.h>
+#include <ui/SetCmd.h>
 #include "Cell.h"
 #include "RefCell.h"
-#include "UnitCell.h"
+#include <qball/UnitCell.h>
 #include "Basis.h"
 
 #include <cassert>

@@ -30,7 +30,7 @@
 
 #include "StructureFactor.h"
 #include "Basis.h"
-#include "UnitCell.h"
+#include <qball/UnitCell.h>
 #include <cstring>
 #include <cassert>
 

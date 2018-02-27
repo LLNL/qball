@@ -28,7 +28,7 @@
 
 #include <config.h>
 
-#include "UserInterface.h"
+#include <ui/UserInterface.h>
 #include <qball/Context.h>
 #include <string>
 #include <list>

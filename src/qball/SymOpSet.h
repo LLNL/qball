@@ -33,7 +33,7 @@
 
 #include "D3vector.h"
 #include "SymOp.h"
-#include "UnitCell.h"
+#include <qball/UnitCell.h>
 #include <vector>
 using namespace std;
 

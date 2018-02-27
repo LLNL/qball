@@ -31,7 +31,7 @@
 #ifndef CONSTRAINTCMD_H
 #define CONSTRAINTCMD_H
 
-#include "UserInterface.h"
+#include <ui/UserInterface.h>
 #include <qball/Sample.h>
 
 class ConstraintCmd : public Cmd

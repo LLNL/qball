@@ -33,7 +33,7 @@
 #define SHIFT_WF_CMD_H
 
 #include <iostream>
-#include "UserInterface.h"
+#include <ui/UserInterface.h>
 #include <qball/Sample.h>
 #include <cstdlib>
 

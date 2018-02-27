@@ -32,7 +32,7 @@
 #define WAVEFUNCTION_H
 
 #include "D3vector.h"
-#include "UnitCell.h"
+#include <qball/UnitCell.h>
 #include "AtomSet.h"
 #include "SharedFilePtr.h"
 #include "Timer.h"

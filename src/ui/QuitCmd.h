@@ -36,7 +36,7 @@
 #include <iomanip>
 #include <time.h>
 
-#include "UserInterface.h"
+#include <ui/UserInterface.h>
 #include <qball/Sample.h>
 
 class QuitCmd : public Cmd

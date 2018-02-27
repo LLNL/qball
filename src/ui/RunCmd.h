@@ -32,7 +32,7 @@
 #define RUNCMD_H
 
 #include <iostream>
-#include "UserInterface.h"
+#include <ui/UserInterface.h>
 #include <qball/Sample.h>
 
 class RunCmd : public Cmd

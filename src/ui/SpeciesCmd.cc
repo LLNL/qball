@@ -29,7 +29,7 @@
 #include <config.h>
 
 #include "SpeciesCmd.h"
-#include "SpeciesReader.h"
+#include <qball/SpeciesReader.h>
 #include <qball/Species.h>
 using namespace std;
 

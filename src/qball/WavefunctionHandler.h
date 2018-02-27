@@ -32,7 +32,7 @@
 #define WavefunctionHANDLER_H
 
 #include "StructureHandler.h"
-#include "UnitCell.h"
+#include <qball/UnitCell.h>
 #include "Wavefunction.h"
 #include "SlaterDet.h"
 

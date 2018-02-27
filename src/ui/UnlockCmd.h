@@ -36,7 +36,7 @@
 #include <string>
 using namespace std;
 
-#include "UserInterface.h"
+#include <ui/UserInterface.h>
 #include <qball/Sample.h>
 #include <qball/Species.h>
 #include "MMSpecies.h"

@@ -35,7 +35,7 @@
 #include "EnergyFunctional.h"
 #include "Sample.h"
 #include "Wavefunction.h"
-#include "PlotCmd.h"
+#include <ui/PlotCmd.h>
 #include <deque>
 #include "CurrentDensity.h"
 

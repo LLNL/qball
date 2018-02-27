@@ -37,7 +37,7 @@
 
 using namespace std;
 
-#include "UserInterface.h"
+#include <ui/UserInterface.h>
 
 class StandardVar : public Var {
 public:

@@ -22,7 +22,7 @@
 #include "CurrentDensity.h"
 #include "D3vector.h"
 #include "Basis.h"
-#include "UnitCell.h"
+#include <qball/UnitCell.h>
 #include "SlaterDet.h"
 #include <fstream>
 #include "isodate.h"

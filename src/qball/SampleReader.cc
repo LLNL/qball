@@ -32,7 +32,7 @@
 
 #include "Sample.h"
 #include "SampleReader.h"
-#include "SpeciesReader.h"
+#include <qball/SpeciesReader.h>
 #include "Species.h"
 #include "Basis.h"
 #include "FourierTransform.h"

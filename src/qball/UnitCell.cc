@@ -28,7 +28,7 @@
 
 #include <config.h>
 
-#include "UnitCell.h"
+#include <qball/UnitCell.h>
 #include <iostream>
 #include <iomanip>
 using namespace std;

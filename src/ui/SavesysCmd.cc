@@ -35,7 +35,7 @@
 #include <qball/release.h>
 #include <qball/qbox_xmlns.h>
 
-#include "UnitCell.h"
+#include <qball/UnitCell.h>
 
 using namespace std;
 
