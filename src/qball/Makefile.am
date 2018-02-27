@@ -70,7 +70,6 @@ noinst_HEADERS =                            \
 	jacobi.h                            \
 	jade.h                              \
 	JDWavefunctionStepper.h             \
-	LineMinimizer.h                     \
 	MDIonicStepper.h                    \
 	MDWavefunctionStepper.h             \
 	Messages.h                          \
