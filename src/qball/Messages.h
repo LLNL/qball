@@ -31,7 +31,7 @@
 #ifndef MESSAGES_H
 #define MESSAGES_H
 
-#include <math/D3vector.h>
+#include <math/d3vector.h>
 #include <string>
 using namespace std;
 

@@ -31,7 +31,7 @@
 #ifndef WAVEFUNCTION_H
 #define WAVEFUNCTION_H
 
-#include <math/D3vector.h>
+#include <math/d3vector.h>
 #include <qball/UnitCell.h>
 #include "AtomSet.h"
 #include "SharedFilePtr.h"

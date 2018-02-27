@@ -31,7 +31,7 @@
 #ifndef SYMOP_H
 #define SYMOP_H
 
-#include <math/D3vector.h>
+#include <math/d3vector.h>
 #include <qball/UnitCell.h>
 #include <vector>
 using namespace std;

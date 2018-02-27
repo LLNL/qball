@@ -45,7 +45,7 @@
 #endif
 
 #include "Context.h"
-#include <math/Matrix.h>
+#include <math/matrix.h>
 #include <math/blas.h>
 #include "Timer.h"
 using namespace std;

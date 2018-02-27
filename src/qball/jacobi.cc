@@ -45,7 +45,7 @@ using namespace std;
 #endif
 
 #include "Context.h"
-#include <math/Matrix.h>
+#include <math/matrix.h>
 #include <math/blas.h>
 
 int jacobi(int maxsweep, double threshold, DoubleMatrix& a, DoubleMatrix& u,

@@ -32,7 +32,7 @@
 #define CGIONICSTEPPER_H
 
 #include "IonicStepper.h"
-#include <math/LineMinimizer.h>
+#include <math/lineminimizer.h>
 #include <vector>
 
 class CGIonicStepper : public IonicStepper

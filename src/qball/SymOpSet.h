@@ -31,7 +31,7 @@
 #ifndef SYMOPSET_H
 #define SYMOPSET_H
 
-#include <math/D3vector.h>
+#include <math/d3vector.h>
 #include "SymOp.h"
 #include <qball/UnitCell.h>
 #include <vector>

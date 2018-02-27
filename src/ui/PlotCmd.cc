@@ -44,7 +44,7 @@
 #include <qball/Basis.h>
 #include <qball/FourierTransform.h>
 #include <qball/SlaterDet.h>
-#include <math/Matrix.h>
+#include <math/matrix.h>
 #include <qball/Species.h>
 #include <qball/Atom.h>
 #include <qball/ChargeDensity.h>

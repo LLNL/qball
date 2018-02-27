@@ -35,7 +35,7 @@
 #include "Basis.h"
 #include "SlaterDet.h"
 #include "Context.h"
-#include <math/Matrix.h>
+#include <math/matrix.h>
 
 class NonLocalPotential
 {

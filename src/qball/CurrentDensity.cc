@@ -20,7 +20,7 @@
 #include <vector>
 #include <valarray>
 #include "CurrentDensity.h"
-#include <math/D3vector.h>
+#include <math/d3vector.h>
 #include "Basis.h"
 #include <qball/UnitCell.h>
 #include "SlaterDet.h"

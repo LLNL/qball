@@ -31,7 +31,7 @@
 #ifndef SYMMETRY_H
 #define SYMMETRY_H
 
-#include <math/D3vector.h>
+#include <math/d3vector.h>
 #include <string>
 using namespace std;
 

@@ -35,8 +35,8 @@
 #include "SymmetrySet.h"
 #include "Wavefunction.h"
 #include "Context.h"
-#include <math/Matrix.h>
-#include <math/D3vector.h>
+#include <math/matrix.h>
+#include <math/d3vector.h>
 
 class HubbardPotential
 {

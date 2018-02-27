@@ -32,7 +32,7 @@
 #define SDAIONICSTEPPER_H
 
 #include "IonicStepper.h"
-#include <math/LineMinimizer.h>
+#include <math/lineminimizer.h>
 #include <vector>
 
 class SDAIonicStepper : public IonicStepper

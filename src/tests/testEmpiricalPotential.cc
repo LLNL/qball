@@ -28,7 +28,7 @@
 #include <string>
 using namespace std;
 #include <qball/Context.h>
-#include <math/D3vector.h>
+#include <math/d3vector.h>
 #include "EmpiricalPotential.h"
 
 #ifdef USE_MPI

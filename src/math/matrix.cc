@@ -42,7 +42,7 @@ using namespace std;
 #endif
 
 
-#include "Matrix.h"
+#include "matrix.h"
 #include <qball/profile.h>
 
 #define numroc     FC_FUNC(numroc, NUMROC)

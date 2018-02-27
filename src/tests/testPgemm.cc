@@ -36,7 +36,7 @@
 #include <map>
 #include <qball/Timer.h>
 #include <qball/Context.h>
-#include <math/Matrix.h>
+#include <math/matrix.h>
 #ifdef USE_MPI
 #include <mpi.h>
 #endif

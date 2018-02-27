@@ -30,7 +30,7 @@
 
 #include "NonLocalPotential.h"
 #include "Species.h"
-#include <math/Matrix.h>
+#include <math/matrix.h>
 #include "PrintMem.h"
 #include <math/blas.h>
 #include <iomanip>

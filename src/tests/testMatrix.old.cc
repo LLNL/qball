@@ -53,7 +53,7 @@ using namespace std;
 #endif
 
 #include <qball/Context.h>
-#include <math/Matrix.h>
+#include <math/matrix.h>
 
 double aa(int i, int j) { return 1.0/(i+1)+2.0*i/(j+1); }
 double bb(int i, int j) { return i-j-3; }

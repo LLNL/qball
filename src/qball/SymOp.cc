@@ -29,7 +29,7 @@
 #include <config.h>
 
 #include "SymOp.h"
-#include <math/D3vector.h>
+#include <math/d3vector.h>
 #include <iomanip>
 using namespace std;
 

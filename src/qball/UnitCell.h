@@ -31,7 +31,7 @@
 #ifndef UNITCELL_H
 #define UNITCELL_H
 
-#include <math/D3vector.h>
+#include <math/d3vector.h>
 #include <valarray>
 using namespace std;
 

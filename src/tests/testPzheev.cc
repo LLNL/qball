@@ -45,7 +45,7 @@ using namespace std;
 #endif
 
 #include <qball/Context.h>
-#include <math/Matrix.h>
+#include <math/matrix.h>
 
 bool runheevr = false;
 bool runheevx = false;

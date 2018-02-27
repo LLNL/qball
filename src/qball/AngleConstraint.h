@@ -32,7 +32,7 @@
 #define ANGLECONSTRAINT_H
 
 #include "Constraint.h"
-#include <math/D3vector.h>
+#include <math/d3vector.h>
 #include <cassert>
 
 class AtomSet;
