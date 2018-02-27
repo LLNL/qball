@@ -32,7 +32,7 @@
 #ifndef BASIS_H
 #define BASIS_H
 
-#include "D3vector.h"
+#include <math/D3vector.h>
 #include <qball/UnitCell.h>
 #include "Context.h"
 #include <vector>

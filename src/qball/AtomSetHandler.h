@@ -32,7 +32,7 @@
 #define ATOMSETHANDLER_H
 
 #include "StructureHandler.h"
-#include "D3vector.h"
+#include <math/D3vector.h>
 #include <string>
 
 class AtomSet;

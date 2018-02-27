@@ -36,7 +36,7 @@
 class SlaterDet;
 class UnitCell;
 class DoubleMatrix;
-#include "D3vector.h"
+#include <math/D3vector.h>
 #include "BasisMapping.h"
 
 class MLWFTransform

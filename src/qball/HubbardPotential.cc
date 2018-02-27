@@ -34,7 +34,7 @@
 #include "Species.h"
 #include "Basis.h"
 #include <math/blas.h>
-#include "D3vector.h"
+#include <math/D3vector.h>
 #include <iomanip>
 #include <vector>
 using namespace std;

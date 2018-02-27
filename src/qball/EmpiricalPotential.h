@@ -32,7 +32,7 @@
 #define EMPIRICALPOTENTIAL_H
 
 #include "Context.h"
-#include "D3vector.h"
+#include <math/D3vector.h>
 #include <string>
 #include <vector>
 using namespace std;

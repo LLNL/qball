@@ -36,7 +36,7 @@ class FourierTransform;
 #include "Basis.h"
 #include <math/Matrix.h>
 
-#include "D3vector.h"
+#include <math/D3vector.h>
 #include <vector>
 #include <iostream>
 #include "Timer.h"

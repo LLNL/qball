@@ -34,7 +34,7 @@
 #include <cassert>
 
 #include "MLWFTransform.h"
-#include "D3vector.h"
+#include <math/D3vector.h>
 #include "Basis.h"
 #include "SlaterDet.h"
 #include <qball/UnitCell.h>

@@ -36,7 +36,7 @@
 #include "Wavefunction.h"
 #include "Context.h"
 #include <math/Matrix.h>
-#include "D3vector.h"
+#include <math/D3vector.h>
 
 class HubbardPotential
 {

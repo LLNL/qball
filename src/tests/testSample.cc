@@ -34,7 +34,7 @@ using namespace std;
 #include <qball/Context.h>
 #include "SlaterDet.h"
 #include "Sample.h"
-#include "D3vector.h"
+#include <math/D3vector.h>
 
 int main(int argc, char** argv)
 {

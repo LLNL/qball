@@ -31,7 +31,7 @@
 #ifndef ATOM_H
 #define ATOM_H
 
-#include "D3vector.h"
+#include <math/D3vector.h>
 #include <string>
 using namespace std;
 

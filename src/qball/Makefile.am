@@ -46,7 +46,6 @@ noinst_HEADERS =                            \
 	CPSampleStepper.h                   \
 	CurrentDensity.h                    \
 	dftd3.h                             \
-	D3vector.h                          \
 	Dimensions.h                        \
 	DistanceConstraint.h                \
 	EhrenSampleStepper.h                \

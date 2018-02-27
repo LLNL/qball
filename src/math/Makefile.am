@@ -5,8 +5,9 @@ lib_LIBRARIES =                             \
 
 noinst_HEADERS =                            \
 	blas.h                              \
-	Matrix.h                            \
-	LineMinimizer.h
+	D3vector.h                          \
+	LineMinimizer.h                     \
+	Matrix.h                            
 
 libmath_a_SOURCES =                         \
 	Matrix.cc
