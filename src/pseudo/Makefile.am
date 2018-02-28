@@ -4,7 +4,7 @@ lib_LIBRARIES =                             \
 	libpseudo.a
 
 noinst_HEADERS =                            \
-	Spline.h
+	spline.h
 
 libpseudo_a_SOURCES =                       \
-	Spline.cc
+	spline.cc

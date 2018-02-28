@@ -1,3 +1,4 @@
+
 ////////////////////////////////////////////////////////////////////////////////  
 // Copyright (c) 2013, Lawrence Livermore National Security, LLC. 
 // qb@ll:  Qbox at Lawrence Livermore
@@ -28,7 +29,7 @@
  *
  ******************************************************************************/
 
-#include "Spline.h"
+#include "spline.h"
 #include <assert.h>
 //ewd DEBUG
 #include <iostream>

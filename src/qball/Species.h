@@ -39,7 +39,7 @@
 using namespace std;
 #include "Context.h"
 #include "Basis.h"
-#include <pseudo/Spline.h>
+#include <pseudo/spline.h>
 
 class Species {
   private:
