@@ -1,3 +1,4 @@
+#include <vector>
 
 namespace pseudopotential {
 

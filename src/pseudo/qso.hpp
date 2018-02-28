@@ -8,7 +8,7 @@
 namespace pseudopotential {
 
   template <typename Type>
-  static Type value(const rapidxml::xml_node<> * node){
+  static Type value(const rapidxml::xml_base<> * node){
     assert(node);
     std::istringstream stst(node->value());
     Type value;
@@ -32,11 +32,17 @@ namespace pseudopotential {
       pseudo_node_ = root_node_->first_node("ultrasoft_pseudopotential");
       if(pseudo_node_) type_ = type::ULTRASOFT;
 
-      pseudo_node_ = root_node_->first_node("norm_conserving_semilocal_pseudopotential");
-      if(pseudo_node_) type_ = type::NORM_CONSERVING_SEMILOCAL;
-      
-      pseudo_node_ = root_node_->first_node("norm_conserving_pseudopotential");
-      if(pseudo_node_) type_ = type::NORM_CONSERVING;
+      if(!pseudo_node_){
+	pseudo_node_ = root_node_->first_node("norm_conserving_semilocal_pseudopotential");
+	if(pseudo_node_) type_ = type::NORM_CONSERVING_SEMILOCAL;
+      }
+
+      if(!pseudo_node_){
+	pseudo_node_ = root_node_->first_node("norm_conserving_pseudopotential");
+	if(pseudo_node_) type_ = type::NORM_CONSERVING;
+      }
+
+      assert(pseudo_node_);
       
     }
 
@@ -85,6 +91,18 @@ namespace pseudopotential {
     int nbeta() const {
       return value<int>(pseudo_node_->first_node("nbeta"));
     }
+
+    void local_potential(std::vector<double> & potential) const {
+      rapidxml::xml_node<> * node = pseudo_node_->first_node("local_potential");
+      assert(node);
+      int size = value<int>(node->first_attribute("size"));
+      potential.resize(size);
+      std::istringstream stst(node->value());
+      for(int ii = 0; ii < size; ii++){
+	stst >> potential[ii];
+      }
+    }
+   
     
   private:
 

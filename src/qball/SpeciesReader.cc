@@ -172,13 +172,8 @@ void SpeciesReader::readSpecies_new (Species& sp, const string uri)
 
       // read the local potential
       if(pseudo.type() == pseudopotential::type::NORM_CONSERVING_SEMILOCAL){
-	XMLFile::Tag tag = xml_file.next_tag("local_potential");
-	int size;
-	tag.get_attribute("size", size);
-	sp.vloc_.resize(size);
-	tag.get_value(sp.vloc_.begin(), sp.vloc_.begin() + size);
-	cout << "  <!-- SpeciesReader::readSpecies: read " << tag.name()
-	     << " size=" << size << " -->" << endl;
+	pseudo.local_potential(sp.vloc_);
+	cout << "  <!-- SpeciesReader::readSpecies: read local_potential size=" << sp.vloc_.size() << " -->" << endl;
       }
       
       for ( int l = 0; l < sp.lmax_ + 1; l++ )
