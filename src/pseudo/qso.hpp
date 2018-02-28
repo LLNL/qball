@@ -78,6 +78,14 @@ namespace pseudopotential {
       return value<double>(pseudo_node_->first_node("rquad"));
     }
 
+    double mesh_spacing() const {
+      return value<double>(pseudo_node_->first_node("mesh_spacing"));
+    }
+
+    int nbeta() const {
+      return value<int>(pseudo_node_->first_node("nbeta"));
+    }
+    
   private:
 
     ifstream file_;

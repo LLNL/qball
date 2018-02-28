@@ -144,7 +144,7 @@ void SpeciesReader::readSpecies_new (Species& sp, const string uri)
       sp.nquad_ = 0;
     }
 
-    if (pseudo.type() == pseudopotential::type::NORM_CONSERVING) { 
+    if(pseudo.type() == pseudopotential::type::NORM_CONSERVING) { 
 
       sp.llocal_ = pseudo.llocal();
       cout << "  <!-- SpeciesReader::readSpecies: read llocal " << sp.llocal_ << " -->" << endl;
@@ -157,29 +157,21 @@ void SpeciesReader::readSpecies_new (Species& sp, const string uri)
 
     }
 
-    {
-      XMLFile::Tag tag = xml_file.next_tag("mesh_spacing");
-      tag.get_value(sp.deltar_);
-      cout << "  <!-- SpeciesReader::readSpecies: read " << tag.name() << " "
-	   << sp.deltar_
-	   << " -->" << endl;
-    }
-    
-    if (ultrasoft) {
-      XMLFile::Tag tag = xml_file.next_tag("nbeta");
-      tag.get_value(sp.nbeta_);
-      cout << "  <!-- SpeciesReader::readSpecies: read " << tag.name() << " "
-	   << sp.nbeta_
-	   << " -->" << endl;
+    sp.deltar_ = pseudo.mesh_spacing();
+    cout << "  <!-- SpeciesReader::readSpecies: read mesh_spacing " << sp.deltar_ << " -->" << endl;
+
+    if(pseudo.type() == pseudopotential::type::ULTRASOFT) {
+      sp.nbeta_ = pseudo.nbeta();
+      cout << "  <!-- SpeciesReader::readSpecies: read nbeta" << sp.nbeta_ << " -->" << endl;
     }
 
     sp.nchannels_ = 1;
-    if (oncv) sp.nchannels_ = 2;
+    if (pseudo.type() == pseudopotential::type::NORM_CONSERVING_SEMILOCAL) sp.nchannels_ = 2;
     
-    if (!ultrasoft) {
+    if (pseudo.type() != pseudopotential::type::ULTRASOFT) {
 
       // read the local potential
-      if(oncv){
+      if(pseudo.type() == pseudopotential::type::NORM_CONSERVING_SEMILOCAL){
 	XMLFile::Tag tag = xml_file.next_tag("local_potential");
 	int size;
 	tag.get_attribute("size", size);
