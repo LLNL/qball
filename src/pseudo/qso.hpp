@@ -6,6 +6,14 @@
 
 namespace pseudopotential {
 
+  template <typename Type>
+  static Type value(const rapidxml::xml_node<> * node){
+    std::istringstream stst(node->value());
+    Type value;
+    stst >> value;
+    return value;
+  }
+
   class qso : public pseudopotential::base {
 
   public:
@@ -29,6 +37,33 @@ namespace pseudopotential {
       if(pseudo_node_) type_ = type::NORM_CONSERVING;
       
     }
+
+    int size() const { return buffer_.size(); };
+
+    std::string description() const {
+      return root_node_->first_node("description")->value();
+    }
+    
+    std::string symbol() const {
+      return root_node_->first_node("symbol")->value();
+    }
+
+    int atomic_number() const {
+      return value<int>(root_node_->first_node("atomic_number"));
+    }
+
+    double mass() const {
+      return value<double>(root_node_->first_node("mass"));
+    }
+    
+    int valence_charge() const {
+      return value<int>(pseudo_node_->first_node("valence_charge"));
+    }
+
+    int lmax() const {
+      return value<int>(pseudo_node_->first_node("lmax"));
+    }
+    
 
   private:
 
