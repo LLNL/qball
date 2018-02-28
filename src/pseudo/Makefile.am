@@ -4,6 +4,8 @@ lib_LIBRARIES =                             \
 	libpseudo.a
 
 noinst_HEADERS =                            \
+	base.hpp                            \
+	qso.hpp                             \
 	spline.h
 
 libpseudo_a_SOURCES =                       \
