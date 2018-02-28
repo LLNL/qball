@@ -144,30 +144,17 @@ void SpeciesReader::readSpecies_new (Species& sp, const string uri)
       sp.nquad_ = 0;
     }
 
-    if (!ultrasoft && !oncv) { 
-      {
-	XMLFile::Tag tag = xml_file.next_tag("llocal");
-        tag.get_value(sp.llocal_);
-	cout << "  <!-- SpeciesReader::readSpecies: read " << tag.name() << " "
-	     << sp.llocal_
-	     << " -->" << endl;
-      }
+    if (pseudo.type() == pseudopotential::type::NORM_CONSERVING) { 
 
-      {
-	XMLFile::Tag tag = xml_file.next_tag("nquad");
-	tag.get_value(sp.nquad_);
-	cout << "  <!-- SpeciesReader::readSpecies: read " << tag.name() << " "
-	     << sp.nquad_
-	     << " -->" << endl;
-      }
+      sp.llocal_ = pseudo.llocal();
+      cout << "  <!-- SpeciesReader::readSpecies: read llocal " << sp.llocal_ << " -->" << endl;
 
-      {
-	XMLFile::Tag tag = xml_file.next_tag("rquad");
-	tag.get_value(sp.rquad_);
-	cout << "  <!-- SpeciesReader::readSpecies: read " << tag.name() << " "
-	     << sp.rquad_
-	     << " -->" << endl;
-      }
+      sp.nquad_ = pseudo.nquad();
+      cout << "  <!-- SpeciesReader::readSpecies: read nquad " << sp.nquad_ << " -->" << endl;
+
+      sp.rquad_ = pseudo.rquad();
+      cout << "  <!-- SpeciesReader::readSpecies: read rquad " << sp.rquad_ << " -->" << endl;
+
     }
 
     {

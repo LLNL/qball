@@ -1,5 +1,6 @@
 #include <fstream>
 #include <vector>
+#include <cassert>
 
 #include <pseudo/base.hpp>
 #include <rapidxml.hpp>
@@ -8,6 +9,7 @@ namespace pseudopotential {
 
   template <typename Type>
   static Type value(const rapidxml::xml_node<> * node){
+    assert(node);
     std::istringstream stst(node->value());
     Type value;
     stst >> value;
@@ -63,7 +65,18 @@ namespace pseudopotential {
     int lmax() const {
       return value<int>(pseudo_node_->first_node("lmax"));
     }
-    
+
+    int llocal() const {
+      return value<int>(pseudo_node_->first_node("llocal"));
+    }
+
+    int nquad() const {
+      return value<int>(pseudo_node_->first_node("nquad"));
+    }
+
+    double rquad() const {
+      return value<double>(pseudo_node_->first_node("rquad"));
+    }
 
   private:
 
