@@ -40,21 +40,9 @@
 #include <vector>
 using namespace std;
 
-#if 0
-//#if HAVE_XERCES
-#include "StructuredDocumentHandler.h"
-#include "SpeciesHandler.h"
-#include <xercesc/util/XMLUniDefs.hpp>
-#include <xercesc/sax2/Attributes.hpp>
-#include <xercesc/util/PlatformUtils.hpp>
-#include <xercesc/sax2/SAX2XMLReader.hpp>
-#include <xercesc/sax2/XMLReaderFactory.hpp>
-using namespace xercesc;
-#else
 #include <sstream>
 #include <cstdio>
 #include <sys/stat.h>
-#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 SpeciesReader::SpeciesReader(const Context& ctxt) : ctxt_(ctxt) {}
