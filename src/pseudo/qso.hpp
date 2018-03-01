@@ -102,7 +102,54 @@ namespace pseudopotential {
 	stst >> potential[ii];
       }
     }
-   
+
+    bool has_projectors(int l){
+      rapidxml::xml_node<> * node = pseudo_node_->first_node("projector");
+      while(node){
+	int read_l = value<int>(node->first_attribute("l"));
+	if(l == read_l) break;
+	node = node->next_sibling();
+      }
+      return node != NULL;
+    }
+    
+    void projector(int l, int i, std::vector<double> & proj) const {
+      rapidxml::xml_node<> * node = pseudo_node_->first_node("projector");
+
+      while(node){
+	int read_l = value<int>(node->first_attribute("l"));
+	int read_i = value<int>(node->first_attribute("i")) - 1;
+	if(l == read_l && i == read_i) break;
+	node = node->next_sibling();
+      }
+
+      assert(node != NULL);
+
+      int size = value<int>(node->first_attribute("size"));
+      proj.resize(size);
+      std::istringstream stst(node->value());
+      for(int ii = 0; ii < size; ii++){
+	stst >> proj[ii];
+      }
+      
+    }
+    
+    double d_ij(int l, int i, int j) const {
+      rapidxml::xml_node<> * node = pseudo_node_->first_node("d_ij");
+      
+      while(node){
+	int read_l = value<int>(node->first_attribute("l"));
+	int read_i = value<int>(node->first_attribute("i")) - 1;
+	int read_j = value<int>(node->first_attribute("j")) - 1;
+	if(l == read_l && i == read_i && j == read_j) break;
+	node = node->next_sibling();
+      }
+
+      assert(node != NULL);
+
+      return value<double>(node);
+      
+    }
     
   private:
 

@@ -174,46 +174,62 @@ void SpeciesReader::readSpecies_new (Species& sp, const string uri)
       if(pseudo.type() == pseudopotential::type::NORM_CONSERVING_SEMILOCAL){
 	pseudo.local_potential(sp.vloc_);
 	cout << "  <!-- SpeciesReader::readSpecies: read local_potential size=" << sp.vloc_.size() << " -->" << endl;
+
+	sp.projectors_.resize(sp.lmax_ + 1);
+
+	for(int l = 0; l < sp.lmax_ + 1; l++ ) {
+	  //check if we have projectors for this l as we don't really know lmax
+	  if(!pseudo.has_projectors(l)){
+	    sp.lmax_ = l - 1;
+	    cout << "  <!-- SpeciesReader::readSpecies: read lmax " << sp.lmax_ << " -->" << endl;
+	    break;
+	  }
+
+	  sp.projectors_[l].resize(sp.nchannels_);
+	  
+	  for ( int i = 0; i < sp.nchannels_; i++){
+	    pseudo.projector(l, i, sp.projectors_[l][i]);
+	    cout << "  <!-- SpeciesReader::readSpecies: read projector l="
+		 << l << " i=" << i << " size=" << sp.projectors_[l][i].size() << " -->" << endl;
+	  }
+	}
+
+	// the oncv weights
+	sp.dij_.resize(sp.lmax_ + 1);
+	for(int l = 0; l < sp.lmax_ + 1; l++){
+	  sp.dij_[l].resize(sp.nchannels_);
+	  for(int ii = 0; ii < sp.nchannels_; ii++){
+	    sp.dij_[l][ii].resize(sp.nchannels_);
+	    for(int jj = 0; jj < sp.nchannels_; jj++){
+	      sp.dij_[l][ii][jj] = pseudo.d_ij(l, ii, jj);
+	      
+	      if(fabs(sp.dij_[l][ii][jj]) > 1.0e-6 && ii != jj){
+		cerr << endl << "Error:" << endl;
+		cerr << "       Unsupported pseudopotential file (non-diagonal ONCV)." << endl << endl;
+		exit(1);
+	    }
+	    }
+	  }
+	  
+	  cout << "  <!-- SpeciesReader::readSpecies: read d_ij l=" << l << " -->" << endl;
+	
+	}
+	
       }
       
-      for ( int l = 0; l < sp.lmax_ + 1; l++ )
-      {
+      for(int l = 0; l < sp.lmax_ + 1; l++ ) {
 	int size;
 	{
 	  // read projector
 	  XMLFile::Tag tag = xml_file.next_tag("projector");
 	  int lread;
-
-	  // for ONCV we don't know lmax
-	  if(oncv && !tag.exists()){
-	    sp.lmax_ = l - 1;
-	    break;
-	  }
 	  
 	  tag.get_attribute("l", lread);
-	  assert(l == lread);
 
 	  tag.get_attribute("size", size);
 
-	  if(oncv){
-	    sp.projectors_.resize(sp.projectors_.size() + 1);
-	    sp.projectors_[l].resize(sp.nchannels_);
-	    sp.projectors_[l][0].resize(size);
-	    tag.get_value(sp.projectors_[l][0].begin(), sp.projectors_[l][0].begin() + size);
-	    cout << "  <!-- SpeciesReader::readSpecies: read " << tag.name() << " l="
-		 << l << " i=1 size=" << size << " -->" << endl;
-	  }
-	  
 	}
 
-	if(oncv){
-	  XMLFile::Tag tag = xml_file.next_tag("projector");
-	  sp.projectors_[l][1].resize(size);
-	  tag.get_value(sp.projectors_[l][1].begin(), sp.projectors_[l][1].begin() + size);
-	  cout << "  <!-- SpeciesReader::readSpecies: read " << tag.name() << " l="
-	       << l << " i=2 size=" << size << " -->" << endl;
-	}
-	
 	if(!oncv){
 	  // read radial potential
 	  sp.vps_.resize(sp.vps_.size() + 1);
@@ -588,35 +604,6 @@ void SpeciesReader::readSpecies_new (Species& sp, const string uri)
       }
     }
 
-    if(oncv){
-      // the oncv weights
-      sp.dij_.resize(sp.lmax_ + 1);
-      for(int l = 0; l < sp.lmax_ + 1; l++){
-	sp.dij_[l].resize(sp.nchannels_);
-	for(int ii = 0; ii < sp.nchannels_; ii++){
-	  sp.dij_[l][ii].resize(sp.nchannels_);
-	  for(int jj = 0; jj < sp.nchannels_; jj++){
-	    XMLFile::Tag tag = xml_file.next_tag("d_ij");
-	    int read_i, read_j;
-	    tag.get_attribute("i", read_i);
-	    tag.get_attribute("j", read_j);
-	    assert(ii + 1 == read_i);
-	    assert(jj + 1 == read_j);
-	    tag.get_value(sp.dij_[l][ii][jj]);
-
-	    if(fabs(sp.dij_[l][ii][jj]) > 1.0e-6 && ii != jj){
-	      cerr << endl << "Error:" << endl;
-	      cerr << "       Unsupported pseudopotential file (non-diagonal ONCV)." << endl << endl;
-	      exit(1);
-	    }
-	  }
-	}
-
-	cout << "  <!-- SpeciesReader::readSpecies: read d_ij l=" << l << " -->" << endl;
-	
-      }
-    }
-    
     sp.uri_ = uri;
 
   }
