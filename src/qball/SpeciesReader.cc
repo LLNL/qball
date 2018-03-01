@@ -211,7 +211,7 @@ void SpeciesReader::readSpecies_new (Species& sp, const string uri)
 	cout << "  <!-- SpeciesReader::readSpecies: read radial_potential l="
 	     << l << " size=" << sp.vps_[l].size() << " -->" << endl;
 
-	if(l != sp.llocal_){
+	if(pseudo.has_radial_function(l)){
 	  pseudo.radial_function(l, sp.phi_[l]);
 
 	  cout << "  <!-- SpeciesReader::readSpecies: read radial_function  l="
