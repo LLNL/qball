@@ -88,37 +88,22 @@ void SpeciesReader::readSpecies_new (Species& sp, const string uri)
     string tag, start_tag, end_tag;
     string::size_type start, end, len;
 
-    //ewd:  determine type of pseudopotential
-    bool ultrasoft = false;
-    bool oncv = false;
-
-    {
-      XMLFile::Tag tag = xml_file.next_tag("ultrasoft_pseudopotential");
-      ultrasoft = tag.exists();
-    }
-
-    sp.usoft_ = ultrasoft;
-
-    if(!ultrasoft){
-      XMLFile::Tag tag = xml_file.next_tag("norm_conserving_semilocal_pseudopotential");
-      oncv = tag.exists();
-    }
-
-    sp.oncv_ = oncv;
+    sp.usoft_ = false;
+    sp.oncv_ = false;
 
     switch(pseudo.type()) {
     case pseudopotential::type::ULTRASOFT :
+      sp.usoft_ = true;
       cout << "  <!-- SpeciesReader::readSpecies: potential type:  ultrasoft -->" << endl;
       break;
     case pseudopotential::type::NORM_CONSERVING_SEMILOCAL :
+      sp.oncv_ = true;
       cout << "  <!-- SpeciesReader::readSpecies: potential type:  ONCV norm-conserving -->" << endl;
       break;
     case pseudopotential::type::NORM_CONSERVING :
       cout << "  <!-- SpeciesReader::readSpecies: potential type:  norm-conserving -->" << endl;
       break;
     }
-    
-    xml_file.reset();
     
     sp.description_ = pseudo.description();
     cout << "  <!-- SpeciesReader::readSpecies: read description " << sp.description_ << " -->" << endl;
@@ -216,20 +201,23 @@ void SpeciesReader::readSpecies_new (Species& sp, const string uri)
     }
 
     if(pseudo.type() == pseudopotential::type::NORM_CONSERVING){
-      sp.vps_.resize(sp.lmax_);
-      sp.phi_.resize(sp.lmax_);
+      sp.vps_.resize(sp.lmax_ + 1);
+      sp.phi_.resize(sp.lmax_ + 1);
+
       for(int l = 0; l < sp.lmax_ + 1; l++ ) {
-	if(l == sp.llocal_) continue;
-	
+
 	pseudo.radial_potential(l, sp.vps_[l]);
 
 	cout << "  <!-- SpeciesReader::readSpecies: read radial_potential l="
 	     << l << " size=" << sp.vps_[l].size() << " -->" << endl;
 
-	pseudo.radial_function(l, sp.phi_[l]);
+	if(l != sp.llocal_){
+	  pseudo.radial_function(l, sp.phi_[l]);
 
-	cout << "  <!-- SpeciesReader::readSpecies: read radial_function  l="
-	     << l << " size=" << sp.phi_[l].size() << " -->" << endl;
+	  cout << "  <!-- SpeciesReader::readSpecies: read radial_function  l="
+	       << l << " size=" << sp.phi_[l].size() << " -->" << endl;
+	}
+	
       }
     }
     
