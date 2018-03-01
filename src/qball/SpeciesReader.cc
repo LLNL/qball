@@ -68,26 +68,6 @@ void SpeciesReader::readSpecies_new (Species& sp, const string uri)
 	 << uri << " size: "
 	 << pseudo.size() << " -->" << endl;
     
-    FILE* infile;
-    infile = fopen(uri.c_str(),"r");
-    if ( !infile )
-    {
-      cout << "  <!-- SpeciesReader::readSpecies could not open file "
-           << uri << " for reading" << " -->" << endl;
-      return;
-    }
-    off_t sz = statbuf.st_size;
-    string buf;
-    buf.resize(sz);
-    fread(&buf[0],sizeof(char),sz,infile);
-
-    XMLFile xml_file(buf);
-    
-    string::size_type pos = 0;
-
-    string tag, start_tag, end_tag;
-    string::size_type start, end, len;
-
     sp.usoft_ = false;
     sp.oncv_ = false;
 
@@ -188,11 +168,8 @@ void SpeciesReader::readSpecies_new (Species& sp, const string uri)
 	    }
 	  }
 	}
-	  
 	cout << "  <!-- SpeciesReader::readSpecies: read d_ij l=" << l << " -->" << endl;
-	
       }
-	
     }
 
     if(pseudo.type() == pseudopotential::type::NORM_CONSERVING){
@@ -242,7 +219,7 @@ void SpeciesReader::readSpecies_new (Species& sp, const string uri)
       pseudo.rinner(sp.rinner_);
       cout << "  <!-- SpeciesReader::readSpecies: read rinner size=" << sp.rinner_.size() << " -->" << endl;
       
-      // read Q_nm
+      // read Q_nm and qfcoeff
       int nqnm = 0;
       for (int i=1; i<=sp.nbeta_; i++)
         nqnm += i;
@@ -254,162 +231,20 @@ void SpeciesReader::readSpecies_new (Species& sp, const string uri)
       sp.qfunb2_.resize(nqnm);
       sp.qfcoeff_.resize(nqnm);
       
-      for ( int q = 0; q < nqnm; q++ )
-      {
-        // read qnm function
-        int size;
-        int iread, nread, mread, lread1, lread2;
-        tag = "qnm";
-        start_tag = string("<") + tag;
-        start = buf.find(start_tag,pos);
-        assert(start != string::npos );
-        end_tag = string("</") + tag + string(">");
- 
-        pos = buf.find("i=",pos)+3;
-        start = pos;
-        end = buf.find("\"",start);
-        len = end - start;
-        {
-          istringstream stst(buf.substr(start,len));
-          stst >> iread;
-        }
-        pos = buf.find("n=",pos)+3;
-        start = pos;
-        end = buf.find("\"",start);
-        len = end - start;
-        {
-          istringstream stst(buf.substr(start,len));
-          stst >> nread;
-        }
-        pos = buf.find("m=",pos)+3;
-        start = pos;
-        end = buf.find("\"",start);
-        len = end - start;
-        {
-          istringstream stst(buf.substr(start,len));
-          stst >> mread;
-        }
-        pos = buf.find("l1=",pos)+4;
-        start = pos;
-        end = buf.find("\"",start);
-        len = end - start;
-        {
-          istringstream stst(buf.substr(start,len));
-          stst >> lread1;
-        }
-        pos = buf.find("l2=",pos)+4;
-        start = pos;
-        end = buf.find("\"",start);
-        len = end - start;
-        {
-          istringstream stst(buf.substr(start,len));
-          stst >> lread2;
-        }
- 
-        pos = buf.find("size=",pos)+6;
-        start = pos;
-        end = buf.find("\"",start);
-        len = end - start;
-        {
-          istringstream stst(buf.substr(start,len));
-          stst >> size;
-        }
-        sp.qfunr_[q].resize(size);
-
-        start_tag = string(">");
-        start = buf.find(start_tag,pos) + 1;
-        end = buf.find(end_tag,start);
-        //pos = buf.find(">",end)+1;
-        len = end - start;
-
-        {
-          istringstream stst(buf.substr(start,len));
-          for ( int i = 0; i < size; i++ )
-          {
-            stst >> sp.qfunr_[q][i];
-          }
-        }
-        sp.qfunl1_[q] = lread1;
-        sp.qfunl2_[q] = lread2;
-        sp.qfunb1_[q] = nread;
-        sp.qfunb2_[q] = mread;
-        cout << "  <!-- SpeciesReader::readSpecies: read " << tag << " q="
-             << q << " l1=" << lread1 << " l2=" << lread2 << " size=" << size << " -->" << endl;
-        pos = buf.find(end_tag,pos);
-
+      for ( int q = 0; q < nqnm; q++ ) {
+	// qnm
 	pseudo.qnm(q, sp.qfunl1_[q], sp.qfunl2_[q], sp.qfunb1_[q], sp.qfunb2_[q], sp.qfunr_[q]);
 	cout << "  <!-- SpeciesReader::readSpecies: read qnm q="
              << q << " l1=" << sp.qfunl1_[q] << " l2=" << sp.qfunl2_[q] << " size="
 	     << sp.qfunr_[q].size() << " -->" << endl;
  
-        // read qcoeffs
+        // qcoeff
         if (sp.rinner_.size() > 0) {
           sp.qfcoeff_[q].resize(2*sp.lmax_+1);
           for (int ltot=0; ltot<2*sp.lmax_+1; ltot++) {
-            tag = "qfcoeff";
-            start_tag = string("<") + tag;
-            start = buf.find(start_tag,pos);
-            assert(start != string::npos );
-            end_tag = string("</") + tag + string(">");
-            
-            pos = buf.find("i=",pos)+3;
-            start = pos;
-            end = buf.find("\"",start);
-            len = end - start;
-            {
-              istringstream stst(buf.substr(start,len));
-              stst >> iread;
-            }
-            pos = buf.find("n=",pos)+3;
-            start = pos;
-            end = buf.find("\"",start);
-            len = end - start;
-            {
-              istringstream stst(buf.substr(start,len));
-              stst >> nread;
-            }
-            pos = buf.find("m=",pos)+3;
-            start = pos;
-            end = buf.find("\"",start);
-            len = end - start;
-            {
-              istringstream stst(buf.substr(start,len));
-              stst >> mread;
-            }
-            pos = buf.find("ltot=",pos)+4;
-            start = pos;
-            end = buf.find("\"",start);
-            len = end - start;
-            {
-              istringstream stst(buf.substr(start,len));
-              stst >> lread1;
-            }
-            pos = buf.find("size=",pos)+6;
-            start = pos;
-            end = buf.find("\"",start);
-            len = end - start;
-            {
-              istringstream stst(buf.substr(start,len));
-              stst >> size;
-            }
-            sp.qfcoeff_[q][ltot].resize(size);
-
-            start_tag = string(">");
-            start = buf.find(start_tag,pos) + 1;
-            end = buf.find(end_tag,start);
-            //pos = buf.find(">",end)+1;
-            len = end - start;
-          
-            {
-              istringstream stst(buf.substr(start,len));
-              for ( int i = 0; i < size; i++ )
-              {
-                stst >> sp.qfcoeff_[q][ltot][i];
-              }
-            }
-            cout << "  <!-- SpeciesReader::readSpecies: read " << tag << " q="
-                 << q << " ltot=" << lread1 << " size=" << size << " -->" << endl;
-            pos = buf.find(end_tag,pos);
+	    pseudo.qfcoeff(q, ltot, sp.qfcoeff_[q][ltot]);
+            cout << "  <!-- SpeciesReader::readSpecies: read qfcoeff q="
+                 << q << " ltot=" << ltot << " size=" << sp.qfcoeff_[q][ltot].size() << " -->" << endl;
           }
         }
       }

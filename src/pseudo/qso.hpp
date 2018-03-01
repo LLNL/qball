@@ -289,6 +289,27 @@ namespace pseudopotential {
       
     }
 
+    void qfcoeff(int index, int ltot, std::vector<double> & val) const {
+      rapidxml::xml_node<> * node = pseudo_node_->first_node("qfcoeff");
+
+      while(node){
+	int read_index = value<int>(node->first_attribute("i"));
+	int read_ltot = value<int>(node->first_attribute("ltot"));
+	if(read_index == index && read_ltot == ltot) break;
+	node = node->next_sibling("qfcoeff");
+      }
+      
+      assert(node != NULL);
+
+      int size = value<int>(node->first_attribute("size"));
+      val.resize(size);
+      std::istringstream stst(node->value());
+      for(int ii = 0; ii < size; ii++){
+	stst >> val[ii];
+      }
+      
+    }
+    
   private:
 
     ifstream file_;
