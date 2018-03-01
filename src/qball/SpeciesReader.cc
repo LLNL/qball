@@ -168,101 +168,74 @@ void SpeciesReader::readSpecies_new (Species& sp, const string uri)
     sp.nchannels_ = 1;
     if (pseudo.type() == pseudopotential::type::NORM_CONSERVING_SEMILOCAL) sp.nchannels_ = 2;
     
-    if (pseudo.type() != pseudopotential::type::ULTRASOFT) {
-
-      // read the local potential
-      if(pseudo.type() == pseudopotential::type::NORM_CONSERVING_SEMILOCAL){
-	pseudo.local_potential(sp.vloc_);
-	cout << "  <!-- SpeciesReader::readSpecies: read local_potential size=" << sp.vloc_.size() << " -->" << endl;
-
-	sp.projectors_.resize(sp.lmax_ + 1);
-
-	for(int l = 0; l < sp.lmax_ + 1; l++ ) {
-	  //check if we have projectors for this l as we don't really know lmax
-	  if(!pseudo.has_projectors(l)){
-	    sp.lmax_ = l - 1;
-	    cout << "  <!-- SpeciesReader::readSpecies: read lmax " << sp.lmax_ << " -->" << endl;
-	    break;
-	  }
-
-	  sp.projectors_[l].resize(sp.nchannels_);
-	  
-	  for ( int i = 0; i < sp.nchannels_; i++){
-	    pseudo.projector(l, i, sp.projectors_[l][i]);
-	    cout << "  <!-- SpeciesReader::readSpecies: read projector l="
-		 << l << " i=" << i << " size=" << sp.projectors_[l][i].size() << " -->" << endl;
-	  }
-	}
-
-	// the oncv weights
-	sp.dij_.resize(sp.lmax_ + 1);
-	for(int l = 0; l < sp.lmax_ + 1; l++){
-	  sp.dij_[l].resize(sp.nchannels_);
-	  for(int ii = 0; ii < sp.nchannels_; ii++){
-	    sp.dij_[l][ii].resize(sp.nchannels_);
-	    for(int jj = 0; jj < sp.nchannels_; jj++){
-	      sp.dij_[l][ii][jj] = pseudo.d_ij(l, ii, jj);
-	      
-	      if(fabs(sp.dij_[l][ii][jj]) > 1.0e-6 && ii != jj){
-		cerr << endl << "Error:" << endl;
-		cerr << "       Unsupported pseudopotential file (non-diagonal ONCV)." << endl << endl;
-		exit(1);
-	    }
-	    }
-	  }
-	  
-	  cout << "  <!-- SpeciesReader::readSpecies: read d_ij l=" << l << " -->" << endl;
-	
-	}
-	
-      }
+    // read the local potential
+    if(pseudo.type() == pseudopotential::type::NORM_CONSERVING_SEMILOCAL){
+      pseudo.local_potential(sp.vloc_);
+      cout << "  <!-- SpeciesReader::readSpecies: read local_potential size=" << sp.vloc_.size() << " -->" << endl;
+      
+      sp.projectors_.resize(sp.lmax_ + 1);
       
       for(int l = 0; l < sp.lmax_ + 1; l++ ) {
-	int size;
-	{
-	  // read projector
-	  XMLFile::Tag tag = xml_file.next_tag("projector");
-	  int lread;
-	  
-	  tag.get_attribute("l", lread);
-
-	  tag.get_attribute("size", size);
-
+	//check if we have projectors for this l as we don't really know lmax
+	if(!pseudo.has_projectors(l)){
+	  sp.lmax_ = l - 1;
+	  cout << "  <!-- SpeciesReader::readSpecies: read lmax " << sp.lmax_ << " -->" << endl;
+	  break;
 	}
 
-	if(!oncv){
-	  // read radial potential
-	  sp.vps_.resize(sp.vps_.size() + 1);
-	  sp.vps_[l].resize(size);
-
-	  {
-	    XMLFile::Tag tag = xml_file.next_tag("radial_potential");
-	    tag.get_value(sp.vps_[l].begin(), sp.vps_[l].begin() + size);
-	    cout << "  <!-- SpeciesReader::readSpecies: read " << tag.name() << " l="
-		 << l << " size=" << size << " -->" << endl;
-	  }
-	
-	  sp.phi_.resize(sp.phi_.size()+1);
-	  sp.phi_[l].resize(size);
- 
-	  // read radial function only if the radial_function tag was found, for nonlocal potentials
- 
-	  if ( l != sp.llocal_ ){
-	    XMLFile::Tag tag = xml_file.next_tag("radial_function");
-	    if (tag.exists()){
-	      tag.get_value(sp.phi_[l].begin(), sp.phi_[l].begin() + size);
-	      cout << "  <!-- SpeciesReader::readSpecies: read " << tag.name() << " l="
-		   << l << " size=" << size << " -->" << endl;
-	    }
-	  }
+	sp.projectors_[l].resize(sp.nchannels_);
 	  
+	for ( int i = 0; i < sp.nchannels_; i++){
+	  pseudo.projector(l, i, sp.projectors_[l][i]);
+	  cout << "  <!-- SpeciesReader::readSpecies: read projector l="
+	       << l << " i=" << i << " size=" << sp.projectors_[l][i].size() << " -->" << endl;
 	}
-
       }
 
+      // the oncv weights
+      sp.dij_.resize(sp.lmax_ + 1);
+      for(int l = 0; l < sp.lmax_ + 1; l++){
+	sp.dij_[l].resize(sp.nchannels_);
+	for(int ii = 0; ii < sp.nchannels_; ii++){
+	  sp.dij_[l][ii].resize(sp.nchannels_);
+	  for(int jj = 0; jj < sp.nchannels_; jj++){
+	    sp.dij_[l][ii][jj] = pseudo.d_ij(l, ii, jj);
+	      
+	    if(fabs(sp.dij_[l][ii][jj]) > 1.0e-6 && ii != jj){
+	      cerr << endl << "Error:" << endl;
+	      cerr << "       Unsupported pseudopotential file (non-diagonal ONCV)." << endl << endl;
+	      exit(1);
+	    }
+	  }
+	}
+	  
+	cout << "  <!-- SpeciesReader::readSpecies: read d_ij l=" << l << " -->" << endl;
+	
+      }
+	
     }
-    else {   // read ultrasoft functions
 
+    if(pseudo.type() == pseudopotential::type::NORM_CONSERVING){
+      sp.vps_.resize(sp.lmax_);
+      sp.phi_.resize(sp.lmax_);
+      for(int l = 0; l < sp.lmax_ + 1; l++ ) {
+	if(l == sp.llocal_) continue;
+	
+	pseudo.radial_potential(l, sp.vps_[l]);
+
+	cout << "  <!-- SpeciesReader::readSpecies: read radial_potential l="
+	     << l << " size=" << sp.vps_[l].size() << " -->" << endl;
+
+	pseudo.radial_function(l, sp.phi_[l]);
+
+	cout << "  <!-- SpeciesReader::readSpecies: read radial_function  l="
+	     << l << " size=" << sp.phi_[l].size() << " -->" << endl;
+      }
+    }
+    
+    if(pseudo.type() == pseudopotential::type::ULTRASOFT){
+      // read ultrasoft functions
+      
       // read vlocal
       int size;
       tag = "vlocal";
@@ -329,7 +302,7 @@ void SpeciesReader::readSpecies_new (Species& sp, const string uri)
           stst >> lread;
           sp.betal_[b] = lread;
         }
- 
+	
         pos = buf.find("size=",pos)+6;
         start = pos;
         end = buf.find("\"",start);
@@ -608,8 +581,6 @@ void SpeciesReader::readSpecies_new (Species& sp, const string uri)
 
   }
 
-  exit(1);
-  
 }
 
 ////////////////////////////////////////////////////////////////////////////////

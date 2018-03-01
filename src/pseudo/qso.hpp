@@ -150,6 +150,47 @@ namespace pseudopotential {
       return value<double>(node);
       
     }
+
+    void radial_function(int l, std::vector<double> & function) const {
+      rapidxml::xml_node<> * node = pseudo_node_->first_node("projector");
+
+      while(node){
+	int read_l = value<int>(node->first_attribute("l"));
+	if(l == read_l) break;
+	node = node->next_sibling();
+      }
+
+      assert(node != NULL);
+
+      int size = value<int>(node->first_attribute("size"));
+      function.resize(size);
+      std::istringstream stst(node->first_node("radial_function")->value());
+      for(int ii = 0; ii < size; ii++){
+	stst >> function[ii];
+      }
+      
+    }
+
+
+    void radial_potential(int l, std::vector<double> & function) const {
+      rapidxml::xml_node<> * node = pseudo_node_->first_node("projector");
+
+      while(node){
+	int read_l = value<int>(node->first_attribute("l"));
+	if(l == read_l) break;
+	node = node->next_sibling();
+      }
+
+      assert(node != NULL);
+
+      int size = value<int>(node->first_attribute("size"));
+      function.resize(size);
+      std::istringstream stst(node->first_node("radial_potential")->value());
+      for(int ii = 0; ii < size; ii++){
+	stst >> function[ii];
+      }
+      
+    }
     
   private:
 
