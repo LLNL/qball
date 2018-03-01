@@ -234,65 +234,13 @@ void SpeciesReader::readSpecies_new (Species& sp, const string uri)
       }
 
       // read dnm_zero (D_nm^0)
-      sp.dzero_.resize(sp.nbeta_);
-      for ( int b = 0; b < sp.nbeta_; b++ )
-        sp.dzero_[b].resize(sp.nbeta_);
-
-      tag = "dnm_zero";
-      start_tag = string("<") + tag + string(">");
-      end_tag = string("</") + tag + string(">");
-      start = buf.find(start_tag,pos);
-      int nbetasq = sp.nbeta_*sp.nbeta_;
-      if ( start != string::npos )
-      {
-        start = buf.find(">",start)+1;
-        end = buf.find(end_tag,start);
-        pos = buf.find(">",end)+1;
-        len = end - start;
-        {
-          istringstream stst(buf.substr(start,len));
-          for ( int i = 0; i < sp.nbeta_; i++ )
-            for ( int j = 0; j < sp.nbeta_; j++ )
-              stst >> sp.dzero_[i][j];
-          cout << "  <!-- SpeciesReader::readSpecies: read " << tag << " -->" << endl;
-        }
-      }
+      pseudo.dnm_zero(sp.nbeta_, sp.dzero_);
+      cout << "  <!-- SpeciesReader::readSpecies: read dnm_zero -->" << endl;
 
       // read rinner:  radii inside which Qnm^L are replaced by polynomial expansions
       //   (see Laasonen, Phys. Rev. B 47, 10142 (1993).)
-      tag = "rinner";
-      start_tag = string("<") + tag;
-      start = buf.find(start_tag,pos);
-      if (start != string::npos ) {
-	int size;
-        pos = buf.find("size=",pos)+6;
-        start = pos;
-        end = buf.find("\"",start);
-        len = end - start;
-        {
-          istringstream stst(buf.substr(start,len));
-          stst >> size;
-        }
-        assert(size <= 2*sp.lmax_+1);
-        sp.rinner_.resize(2*sp.lmax_+1);
-        for (int i=0; i<2*sp.lmax_+1; i++)
-          sp.rinner_[i] = 0.0;
-        start_tag = string(">");
-        start = buf.find(start_tag,pos) + 1;
-        end_tag = string("</") + tag + string(">");
-        end = buf.find(end_tag,start);
-        pos = buf.find(">",end)+1;
-        len = end - start;
-        {
-          istringstream stst(buf.substr(start,len));
-          for ( int i = 0; i < size; i++ )
-          {
-            stst >> sp.rinner_[i];
-          }
-        }
-        cout << "  <!-- SpeciesReader::readSpecies: read " << tag
-             << " size=" << size << " -->" << endl;
-      }
+      pseudo.rinner(sp.rinner_);
+      cout << "  <!-- SpeciesReader::readSpecies: read rinner size=" << sp.rinner_.size() << " -->" << endl;
       
       // read Q_nm
       int nqnm = 0;

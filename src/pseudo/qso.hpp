@@ -242,6 +242,32 @@ namespace pseudopotential {
       
     }
 
+    void dnm_zero(int nbeta, std::vector<std::vector<double> > & dnm){
+      rapidxml::xml_node<> * node = pseudo_node_->first_node("dnm_zero");
+      std::istringstream stst(node->value());
+
+      dnm.resize(nbeta);
+      for(int i = 0; i < nbeta; i++){
+	dnm[i].resize(nbeta);
+	for ( int j = 0; j < nbeta; j++){
+	  stst >> dnm[i][j];
+	}
+      }
+    }
+    
+    void rinner(std::vector<double> & val){
+      rapidxml::xml_node<> * node = pseudo_node_->first_node("rinner");
+
+      assert(node != NULL);
+
+      int size = value<int>(node->first_attribute("size"));
+      val.resize(size);
+      std::istringstream stst(node->value());
+      for(int ii = 0; ii < size; ii++){
+	stst >> val[ii];
+      }
+    }
+    
   private:
 
     ifstream file_;
