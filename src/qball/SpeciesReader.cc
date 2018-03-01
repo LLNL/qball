@@ -337,6 +337,11 @@ void SpeciesReader::readSpecies_new (Species& sp, const string uri)
              << q << " l1=" << lread1 << " l2=" << lread2 << " size=" << size << " -->" << endl;
         pos = buf.find(end_tag,pos);
 
+	pseudo.qnm(q, sp.qfunl1_[q], sp.qfunl2_[q], sp.qfunb1_[q], sp.qfunb2_[q], sp.qfunr_[q]);
+	cout << "  <!-- SpeciesReader::readSpecies: read qnm q="
+             << q << " l1=" << sp.qfunl1_[q] << " l2=" << sp.qfunl2_[q] << " size="
+	     << sp.qfunr_[q].size() << " -->" << endl;
+ 
         // read qcoeffs
         if (sp.rinner_.size() > 0) {
           sp.qfcoeff_[q].resize(2*sp.lmax_+1);

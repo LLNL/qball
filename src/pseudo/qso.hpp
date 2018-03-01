@@ -112,7 +112,7 @@ namespace pseudopotential {
       while(node){
 	int read_l = value<int>(node->first_attribute("l"));
 	if(l == read_l) break;
-	node = node->next_sibling();
+	node = node->next_sibling("projector");
       }
       return node != NULL;
     }
@@ -124,7 +124,7 @@ namespace pseudopotential {
 	int read_l = value<int>(node->first_attribute("l"));
 	int read_i = value<int>(node->first_attribute("i")) - 1;
 	if(l == read_l && i == read_i) break;
-	node = node->next_sibling();
+	node = node->next_sibling("projector");
       }
 
       assert(node != NULL);
@@ -146,7 +146,7 @@ namespace pseudopotential {
 	int read_i = value<int>(node->first_attribute("i")) - 1;
 	int read_j = value<int>(node->first_attribute("j")) - 1;
 	if(l == read_l && i == read_i && j == read_j) break;
-	node = node->next_sibling();
+	node = node->next_sibling("d_ij");
       }
 
       assert(node != NULL);
@@ -161,7 +161,7 @@ namespace pseudopotential {
       while(node){
 	int read_l = value<int>(node->first_attribute("l"));
 	if(l == read_l) break;
-	node = node->next_sibling();
+	node = node->next_sibling("projector");
       }
       
       return node->first_node("radial_function") != NULL;
@@ -174,7 +174,7 @@ namespace pseudopotential {
       while(node){
 	int read_l = value<int>(node->first_attribute("l"));
 	if(l == read_l) break;
-	node = node->next_sibling();
+	node = node->next_sibling("projector");
       }
 
       assert(node != NULL);
@@ -195,7 +195,7 @@ namespace pseudopotential {
       while(node){
 	int read_l = value<int>(node->first_attribute("l"));
 	if(l == read_l) break;
-	node = node->next_sibling();
+	node = node->next_sibling("projector");
       }
 
       assert(node != NULL);
@@ -228,7 +228,7 @@ namespace pseudopotential {
     void beta(int index, int & l, std::vector<double> & proj) const {
       rapidxml::xml_node<> * node = pseudo_node_->first_node("beta");
 
-      for(int i = 0; i < index; i++) node = node->next_sibling();
+      for(int i = 0; i < index; i++) node = node->next_sibling("beta");
 
       assert(node != NULL);
 
@@ -267,7 +267,28 @@ namespace pseudopotential {
 	stst >> val[ii];
       }
     }
-    
+
+    void qnm(int index, int & l1, int & l2, int & n, int & m, std::vector<double> & val) const {
+      rapidxml::xml_node<> * node = pseudo_node_->first_node("qnm");
+
+      for(int i = 0; i < index; i++) node = node->next_sibling("qnm");
+
+      assert(node != NULL);
+
+      n = value<int>(node->first_attribute("n"));
+      m = value<int>(node->first_attribute("m"));
+      l1 = value<int>(node->first_attribute("l1"));
+      l2 = value<int>(node->first_attribute("l2"));
+
+      int size = value<int>(node->first_attribute("size"));
+      val.resize(size);
+      std::istringstream stst(node->value());
+      for(int ii = 0; ii < size; ii++){
+	stst >> val[ii];
+      }
+      
+    }
+
   private:
 
     ifstream file_;
