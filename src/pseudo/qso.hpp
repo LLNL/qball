@@ -225,6 +225,22 @@ namespace pseudopotential {
       }
     }
     
+    void beta(int index, int & l, std::vector<double> & proj) const {
+      rapidxml::xml_node<> * node = pseudo_node_->first_node("beta");
+
+      for(int i = 0; i < index; i++) node = node->next_sibling();
+
+      assert(node != NULL);
+
+      l = value<int>(node->first_attribute("l"));
+      int size = value<int>(node->first_attribute("size"));
+      proj.resize(size);
+      std::istringstream stst(node->value());
+      for(int ii = 0; ii < size; ii++){
+	stst >> proj[ii];
+      }
+      
+    }
 
   private:
 

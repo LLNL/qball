@@ -226,57 +226,11 @@ void SpeciesReader::readSpecies_new (Species& sp, const string uri)
       pseudo.local_potential(sp.vps_[0]);
       cout << "  <!-- SpeciesReader::readSpecies: read vlocal size=" << sp.vps_[0].size() << " -->" << endl;
 
-      int size;
-      
       sp.betar_.resize(sp.nbeta_);
       sp.betal_.resize(sp.nbeta_);
-      for ( int b = 0; b < sp.nbeta_; b++ )
-      {
-        // read beta function
-        int size;
-        tag = "beta";
-        start_tag = string("<") + tag;
-        start = buf.find(start_tag,pos);
-        assert(start != string::npos );
- 
-        pos = buf.find("l=",pos)+3;
-        start = pos;
-        end = buf.find("\"",start);
-        len = end - start;
-      
-        {
-          istringstream stst(buf.substr(start,len));
-          int lread;
-          stst >> lread;
-          sp.betal_[b] = lread;
-        }
-	
-        pos = buf.find("size=",pos)+6;
-        start = pos;
-        end = buf.find("\"",start);
-        len = end - start;
-        {
-          istringstream stst(buf.substr(start,len));
-          stst >> size;
-          // cout << " size=" << size << endl;
-        }
-        sp.betar_[b].resize(size);
-
-        start_tag = string(">");
-        start = buf.find(start_tag,pos) + 1;
-        end_tag = string("</") + tag + string(">");
-        end = buf.find(end_tag,start);
-        pos = buf.find(">",end)+1;
-        len = end - start;
-        {
-          istringstream stst(buf.substr(start,len));
-          for ( int i = 0; i < size; i++ )
-          {
-            stst >> sp.betar_[b][i];
-          }
-        }
-        cout << "  <!-- SpeciesReader::readSpecies: read " << tag << " b="
-             << b << " size=" << size << " -->" << endl;
+      for ( int b = 0; b < sp.nbeta_; b++ ){
+	pseudo.beta(b, sp.betal_[b], sp.betar_[b]);
+        cout << "  <!-- SpeciesReader::readSpecies: read beta b=" << b << " size=" << sp.betar_[b].size() << " -->" << endl;
       }
 
       // read dnm_zero (D_nm^0)
@@ -310,6 +264,7 @@ void SpeciesReader::readSpecies_new (Species& sp, const string uri)
       start_tag = string("<") + tag;
       start = buf.find(start_tag,pos);
       if (start != string::npos ) {
+	int size;
         pos = buf.find("size=",pos)+6;
         start = pos;
         end = buf.find("\"",start);
@@ -508,8 +463,6 @@ void SpeciesReader::readSpecies_new (Species& sp, const string uri)
 
     }
 
-    exit(1);
-    
     if (pseudo.has_nlcc()) {
       sp.nlcc_ = true;
       cout << "  <!-- SpeciesReader::readSpecies: nlcc found. -->" << endl;
