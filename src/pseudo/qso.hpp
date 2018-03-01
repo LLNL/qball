@@ -94,6 +94,10 @@ namespace pseudopotential {
 
     void local_potential(std::vector<double> & potential) const {
       rapidxml::xml_node<> * node = pseudo_node_->first_node("local_potential");
+      if(!node){
+	// for ultrasoft, this is called vlocal
+	node = pseudo_node_->first_node("vlocal");
+      }
       assert(node);
       int size = value<int>(node->first_attribute("size"));
       potential.resize(size);

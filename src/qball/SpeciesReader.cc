@@ -145,11 +145,6 @@ void SpeciesReader::readSpecies_new (Species& sp, const string uri)
     sp.deltar_ = pseudo.mesh_spacing();
     cout << "  <!-- SpeciesReader::readSpecies: read mesh_spacing " << sp.deltar_ << " -->" << endl;
 
-    if(pseudo.type() == pseudopotential::type::ULTRASOFT) {
-      sp.nbeta_ = pseudo.nbeta();
-      cout << "  <!-- SpeciesReader::readSpecies: read nbeta" << sp.nbeta_ << " -->" << endl;
-    }
-
     sp.nchannels_ = 1;
     if (pseudo.type() == pseudopotential::type::NORM_CONSERVING_SEMILOCAL) sp.nchannels_ = 2;
     
@@ -222,52 +217,17 @@ void SpeciesReader::readSpecies_new (Species& sp, const string uri)
     }
     
     if(pseudo.type() == pseudopotential::type::ULTRASOFT){
-      // read ultrasoft functions
-      
-      // read vlocal
-      int size;
-      tag = "vlocal";
-      start_tag = string("<") + tag;
-      start = buf.find(start_tag,pos);
-      assert(start != string::npos );
- 
-      pos = buf.find("size=",pos)+6;
-      start = pos;
-      end = buf.find("\"",start);
-      len = end - start;
-      {
-        istringstream stst(buf.substr(start,len));
-        stst >> size;
-        // cout << " size=" << size << endl;
-      }
 
+      sp.nbeta_ = pseudo.nbeta();
+      cout << "  <!-- SpeciesReader::readSpecies: read nbeta" << sp.nbeta_ << " -->" << endl;
+      
       sp.llocal_ = 0;
       sp.vps_.resize(1);
-      sp.vps_[0].resize(size);
+      pseudo.local_potential(sp.vps_[0]);
+      cout << "  <!-- SpeciesReader::readSpecies: read vlocal size=" << sp.vps_[0].size() << " -->" << endl;
 
-      ostringstream oss;
-      oss << size;
-      start_tag = string("<") + tag + string(" size=\"") + oss.str() + string("\"") + string(">");
-      end_tag = string("</") + tag + string(">");
-      pos -= 128;  // back position index up a line or two
-      start = buf.find(start_tag,pos);
-      if ( start != string::npos )
-      {
-        start = buf.find(">",start)+1;
-        end = buf.find(end_tag,start);
-        pos = buf.find(">",end)+1;
-        len = end - start;
-        {
-          istringstream stst(buf.substr(start,len));
-          for ( int i = 0; i < size; i++ )
-          {
-            stst >> sp.vps_[0][i];
-            //cout << sp.vps_[0][i] << endl;
-          }
-        }
-        cout << "  <!-- SpeciesReader::readSpecies: read " << tag << " size=" << size << " -->" << endl;
-      }
-
+      int size;
+      
       sp.betar_.resize(sp.nbeta_);
       sp.betal_.resize(sp.nbeta_);
       for ( int b = 0; b < sp.nbeta_; b++ )
@@ -548,6 +508,8 @@ void SpeciesReader::readSpecies_new (Species& sp, const string uri)
 
     }
 
+    exit(1);
+    
     if (pseudo.has_nlcc()) {
       sp.nlcc_ = true;
       cout << "  <!-- SpeciesReader::readSpecies: nlcc found. -->" << endl;
