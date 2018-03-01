@@ -548,21 +548,11 @@ void SpeciesReader::readSpecies_new (Species& sp, const string uri)
 
     }
 
-    {
-      // read rho_nlcc
-      XMLFile::Tag tag = xml_file.next_tag("rho_nlcc");
-      if (tag.exists()) {
-	int size;
-	tag.get_attribute("size", size);
-	
-	sp.rhor_nlcc_.resize(size);
-	sp.nlcc_ = true;
-	cout << "  <!-- SpeciesReader::readSpecies: nlcc found. -->" << endl;
-	
-	tag.get_value(sp.rhor_nlcc_.begin(), sp.rhor_nlcc_.begin() + size);
-	
-	cout << "  <!-- SpeciesReader::readSpecies: read " << tag.name() << " size=" << size << " -->" << endl;
-      }
+    if (pseudo.has_nlcc()) {
+      sp.nlcc_ = true;
+      cout << "  <!-- SpeciesReader::readSpecies: nlcc found. -->" << endl;
+      pseudo.nlcc_density(sp.rhor_nlcc_);
+      cout << "  <!-- SpeciesReader::readSpecies: read rho_nlcc size=" << sp.rhor_nlcc_.size() << " -->" << endl;
     }
 
     sp.uri_ = uri;

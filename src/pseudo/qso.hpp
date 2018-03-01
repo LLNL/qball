@@ -205,7 +205,23 @@ namespace pseudopotential {
       }
       
     }
+
+    bool has_nlcc(){
+      return pseudo_node_->first_node("rho_nlcc");
+    }
+
+    void nlcc_density(std::vector<double> & density) const {
+      rapidxml::xml_node<> * node = pseudo_node_->first_node("rho_nlcc");
+      assert(node);
+      int size = value<int>(node->first_attribute("size"));
+      density.resize(size);
+      std::istringstream stst(node->value());
+      for(int ii = 0; ii < size; ii++){
+	stst >> density[ii];
+      }
+    }
     
+
   private:
 
     ifstream file_;
