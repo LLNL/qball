@@ -72,11 +72,21 @@ namespace pseudopotential {
     }
 
     int lmax() const {
-      return value<int>(pseudo_node_->first_node("lmax"));
+      if(pseudo_node_->first_node("lmax")) {
+	return value<int>(pseudo_node_->first_node("lmax"));
+      } else {
+	for(int l = 0; l <= 10; l++ ) {
+	  if(!has_projectors(l)) return l - 1;
+	}
+      }
     }
 
     int llocal() const {
-      return value<int>(pseudo_node_->first_node("llocal"));
+      if(pseudo_node_->first_node("llocal")){
+	return value<int>(pseudo_node_->first_node("llocal"));
+      } else {
+	return -1;
+      }
     }
 
     int nquad() const {

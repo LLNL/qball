@@ -122,26 +122,20 @@ void  SpeciesReader::fill_species(Species& sp, PseudopotentialType & pseudo){
   sp.zval_ = pseudo.valence_charge();
   cout << "  <!-- SpeciesReader::readSpecies: read valence_charge " << sp.zval_ << " -->" << endl;
 
-  if(pseudo.type() != pseudopotential::type::NORM_CONSERVING_SEMILOCAL){
-    sp.lmax_ = pseudo.lmax();
-    cout << "  <!-- SpeciesReader::readSpecies: read lmax " << sp.lmax_ << " -->" << endl;
-  } else {
-    sp.lmax_ = 3; // for the moment we assume is 3, we might have to decrease it later
-    sp.llocal_ = -1; // no local component for ONCV
-    sp.nquad_ = 0;
-  }
+  sp.lmax_ = pseudo.lmax();
+  cout << "  <!-- SpeciesReader::readSpecies: read lmax " << sp.lmax_ << " -->" << endl;
 
+  sp.llocal_ = pseudo.llocal();
+  cout << "  <!-- SpeciesReader::readSpecies: read llocal " << sp.llocal_ << " -->" << endl;
+  
   if(pseudo.type() == pseudopotential::type::NORM_CONSERVING) { 
-
-    sp.llocal_ = pseudo.llocal();
-    cout << "  <!-- SpeciesReader::readSpecies: read llocal " << sp.llocal_ << " -->" << endl;
-
     sp.nquad_ = pseudo.nquad();
     cout << "  <!-- SpeciesReader::readSpecies: read nquad " << sp.nquad_ << " -->" << endl;
-
     sp.rquad_ = pseudo.rquad();
     cout << "  <!-- SpeciesReader::readSpecies: read rquad " << sp.rquad_ << " -->" << endl;
-
+  } else {
+    sp.nquad_ = 0;
+    sp.rquad_ = 0.0;
   }
 
   sp.deltar_ = pseudo.mesh_spacing();
@@ -158,13 +152,6 @@ void  SpeciesReader::fill_species(Species& sp, PseudopotentialType & pseudo){
     sp.projectors_.resize(sp.lmax_ + 1);
       
     for(int l = 0; l < sp.lmax_ + 1; l++ ) {
-      //check if we have projectors for this l as we don't really know lmax
-      if(!pseudo.has_projectors(l)){
-	sp.lmax_ = l - 1;
-	cout << "  <!-- SpeciesReader::readSpecies: read lmax " << sp.lmax_ << " -->" << endl;
-	break;
-      }
-
       sp.projectors_[l].resize(sp.nchannels_);
 	  
       for ( int i = 0; i < sp.nchannels_; i++){
