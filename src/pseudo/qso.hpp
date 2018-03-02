@@ -1,3 +1,6 @@
+#ifndef PSEUDO_QSO_HPP
+#define PSEUDO_QSO_HPP
+
 #include <fstream>
 #include <vector>
 #include <cassert>
@@ -328,3 +331,4 @@ namespace pseudopotential {
 
 }
 
+#endif

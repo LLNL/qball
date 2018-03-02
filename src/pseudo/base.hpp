@@ -1,3 +1,6 @@
+#ifndef PSEUDO_BASE_HPP
+#define PSEUDO_BASE_HPP
+
 #include <vector>
 
 namespace pseudopotential {
@@ -17,3 +20,5 @@ namespace pseudopotential {
   };
 
 }
+
+#endif
