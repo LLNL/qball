@@ -36,6 +36,19 @@ namespace pseudopotential {
       
       assert(root_node_);
 
+      // Read the grid
+      
+      rapidxml::xml_node<> * node = root_node_->first_node("PP_MESH")->first_node("PP_R");
+
+      assert(node != NULL);
+
+      int size = value<int>(node->first_attribute("size"));
+      grid_.resize(size);
+      std::istringstream stst(node->value());
+      for(int ii = 0; ii < size; ii++){
+	stst >> grid_[ii];
+      }
+
     }
 
     int size() const { return buffer_.size(); };
@@ -79,7 +92,7 @@ namespace pseudopotential {
     }
 
     double mesh_spacing() const {
-      return value<double>(pseudo_node_->first_node("mesh_spacing"));
+      return 0.01;
     }
 
     int nbeta() const {
@@ -87,6 +100,7 @@ namespace pseudopotential {
     }
 
     void local_potential(std::vector<double> & potential) const {
+#if 0
       rapidxml::xml_node<> * node = pseudo_node_->first_node("local_potential");
       if(!node){
 	// for ultrasoft, this is called vlocal
@@ -99,9 +113,11 @@ namespace pseudopotential {
       for(int ii = 0; ii < size; ii++){
 	stst >> potential[ii];
       }
+#endif
     }
 
     bool has_projectors(int l) const {
+#if 0
       rapidxml::xml_node<> * node = pseudo_node_->first_node("projector");
       while(node){
 	int read_l = value<int>(node->first_attribute("l"));
@@ -109,9 +125,11 @@ namespace pseudopotential {
 	node = node->next_sibling("projector");
       }
       return node != NULL;
+#endif
     }
     
     void projector(int l, int i, std::vector<double> & proj) const {
+#if 0
       rapidxml::xml_node<> * node = pseudo_node_->first_node("projector");
 
       while(node){
@@ -129,10 +147,11 @@ namespace pseudopotential {
       for(int ii = 0; ii < size; ii++){
 	stst >> proj[ii];
       }
-      
+#endif
     }
     
     double d_ij(int l, int i, int j) const {
+#if 0
       rapidxml::xml_node<> * node = pseudo_node_->first_node("d_ij");
       
       while(node){
@@ -146,10 +165,11 @@ namespace pseudopotential {
       assert(node != NULL);
 
       return value<double>(node);
-      
+#endif 
     }
 
     bool has_radial_function(int l) const{
+#if 0
       rapidxml::xml_node<> * node = pseudo_node_->first_node("projector");
       
       while(node){
@@ -159,10 +179,11 @@ namespace pseudopotential {
       }
       
       return node->first_node("radial_function") != NULL;
-      
+#endif 
     }
 
     void radial_function(int l, std::vector<double> & function) const {
+#if 0
       rapidxml::xml_node<> * node = pseudo_node_->first_node("projector");
 
       while(node){
@@ -180,10 +201,11 @@ namespace pseudopotential {
       for(int ii = 0; ii < size; ii++){
 	stst >> function[ii];
       }
-      
+#endif 
     }
 
     void radial_potential(int l, std::vector<double> & function) const {
+#if 0
       rapidxml::xml_node<> * node = pseudo_node_->first_node("projector");
 
       while(node){
@@ -201,14 +223,17 @@ namespace pseudopotential {
       for(int ii = 0; ii < size; ii++){
 	stst >> function[ii];
       }
-      
+#endif 
     }
 
     bool has_nlcc() const{
+#if 0
       return pseudo_node_->first_node("rho_nlcc");
+#endif
     }
 
     void nlcc_density(std::vector<double> & density) const {
+#if 0
       rapidxml::xml_node<> * node = pseudo_node_->first_node("rho_nlcc");
       assert(node);
       int size = value<int>(node->first_attribute("size"));
@@ -217,9 +242,11 @@ namespace pseudopotential {
       for(int ii = 0; ii < size; ii++){
 	stst >> density[ii];
       }
+#endif
     }
     
     void beta(int index, int & l, std::vector<double> & proj) const {
+#if 0
       rapidxml::xml_node<> * node = pseudo_node_->first_node("beta");
 
       for(int i = 0; i < index; i++) node = node->next_sibling("beta");
@@ -233,10 +260,11 @@ namespace pseudopotential {
       for(int ii = 0; ii < size; ii++){
 	stst >> proj[ii];
       }
-      
+#endif 
     }
 
     void dnm_zero(int nbeta, std::vector<std::vector<double> > & dnm) const {
+#if 0
       rapidxml::xml_node<> * node = pseudo_node_->first_node("dnm_zero");
       std::istringstream stst(node->value());
 
@@ -247,14 +275,18 @@ namespace pseudopotential {
 	  stst >> dnm[i][j];
 	}
       }
+#endif
     }
 
     bool has_rinner() const {
+#if 0
       rapidxml::xml_node<> * node = pseudo_node_->first_node("rinner");
       return node;
+#endif
     }
     
     void rinner(std::vector<double> & val) const {
+#if 0
       rapidxml::xml_node<> * node = pseudo_node_->first_node("rinner");
 
       assert(node != NULL);
@@ -265,9 +297,11 @@ namespace pseudopotential {
       for(int ii = 0; ii < size; ii++){
 	stst >> val[ii];
       }
+#endif
     }
 
     void qnm(int index, int & l1, int & l2, int & n, int & m, std::vector<double> & val) const {
+#if 0
       rapidxml::xml_node<> * node = pseudo_node_->first_node("qnm");
 
       for(int i = 0; i < index; i++) node = node->next_sibling("qnm");
@@ -285,10 +319,11 @@ namespace pseudopotential {
       for(int ii = 0; ii < size; ii++){
 	stst >> val[ii];
       }
-      
+#endif 
     }
 
     void qfcoeff(int index, int ltot, std::vector<double> & val) const {
+#if 0
       rapidxml::xml_node<> * node = pseudo_node_->first_node("qfcoeff");
 
       while(node){
@@ -306,7 +341,7 @@ namespace pseudopotential {
       for(int ii = 0; ii < size; ii++){
 	stst >> val[ii];
       }
-      
+#endif 
     }
     
   private:
@@ -315,7 +350,7 @@ namespace pseudopotential {
     vector<char> buffer_;
     rapidxml::xml_document<> doc_;
     rapidxml::xml_node<> * root_node_;
-    rapidxml::xml_node<> * pseudo_node_;
+    std::vector<double> grid_;
     
     
   };
