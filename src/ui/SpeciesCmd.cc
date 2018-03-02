@@ -50,7 +50,7 @@ int SpeciesCmd::action(int argc, char **argv) {
   Species* sp = new Species(s->ctxt_,argv[1]);
   
   try {
-    sp_reader.readSpecies_new(*sp,argv[2]);
+    sp_reader.readSpecies(*sp,argv[2]);
     sp_reader.bcastSpecies(*sp);
     if (argc == 4) {
       const double rcpsin = atof(argv[3]);

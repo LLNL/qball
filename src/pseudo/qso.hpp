@@ -107,7 +107,7 @@ namespace pseudopotential {
       }
     }
 
-    bool has_projectors(int l){
+    bool has_projectors(int l) const {
       rapidxml::xml_node<> * node = pseudo_node_->first_node("projector");
       while(node){
 	int read_l = value<int>(node->first_attribute("l"));
@@ -155,7 +155,7 @@ namespace pseudopotential {
       
     }
 
-    bool has_radial_function(int l){
+    bool has_radial_function(int l) const{
       rapidxml::xml_node<> * node = pseudo_node_->first_node("projector");
       
       while(node){
@@ -210,7 +210,7 @@ namespace pseudopotential {
       
     }
 
-    bool has_nlcc(){
+    bool has_nlcc() const{
       return pseudo_node_->first_node("rho_nlcc");
     }
 
@@ -242,7 +242,7 @@ namespace pseudopotential {
       
     }
 
-    void dnm_zero(int nbeta, std::vector<std::vector<double> > & dnm){
+    void dnm_zero(int nbeta, std::vector<std::vector<double> > & dnm) const {
       rapidxml::xml_node<> * node = pseudo_node_->first_node("dnm_zero");
       std::istringstream stst(node->value());
 
@@ -254,8 +254,13 @@ namespace pseudopotential {
 	}
       }
     }
+
+    bool has_rinner() const {
+      rapidxml::xml_node<> * node = pseudo_node_->first_node("rinner");
+      return node;
+    }
     
-    void rinner(std::vector<double> & val){
+    void rinner(std::vector<double> & val) const {
       rapidxml::xml_node<> * node = pseudo_node_->first_node("rinner");
 
       assert(node != NULL);

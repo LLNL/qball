@@ -47,7 +47,6 @@ class SpeciesReader
 
   SpeciesReader(const Context& ctxt);
   void readSpecies(Species& sp, const string uri);
-  void readSpecies_new(Species& sp, const string uri);
   void bcastSpecies(Species& sp);
 };
 
