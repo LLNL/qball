@@ -31,7 +31,7 @@ namespace pseudopotential {
       if(root_node_->first_node("PP_HEADER")->first_attribute("pseudo_type")->value() == string("NC")){
 	type_ = type::NORM_CONSERVING_SEMILOCAL;
       } else {
-	cerr << "Unsupported UPF pseudopotential" << endl;
+	cerr << "Unsupported UPF pseudopotential, not norm conserving." << endl;
 	exit(1);
       }
       
@@ -49,6 +49,12 @@ namespace pseudopotential {
 	for(int ii = 0; ii < size; ii++){
 	  stst >> grid_[ii];
 	}
+
+	if(fabs(grid_[0]) > 1e-10){
+	  cerr << "Unsupported UPF pseudopotential, grid does not start at zero." << endl;
+	  exit(1);
+	}
+	
       }
       
       //Read dij once
@@ -60,7 +66,10 @@ namespace pseudopotential {
 	dij_.resize(nprojectors()*nprojectors());
 	
 	std::istringstream stst(node->value());
-	for(unsigned ii = 0; ii < dij_.size(); ii++) stst >> dij_[ii];
+	for(unsigned ii = 0; ii < dij_.size(); ii++){
+	  stst >> dij_[ii];
+	  dij_[ii] *= 0.5; //convert from Rydberg to Hartree
+	}
       }
 	
     }
@@ -126,8 +135,11 @@ namespace pseudopotential {
 
       potential.resize(size);
       std::istringstream stst(node->value());
-      for(int ii = 0; ii < size; ii++) stst >> potential[ii];
-
+      for(int ii = 0; ii < size; ii++) {
+	stst >> potential[ii];
+	potential[ii] *= 0.5; //Convert from Rydberg to Hartree
+      }
+      
       interpolate(potential);
       
     }
@@ -161,6 +173,10 @@ namespace pseudopotential {
       std::istringstream stst(node->value());
       for(int ii = 0; ii < size; ii++) stst >> proj[ii];
 
+      //the projectors come multiplied by r, so we have to divide and fix the first point
+      for(int ii = 1; ii < size; ii++) proj[ii] /= grid_[ii];
+      proj[0] = linear_extrapolate(grid_[0], grid_[1], grid_[2], proj[1], proj[2]);
+      
       interpolate(proj);
 
     }
@@ -239,6 +255,11 @@ namespace pseudopotential {
 	function.push_back(function_spline.value(rr));
       }
 
+    }
+
+    static double linear_extrapolate(const double & x0, const double & x1, const double & x2, const double & y1, const double & y2){
+      double mm = (y2 - y1)/(x2 - x1);
+      return y1 + mm*(x0 - x1);
     }
     
     ifstream file_;
