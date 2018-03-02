@@ -39,6 +39,8 @@
 #include <vector>
 using namespace std;
 
+#include <algorithm>
+#include <string>
 #include <sstream>
 #include <cstdio>
 #include <sys/stat.h>
@@ -48,26 +50,32 @@ using namespace std;
 SpeciesReader::SpeciesReader(const Context& ctxt) : ctxt_(ctxt) {}
 
 ////////////////////////////////////////////////////////////////////////////////
-void SpeciesReader::readSpecies(Species& sp, const string uri)
-{
+void SpeciesReader::readSpecies(Species& sp, const string uri){
 
   if(ctxt_.oncoutpe()){
-
-    pseudopotential::qso pseudo(uri);
 
     struct stat statbuf;
     bool found_file = !stat(uri.c_str(),&statbuf);
 
     if(!found_file)  Messages::fatal("cannot find pseudopotential file '" + uri + "'");
     
-    cout << "  <!-- SpeciesReader opening file "
-	 << uri << " size: "
-	 << pseudo.size() << " -->" << endl;
-
     sp.uri_ = uri;
+
+    string extension = uri.substr(uri.find_last_of(".") + 1);
+    std::transform(extension.begin(), extension.end(), extension.begin(), ::tolower);
+
+    cout << "  <!-- SpeciesReader opening file " << uri << " -->" << endl;
     
-    fill_species(sp, pseudo);
-    
+    if(extension == "xml"){
+      pseudopotential::qso pseudo(uri);
+      fill_species(sp, pseudo);
+      cout << "  <!--   format: QSO XML -->" << endl;
+      cout << "  <!--   size:   " << pseudo.size() << " -->" << endl;
+    } else {
+      cerr << "Unknown pseudopotential type" << endl;
+      exit(1);
+    }
+
   }
 
 }
