@@ -38,18 +38,31 @@ namespace pseudopotential {
       assert(root_node_);
 
       // Read the grid
-      
-      rapidxml::xml_node<> * node = root_node_->first_node("PP_MESH")->first_node("PP_R");
-
-      assert(node != NULL);
-
-      int size = value<int>(node->first_attribute("size"));
-      grid_.resize(size);
-      std::istringstream stst(node->value());
-      for(int ii = 0; ii < size; ii++){
-	stst >> grid_[ii];
+      {
+	rapidxml::xml_node<> * node = root_node_->first_node("PP_MESH")->first_node("PP_R");
+	
+	assert(node);
+	
+	int size = value<int>(node->first_attribute("size"));
+	grid_.resize(size);
+	std::istringstream stst(node->value());
+	for(int ii = 0; ii < size; ii++){
+	  stst >> grid_[ii];
+	}
       }
+      
+      //Read dij once
+      {
+      	rapidxml::xml_node<> * node = root_node_->first_node("PP_NONLOCAL")->first_node("PP_DIJ");
 
+	assert(node);
+	
+	dij_.resize(nprojectors()*nprojectors());
+	
+	std::istringstream stst(node->value());
+	for(int ii = 0; ii < dij_.size(); ii++) stst >> dij_[ii];
+      }
+	
     }
 
     int size() const { return buffer_.size(); };
@@ -97,7 +110,7 @@ namespace pseudopotential {
     }
 
     int nchannels() const {
-      return number_of_projectors()/(lmax() + 1);
+      return nprojectors()/(lmax() + 1);
     }
     
     int nbeta() const {
@@ -119,7 +132,7 @@ namespace pseudopotential {
       
     }
 
-    int number_of_projectors() const {
+    int nprojectors() const {
       return value<int>(root_node_->first_node("PP_HEADER")->first_attribute("number_of_proj"));
     }
     
@@ -130,7 +143,7 @@ namespace pseudopotential {
     void projector(int l, int i, std::vector<double> & proj) const {
       rapidxml::xml_node<> * node;
 
-      for(int iproj = 1; iproj <= number_of_projectors(); iproj++){
+      for(int iproj = 1; iproj <= nprojectors(); iproj++){
 	std::string tag = "PP_BETA." + std::to_string(iproj);
 	node = root_node_->first_node("PP_NONLOCAL")->first_node(tag.c_str());
 
@@ -153,79 +166,22 @@ namespace pseudopotential {
     }
     
     double d_ij(int l, int i, int j) const {
-#if 0
-      rapidxml::xml_node<> * node = pseudo_node_->first_node("d_ij");
-      
-      while(node){
-	int read_l = value<int>(node->first_attribute("l"));
-	int read_i = value<int>(node->first_attribute("i")) - 1;
-	int read_j = value<int>(node->first_attribute("j")) - 1;
-	if(l == read_l && i == read_i && j == read_j) break;
-	node = node->next_sibling("d_ij");
-      }
+      int n = l*nchannels() + i;
+      int m = l*nchannels() + j;
 
-      assert(node != NULL);
-
-      return value<double>(node);
-#endif 
+      return dij_[n*nprojectors() + m];
     }
 
     bool has_radial_function(int l) const{
-#if 0
-      rapidxml::xml_node<> * node = pseudo_node_->first_node("projector");
-      
-      while(node){
-	int read_l = value<int>(node->first_attribute("l"));
-	if(l == read_l) break;
-	node = node->next_sibling("projector");
-      }
-      
-      return node->first_node("radial_function") != NULL;
-#endif 
+      return false;
     }
 
     void radial_function(int l, std::vector<double> & function) const {
-#if 0
-      rapidxml::xml_node<> * node = pseudo_node_->first_node("projector");
-
-      while(node){
-	int read_l = value<int>(node->first_attribute("l"));
-	if(l == read_l) break;
-	node = node->next_sibling("projector");
-      }
-
-      assert(node != NULL);
-      assert(node->first_node("radial_function"));
-      
-      int size = value<int>(node->first_attribute("size"));
-      function.resize(size);
-      std::istringstream stst(node->first_node("radial_function")->value());
-      for(int ii = 0; ii < size; ii++){
-	stst >> function[ii];
-      }
-#endif 
+      function.clear();
     }
 
     void radial_potential(int l, std::vector<double> & function) const {
-#if 0
-      rapidxml::xml_node<> * node = pseudo_node_->first_node("projector");
-
-      while(node){
-	int read_l = value<int>(node->first_attribute("l"));
-	if(l == read_l) break;
-	node = node->next_sibling("projector");
-      }
-
-      assert(node != NULL);
-      assert(node->first_node("radial_potential"));
-      
-      int size = value<int>(node->first_attribute("size"));
-      function.resize(size);
-      std::istringstream stst(node->first_node("radial_potential")->value());
-      for(int ii = 0; ii < size; ii++){
-	stst >> function[ii];
-      }
-#endif 
+      function.clear();
     }
 
     bool has_nlcc() const{
@@ -367,7 +323,7 @@ namespace pseudopotential {
     rapidxml::xml_document<> doc_;
     rapidxml::xml_node<> * root_node_;
     std::vector<double> grid_;
-    
+    std::vector<double> dij_;
     
   };
 
