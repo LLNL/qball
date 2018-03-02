@@ -32,7 +32,6 @@
 
 #include "Species.h"
 #include <qball/SpeciesReader.h>
-#include "XMLFile.h"
 #include "Messages.h"
 #include <cassert>
 #include <string>

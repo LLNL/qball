@@ -126,10 +126,9 @@ noinst_HEADERS =                            \
 	WavefunctionHandler.h               \
 	WavefunctionStepper.h               \
 	XCPotential.h                       \
-	XMLFile.h                           \
 	XMLGFPreprocessor.h
 
-libqbLink_a_SOURCES =                       \
+libqbLink_a_SOURCES =                        \
 	AtomSet.cc                           \
 	Atom.cc                              \
 	CoordinateConstraint.cc              \
