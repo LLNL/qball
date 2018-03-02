@@ -5,8 +5,11 @@ lib_LIBRARIES =                             \
 
 noinst_HEADERS =                            \
 	base.hpp                            \
+	chemical_element.hpp                \
 	qso.hpp                             \
-	spline.h
+	spline.h                            \
+	upf.hpp
 
 libpseudo_a_SOURCES =                       \
-	spline.cc
+	spline.cc                           \
+	chemical_element.cc

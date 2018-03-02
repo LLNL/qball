@@ -8,6 +8,8 @@
 #include <pseudo/base.hpp>
 #include <rapidxml.hpp>
 
+#include <pseudo/chemical_element.hpp>
+
 namespace pseudopotential {
 
   class upf : public pseudopotential::base {
@@ -47,9 +49,13 @@ namespace pseudopotential {
     }
 
     int atomic_number() const {
+      chemical_element el(symbol());
+      return el.atomic_number();
     }
 
     double mass() const {
+      chemical_element el(symbol());
+      return el.mass();
     }
     
     int valence_charge() const {

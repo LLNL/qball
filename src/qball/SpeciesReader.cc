@@ -45,6 +45,7 @@ using namespace std;
 #include <cstdio>
 #include <sys/stat.h>
 #include <pseudo/qso.hpp>
+#include <pseudo/upf.hpp>
 
 ////////////////////////////////////////////////////////////////////////////////
 SpeciesReader::SpeciesReader(const Context& ctxt) : ctxt_(ctxt) {}
@@ -70,6 +71,11 @@ void SpeciesReader::readSpecies(Species& sp, const string uri){
       pseudopotential::qso pseudo(uri);
       fill_species(sp, pseudo);
       cout << "  <!--   format: QSO XML -->" << endl;
+      cout << "  <!--   size:   " << pseudo.size() << " -->" << endl;
+    } else if(extension == "upf") {
+      pseudopotential::upf pseudo(uri);
+      fill_species(sp, pseudo);
+      cout << "  <!--   format: UPF -->" << endl;
       cout << "  <!--   size:   " << pseudo.size() << " -->" << endl;
     } else {
       cerr << "Unknown pseudopotential type" << endl;
