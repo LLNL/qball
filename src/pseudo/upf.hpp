@@ -60,7 +60,7 @@ namespace pseudopotential {
 	dij_.resize(nprojectors()*nprojectors());
 	
 	std::istringstream stst(node->value());
-	for(int ii = 0; ii < dij_.size(); ii++) stst >> dij_[ii];
+	for(unsigned ii = 0; ii < dij_.size(); ii++) stst >> dij_[ii];
       }
 	
     }
@@ -141,7 +141,7 @@ namespace pseudopotential {
     }
     
     void projector(int l, int i, std::vector<double> & proj) const {
-      rapidxml::xml_node<> * node;
+      rapidxml::xml_node<> * node = NULL;
 
       for(int iproj = 1; iproj <= nprojectors(); iproj++){
 	std::string tag = "PP_BETA." + std::to_string(iproj);
@@ -154,7 +154,7 @@ namespace pseudopotential {
 	if(l == read_l && i == read_i) break;
       }
 
-      assert(node != NULL);
+      assert(node);
 
       int size = value<int>(node->first_attribute("size"));
       proj.resize(size);
@@ -185,121 +185,44 @@ namespace pseudopotential {
     }
 
     bool has_nlcc() const{
-#if 0
-      return pseudo_node_->first_node("rho_nlcc");
-#endif
+      return root_node_->first_node("PP_NLCC");
     }
 
     void nlcc_density(std::vector<double> & density) const {
-#if 0
-      rapidxml::xml_node<> * node = pseudo_node_->first_node("rho_nlcc");
+      rapidxml::xml_node<> * node = root_node_->first_node("PP_NLCC");
       assert(node);
+      
       int size = value<int>(node->first_attribute("size"));
       density.resize(size);
+
       std::istringstream stst(node->value());
-      for(int ii = 0; ii < size; ii++){
-	stst >> density[ii];
-      }
-#endif
+      for(int ii = 0; ii < size; ii++) stst >> density[ii];
+
+      interpolate(density);
     }
     
     void beta(int index, int & l, std::vector<double> & proj) const {
-#if 0
-      rapidxml::xml_node<> * node = pseudo_node_->first_node("beta");
-
-      for(int i = 0; i < index; i++) node = node->next_sibling("beta");
-
-      assert(node != NULL);
-
-      l = value<int>(node->first_attribute("l"));
-      int size = value<int>(node->first_attribute("size"));
-      proj.resize(size);
-      std::istringstream stst(node->value());
-      for(int ii = 0; ii < size; ii++){
-	stst >> proj[ii];
-      }
-#endif 
+      proj.clear();
     }
 
     void dnm_zero(int nbeta, std::vector<std::vector<double> > & dnm) const {
-#if 0
-      rapidxml::xml_node<> * node = pseudo_node_->first_node("dnm_zero");
-      std::istringstream stst(node->value());
-
-      dnm.resize(nbeta);
-      for(int i = 0; i < nbeta; i++){
-	dnm[i].resize(nbeta);
-	for ( int j = 0; j < nbeta; j++){
-	  stst >> dnm[i][j];
-	}
-      }
-#endif
+      dnm.clear();
     }
 
     bool has_rinner() const {
-#if 0
-      rapidxml::xml_node<> * node = pseudo_node_->first_node("rinner");
-      return node;
-#endif
+      return false;
     }
     
     void rinner(std::vector<double> & val) const {
-#if 0
-      rapidxml::xml_node<> * node = pseudo_node_->first_node("rinner");
-
-      assert(node != NULL);
-
-      int size = value<int>(node->first_attribute("size"));
-      val.resize(size);
-      std::istringstream stst(node->value());
-      for(int ii = 0; ii < size; ii++){
-	stst >> val[ii];
-      }
-#endif
+      val.clear();
     }
 
     void qnm(int index, int & l1, int & l2, int & n, int & m, std::vector<double> & val) const {
-#if 0
-      rapidxml::xml_node<> * node = pseudo_node_->first_node("qnm");
-
-      for(int i = 0; i < index; i++) node = node->next_sibling("qnm");
-
-      assert(node != NULL);
-
-      n = value<int>(node->first_attribute("n"));
-      m = value<int>(node->first_attribute("m"));
-      l1 = value<int>(node->first_attribute("l1"));
-      l2 = value<int>(node->first_attribute("l2"));
-
-      int size = value<int>(node->first_attribute("size"));
-      val.resize(size);
-      std::istringstream stst(node->value());
-      for(int ii = 0; ii < size; ii++){
-	stst >> val[ii];
-      }
-#endif 
+      val.clear();
     }
 
     void qfcoeff(int index, int ltot, std::vector<double> & val) const {
-#if 0
-      rapidxml::xml_node<> * node = pseudo_node_->first_node("qfcoeff");
-
-      while(node){
-	int read_index = value<int>(node->first_attribute("i"));
-	int read_ltot = value<int>(node->first_attribute("ltot"));
-	if(read_index == index && read_ltot == ltot) break;
-	node = node->next_sibling("qfcoeff");
-      }
-      
-      assert(node != NULL);
-
-      int size = value<int>(node->first_attribute("size"));
-      val.resize(size);
-      std::istringstream stst(node->value());
-      for(int ii = 0; ii < size; ii++){
-	stst >> val[ii];
-      }
-#endif 
+      val.clear();
     }
     
   private:

@@ -79,6 +79,7 @@ namespace pseudopotential {
 	  if(!has_projectors(l)) return l - 1;
 	}
       }
+      return -1;
     }
 
     int llocal() const {
