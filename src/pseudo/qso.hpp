@@ -89,6 +89,11 @@ namespace pseudopotential {
       }
     }
 
+    int nchannels() const {
+      if(type_ == type::NORM_CONSERVING_SEMILOCAL) return 2;
+      return 1;
+    }
+    
     int nquad() const {
       return value<int>(pseudo_node_->first_node("nquad"));
     }

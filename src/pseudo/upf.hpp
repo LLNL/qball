@@ -96,6 +96,10 @@ namespace pseudopotential {
       return 0.01;
     }
 
+    int nchannels() const {
+      return number_of_projectors()/(lmax() + 1);
+    }
+    
     int nbeta() const {
       return 0;
     }
@@ -107,42 +111,34 @@ namespace pseudopotential {
 
       int size = value<int>(node->first_attribute("size"));
 
-      std::vector<double> potential_in_grid(size);
-
+      potential.resize(size);
       std::istringstream stst(node->value());
-      for(int ii = 0; ii < size; ii++) stst >> potential_in_grid[ii];
+      for(int ii = 0; ii < size; ii++) stst >> potential[ii];
 
-      Spline potential_spline;
-      potential_spline.fit(grid_.data(), potential_in_grid.data(), size, SPLINE_FLAT_BC, SPLINE_NATURAL_BC);
-
-      potential.clear();
-      for(double rr = 0.0; rr <= grid_[grid_.size() - 1]; rr += mesh_spacing()){
-	potential.push_back(potential_spline.value(rr));
-      }
+      interpolate(potential);
       
     }
 
+    int number_of_projectors() const {
+      return value<int>(root_node_->first_node("PP_HEADER")->first_attribute("number_of_proj"));
+    }
+    
     bool has_projectors(int l) const {
-#if 0
-      rapidxml::xml_node<> * node = pseudo_node_->first_node("projector");
-      while(node){
-	int read_l = value<int>(node->first_attribute("l"));
-	if(l == read_l) break;
-	node = node->next_sibling("projector");
-      }
-      return node != NULL;
-#endif
+      return l >=0 && l <= lmax();
     }
     
     void projector(int l, int i, std::vector<double> & proj) const {
-#if 0
-      rapidxml::xml_node<> * node = pseudo_node_->first_node("projector");
+      rapidxml::xml_node<> * node;
 
-      while(node){
-	int read_l = value<int>(node->first_attribute("l"));
-	int read_i = value<int>(node->first_attribute("i")) - 1;
+      for(int iproj = 1; iproj <= number_of_projectors(); iproj++){
+	std::string tag = "PP_BETA." + std::to_string(iproj);
+	node = root_node_->first_node("PP_NONLOCAL")->first_node(tag.c_str());
+
+	assert(node);
+	
+	int read_l = value<int>(node->first_attribute("angular_momentum"));
+	int read_i = (value<int>(node->first_attribute("index")) - 1)%nchannels();
 	if(l == read_l && i == read_i) break;
-	node = node->next_sibling("projector");
       }
 
       assert(node != NULL);
@@ -150,10 +146,10 @@ namespace pseudopotential {
       int size = value<int>(node->first_attribute("size"));
       proj.resize(size);
       std::istringstream stst(node->value());
-      for(int ii = 0; ii < size; ii++){
-	stst >> proj[ii];
-      }
-#endif
+      for(int ii = 0; ii < size; ii++) stst >> proj[ii];
+
+      interpolate(proj);
+
     }
     
     double d_ij(int l, int i, int j) const {
@@ -352,6 +348,20 @@ namespace pseudopotential {
     
   private:
 
+    void interpolate(std::vector<double> & function) const {
+
+      std::vector<double> function_in_grid = function;
+      
+      Spline function_spline;
+      function_spline.fit(grid_.data(), function_in_grid.data(), function_in_grid.size(), SPLINE_FLAT_BC, SPLINE_NATURAL_BC);
+
+      function.clear();
+      for(double rr = 0.0; rr <= grid_[grid_.size() - 1]; rr += mesh_spacing()){
+	function.push_back(function_spline.value(rr));
+      }
+
+    }
+    
     ifstream file_;
     vector<char> buffer_;
     rapidxml::xml_document<> doc_;
