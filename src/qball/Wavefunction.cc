@@ -466,7 +466,7 @@ void Wavefunction::set_hasdata(bool hasd) {
 void Wavefunction::deallocate(void) {
    hasdata_ = false;
    for ( int ispin = 0; ispin < nspin_; ispin++ ) {
-      if ( spincontext_[ispin] != 0 ) {
+     if ( spincontext_.size() > 0 && spincontext_[ispin] != 0 ) {
          for ( int ikp = 0; ikp < sdcontext_[ispin].size(); ikp++ ) {
             if (sdcontext_[ispin][ikp] != 0 ) {
                if (sdcontext_[ispin][ikp]->active() ) {
