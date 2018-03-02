@@ -50,11 +50,8 @@ SpeciesReader::SpeciesReader(const Context& ctxt) : ctxt_(ctxt) {}
 ////////////////////////////////////////////////////////////////////////////////
 void SpeciesReader::readSpecies(Species& sp, const string uri)
 {
-  // Simplified parsing not using Xerces
-  // parse file uri
-  
-  if ( ctxt_.oncoutpe() )
-  {
+
+  if(ctxt_.oncoutpe()){
 
     pseudopotential::qso pseudo(uri);
 
@@ -66,201 +63,208 @@ void SpeciesReader::readSpecies(Species& sp, const string uri)
     cout << "  <!-- SpeciesReader opening file "
 	 << uri << " size: "
 	 << pseudo.size() << " -->" << endl;
-    
-    sp.usoft_ = false;
-    sp.oncv_ = false;
-
-    switch(pseudo.type()) {
-    case pseudopotential::type::ULTRASOFT :
-      sp.usoft_ = true;
-      cout << "  <!-- SpeciesReader::readSpecies: potential type:  ultrasoft -->" << endl;
-      break;
-    case pseudopotential::type::NORM_CONSERVING_SEMILOCAL :
-      sp.oncv_ = true;
-      cout << "  <!-- SpeciesReader::readSpecies: potential type:  ONCV norm-conserving -->" << endl;
-      break;
-    case pseudopotential::type::NORM_CONSERVING :
-      cout << "  <!-- SpeciesReader::readSpecies: potential type:  norm-conserving -->" << endl;
-      break;
-    }
-    
-    sp.description_ = pseudo.description();
-    cout << "  <!-- SpeciesReader::readSpecies: read description " << sp.description_ << " -->" << endl;
-    
-    sp.symbol_ = pseudo.symbol();
-    cout << "  <!-- SpeciesReader::readSpecies: read symbol " << sp.symbol_ << " -->" << endl;
-
-    sp.atomic_number_ = pseudo.atomic_number();
-    cout << "  <!-- SpeciesReader::readSpecies: read atomic_number " << sp.atomic_number_ << " -->" << endl;
-
-    sp.mass_ = pseudo.mass();
-    cout << "  <!-- SpeciesReader::readSpecies: read mass " << sp.mass_ << " -->" << endl;
-
-    sp.zval_ = pseudo.valence_charge();
-    cout << "  <!-- SpeciesReader::readSpecies: read valence_charge " << sp.zval_ << " -->" << endl;
-
-    if(pseudo.type() != pseudopotential::type::NORM_CONSERVING_SEMILOCAL){
-      sp.lmax_ = pseudo.lmax();
-      cout << "  <!-- SpeciesReader::readSpecies: read lmax " << sp.lmax_ << " -->" << endl;
-    } else {
-      sp.lmax_ = 3; // for the moment we assume is 3, we might have to decrease it later
-      sp.llocal_ = -1; // no local component for ONCV
-      sp.nquad_ = 0;
-    }
-
-    if(pseudo.type() == pseudopotential::type::NORM_CONSERVING) { 
-
-      sp.llocal_ = pseudo.llocal();
-      cout << "  <!-- SpeciesReader::readSpecies: read llocal " << sp.llocal_ << " -->" << endl;
-
-      sp.nquad_ = pseudo.nquad();
-      cout << "  <!-- SpeciesReader::readSpecies: read nquad " << sp.nquad_ << " -->" << endl;
-
-      sp.rquad_ = pseudo.rquad();
-      cout << "  <!-- SpeciesReader::readSpecies: read rquad " << sp.rquad_ << " -->" << endl;
-
-    }
-
-    sp.deltar_ = pseudo.mesh_spacing();
-    cout << "  <!-- SpeciesReader::readSpecies: read mesh_spacing " << sp.deltar_ << " -->" << endl;
-
-    sp.nchannels_ = 1;
-    if (pseudo.type() == pseudopotential::type::NORM_CONSERVING_SEMILOCAL) sp.nchannels_ = 2;
-    
-    // read the local potential
-    if(pseudo.type() == pseudopotential::type::NORM_CONSERVING_SEMILOCAL){
-      pseudo.local_potential(sp.vloc_);
-      cout << "  <!-- SpeciesReader::readSpecies: read local_potential size=" << sp.vloc_.size() << " -->" << endl;
-      
-      sp.projectors_.resize(sp.lmax_ + 1);
-      
-      for(int l = 0; l < sp.lmax_ + 1; l++ ) {
-	//check if we have projectors for this l as we don't really know lmax
-	if(!pseudo.has_projectors(l)){
-	  sp.lmax_ = l - 1;
-	  cout << "  <!-- SpeciesReader::readSpecies: read lmax " << sp.lmax_ << " -->" << endl;
-	  break;
-	}
-
-	sp.projectors_[l].resize(sp.nchannels_);
-	  
-	for ( int i = 0; i < sp.nchannels_; i++){
-	  pseudo.projector(l, i, sp.projectors_[l][i]);
-	  cout << "  <!-- SpeciesReader::readSpecies: read projector l="
-	       << l << " i=" << i << " size=" << sp.projectors_[l][i].size() << " -->" << endl;
-	}
-      }
-
-      // the oncv weights
-      sp.dij_.resize(sp.lmax_ + 1);
-      for(int l = 0; l < sp.lmax_ + 1; l++){
-	sp.dij_[l].resize(sp.nchannels_);
-	for(int ii = 0; ii < sp.nchannels_; ii++){
-	  sp.dij_[l][ii].resize(sp.nchannels_);
-	  for(int jj = 0; jj < sp.nchannels_; jj++){
-	    sp.dij_[l][ii][jj] = pseudo.d_ij(l, ii, jj);
-	      
-	    if(fabs(sp.dij_[l][ii][jj]) > 1.0e-6 && ii != jj){
-	      cerr << endl << "Error:" << endl;
-	      cerr << "       Unsupported pseudopotential file (non-diagonal ONCV)." << endl << endl;
-	      exit(1);
-	    }
-	  }
-	}
-	cout << "  <!-- SpeciesReader::readSpecies: read d_ij l=" << l << " -->" << endl;
-      }
-    }
-
-    if(pseudo.type() == pseudopotential::type::NORM_CONSERVING){
-      sp.vps_.resize(sp.lmax_ + 1);
-      sp.phi_.resize(sp.lmax_ + 1);
-
-      for(int l = 0; l < sp.lmax_ + 1; l++ ) {
-
-	pseudo.radial_potential(l, sp.vps_[l]);
-
-	cout << "  <!-- SpeciesReader::readSpecies: read radial_potential l="
-	     << l << " size=" << sp.vps_[l].size() << " -->" << endl;
-
-	if(pseudo.has_radial_function(l)){
-	  pseudo.radial_function(l, sp.phi_[l]);
-
-	  cout << "  <!-- SpeciesReader::readSpecies: read radial_function  l="
-	       << l << " size=" << sp.phi_[l].size() << " -->" << endl;
-	}
-	
-      }
-    }
-    
-    if(pseudo.type() == pseudopotential::type::ULTRASOFT){
-
-      sp.nbeta_ = pseudo.nbeta();
-      cout << "  <!-- SpeciesReader::readSpecies: read nbeta" << sp.nbeta_ << " -->" << endl;
-      
-      sp.llocal_ = 0;
-      sp.vps_.resize(1);
-      pseudo.local_potential(sp.vps_[0]);
-      cout << "  <!-- SpeciesReader::readSpecies: read vlocal size=" << sp.vps_[0].size() << " -->" << endl;
-
-      sp.betar_.resize(sp.nbeta_);
-      sp.betal_.resize(sp.nbeta_);
-      for ( int b = 0; b < sp.nbeta_; b++ ){
-	pseudo.beta(b, sp.betal_[b], sp.betar_[b]);
-        cout << "  <!-- SpeciesReader::readSpecies: read beta b=" << b << " size=" << sp.betar_[b].size() << " -->" << endl;
-      }
-
-      // read dnm_zero (D_nm^0)
-      pseudo.dnm_zero(sp.nbeta_, sp.dzero_);
-      cout << "  <!-- SpeciesReader::readSpecies: read dnm_zero -->" << endl;
-
-      // read rinner:  radii inside which Qnm^L are replaced by polynomial expansions
-      //   (see Laasonen, Phys. Rev. B 47, 10142 (1993).)
-      if(pseudo.has_rinner()){
-	pseudo.rinner(sp.rinner_);
-	cout << "  <!-- SpeciesReader::readSpecies: read rinner size=" << sp.rinner_.size() << " -->" << endl;
-      }
-      
-      // read Q_nm and qfcoeff
-      int nqnm = 0;
-      for (int i=1; i<=sp.nbeta_; i++)
-        nqnm += i;
-      sp.nqfun_ = nqnm;
-      sp.qfunr_.resize(nqnm);
-      sp.qfunl1_.resize(nqnm);
-      sp.qfunl2_.resize(nqnm);
-      sp.qfunb1_.resize(nqnm);
-      sp.qfunb2_.resize(nqnm);
-      sp.qfcoeff_.resize(nqnm);
-      
-      for ( int q = 0; q < nqnm; q++ ) {
-	// qnm
-	pseudo.qnm(q, sp.qfunl1_[q], sp.qfunl2_[q], sp.qfunb1_[q], sp.qfunb2_[q], sp.qfunr_[q]);
-	cout << "  <!-- SpeciesReader::readSpecies: read qnm q="
-             << q << " l1=" << sp.qfunl1_[q] << " l2=" << sp.qfunl2_[q] << " size="
-	     << sp.qfunr_[q].size() << " -->" << endl;
- 
-        // qcoeff
-        if (sp.rinner_.size() > 0) {
-          sp.qfcoeff_[q].resize(2*sp.lmax_+1);
-          for (int ltot=0; ltot<2*sp.lmax_+1; ltot++) {
-	    pseudo.qfcoeff(q, ltot, sp.qfcoeff_[q][ltot]);
-            cout << "  <!-- SpeciesReader::readSpecies: read qfcoeff q="
-                 << q << " ltot=" << ltot << " size=" << sp.qfcoeff_[q][ltot].size() << " -->" << endl;
-          }
-        }
-      }
-
-    }
-
-    if (pseudo.has_nlcc()) {
-      sp.nlcc_ = true;
-      cout << "  <!-- SpeciesReader::readSpecies: nlcc found. -->" << endl;
-      pseudo.nlcc_density(sp.rhor_nlcc_);
-      cout << "  <!-- SpeciesReader::readSpecies: read rho_nlcc size=" << sp.rhor_nlcc_.size() << " -->" << endl;
-    }
 
     sp.uri_ = uri;
+    
+    fill_species(sp, pseudo);
+    
+  }
 
+}
+
+template <typename PseudopotentialType>
+void  SpeciesReader::fill_species(Species& sp, PseudopotentialType & pseudo){
+
+  sp.nlcc_ = false;
+  sp.usoft_ = false;
+  sp.oncv_ = false;
+
+  switch(pseudo.type()) {
+  case pseudopotential::type::ULTRASOFT :
+    sp.usoft_ = true;
+    cout << "  <!-- SpeciesReader::readSpecies: potential type:  ultrasoft -->" << endl;
+    break;
+  case pseudopotential::type::NORM_CONSERVING_SEMILOCAL :
+    sp.oncv_ = true;
+    cout << "  <!-- SpeciesReader::readSpecies: potential type:  ONCV norm-conserving -->" << endl;
+    break;
+  case pseudopotential::type::NORM_CONSERVING :
+    cout << "  <!-- SpeciesReader::readSpecies: potential type:  norm-conserving -->" << endl;
+    break;
+  }
+    
+  sp.description_ = pseudo.description();
+  cout << "  <!-- SpeciesReader::readSpecies: read description " << sp.description_ << " -->" << endl;
+    
+  sp.symbol_ = pseudo.symbol();
+  cout << "  <!-- SpeciesReader::readSpecies: read symbol " << sp.symbol_ << " -->" << endl;
+
+  sp.atomic_number_ = pseudo.atomic_number();
+  cout << "  <!-- SpeciesReader::readSpecies: read atomic_number " << sp.atomic_number_ << " -->" << endl;
+
+  sp.mass_ = pseudo.mass();
+  cout << "  <!-- SpeciesReader::readSpecies: read mass " << sp.mass_ << " -->" << endl;
+
+  sp.zval_ = pseudo.valence_charge();
+  cout << "  <!-- SpeciesReader::readSpecies: read valence_charge " << sp.zval_ << " -->" << endl;
+
+  if(pseudo.type() != pseudopotential::type::NORM_CONSERVING_SEMILOCAL){
+    sp.lmax_ = pseudo.lmax();
+    cout << "  <!-- SpeciesReader::readSpecies: read lmax " << sp.lmax_ << " -->" << endl;
+  } else {
+    sp.lmax_ = 3; // for the moment we assume is 3, we might have to decrease it later
+    sp.llocal_ = -1; // no local component for ONCV
+    sp.nquad_ = 0;
+  }
+
+  if(pseudo.type() == pseudopotential::type::NORM_CONSERVING) { 
+
+    sp.llocal_ = pseudo.llocal();
+    cout << "  <!-- SpeciesReader::readSpecies: read llocal " << sp.llocal_ << " -->" << endl;
+
+    sp.nquad_ = pseudo.nquad();
+    cout << "  <!-- SpeciesReader::readSpecies: read nquad " << sp.nquad_ << " -->" << endl;
+
+    sp.rquad_ = pseudo.rquad();
+    cout << "  <!-- SpeciesReader::readSpecies: read rquad " << sp.rquad_ << " -->" << endl;
+
+  }
+
+  sp.deltar_ = pseudo.mesh_spacing();
+  cout << "  <!-- SpeciesReader::readSpecies: read mesh_spacing " << sp.deltar_ << " -->" << endl;
+
+  sp.nchannels_ = 1;
+  if (pseudo.type() == pseudopotential::type::NORM_CONSERVING_SEMILOCAL) sp.nchannels_ = 2;
+    
+  // read the local potential
+  if(pseudo.type() == pseudopotential::type::NORM_CONSERVING_SEMILOCAL){
+    pseudo.local_potential(sp.vloc_);
+    cout << "  <!-- SpeciesReader::readSpecies: read local_potential size=" << sp.vloc_.size() << " -->" << endl;
+      
+    sp.projectors_.resize(sp.lmax_ + 1);
+      
+    for(int l = 0; l < sp.lmax_ + 1; l++ ) {
+      //check if we have projectors for this l as we don't really know lmax
+      if(!pseudo.has_projectors(l)){
+	sp.lmax_ = l - 1;
+	cout << "  <!-- SpeciesReader::readSpecies: read lmax " << sp.lmax_ << " -->" << endl;
+	break;
+      }
+
+      sp.projectors_[l].resize(sp.nchannels_);
+	  
+      for ( int i = 0; i < sp.nchannels_; i++){
+	pseudo.projector(l, i, sp.projectors_[l][i]);
+	cout << "  <!-- SpeciesReader::readSpecies: read projector l="
+	     << l << " i=" << i << " size=" << sp.projectors_[l][i].size() << " -->" << endl;
+      }
+    }
+
+    // the oncv weights
+    sp.dij_.resize(sp.lmax_ + 1);
+    for(int l = 0; l < sp.lmax_ + 1; l++){
+      sp.dij_[l].resize(sp.nchannels_);
+      for(int ii = 0; ii < sp.nchannels_; ii++){
+	sp.dij_[l][ii].resize(sp.nchannels_);
+	for(int jj = 0; jj < sp.nchannels_; jj++){
+	  sp.dij_[l][ii][jj] = pseudo.d_ij(l, ii, jj);
+	      
+	  if(fabs(sp.dij_[l][ii][jj]) > 1.0e-6 && ii != jj){
+	    cerr << endl << "Error:" << endl;
+	    cerr << "       Unsupported pseudopotential file (non-diagonal ONCV)." << endl << endl;
+	    exit(1);
+	  }
+	}
+      }
+      cout << "  <!-- SpeciesReader::readSpecies: read d_ij l=" << l << " -->" << endl;
+    }
+  }
+
+  if(pseudo.type() == pseudopotential::type::NORM_CONSERVING){
+    sp.vps_.resize(sp.lmax_ + 1);
+    sp.phi_.resize(sp.lmax_ + 1);
+
+    for(int l = 0; l < sp.lmax_ + 1; l++){
+
+      pseudo.radial_potential(l, sp.vps_[l]);
+
+      cout << "  <!-- SpeciesReader::readSpecies: read radial_potential l="
+	   << l << " size=" << sp.vps_[l].size() << " -->" << endl;
+
+      if(pseudo.has_radial_function(l)){
+	pseudo.radial_function(l, sp.phi_[l]);
+
+	cout << "  <!-- SpeciesReader::readSpecies: read radial_function  l="
+	     << l << " size=" << sp.phi_[l].size() << " -->" << endl;
+      }
+    }
+  }
+    
+  if(pseudo.type() == pseudopotential::type::ULTRASOFT){
+
+    sp.nbeta_ = pseudo.nbeta();
+    cout << "  <!-- SpeciesReader::readSpecies: read nbeta" << sp.nbeta_ << " -->" << endl;
+      
+    sp.llocal_ = 0;
+    sp.vps_.resize(1);
+    pseudo.local_potential(sp.vps_[0]);
+    cout << "  <!-- SpeciesReader::readSpecies: read vlocal size=" << sp.vps_[0].size() << " -->" << endl;
+
+    sp.betar_.resize(sp.nbeta_);
+    sp.betal_.resize(sp.nbeta_);
+    for ( int b = 0; b < sp.nbeta_; b++ ){
+      pseudo.beta(b, sp.betal_[b], sp.betar_[b]);
+      cout << "  <!-- SpeciesReader::readSpecies: read beta b=" << b << " size=" << sp.betar_[b].size() << " -->" << endl;
+    }
+
+    // read dnm_zero (D_nm^0)
+    pseudo.dnm_zero(sp.nbeta_, sp.dzero_);
+    cout << "  <!-- SpeciesReader::readSpecies: read dnm_zero -->" << endl;
+
+    // read rinner:  radii inside which Qnm^L are replaced by polynomial expansions
+    //   (see Laasonen, Phys. Rev. B 47, 10142 (1993).)
+    if(pseudo.has_rinner()){
+      pseudo.rinner(sp.rinner_);
+      cout << "  <!-- SpeciesReader::readSpecies: read rinner size=" << sp.rinner_.size() << " -->" << endl;
+    }
+      
+    // read Q_nm and qfcoeff
+    int nqnm = 0;
+    for (int i=1; i<=sp.nbeta_; i++)
+      nqnm += i;
+    sp.nqfun_ = nqnm;
+    sp.qfunr_.resize(nqnm);
+    sp.qfunl1_.resize(nqnm);
+    sp.qfunl2_.resize(nqnm);
+    sp.qfunb1_.resize(nqnm);
+    sp.qfunb2_.resize(nqnm);
+    sp.qfcoeff_.resize(nqnm);
+      
+    for(int q = 0; q < nqnm; q++){
+      // qnm
+      pseudo.qnm(q, sp.qfunl1_[q], sp.qfunl2_[q], sp.qfunb1_[q], sp.qfunb2_[q], sp.qfunr_[q]);
+      cout << "  <!-- SpeciesReader::readSpecies: read qnm q="
+	   << q << " l1=" << sp.qfunl1_[q] << " l2=" << sp.qfunl2_[q] << " size="
+	   << sp.qfunr_[q].size() << " -->" << endl;
+ 
+      // qcoeff
+      if (sp.rinner_.size() > 0) {
+	sp.qfcoeff_[q].resize(2*sp.lmax_+1);
+	for (int ltot=0; ltot<2*sp.lmax_+1; ltot++) {
+	  pseudo.qfcoeff(q, ltot, sp.qfcoeff_[q][ltot]);
+	  cout << "  <!-- SpeciesReader::readSpecies: read qfcoeff q="
+	       << q << " ltot=" << ltot << " size=" << sp.qfcoeff_[q][ltot].size() << " -->" << endl;
+	}
+      }
+    }
+
+  }
+
+  if(pseudo.has_nlcc()){
+    sp.nlcc_ = true;
+    cout << "  <!-- SpeciesReader::readSpecies: nlcc found. -->" << endl;
+    pseudo.nlcc_density(sp.rhor_nlcc_);
+    cout << "  <!-- SpeciesReader::readSpecies: read rho_nlcc size=" << sp.rhor_nlcc_.size() << " -->" << endl;
   }
 
 }

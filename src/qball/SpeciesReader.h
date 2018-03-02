@@ -42,10 +42,14 @@ class SpeciesReader
   const Context& ctxt_;
   
   string uri_;   // uri from which Species is read
+
+  template <typename PseudopotentialType>
+  void fill_species(Species& sp, PseudopotentialType & pseudo);
   
   public:
 
   SpeciesReader(const Context& ctxt);
+
   void readSpecies(Species& sp, const string uri);
   void bcastSpecies(Species& sp);
 };
