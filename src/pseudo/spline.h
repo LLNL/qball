@@ -48,7 +48,7 @@ class Spline {
   Spline(){
   }
   
-  void fit(double *x, double *y, int n, double yp1, double ypn){
+  void fit(const double *x, double *y, int n, double yp1, double ypn){
     x_.resize(n);
     y_.resize(n);
     y2_.resize(n);

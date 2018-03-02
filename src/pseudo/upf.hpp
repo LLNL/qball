@@ -9,6 +9,7 @@
 #include <rapidxml.hpp>
 
 #include <pseudo/chemical_element.hpp>
+#include <pseudo/spline.h>
 
 namespace pseudopotential {
 
@@ -100,20 +101,25 @@ namespace pseudopotential {
     }
 
     void local_potential(std::vector<double> & potential) const {
-#if 0
-      rapidxml::xml_node<> * node = pseudo_node_->first_node("local_potential");
-      if(!node){
-	// for ultrasoft, this is called vlocal
-	node = pseudo_node_->first_node("vlocal");
-      }
+      rapidxml::xml_node<> * node = root_node_->first_node("PP_LOCAL");
+
       assert(node);
+
       int size = value<int>(node->first_attribute("size"));
-      potential.resize(size);
+
+      std::vector<double> potential_in_grid(size);
+
       std::istringstream stst(node->value());
-      for(int ii = 0; ii < size; ii++){
-	stst >> potential[ii];
+      for(int ii = 0; ii < size; ii++) stst >> potential_in_grid[ii];
+
+      Spline potential_spline;
+      potential_spline.fit(grid_.data(), potential_in_grid.data(), size, SPLINE_FLAT_BC, SPLINE_NATURAL_BC);
+
+      potential.clear();
+      for(double rr = 0.0; rr <= grid_[grid_.size() - 1]; rr += mesh_spacing()){
+	potential.push_back(potential_spline.value(rr));
       }
-#endif
+      
     }
 
     bool has_projectors(int l) const {
