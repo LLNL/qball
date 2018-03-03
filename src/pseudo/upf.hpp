@@ -178,10 +178,9 @@ namespace pseudopotential {
 
       //the projectors come multiplied by r, so we have to divide and fix the first point
       for(int ii = 1; ii < size; ii++) proj[ii] /= grid_[ii];
-      proj[0] = linear_extrapolate(grid_[0], grid_[1], grid_[2], proj[1], proj[2]);
+      extrapolate_first_point(proj);
       
       interpolate(proj);
-
     }
     
     double d_ij(int l, int i, int j) const {
@@ -258,9 +257,17 @@ namespace pseudopotential {
       }
     }
 
-    static double linear_extrapolate(const double & x0, const double & x1, const double & x2, const double & y1, const double & y2){
-      double mm = (y2 - y1)/(x2 - x1);
-      return y1 + mm*(x0 - x1);
+    void extrapolate_first_point(std::vector<double> & function_) const{
+      double x1 = grid_[1];
+      double x2 = grid_[2];
+      double x3 = grid_[3];
+      double f1 = function_[1];
+      double f2 = function_[2];
+      double f3 = function_[3];
+
+      function_[0] = f1*x2*x3*(x2 - x3) + f2*x1*x3*(x3 - x1) + f3*x1*x2*(x1 - x2);
+      function_[0] /= (x1 - x2)*(x1 - x3)*(x2 - x3);
+
     }
     
     ifstream file_;
