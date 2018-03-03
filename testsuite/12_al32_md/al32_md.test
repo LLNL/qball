@@ -3,7 +3,7 @@
 
 Test       : Aluminum MD
 Program    : qball
-TestGroups : short-run
+TestGroups : long-run
 Enabled    : Yes
 
 Processors : 4
