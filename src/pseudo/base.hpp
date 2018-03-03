@@ -12,10 +12,12 @@ namespace pseudopotential {
   public:
 
     pseudopotential::type type() const { return type_; }
+    int lmax() const { return lmax_; }
     
   protected:
 
     pseudopotential::type type_;
+    int lmax_;
     
   };
 

@@ -86,6 +86,9 @@ namespace pseudopotential {
 	  dij_[ii] *= 0.5; //convert from Rydberg to Hartree
 	}
       }
+
+      //Read lmax
+      lmax_ = value<int>(root_node_->first_node("PP_HEADER")->first_attribute("l_max"));
 	
     }
 
@@ -113,10 +116,6 @@ namespace pseudopotential {
       return value<int>(root_node_->first_node("PP_HEADER")->first_attribute("z_valence"));
     }
 
-    int lmax() const {
-      return value<int>(root_node_->first_node("PP_HEADER")->first_attribute("l_max"));
-    }
-
     int llocal() const {
       return value<int>(root_node_->first_node("PP_HEADER")->first_attribute("l_local"));
     }
@@ -141,10 +140,6 @@ namespace pseudopotential {
       }
     }
     
-    int nbeta() const {
-      return nprojectors();
-    }
-
     void local_potential(std::vector<double> & potential) const {
       rapidxml::xml_node<> * node = root_node_->first_node("PP_LOCAL");
 

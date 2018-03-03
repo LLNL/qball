@@ -46,6 +46,17 @@ namespace pseudopotential {
       }
 
       assert(pseudo_node_);
+
+      //read lmax
+      lmax_ = -1;
+      if(pseudo_node_->first_node("lmax")) {
+	lmax_ = value<int>(pseudo_node_->first_node("lmax"));
+      } else {
+	for(int l = 0; l <= 10; l++ ){
+	  if(!has_projectors(l)) lmax_ = l - 1;
+	}
+      }
+      assert(lmax_ >= 0);
       
     }
 
@@ -71,17 +82,6 @@ namespace pseudopotential {
       return value<int>(pseudo_node_->first_node("valence_charge"));
     }
 
-    int lmax() const {
-      if(pseudo_node_->first_node("lmax")) {
-	return value<int>(pseudo_node_->first_node("lmax"));
-      } else {
-	for(int l = 0; l <= 10; l++ ) {
-	  if(!has_projectors(l)) return l - 1;
-	}
-      }
-      return -1;
-    }
-
     int llocal() const {
       if(pseudo_node_->first_node("llocal")){
 	return value<int>(pseudo_node_->first_node("llocal"));
@@ -91,6 +91,13 @@ namespace pseudopotential {
     }
 
     int nchannels() const {
+      if(type_ == type::ULTRASOFT){
+	int np = nbeta();
+	int nl = lmax() + 1;
+	cout << "NPNL" << np << '\t' << nl << endl;
+	assert(np%nl == 0);
+	return np/nl;
+      }
       if(type_ == type::KLEINMAN_BYLANDER) return 2;
       return 1;
     }
@@ -105,10 +112,6 @@ namespace pseudopotential {
 
     double mesh_spacing() const {
       return value<double>(pseudo_node_->first_node("mesh_spacing"));
-    }
-
-    int nbeta() const {
-      return value<int>(pseudo_node_->first_node("nbeta"));
     }
 
     void local_potential(std::vector<double> & potential) const {
@@ -126,14 +129,23 @@ namespace pseudopotential {
       }
     }
 
-    bool nprojectors() const {
-      int count = 0;
-      rapidxml::xml_node<> * node = pseudo_node_->first_node("projector");
-      while(node) {
-	count++;
-	node = node->next_sibling("projector");
+    int nprojectors() const {
+      switch(type_){
+      case type::ULTRASOFT:
+	return nbeta();
+      case type::KLEINMAN_BYLANDER: {
+	int count = 0;
+	rapidxml::xml_node<> * node = pseudo_node_->first_node("projector");
+	while(node) {
+	  count++;
+	  node = node->next_sibling("projector");
+	}
+	return count;
       }
-      return count;
+      case type::NORM_CONSERVING:
+	return 0;
+      }
+      return 0;
     }
     
     bool has_projectors(int l) const {
@@ -147,13 +159,16 @@ namespace pseudopotential {
     }
     
     void projector(int l, int i, std::vector<double> & proj) const {
-      rapidxml::xml_node<> * node = pseudo_node_->first_node("projector");
+
+      std::string tag = "projector";
+      
+      rapidxml::xml_node<> * node = pseudo_node_->first_node(tag.c_str());
 
       while(node){
 	int read_l = value<int>(node->first_attribute("l"));
 	int read_i = value<int>(node->first_attribute("i")) - 1;
 	if(l == read_l && i == read_i) break;
-	node = node->next_sibling("projector");
+	node = node->next_sibling(tag.c_str());
       }
 
       assert(node != NULL);
@@ -161,9 +176,7 @@ namespace pseudopotential {
       int size = value<int>(node->first_attribute("size"));
       proj.resize(size);
       std::istringstream stst(node->value());
-      for(int ii = 0; ii < size; ii++){
-	stst >> proj[ii];
-      }
+      for(int ii = 0; ii < size; ii++) stst >> proj[ii];
       
     }
     
@@ -345,6 +358,11 @@ namespace pseudopotential {
     }
     
   private:
+
+    int nbeta() const {
+      return value<int>(pseudo_node_->first_node("nbeta"));
+    }
+
 
     ifstream file_;
     vector<char> buffer_;

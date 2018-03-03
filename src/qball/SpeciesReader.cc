@@ -217,7 +217,7 @@ void  SpeciesReader::fill_species(Species& sp, PseudopotentialType & pseudo){
     
   if(pseudo.type() == pseudopotential::type::ULTRASOFT){
 
-    sp.nbeta_ = pseudo.nbeta();
+    sp.nbeta_ = pseudo.nprojectors();
     cout << "  <!-- SpeciesReader::readSpecies: read nbeta " << sp.nbeta_ << " -->" << endl;
       
     sp.llocal_ = 0;
