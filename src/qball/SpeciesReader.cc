@@ -142,14 +142,15 @@ void  SpeciesReader::fill_species(Species& sp, PseudopotentialType & pseudo){
   cout << "  <!-- SpeciesReader::readSpecies: read mesh_spacing " << sp.deltar_ << " -->" << endl;
   
   sp.nchannels_ = pseudo.nchannels();
-    
+  assert(sp.nchannels_ > 0);
+
   // read the local potential
   if(pseudo.type() == pseudopotential::type::NORM_CONSERVING_SEMILOCAL){
     pseudo.local_potential(sp.vloc_);
     cout << "  <!-- SpeciesReader::readSpecies: read local_potential size=" << sp.vloc_.size() << " -->" << endl;
       
     sp.projectors_.resize(sp.lmax_ + 1);
-      
+
     for(int l = 0; l < sp.lmax_ + 1; l++ ) {
       sp.projectors_[l].resize(sp.nchannels_);
 	  

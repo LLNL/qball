@@ -38,7 +38,7 @@ namespace pseudopotential {
       
       std::string pseudo_type = root_node_->first_node("PP_HEADER")->first_attribute("pseudo_type")->value();
       
-      if(pseudo_type == "NC"){
+      if(pseudo_type == "NC" || pseudo_type == "SL"){
 	type_ = type::NORM_CONSERVING_SEMILOCAL;
       } else if(pseudo_type == "USPP"){
 	type_ = type::ULTRASOFT;
@@ -51,21 +51,22 @@ namespace pseudopotential {
 
       // Read the grid
       {
+	rapidxml::xml_base<> * xmin = root_node_->first_node("PP_MESH")->first_attribute("xmin");
+
+	start_point_ = 0;
+	if(xmin && fabs(value<double>(xmin)) > 1.0e-10) start_point_ = 1;
+	
 	rapidxml::xml_node<> * node = root_node_->first_node("PP_MESH")->first_node("PP_R");
 	
 	assert(node);
 	
 	int size = value<int>(node->first_attribute("size"));
-	grid_.resize(size);
+	grid_.resize(size + start_point_);
 	std::istringstream stst(node->value());
-	for(int ii = 0; ii < size; ii++){
-	  stst >> grid_[ii];
-	}
-
-	if(fabs(grid_[0]) > 1e-10){
-	  cerr << "Unsupported UPF pseudopotential, grid does not start at zero." << endl;
-	  exit(1);
-	}
+	grid_[0] = 0.0;
+	for(int ii = 0; ii < size; ii++) stst >> grid_[start_point_ + ii];
+	
+	assert(fabs(grid_[0]) <= 1e-10);
 	
       }
       
@@ -131,7 +132,11 @@ namespace pseudopotential {
     }
 
     int nchannels() const {
-      return nprojectors()/(lmax() + 1);
+      if(llocal() >= 0){
+	return nprojectors()/lmax();
+      } else {
+	return nprojectors()/(lmax() + 1);
+      }
     }
     
     int nbeta() const {
@@ -145,12 +150,13 @@ namespace pseudopotential {
 
       int size = value<int>(node->first_attribute("size"));
 
-      potential.resize(size);
+      potential.resize(size + start_point_);
       std::istringstream stst(node->value());
       for(int ii = 0; ii < size; ii++) {
-	stst >> potential[ii];
+	stst >> potential[ii + start_point_];
 	potential[ii] *= 0.5; //Convert from Rydberg to Hartree
       }
+      if(start_point_ > 0) extrapolate_first_point(potential);
       
       interpolate(potential);
       
@@ -181,12 +187,12 @@ namespace pseudopotential {
       assert(node);
 
       int size = value<int>(node->first_attribute("size"));
-      proj.resize(size);
+      proj.resize(size + start_point_);
       std::istringstream stst(node->value());
-      for(int ii = 0; ii < size; ii++) stst >> proj[ii];
+      for(int ii = 0; ii < size; ii++) stst >> proj[ii + start_point_];
 
       //the projectors come multiplied by r, so we have to divide and fix the first point
-      for(int ii = 1; ii < size; ii++) proj[ii] /= grid_[ii];
+      for(int ii = 1; ii < size + start_point_; ii++) proj[ii] /= grid_[ii];
       extrapolate_first_point(proj);
       
       interpolate(proj);
@@ -233,7 +239,13 @@ namespace pseudopotential {
     }
 
     void dnm_zero(int nbeta, std::vector<std::vector<double> > & dnm) const {
-      dnm.clear();
+      dnm.resize(nbeta);
+      for(int i = 0; i < nbeta; i++){
+	dnm[i].resize(nbeta);
+	for ( int j = 0; j < nbeta; j++){
+	  dnm[i][j] = dij_[i*nbeta + j];
+	}
+      }
     }
 
     bool has_rinner() const {
@@ -285,6 +297,7 @@ namespace pseudopotential {
     rapidxml::xml_node<> * root_node_;
     std::vector<double> grid_;
     std::vector<double> dij_;
+    int start_point_;
     
   };
 

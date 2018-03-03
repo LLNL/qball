@@ -209,12 +209,12 @@ bool Species::initialize(double rcpsval)
     potentials_r_[0].fit(&rps_[0], &vps_[0][0], ndft_, SPLINE_FLAT_BC, SPLINE_NATURAL_BC);
 
   } else if(oncv_){
-    assert(llocal_ == -1);
     
     vloc_.resize(ndft_);
     for (int ip = np; ip < ndft_; ip++ ) vloc_[ip] = - zval_/rps_[ip];
 
     for(int ll = 0; ll <= lmax_; ll++ ){
+      if(ll == llocal_) continue;
       for(int ii = 0; ii < nchannels_; ii++){
 	projectors_[ll][ii].resize(ndft_);
 	for (int ip = np; ip < ndft_; ip++ ) projectors_[ll][ii][ip] = 0.0;
