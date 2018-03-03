@@ -20,12 +20,12 @@ namespace pseudopotential {
     upf(const std::string & filename):
       file_(filename),
       buffer_((istreambuf_iterator<char>(file_)), istreambuf_iterator<char>()){
-
+      
       buffer_.push_back('\0');
       doc_.parse<0>(&buffer_[0]);
-
+      
       root_node_ = doc_.first_node("UPF");
-
+      
       if(!root_node_){
 	cerr << "Error: File '" << filename << "' is not a UPF 2 file (version 1 is not supported)." << endl;
 	exit(1);
@@ -35,11 +35,15 @@ namespace pseudopotential {
 	cerr << "Unsupported UPF pseudopotential, can only read UPF v2." << endl;
 	exit(1);
       }
-
-      if(root_node_->first_node("PP_HEADER")->first_attribute("pseudo_type")->value() == string("NC")){
+      
+      std::string pseudo_type = root_node_->first_node("PP_HEADER")->first_attribute("pseudo_type")->value();
+      
+      if(pseudo_type == "NC"){
 	type_ = type::NORM_CONSERVING_SEMILOCAL;
+      } else if(pseudo_type == "USPP"){
+	type_ = type::ULTRASOFT;
       } else {
-	cerr << "Unsupported UPF pseudopotential, not norm conserving." << endl;
+	cerr << "Error: Unsupported UPF pseudopotential." << endl;
 	exit(1);
       }
       
