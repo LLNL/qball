@@ -126,6 +126,16 @@ namespace pseudopotential {
       }
     }
 
+    bool nprojectors() const {
+      int count = 0;
+      rapidxml::xml_node<> * node = pseudo_node_->first_node("projector");
+      while(node) {
+	count++;
+	node = node->next_sibling("projector");
+      }
+      return count;
+    }
+    
     bool has_projectors(int l) const {
       rapidxml::xml_node<> * node = pseudo_node_->first_node("projector");
       while(node){
