@@ -160,6 +160,20 @@ void  SpeciesReader::fill_species(Species& sp, PseudopotentialType & pseudo){
       }
     }
 
+    /*
+    std::ofstream pseudo_debug("projectors.dat");
+    for(unsigned ip = 0; ip < sp.projectors_[0][0].size(); ip++){
+      pseudo_debug << ip*sp.deltar_;
+      for(int l = 0; l < sp.lmax_ + 1; l++ ) {
+	for ( int i = 0; i < sp.nchannels_; i++){
+	  pseudo_debug << '\t' << sp.projectors_[l][i][ip];
+	}
+      }
+      pseudo_debug << endl;
+    }
+    pseudo_debug.close();
+    */
+
     // the oncv weights
     sp.dij_.resize(sp.lmax_ + 1);
     for(int l = 0; l < sp.lmax_ + 1; l++){
