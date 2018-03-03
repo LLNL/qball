@@ -39,9 +39,11 @@ namespace pseudopotential {
       std::string pseudo_type = root_node_->first_node("PP_HEADER")->first_attribute("pseudo_type")->value();
       
       if(pseudo_type == "NC" || pseudo_type == "SL"){
-	type_ = type::NORM_CONSERVING_SEMILOCAL;
+	type_ = type::KLEINMAN_BYLANDER;
       } else if(pseudo_type == "USPP"){
 	type_ = type::ULTRASOFT;
+	cerr << "Error: Ultrasoft UPF pseudopotentials are not supported at the moment." << endl;
+	exit(1);
       } else {
 	cerr << "Error: Unsupported UPF pseudopotential." << endl;
 	exit(1);

@@ -98,9 +98,9 @@ void  SpeciesReader::fill_species(Species& sp, PseudopotentialType & pseudo){
     sp.usoft_ = true;
     cout << "  <!-- SpeciesReader::readSpecies: potential type:  ultrasoft -->" << endl;
     break;
-  case pseudopotential::type::NORM_CONSERVING_SEMILOCAL :
+  case pseudopotential::type::KLEINMAN_BYLANDER :
     sp.oncv_ = true;
-    cout << "  <!-- SpeciesReader::readSpecies: potential type:  ONCV norm-conserving -->" << endl;
+    cout << "  <!-- SpeciesReader::readSpecies: potential type:  Kleinman-Bylander norm-conserving -->" << endl;
     break;
   case pseudopotential::type::NORM_CONSERVING :
     cout << "  <!-- SpeciesReader::readSpecies: potential type:  norm-conserving -->" << endl;
@@ -145,7 +145,7 @@ void  SpeciesReader::fill_species(Species& sp, PseudopotentialType & pseudo){
   assert(sp.nchannels_ > 0);
 
   // read the local potential
-  if(pseudo.type() == pseudopotential::type::NORM_CONSERVING_SEMILOCAL){
+  if(pseudo.type() == pseudopotential::type::KLEINMAN_BYLANDER){
     pseudo.local_potential(sp.vloc_);
     cout << "  <!-- SpeciesReader::readSpecies: read local_potential size=" << sp.vloc_.size() << " -->" << endl;
       
@@ -245,8 +245,7 @@ void  SpeciesReader::fill_species(Species& sp, PseudopotentialType & pseudo){
       
     // read Q_nm and qfcoeff
     int nqnm = 0;
-    for (int i=1; i<=sp.nbeta_; i++)
-      nqnm += i;
+    for (int i = 1; i <= sp.nbeta_; i++) nqnm += i;
     sp.nqfun_ = nqnm;
     sp.qfunr_.resize(nqnm);
     sp.qfunl1_.resize(nqnm);

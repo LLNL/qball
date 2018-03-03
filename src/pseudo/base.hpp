@@ -5,7 +5,7 @@
 
 namespace pseudopotential {
 
-  enum class type { ULTRASOFT, NORM_CONSERVING, NORM_CONSERVING_SEMILOCAL };
+  enum class type { ULTRASOFT, NORM_CONSERVING, KLEINMAN_BYLANDER };
   
   class base {
 

@@ -37,7 +37,7 @@ namespace pseudopotential {
 
       if(!pseudo_node_){
 	pseudo_node_ = root_node_->first_node("norm_conserving_semilocal_pseudopotential");
-	if(pseudo_node_) type_ = type::NORM_CONSERVING_SEMILOCAL;
+	if(pseudo_node_) type_ = type::KLEINMAN_BYLANDER;
       }
 
       if(!pseudo_node_){
@@ -91,7 +91,7 @@ namespace pseudopotential {
     }
 
     int nchannels() const {
-      if(type_ == type::NORM_CONSERVING_SEMILOCAL) return 2;
+      if(type_ == type::KLEINMAN_BYLANDER) return 2;
       return 1;
     }
     
