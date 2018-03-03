@@ -26,6 +26,11 @@ namespace pseudopotential {
 
       root_node_ = doc_.first_node("UPF");
 
+      if(!root_node_){
+	cerr << "Error: File '" << filename << "' is not a UPF 2 file (version 1 is not supported)." << endl;
+	exit(1);
+      }
+      
       if(root_node_->first_attribute("version")->value()[0] != '2'){
 	cerr << "Unsupported UPF pseudopotential, can only read UPF v2." << endl;
 	exit(1);
