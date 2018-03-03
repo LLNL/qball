@@ -53,10 +53,14 @@ namespace pseudopotential {
 	lmax_ = value<int>(pseudo_node_->first_node("lmax"));
       } else {
 	for(int l = 0; l <= 10; l++ ){
-	  if(!has_projectors(l)) lmax_ = l - 1;
+	  if(!has_projectors(l)){
+	    lmax_ = l - 1;
+	    break;
+	  }
 	}
       }
       assert(lmax_ >= 0);
+      assert(lmax_ < 9);
       
     }
 
@@ -94,7 +98,6 @@ namespace pseudopotential {
       if(type_ == type::ULTRASOFT){
 	int np = nbeta();
 	int nl = lmax() + 1;
-	cout << "NPNL" << np << '\t' << nl << endl;
 	assert(np%nl == 0);
 	return np/nl;
       }

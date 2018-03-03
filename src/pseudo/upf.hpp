@@ -292,7 +292,7 @@ namespace pseudopotential {
 	function.push_back(function_spline.value(rr));
       }
     }
-
+    
     void extrapolate_first_point(std::vector<double> & function_) const{
       double x1 = grid_[1];
       double x2 = grid_[2];
@@ -301,6 +301,10 @@ namespace pseudopotential {
       double f2 = function_[2];
       double f3 = function_[3];
 
+
+      // obtained from:
+      // http://www.wolframalpha.com/input/?i=solve+%7Bb*x1%5E2+%2B+c*x1+%2B+d+%3D%3D+f1,++b*x2%5E2+%2B+c*x2+%2B+d+%3D%3D+f2,+b*x3%5E2+%2B+c*x3+%2B+d+%3D%3D+f3+%7D++for+b,+c,+d
+      
       function_[0] = f1*x2*x3*(x2 - x3) + f2*x1*x3*(x3 - x1) + f3*x1*x2*(x1 - x2);
       function_[0] /= (x1 - x2)*(x1 - x3)*(x2 - x3);
 
