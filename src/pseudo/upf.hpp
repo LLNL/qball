@@ -140,7 +140,7 @@ namespace pseudopotential {
     }
     
     int nbeta() const {
-      return 0;
+      return nprojectors();
     }
 
     void local_potential(std::vector<double> & potential) const {
@@ -234,8 +234,26 @@ namespace pseudopotential {
       interpolate(density);
     }
     
-    void beta(int index, int & l, std::vector<double> & proj) const {
-      proj.clear();
+    void beta(int iproj, int & l, std::vector<double> & proj) const {
+      rapidxml::xml_node<> * node = NULL;
+
+      std::string tag = "PP_BETA." + std::to_string(iproj + 1);
+      node = root_node_->first_node("PP_NONLOCAL")->first_node(tag.c_str());
+
+      assert(node);
+	
+      l = value<int>(node->first_attribute("angular_momentum"));
+
+      int size = value<int>(node->first_attribute("size"));
+      proj.resize(size + start_point_);
+      std::istringstream stst(node->value());
+      for(int ii = 0; ii < size; ii++) stst >> proj[ii + start_point_];
+
+      //the projectors come multiplied by r, so we have to divide and fix the first point
+      for(int ii = 1; ii < size + start_point_; ii++) proj[ii] /= grid_[ii];
+      extrapolate_first_point(proj);
+      
+      interpolate(proj);
     }
 
     void dnm_zero(int nbeta, std::vector<std::vector<double> > & dnm) const {
