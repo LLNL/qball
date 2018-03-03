@@ -26,7 +26,10 @@ namespace pseudopotential {
 
       root_node_ = doc_.first_node("UPF");
 
-      //TODO: check for version
+      if(root_node_->first_attribute("version")->value()[0] != '2'){
+	cerr << "Unsupported UPF pseudopotential, can only read UPF v2." << endl;
+	exit(1);
+      }
 
       if(root_node_->first_node("PP_HEADER")->first_attribute("pseudo_type")->value() == string("NC")){
 	type_ = type::NORM_CONSERVING_SEMILOCAL;
@@ -244,7 +247,6 @@ namespace pseudopotential {
   private:
 
     void interpolate(std::vector<double> & function) const {
-
       std::vector<double> function_in_grid = function;
       
       Spline function_spline;
@@ -254,7 +256,6 @@ namespace pseudopotential {
       for(double rr = 0.0; rr <= grid_[grid_.size() - 1]; rr += mesh_spacing()){
 	function.push_back(function_spline.value(rr));
       }
-
     }
 
     static double linear_extrapolate(const double & x0, const double & x1, const double & x2, const double & y1, const double & y2){
