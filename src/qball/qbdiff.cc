@@ -27,17 +27,28 @@
 #include <config.h>
 
 #include <iostream>
+#include <fstream>
 #include <string>
 #include <cmath>
+#include <fstream>
+#include <vector>
+#include <cassert>
+#include <sstream>
 
-#include <xercesc/parsers/XercesDOMParser.hpp>
-#include <xercesc/dom/DOM.hpp>
-#include <xercesc/util/PlatformUtils.hpp>
+#include <rapidxml.hpp>
 
 using namespace std;
-using namespace xercesc;
 
 double energy_tol = 1.0e-6;
+
+template <typename Type>
+static Type value(const rapidxml::xml_base<> * node){
+  assert(node);
+  std::istringstream stst(node->value());
+  Type value;
+  stst >> value;
+  return value;
+}
 
 int main(int argc, char** argv)
 {
@@ -49,42 +60,39 @@ int main(int argc, char** argv)
   string filename1 = string(argv[1]);
   string filename2 = string(argv[2]);
 
-  XMLPlatformUtils::Initialize();
+  rapidxml::xml_document<> docu1, docu2;
+    
+  std::ifstream file1(filename1);
+  std::vector<char> buffer1((istreambuf_iterator<char>(file1)), istreambuf_iterator<char>());
+  docu1.parse<0>(buffer1.data());
+  
+  std::ifstream file2(filename2);
+  std::vector<char> buffer2((istreambuf_iterator<char>(file2)), istreambuf_iterator<char>());
+  docu2.parse<0>(buffer2.data());
 
-  XercesDOMParser * parser = new XercesDOMParser();
+  rapidxml::xml_node<> * iteration_node1 = docu1.first_node("qbox:simulation")->first_node("run")->first_node("iteration");
+  rapidxml::xml_node<> * iteration_node2 = docu2.first_node("qbox:simulation")->first_node("run")->first_node("iteration");
 
-  parser->parse(filename1.c_str());
-  DOMDocument * doc1 = parser->adoptDocument();
-
-  parser->parse(filename2.c_str());
-  DOMDocument * doc2 = parser->adoptDocument();
-
-  XMLCh* tmp = XMLString::transcode("iteration");
-  DOMNodeList* list1 = doc1->getElementsByTagName(tmp);
-  DOMNodeList* list2 = doc2->getElementsByTagName(tmp);
-  XMLString::release(&tmp);
-
-  if(list1->getLength() != list2->getLength()){
-    cout << "Different number of iterations: " << list1->getLength() << " vs " <<list2->getLength() << std::endl;
+  cout << iteration_node1 << "\t" << iteration_node2 << endl;
+  
+  if(!iteration_node1 || !iteration_node2){
+    cout << "At least one of the files does not contain any iteration." << endl;
     exit(1);
   }
-  
-  bool correct = true;
 
-  for(unsigned iter = 0; iter < list1->getLength(); iter++){
+  bool correct = true;
+  int iter = 1;
+  while(iteration_node1 && iteration_node2){
+
+    cout << "iter " << iter << endl;
     
     bool iter_correct = true;
 
-    DOMElement * it1 = dynamic_cast<DOMElement*>(list1->item(iter));
-    DOMElement * it2 = dynamic_cast<DOMElement*>(list2->item(iter));
-    
-    XMLCh* tmp = XMLString::transcode("etotal");
-    DOMElement* child1 = dynamic_cast<DOMElement*>(it1->getElementsByTagName(tmp)->item(0));
-    DOMElement* child2 = dynamic_cast<DOMElement*>(it2->getElementsByTagName(tmp)->item(0));
-    XMLString::release(&tmp);
-
-    double etotal1 = strtod(XMLString::transcode(child1->getTextContent()), NULL);
-    double etotal2 = strtod(XMLString::transcode(child2->getTextContent()), NULL);
+    assert(iteration_node1->first_node("etotal"));
+    assert(iteration_node2->first_node("etotal"));
+ 
+    double etotal1 = value<double>(iteration_node1->first_node("etotal"));
+    double etotal2 = value<double>(iteration_node2->first_node("etotal"));
 
     cout << endl;
     
@@ -108,12 +116,11 @@ int main(int argc, char** argv)
       cout << "[  FAIL  ]" << endl;
     }
 
+    iteration_node1 = iteration_node1->next_sibling("iteration");
+    iteration_node2 = iteration_node2->next_sibling("iteration");
+
   }
-
-  doc1->release();
-  doc2->release();
   
-  XMLPlatformUtils::Terminate();
-
   if(!correct) return 1;
+
 }
