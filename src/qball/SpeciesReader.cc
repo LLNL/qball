@@ -71,16 +71,16 @@ void SpeciesReader::readSpecies(Species& sp, const string uri){
     
     if(extension == "xml"){
       pseudo = new pseudopotential::qso(uri);
-      cout << "  <!--   format: QSO XML -->" << endl;
     } else if(extension == "upf") {
       pseudo = new pseudopotential::upf(uri);
-      cout << "  <!--   format: UPF -->" << endl;
     } else {
       cerr << "Unknown pseudopotential type" << endl;
       exit(1);
     }
 
     cout << "  <!--   size:   " << pseudo->size() << " -->" << endl;
+    cout << "  <!--   format: " << pseudo->format() << " -->" << endl;
+    
     fill_species(sp, *pseudo);
 
     delete pseudo;

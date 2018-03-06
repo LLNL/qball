@@ -22,7 +22,7 @@ namespace pseudopotential {
   class qso : public pseudopotential::base {
 
   public:
-    
+
     qso(const std::string & filename):
       file_(filename),
       buffer_((istreambuf_iterator<char>(file_)), istreambuf_iterator<char>()){
@@ -64,6 +64,8 @@ namespace pseudopotential {
       
     }
 
+    std::string format() const { return "quantum-simulation.org (XML)"; }
+    
     int size() const { return buffer_.size(); };
 
     std::string description() const {

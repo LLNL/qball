@@ -16,6 +16,7 @@ namespace pseudopotential {
     virtual int lmax() const { return lmax_; }
 
     //Pure virtual functions
+    virtual std::string format() const = 0;
     virtual int size() const = 0;
     virtual std::string description() const = 0;
     virtual std::string symbol() const = 0;

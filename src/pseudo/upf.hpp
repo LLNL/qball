@@ -92,6 +92,8 @@ namespace pseudopotential {
 	
     }
 
+    std::string format() const { return "UPF 2"; }
+    
     int size() const { return buffer_.size(); };
 
     std::string description() const {
