@@ -1,8 +1,9 @@
 ACLOCAL_AMFLAGS = -I m4
 
-SUBDIRS =        \
-	external_libs \
-	src      \
+SUBDIRS =                   \
+	external_libs       \
+	share               \
+	src                 \
 	testsuite
 
 check-short:

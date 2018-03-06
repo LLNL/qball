@@ -223,6 +223,16 @@ AC_MSG_NOTICE([
 AC_CONFIG_FILES([Makefile
                  external_libs/Makefile
 		 external_libs/dftd3/Makefile
+		 share/Makefile
+		 share/pseudopotentials/Makefile
+ 		 share/pseudopotentials/pseudo-dojo.org/Makefile
+ 		 share/pseudopotentials/pseudo-dojo.org/nc-sr-04_pbe_standard/Makefile
+ 		 share/pseudopotentials/pseudo-dojo.org/nc-sr-04_pbe_stringent/Makefile
+ 		 share/pseudopotentials/quantum-simulation.org/Makefile
+  		 share/pseudopotentials/quantum-simulation.org/hscv/Makefile
+   		 share/pseudopotentials/quantum-simulation.org/hscv/lda/Makefile
+   		 share/pseudopotentials/quantum-simulation.org/hscv/pbe/Makefile
+ 		 share/pseudopotentials/quantum-simulation.org/sg15/Makefile
                  src/Makefile
 		 src/math/Makefile
                  src/pseudo/Makefile
@@ -256,4 +266,6 @@ SCALAPACK 2      :  $acx_scalapack2_ok
 MASSV            :  $acx_massv_ok
 BlueGene/Q       :  $acx_bgq
 ])
+
+
 
