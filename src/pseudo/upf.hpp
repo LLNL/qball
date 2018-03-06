@@ -4,12 +4,15 @@
 #include <fstream>
 #include <vector>
 #include <cassert>
+#include <sstream>
+#include <iostream>
+#include <cmath>
 
-#include <pseudo/base.hpp>
+#include "base.hpp"
 #include <rapidxml.hpp>
 
-#include <pseudo/chemical_element.hpp>
-#include <pseudo/spline.h>
+#include "chemical_element.hpp"
+#include "spline.h"
 
 namespace pseudopotential {
 
@@ -19,7 +22,7 @@ namespace pseudopotential {
     
     upf(const std::string & filename):
       file_(filename),
-      buffer_((istreambuf_iterator<char>(file_)), istreambuf_iterator<char>()){
+      buffer_((std::istreambuf_iterator<char>(file_)), std::istreambuf_iterator<char>()){
       
       buffer_.push_back('\0');
       doc_.parse<0>(&buffer_[0]);
@@ -27,12 +30,12 @@ namespace pseudopotential {
       root_node_ = doc_.first_node("UPF");
       
       if(!root_node_){
-	cerr << "Error: File '" << filename << "' is not a UPF 2 file (version 1 is not supported)." << endl;
+	std::cerr << "Error: File '" << filename << "' is not a UPF 2 file (version 1 is not supported)." << std::endl;
 	exit(1);
       }
       
       if(root_node_->first_attribute("version")->value()[0] != '2'){
-	cerr << "Unsupported UPF pseudopotential, can only read UPF v2." << endl;
+	std::cerr << "Unsupported UPF pseudopotential, can only read UPF v2." << std::endl;
 	exit(1);
       }
       
@@ -42,10 +45,10 @@ namespace pseudopotential {
 	type_ = type::KLEINMAN_BYLANDER;
       } else if(pseudo_type == "USPP"){
 	type_ = type::ULTRASOFT;
-	cerr << "Error: Ultrasoft UPF pseudopotentials are not supported at the moment." << endl;
+	std::cerr << "Error: Ultrasoft UPF pseudopotentials are not supported at the moment." << std::endl;
 	exit(1);
       } else {
-	cerr << "Error: Unsupported UPF pseudopotential." << endl;
+	std::cerr << "Error: Unsupported UPF pseudopotential." << std::endl;
 	exit(1);
       }
       
@@ -312,8 +315,8 @@ namespace pseudopotential {
 
     }
     
-    ifstream file_;
-    vector<char> buffer_;
+    std::ifstream file_;
+    std::vector<char> buffer_;
     rapidxml::xml_document<> doc_;
     rapidxml::xml_node<> * root_node_;
     std::vector<double> grid_;

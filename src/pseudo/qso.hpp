@@ -4,8 +4,10 @@
 #include <fstream>
 #include <vector>
 #include <cassert>
+#include <sstream>
+#include <iostream>
 
-#include <pseudo/base.hpp>
+#include "base.hpp"
 #include <rapidxml.hpp>
 
 namespace pseudopotential {
@@ -25,7 +27,7 @@ namespace pseudopotential {
 
     qso(const std::string & filename):
       file_(filename),
-      buffer_((istreambuf_iterator<char>(file_)), istreambuf_iterator<char>()){
+      buffer_((std::istreambuf_iterator<char>(file_)), std::istreambuf_iterator<char>()){
 
       buffer_.push_back('\0');
       doc_.parse<0>(&buffer_[0]);
@@ -369,8 +371,8 @@ namespace pseudopotential {
     }
 
 
-    ifstream file_;
-    vector<char> buffer_;
+    std::ifstream file_;
+    std::vector<char> buffer_;
     rapidxml::xml_document<> doc_;
     rapidxml::xml_node<> * root_node_;
     rapidxml::xml_node<> * pseudo_node_;

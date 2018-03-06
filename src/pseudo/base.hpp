@@ -2,6 +2,7 @@
 #define PSEUDO_BASE_HPP
 
 #include <vector>
+#include <string>
 
 namespace pseudopotential {
 
