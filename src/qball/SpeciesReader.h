@@ -34,6 +34,7 @@
 #include <string>
 using namespace std;
 #include "Context.h"
+#include <pseudo/base.hpp>
 
 class SpeciesReader
 {
@@ -43,8 +44,7 @@ class SpeciesReader
   
   string uri_;   // uri from which Species is read
 
-  template <typename PseudopotentialType>
-  void fill_species(Species& sp, PseudopotentialType & pseudo);
+  void fill_species(Species& sp, pseudopotential::base & pseudo);
   
   public:
 

@@ -66,28 +66,30 @@ void SpeciesReader::readSpecies(Species& sp, const string uri){
     std::transform(extension.begin(), extension.end(), extension.begin(), ::tolower);
 
     cout << "  <!-- SpeciesReader opening file " << uri << " -->" << endl;
+
+    pseudopotential::base * pseudo = NULL;
     
     if(extension == "xml"){
-      pseudopotential::qso pseudo(uri);
+      pseudo = new pseudopotential::qso(uri);
       cout << "  <!--   format: QSO XML -->" << endl;
-      cout << "  <!--   size:   " << pseudo.size() << " -->" << endl;
-      fill_species(sp, pseudo);
     } else if(extension == "upf") {
-      pseudopotential::upf pseudo(uri);
+      pseudo = new pseudopotential::upf(uri);
       cout << "  <!--   format: UPF -->" << endl;
-      cout << "  <!--   size:   " << pseudo.size() << " -->" << endl;
-      fill_species(sp, pseudo);
     } else {
       cerr << "Unknown pseudopotential type" << endl;
       exit(1);
     }
 
+    cout << "  <!--   size:   " << pseudo->size() << " -->" << endl;
+    fill_species(sp, *pseudo);
+
+    delete pseudo;
+    
   }
 
 }
 
-template <typename PseudopotentialType>
-void  SpeciesReader::fill_species(Species& sp, PseudopotentialType & pseudo){
+void  SpeciesReader::fill_species(Species& sp, pseudopotential::base & pseudo){
 
   sp.nlcc_ = false;
   sp.usoft_ = false;
