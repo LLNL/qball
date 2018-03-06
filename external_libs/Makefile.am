@@ -19,5 +19,5 @@
 ##
 ## $Id$
 
-SUBDIRS = dftd3
+SUBDIRS = dftd3 rapidxml
 

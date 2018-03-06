@@ -223,6 +223,7 @@ AC_MSG_NOTICE([
 AC_CONFIG_FILES([Makefile
                  external_libs/Makefile
 		 external_libs/dftd3/Makefile
+ 		 external_libs/rapidxml/Makefile
 		 share/Makefile
 		 share/pseudopotentials/Makefile
  		 share/pseudopotentials/pseudo-dojo.org/Makefile
