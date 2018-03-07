@@ -1,6 +1,24 @@
 #ifndef PSEUDO_BASE_HPP
 #define PSEUDO_BASE_HPP
 
+/*
+ Copyright (C) 2018 Xavier Andrade
+
+ This program is free software; you can redistribute it and/or modify
+ it under the terms of the GNU Lesser General Public License as published by
+ the Free Software Foundation; either version 3 of the License, or
+ (at your option) any later version.
+  
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU Lesser General Public License for more details.
+  
+ You should have received a copy of the GNU Lesser General Public License
+ along with this program; if not, write to the Free Software
+ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+*/
+
 #include <vector>
 #include <string>
 
@@ -29,6 +47,7 @@ namespace pseudopotential {
     virtual int nquad() const = 0;
     virtual double rquad() const = 0;
     virtual double mesh_spacing() const = 0;
+    virtual int mesh_size() const = 0;
     virtual void local_potential(std::vector<double> & potential) const = 0;
     virtual int nprojectors() const = 0;
     virtual bool has_projectors(int l) const = 0;

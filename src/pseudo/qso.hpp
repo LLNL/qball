@@ -1,6 +1,24 @@
 #ifndef PSEUDO_QSO_HPP
 #define PSEUDO_QSO_HPP
 
+/*
+ Copyright (C) 2018 Xavier Andrade
+
+ This program is free software; you can redistribute it and/or modify
+ it under the terms of the GNU Lesser General Public License as published by
+ the Free Software Foundation; either version 3 of the License, or
+ (at your option) any later version.
+  
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU Lesser General Public License for more details.
+  
+ You should have received a copy of the GNU Lesser General Public License
+ along with this program; if not, write to the Free Software
+ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+*/
+
 #include <fstream>
 #include <vector>
 #include <cassert>
@@ -121,6 +139,14 @@ namespace pseudopotential {
       return value<double>(pseudo_node_->first_node("mesh_spacing"));
     }
 
+    int mesh_size() const {
+      rapidxml::xml_node<> * node = pseudo_node_->first_node("local_potential"); //kleinman bylander
+      if(!node) node = pseudo_node_->first_node("vlocal"); //ultrasoft
+      if(!node) node = pseudo_node_->first_node("projector"); //norm conserving
+      assert(node);
+      return value<int>(node->first_attribute("size"));
+    }
+    
     void local_potential(std::vector<double> & potential) const {
       rapidxml::xml_node<> * node = pseudo_node_->first_node("local_potential");
       if(!node){
