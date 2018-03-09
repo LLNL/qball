@@ -47,27 +47,20 @@ namespace pseudopotential {
       
       root_node_ = doc_.first_node("UPF");
       
-      if(!root_node_){
-	std::cerr << "Error: File '" << filename << "' is not a UPF 2 file (version 1 is not supported)." << std::endl;
-	exit(1);
-      }
+      if(!root_node_) throw status::FORMAT_NOT_SUPPORTED;
       
-      if(root_node_->first_attribute("version")->value()[0] != '2'){
-	std::cerr << "Unsupported UPF pseudopotential, can only read UPF v2." << std::endl;
-	exit(1);
-      }
+      if(root_node_->first_attribute("version")->value()[0] != '2') throw status::FORMAT_NOT_SUPPORTED;
       
       std::string pseudo_type = root_node_->first_node("PP_HEADER")->first_attribute("pseudo_type")->value();
       
       if(pseudo_type == "NC" || pseudo_type == "SL"){
 	type_ = type::KLEINMAN_BYLANDER;
       } else if(pseudo_type == "USPP"){
-	type_ = type::ULTRASOFT;
-	std::cerr << "Error: Ultrasoft UPF pseudopotentials are not supported at the moment." << std::endl;
-	exit(1);
+	throw status::UNSUPPORTED_TYPE_ULTRASOFT;
+      } else if(pseudo_type == "PAW") {
+	throw status::UNSUPPORTED_TYPE_PAW;
       } else {
-	std::cerr << "Error: Unsupported UPF pseudopotential." << std::endl;
-	exit(1);
+	throw status::UNSUPPORTED_TYPE;
       }
       
       assert(root_node_);
@@ -90,6 +83,11 @@ namespace pseudopotential {
 	for(int ii = 0; ii < size; ii++) stst >> grid_[start_point_ + ii];
 	
 	assert(fabs(grid_[0]) <= 1e-10);
+
+	mesh_size_ = start_point_ + value<int>(root_node_->first_node("PP_HEADER")->first_attribute("mesh_size"));
+
+	mesh_size_ = 0;
+	for(double rr = 0.0; rr <= grid_[grid_.size() - 1]; rr += mesh_spacing()) mesh_size_++;
 	
       }
       
@@ -110,7 +108,7 @@ namespace pseudopotential {
 
       //Read lmax
       lmax_ = value<int>(root_node_->first_node("PP_HEADER")->first_attribute("l_max"));
-	
+      assert(lmax_ >= 0);
     }
 
     std::string format() const { return "UPF 2"; }
@@ -140,7 +138,8 @@ namespace pseudopotential {
     }
 
     int llocal() const {
-      return value<int>(root_node_->first_node("PP_HEADER")->first_attribute("l_local"));
+      int ll = value<int>(root_node_->first_node("PP_HEADER")->first_attribute("l_local"));
+      return std::max(-1, ll); 
     }
 
     int nquad() const {
@@ -156,7 +155,7 @@ namespace pseudopotential {
     }
 
     int mesh_size() const {
-      return value<int>(root_node_->first_node("PP_HEADER")->first_attribute("mesh_size"));
+      return mesh_size_;
     }
     
     int nchannels() const {
@@ -181,7 +180,7 @@ namespace pseudopotential {
 	potential[ii] *= 0.5; //Convert from Rydberg to Hartree
       }
       if(start_point_ > 0) extrapolate_first_point(potential);
-      
+
       interpolate(potential);
       
     }
@@ -344,6 +343,7 @@ namespace pseudopotential {
     std::vector<double> grid_;
     std::vector<double> dij_;
     int start_point_;
+    int mesh_size_;
     
   };
 

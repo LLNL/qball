@@ -24,7 +24,21 @@
 
 namespace pseudopotential {
 
-  enum class type { ULTRASOFT = 30, NORM_CONSERVING = 31, KLEINMAN_BYLANDER = 32};
+  enum class type {
+    ULTRASOFT = 30,
+    NORM_CONSERVING = 31,
+    KLEINMAN_BYLANDER = 32
+  };
+  
+  enum class status {
+    SUCCESS                    = 0,
+    FILE_NOT_FOUND             = 455,
+    FORMAT_NOT_SUPPORTED       = 456,
+    UNKNOWN_FORMAT             = 457,
+    UNSUPPORTED_TYPE_ULTRASOFT = 458,
+    UNSUPPORTED_TYPE_PAW       = 459,
+    UNSUPPORTED_TYPE           = 460
+  };
   
   class base {
 
