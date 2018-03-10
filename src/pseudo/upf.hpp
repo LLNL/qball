@@ -252,8 +252,10 @@ namespace pseudopotential {
       density.resize(size);
 
       std::istringstream stst(node->value());
-      for(int ii = 0; ii < size; ii++) stst >> density[ii];
-
+      for(int ii = 0; ii < size; ii++) stst >> density[start_point_ + ii];
+      extrapolate_first_point(density);
+      // this charge does not come multiplied by anything
+      
       interpolate(density);
     }
     
@@ -303,6 +305,63 @@ namespace pseudopotential {
 
     void qfcoeff(int index, int ltot, std::vector<double> & val) const {
       val.clear();
+    }
+
+    bool has_density(){
+      return root_node_->first_node("PP_RHOATOM");
+    }
+      
+    void density(std::vector<double> & val) const {
+      rapidxml::xml_node<> * node = root_node_->first_node("PP_RHOATOM");
+      assert(node);
+      
+      int size = value<int>(node->first_attribute("size"));
+      val.resize(size);
+      
+      std::istringstream stst(node->value());
+      for(int ii = 0; ii < size; ii++) stst >> val[start_point_ + ii];
+
+      // the density comes multiplied by 4\pi r
+      for(int ii = 1; ii < size + start_point_; ii++) val[ii] /= 4.0*M_PI*grid_[ii];
+      extrapolate_first_point(val);
+      
+      interpolate(val);
+    }
+
+    int nwavefunctions() const {
+      return value<int>(root_node_->first_node("PP_HEADER")->first_attribute("number_of_wfc"));
+    }
+    
+    void wavefunction(int index, int & n, int & l, double & occ, std::vector<double> & proj) const {
+      rapidxml::xml_node<> * node = NULL;
+      
+      std::string tag = "PP_CHI." + std::to_string(index + 1);
+      node = root_node_->first_node("PP_PSWFC")->first_node(tag.c_str());
+      
+      assert(node);
+
+      // not all files have "n", so we might have to parse the label
+      if(node->first_attribute("n")){
+	n = value<int>(node->first_attribute("n"));
+      } else {
+	std::string label = node->first_attribute("label")->value();
+	n = std::stoi(label.substr(0, 1));
+      }
+      
+      l = value<int>(node->first_attribute("l"));
+
+      occ = value<double>(node->first_attribute("occupation"));
+      
+      int size = value<int>(node->first_attribute("size"));
+      proj.resize(size + start_point_);
+      std::istringstream stst(node->value());
+      for(int ii = 0; ii < size; ii++) stst >> proj[ii + start_point_];
+
+      //the wavefunctions come multiplied by r, so we have to divide and fix the first point
+      for(int ii = 1; ii < size + start_point_; ii++) proj[ii] /= grid_[ii];
+      extrapolate_first_point(proj);
+      
+      interpolate(proj);
     }
     
   private:
