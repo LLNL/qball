@@ -49,6 +49,7 @@ class Cmd
 {
   public:
   UserInterface *ui;
+  virtual ~Cmd(){}
   virtual char const*name(void) const = 0;
   virtual char const*help_msg(void) const = 0;
   virtual int action(int argc, char **argv) = 0;
@@ -57,6 +58,7 @@ class Cmd
 class Var {
 public:
   UserInterface *ui;
+  virtual ~Var(){}
   virtual char const*name ( void ) const = 0;
   virtual int set ( int argc, char **argv ) = 0;
   virtual string print ( void ) const = 0;

@@ -64,7 +64,6 @@ class ComputeMLWFCmd : public Cmd
   int action(int argc, char **argv);
 
   ComputeMLWFCmd();
-  ~ComputeMLWFCmd();
 };
 #endif
 

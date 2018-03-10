@@ -60,7 +60,7 @@ class SaveESPCmd : public Cmd
   int action(int argc, char **argv);
 
   SaveESPCmd();
-  ~SaveESPCmd();
+
 };
 #endif
 
