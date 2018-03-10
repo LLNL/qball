@@ -18,7 +18,7 @@
 ## 02110-1301, USA.
 ##
 
-pdpbestrdir = $(pkgdatadir)/pseudopotentials/pseudo-dojo.org/nc-sr-04_pbe_standard/
+pdpbestrdir = $(pkgdatadir)/pseudopotentials/pseudo-dojo.org/nc-sr-04_pbe_stringent/
 
 dist_pdpbestr_DATA =                            \
 	Ag.upf                                  \
