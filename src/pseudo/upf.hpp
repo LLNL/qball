@@ -54,7 +54,7 @@ namespace pseudopotential {
       std::string pseudo_type = root_node_->first_node("PP_HEADER")->first_attribute("pseudo_type")->value();
       
       if(pseudo_type == "NC" || pseudo_type == "SL"){
-	type_ = type::KLEINMAN_BYLANDER;
+	type_ = pseudopotential::type::KLEINMAN_BYLANDER;
       } else if(pseudo_type == "USPP"){
 	throw status::UNSUPPORTED_TYPE_ULTRASOFT;
       } else if(pseudo_type == "PAW") {

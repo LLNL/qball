@@ -53,16 +53,16 @@ namespace pseudopotential {
       root_node_ = doc_.first_node("fpmd:species");
 
       pseudo_node_ = root_node_->first_node("ultrasoft_pseudopotential");
-      if(pseudo_node_) type_ = type::ULTRASOFT;
+      if(pseudo_node_) type_ = pseudopotential::type::ULTRASOFT;
 
       if(!pseudo_node_){
 	pseudo_node_ = root_node_->first_node("norm_conserving_semilocal_pseudopotential");
-	if(pseudo_node_) type_ = type::KLEINMAN_BYLANDER;
+	if(pseudo_node_) type_ = pseudopotential::type::KLEINMAN_BYLANDER;
       }
 
       if(!pseudo_node_){
 	pseudo_node_ = root_node_->first_node("norm_conserving_pseudopotential");
-	if(pseudo_node_) type_ = type::NORM_CONSERVING;
+	if(pseudo_node_) type_ = pseudopotential::type::NORM_CONSERVING;
       }
 
       assert(pseudo_node_);
@@ -117,13 +117,13 @@ namespace pseudopotential {
     }
 
     int nchannels() const {
-      if(type_ == type::ULTRASOFT){
+      if(type_ == pseudopotential::type::ULTRASOFT){
 	int np = nbeta();
 	int nl = lmax() + 1;
 	assert(np%nl == 0);
 	return np/nl;
       }
-      if(type_ == type::KLEINMAN_BYLANDER) return 2;
+      if(type_ == pseudopotential::type::KLEINMAN_BYLANDER) return 2;
       return 1;
     }
     
@@ -164,9 +164,9 @@ namespace pseudopotential {
 
     int nprojectors() const {
       switch(type_){
-      case type::ULTRASOFT:
+      case pseudopotential::type::ULTRASOFT:
 	return nbeta();
-      case type::KLEINMAN_BYLANDER: {
+      case pseudopotential::type::KLEINMAN_BYLANDER: {
 	int count = 0;
 	rapidxml::xml_node<> * node = pseudo_node_->first_node("projector");
 	while(node) {
@@ -175,7 +175,7 @@ namespace pseudopotential {
 	}
 	return count;
       }
-      case type::NORM_CONSERVING:
+      case pseudopotential::type::NORM_CONSERVING:
 	return 0;
       }
       return 0;
