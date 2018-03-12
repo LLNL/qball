@@ -107,7 +107,7 @@ void  SpeciesReader::fill_species(Species& sp, pseudopotential::base & pseudo){
     sp.oncv_ = true;
     cout << "  <!-- SpeciesReader::readSpecies: potential type:  Kleinman-Bylander norm-conserving -->" << endl;
     break;
-  case pseudopotential::type::NORM_CONSERVING :
+  case pseudopotential::type::SEMILOCAL :
     cout << "  <!-- SpeciesReader::readSpecies: potential type:  norm-conserving -->" << endl;
     break;
   }
@@ -133,7 +133,7 @@ void  SpeciesReader::fill_species(Species& sp, pseudopotential::base & pseudo){
   sp.llocal_ = pseudo.llocal();
   cout << "  <!-- SpeciesReader::readSpecies: read llocal " << sp.llocal_ << " -->" << endl;
   
-  if(pseudo.type() == pseudopotential::type::NORM_CONSERVING) { 
+  if(pseudo.type() == pseudopotential::type::SEMILOCAL) { 
     sp.nquad_ = pseudo.nquad();
     cout << "  <!-- SpeciesReader::readSpecies: read nquad " << sp.nquad_ << " -->" << endl;
     sp.rquad_ = pseudo.rquad();
@@ -200,7 +200,7 @@ void  SpeciesReader::fill_species(Species& sp, pseudopotential::base & pseudo){
     }
   }
 
-  if(pseudo.type() == pseudopotential::type::NORM_CONSERVING){
+  if(pseudo.type() == pseudopotential::type::SEMILOCAL){
     sp.vps_.resize(sp.lmax_ + 1);
     sp.phi_.resize(sp.lmax_ + 1);
 

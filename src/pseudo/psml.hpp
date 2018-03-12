@@ -44,19 +44,45 @@ namespace pseudopotential {
 
       root_node_ = doc_.first_node("psml");
 
-      type_ = pseudopotential::type::KLEINMAN_BYLANDER;
-
-      //read lmax
-      lmax_ = -1;
-      for(int l = 0; l <= 10; l++ ){
-	if(!has_projectors(l)){
-	  lmax_ = l - 1;
-	  break;
-	}
+      //now check the type
+      bool has_local_potential = root_node_->first_node("local-potential");
+      bool has_nl_projectors = root_node_->first_node("nonlocal-projectors");
+      bool has_semilocal_potentials = root_node_->first_node("semilocal-potentials");
+      bool has_pseudo_wavefunctions = root_node_->first_node("pseudo-wave-functions");
+      if(has_nl_projectors && has_local_potential) {
+	type_ = pseudopotential::type::KLEINMAN_BYLANDER;
+      } else if(has_semilocal_potentials && has_pseudo_wavefunctions) {
+	type_ = pseudopotential::type::SEMILOCAL;
+      } else {
+	throw status::UNSUPPORTED_TYPE;
       }
-      assert(lmax_ >= 0);
-      assert(lmax_ < 9);
 
+      {
+	//read lmax
+	std::string tag1, tag2;
+	if(type_ == pseudopotential::type::KLEINMAN_BYLANDER){
+	  tag1 = "nonlocal-projectors";
+	  tag2 = "proj";
+	} else if(type_ == pseudopotential::type::SEMILOCAL){
+	  tag1 = "semilocal-potentials";
+	  tag2 = "slps";
+	} else {
+	  assert(false);
+	}
+      
+	lmax_ = -1;
+	rapidxml::xml_node<> * node = root_node_->first_node(tag1.c_str());
+	assert(node);
+	node = node->first_node(tag2.c_str());
+	while(node){
+	  int read_l = letter_to_l(node->first_attribute("l")->value());
+	  lmax_ = std::max(lmax_, read_l);
+	  node = node->next_sibling(tag2.c_str());
+	}
+	assert(lmax_ >= 0);
+	assert(lmax_ < 9);
+      }
+      
       //read grid
       {
 	rapidxml::xml_node<> * node = root_node_->first_node("grid");
@@ -77,6 +103,7 @@ namespace pseudopotential {
 	for(double rr = 0.0; rr <= grid_[grid_.size() - 1]; rr += mesh_spacing()) mesh_size_++;
 	
       }
+      
     }
 
     std::string format() const { return "PSML"; }
@@ -147,17 +174,6 @@ namespace pseudopotential {
 	node = node->next_sibling("proj");
       }
       return count;
-    }
-    
-    bool has_projectors(int l) const {
-      //note: this function can't use lmax_ or lmax()
-      rapidxml::xml_node<> * node = root_node_->first_node("nonlocal-projectors")->first_node("proj");
-      while(node){
-	int read_l = letter_to_l(node->first_attribute("l")->value());
-	if(l == read_l) break;
-	node = node->next_sibling("proj");
-      }
-      return node != NULL;
     }
     
     void projector(int l, int ic, std::vector<double> & val) const {

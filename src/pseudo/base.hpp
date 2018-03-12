@@ -27,7 +27,7 @@ namespace pseudopotential {
 
   enum class type {
     ULTRASOFT = 30,
-    NORM_CONSERVING = 31,
+    SEMILOCAL = 31,
     KLEINMAN_BYLANDER = 32
   };
   
@@ -65,7 +65,6 @@ namespace pseudopotential {
     virtual int mesh_size() const = 0;
     virtual void local_potential(std::vector<double> & potential) const = 0;
     virtual int nprojectors() const = 0;
-    virtual bool has_projectors(int l) const = 0;
     virtual void projector(int l, int i, std::vector<double> & proj) const = 0;
     virtual double d_ij(int l, int i, int j) const = 0;
     virtual bool has_radial_function(int l) const= 0;

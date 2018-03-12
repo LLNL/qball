@@ -189,10 +189,6 @@ namespace pseudopotential {
       return value<int>(root_node_->first_node("PP_HEADER")->first_attribute("number_of_proj"));
     }
     
-    bool has_projectors(int l) const {
-      return l >=0 && l <= lmax();
-    }
-    
     void projector(int l, int i, std::vector<double> & proj) const {
       rapidxml::xml_node<> * node = NULL;
 
