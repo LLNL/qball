@@ -26,9 +26,10 @@
 namespace pseudopotential {
 
   enum class type {
-    ULTRASOFT = 30,
-    SEMILOCAL = 31,
-    KLEINMAN_BYLANDER = 32
+    ULTRASOFT         = 30,
+    SEMILOCAL         = 31,
+    KLEINMAN_BYLANDER = 32,
+    PAW               = 33
   };
   
   enum class status {
@@ -40,6 +41,17 @@ namespace pseudopotential {
     UNSUPPORTED_TYPE_PAW       = 459,
     UNSUPPORTED_TYPE           = 460
   };
+
+  enum class format {
+    UPF1                       = 775,
+    UPF2                       = 776,
+    QSO                        = 777,
+    PSML                       = 778,
+    PSF                        = 779,
+    CPI                        = 780,
+    FHI                        = 781,
+    HGH                        = 782
+  };
   
   class base {
 
@@ -50,7 +62,7 @@ namespace pseudopotential {
     virtual int lmax() const { return lmax_; }
 
     //Pure virtual functions
-    virtual std::string format() const = 0;
+    virtual pseudopotential::format format() const = 0;
     virtual int size() const = 0;
     virtual std::string description() const = 0;
     virtual std::string symbol() const = 0;

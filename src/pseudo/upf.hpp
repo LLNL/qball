@@ -111,7 +111,7 @@ namespace pseudopotential {
       assert(lmax_ >= 0);
     }
 
-    std::string format() const { return "UPF 2"; }
+    pseudopotential::format format() const { return pseudopotential::format::UPF2; }
     
     int size() const { return buffer_.size(); };
 

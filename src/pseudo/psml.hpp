@@ -44,6 +44,11 @@ namespace pseudopotential {
 
       root_node_ = doc_.first_node("psml");
 
+      spec_node_ = root_node_->first_node("pseudo-atom-spec");
+      //some files do not have "pseudo-atom-spec" but "header"
+      if(!spec_node_) spec_node_ = root_node_->first_node("header");
+      assert(spec_node_);
+      
       //now check the type
       bool has_local_potential = root_node_->first_node("local-potential");
       bool has_nl_projectors = root_node_->first_node("nonlocal-projectors");
@@ -106,7 +111,7 @@ namespace pseudopotential {
       
     }
 
-    std::string format() const { return "PSML"; }
+    pseudopotential::format format() const { return pseudopotential::format::PSML; }
     
     int size() const { return buffer_.size(); };
 
@@ -115,11 +120,11 @@ namespace pseudopotential {
     }
     
     std::string symbol() const {
-      return root_node_->first_node("pseudo-atom-spec")->first_attribute("atomic-label")->value();
+      return spec_node_->first_attribute("atomic-label")->value();
     }
 
     int atomic_number() const {
-      return value<int>(root_node_->first_node("pseudo-atom-spec")->first_attribute("atomic-number"));
+      return value<int>(spec_node_->first_attribute("atomic-number"));
     }
 
     double mass() const {
@@ -128,7 +133,7 @@ namespace pseudopotential {
     }
     
     int valence_charge() const {
-      return value<int>(root_node_->first_node("pseudo-atom-spec")->first_node("valence-configuration")->first_attribute("total-valence-charge"));
+      return value<int>(spec_node_->first_node("valence-configuration")->first_attribute("total-valence-charge"));
     }
 
     int llocal() const {
@@ -136,8 +141,11 @@ namespace pseudopotential {
     }
 
     int nchannels() const {
+      if(type_ == pseudopotential::type::SEMILOCAL) return 1;
       int nc = 0;
-      rapidxml::xml_node<> * node = root_node_->first_node("nonlocal-projectors")->first_node("proj");
+      rapidxml::xml_node<> * node = root_node_->first_node("nonlocal-projectors");
+      assert(node);
+      node = node->first_node("proj");
       while(node){
 	int read_ic = value<int>(node->first_attribute("seq")) - 1;
 	nc = std::max(nc, read_ic + 1);
@@ -205,10 +213,24 @@ namespace pseudopotential {
       return false;
     }
 
-    void radial_function(int l, std::vector<double> & function) const {
+    void radial_function(int l, std::vector<double> & val) const {
+      rapidxml::xml_node<> * node = root_node_->first_node("pseudo-wave-functions")->first_node("pswf");
+      while(node){
+	int read_l = letter_to_l(node->first_attribute("l")->value());
+	if(l == read_l) break;
+	node = node->next_sibling("pswf");
+      }
+      read_function(node, val);
     }
 
-    void radial_potential(int l, std::vector<double> & function) const {
+    void radial_potential(int l, std::vector<double> & val) const {
+      rapidxml::xml_node<> * node = root_node_->first_node("semilocal-potentials")->first_node("slps");
+      while(node){
+	int read_l = letter_to_l(node->first_attribute("l")->value());
+	if(l == read_l) break;
+	node = node->next_sibling("slps");
+      }
+      read_function(node, val);
     }
 
     bool has_nlcc() const{
@@ -252,9 +274,11 @@ namespace pseudopotential {
   private:
 
     void read_function(rapidxml::xml_node<> * base_node, std::vector<double> & val, bool potential_padding = false) const{
+      assert(base_node);
       rapidxml::xml_node<> * node = base_node->first_node("radfunc")->first_node("data");
       assert(node);
-      int size = value<int>(node->first_attribute("npts"));
+      int size = grid_.size();
+      if(node->first_attribute("npts")) size = value<int>(node->first_attribute("npts"));
       val.resize(grid_.size());
       std::istringstream stst(node->value());
       for(int ii = 0; ii < size; ii++) stst >> val[ii];
@@ -295,6 +319,7 @@ namespace pseudopotential {
     std::vector<char> buffer_;
     rapidxml::xml_document<> doc_;
     rapidxml::xml_node<> * root_node_;
+    rapidxml::xml_node<> * spec_node_;
     std::vector<double> grid_;
     int mesh_size_;
     

@@ -75,7 +75,7 @@ namespace pseudopotential {
       
     }
 
-    std::string format() const { return "quantum-simulation.org (XML)"; }
+    pseudopotential::format format() const { return pseudopotential::format::QSO; }
     
     int size() const { return buffer_.size(); };
 

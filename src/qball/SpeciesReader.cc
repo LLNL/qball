@@ -82,7 +82,20 @@ void SpeciesReader::readSpecies(Species& sp, const string uri){
     }
 
     cout << "  <!--   size:   " << pseudo->size() << " -->" << endl;
-    cout << "  <!--   format: " << pseudo->format() << " -->" << endl;
+
+    std::string format_name;
+    switch(pseudo->format()){
+    case pseudopotential::format::QSO:
+      format_name = "QSO";
+      break;
+    case pseudopotential::format::UPF2:
+      format_name = "UPF2";
+      break;
+    case pseudopotential::format::PSML:
+      format_name = "PSML";
+      break;
+    }
+    cout << "  <!--   format: " << format_name << " -->" << endl;
     
     fill_species(sp, *pseudo);
 
