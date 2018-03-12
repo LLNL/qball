@@ -21,6 +21,7 @@
 
 #include <vector>
 #include <string>
+#include <rapidxml.hpp>
 
 namespace pseudopotential {
 
@@ -87,6 +88,15 @@ namespace pseudopotential {
    
   protected:
 
+    template <typename Type>
+    static Type value(const rapidxml::xml_base<> * node){
+      assert(node);
+      std::istringstream stst(node->value());
+      Type value;
+      stst >> value;
+      return value;
+    }
+    
     pseudopotential::type type_;
     int lmax_;
     

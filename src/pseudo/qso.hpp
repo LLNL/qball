@@ -30,15 +30,6 @@
 
 namespace pseudopotential {
 
-  template <typename Type>
-  static Type value(const rapidxml::xml_base<> * node){
-    assert(node);
-    std::istringstream stst(node->value());
-    Type value;
-    stst >> value;
-    return value;
-  }
-
   class qso : public pseudopotential::base {
 
   public:

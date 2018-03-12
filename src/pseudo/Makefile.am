@@ -6,6 +6,7 @@ lib_LIBRARIES =                             \
 noinst_HEADERS =                            \
 	base.hpp                            \
 	chemical_element.hpp                \
+	psml.hpp                            \
 	qso.hpp                             \
 	spline.h                            \
 	upf.hpp

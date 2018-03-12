@@ -44,6 +44,7 @@ using namespace std;
 #include <sstream>
 #include <cstdio>
 #include <sys/stat.h>
+#include <pseudo/psml.hpp>
 #include <pseudo/qso.hpp>
 #include <pseudo/upf.hpp>
 
@@ -73,6 +74,8 @@ void SpeciesReader::readSpecies(Species& sp, const string uri){
       pseudo = new pseudopotential::qso(uri);
     } else if(extension == "upf") {
       pseudo = new pseudopotential::upf(uri);
+    } else if(extension == "psml") {
+      pseudo = new pseudopotential::psml(uri);
     } else {
       cerr << "Unknown pseudopotential type" << endl;
       exit(1);
