@@ -140,6 +140,30 @@ namespace pseudopotential {
       return -1;
     }
 
+    pseudopotential::exchange exchange() const {
+      // PSML uses libxc ids, so we just need to read the value
+      rapidxml::xml_node<> * node = spec_node_->first_node("exchange-correlation")->first_node("libxc-info")->first_node("functional");
+      while(node){
+	if(value<std::string>(node->first_attribute("type")) == "exchange") {
+	  return pseudopotential::exchange(value<int>(node->first_attribute("id")));
+	}
+	node = node->next_sibling("functional");
+      }
+      return pseudopotential::exchange::UNKNOWN;
+    }
+
+    pseudopotential::correlation correlation() const {
+      // PSML uses libxc ids, so we just need to read the value
+      rapidxml::xml_node<> * node = spec_node_->first_node("exchange-correlation")->first_node("libxc-info")->first_node("functional");
+      while(node){
+	if(value<std::string>(node->first_attribute("type")) == "correlation") {
+	  return pseudopotential::correlation(value<int>(node->first_attribute("id")));
+	}
+	node = node->next_sibling("functional");
+      }
+      return pseudopotential::correlation::UNKNOWN;
+    }
+    
     int nchannels() const {
       if(type_ == pseudopotential::type::SEMILOCAL) return 1;
       int nc = 0;

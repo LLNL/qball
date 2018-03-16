@@ -52,6 +52,27 @@ namespace pseudopotential {
     FHI                        = 781,
     HGH                        = 782
   };
+
+  // these values match libxc convention
+  enum class exchange {
+    UNKNOWN                    =  -2,
+    ANY                        =  -1,
+    NONE                       =   0,    
+    LDA                        =   1,
+    PBE                        = 101,
+    PBE_SOL                    = 116,
+    B88                        = 106
+  };
+
+  enum class correlation {
+    UNKNOWN                    =  -2,
+    ANY                        =  -1,
+    NONE                       =   0,
+    LDA_PW                     =  12,
+    PBE                        = 130,
+    PBE_SOL                    = 133,
+    LYP                        = 131
+  };
   
   class base {
 
@@ -96,7 +117,9 @@ namespace pseudopotential {
     virtual void density(std::vector<double> & val) const { val.clear(); }
     virtual int nwavefunctions() const { return 0; }
     virtual void wavefunction(int index, int & n, int & l, double & occ, std::vector<double> & val) const { val.clear(); }
-   
+    virtual pseudopotential::exchange exchange() const { return pseudopotential::exchange::UNKNOWN; }
+    virtual pseudopotential::correlation correlation() const { return pseudopotential::correlation::UNKNOWN; }
+    
   protected:
 
     template <typename Type>
