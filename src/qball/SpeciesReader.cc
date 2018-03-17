@@ -47,6 +47,7 @@ using namespace std;
 #include <pseudo/psml.hpp>
 #include <pseudo/qso.hpp>
 #include <pseudo/upf.hpp>
+#include <pseudo/detect_format.hpp>
 
 ////////////////////////////////////////////////////////////////////////////////
 SpeciesReader::SpeciesReader(const Context& ctxt) : ctxt_(ctxt) {}
@@ -56,29 +57,29 @@ void SpeciesReader::readSpecies(Species& sp, const string uri){
 
   if(ctxt_.oncoutpe()){
 
-    struct stat statbuf;
-    bool found_file = !stat(uri.c_str(),&statbuf);
+    pseudopotential::format format = pseudopotential::detect_format(uri);
 
-    if(!found_file)  Messages::fatal("cannot find pseudopotential file '" + uri + "'");
+    if(format == pseudopotential::format::FILE_NOT_FOUND) Messages::fatal("cannot find pseudopotential file '" + uri + "'");
+    if(format == pseudopotential::format::UNKNOWN) Messages::fatal("cannot determine format for pseudopotential file '" + uri + "'");
     
     sp.uri_ = uri;
-
-    string extension = uri.substr(uri.find_last_of(".") + 1);
-    std::transform(extension.begin(), extension.end(), extension.begin(), ::tolower);
 
     cout << "  <!-- SpeciesReader opening file " << uri << " -->" << endl;
 
     pseudopotential::base * pseudo = NULL;
     
-    if(extension == "xml"){
+    switch(format){
+    case pseudopotential::format::QSO:
       pseudo = new pseudopotential::qso(uri);
-    } else if(extension == "upf") {
+      break;
+    case pseudopotential::format::UPF1:
       pseudo = new pseudopotential::upf(uri);
-    } else if(extension == "psml") {
+      break;
+    case pseudopotential::format::PSML:
       pseudo = new pseudopotential::psml(uri);
-    } else {
-      cerr << "Unknown pseudopotential type" << endl;
-      exit(1);
+      break;
+    default:
+      Messages::fatal("unsupported format for pseudopotential file '" + uri + "'");
     }
 
     cout << "  <!--   size:   " << pseudo->size() << " -->" << endl;
@@ -94,7 +95,10 @@ void SpeciesReader::readSpecies(Species& sp, const string uri){
     case pseudopotential::format::PSML:
       format_name = "PSML";
       break;
+    default:
+      assert(false);
     }
+    
     cout << "  <!--   format: " << format_name << " -->" << endl;
     
     fill_species(sp, *pseudo);
