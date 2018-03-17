@@ -9,7 +9,7 @@ noinst_HEADERS =                            \
 	psml.hpp                            \
 	qso.hpp                             \
 	spline.h                            \
-	upf.hpp
+	upf2.hpp
 
 libpseudo_a_SOURCES =                       \
 	spline.cc                           \

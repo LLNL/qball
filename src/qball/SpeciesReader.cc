@@ -46,7 +46,7 @@ using namespace std;
 #include <sys/stat.h>
 #include <pseudo/psml.hpp>
 #include <pseudo/qso.hpp>
-#include <pseudo/upf.hpp>
+#include <pseudo/upf2.hpp>
 #include <pseudo/detect_format.hpp>
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -70,12 +70,15 @@ void SpeciesReader::readSpecies(Species& sp, const string uri){
     
     switch(format){
     case pseudopotential::format::QSO:
+      cout << "  <!--   format: QSO -->" << endl;
       pseudo = new pseudopotential::qso(uri);
       break;
-    case pseudopotential::format::UPF1:
+    case pseudopotential::format::UPF2:
+      cout << "  <!--   format: UPF2 -->" << endl;
       pseudo = new pseudopotential::upf(uri);
       break;
     case pseudopotential::format::PSML:
+      cout << "  <!--   format: PSML -->" << endl;
       pseudo = new pseudopotential::psml(uri);
       break;
     default:
@@ -84,23 +87,6 @@ void SpeciesReader::readSpecies(Species& sp, const string uri){
 
     cout << "  <!--   size:   " << pseudo->size() << " -->" << endl;
 
-    std::string format_name;
-    switch(pseudo->format()){
-    case pseudopotential::format::QSO:
-      format_name = "QSO";
-      break;
-    case pseudopotential::format::UPF2:
-      format_name = "UPF2";
-      break;
-    case pseudopotential::format::PSML:
-      format_name = "PSML";
-      break;
-    default:
-      assert(false);
-    }
-    
-    cout << "  <!--   format: " << format_name << " -->" << endl;
-    
     fill_species(sp, *pseudo);
 
     delete pseudo;
