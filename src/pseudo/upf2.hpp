@@ -1,5 +1,5 @@
-#ifndef PSEUDO_UPF_HPP
-#define PSEUDO_UPF_HPP
+#ifndef PSEUDO_UPF2_HPP
+#define PSEUDO_UPF2_HPP
 
 /*
  Copyright (C) 2018 Xavier Andrade
@@ -34,11 +34,11 @@
 
 namespace pseudopotential {
 
-  class upf : public pseudopotential::base {
+  class upf2 : public pseudopotential::base {
 
   public:
     
-    upf(const std::string & filename):
+    upf2(const std::string & filename):
       file_(filename),
       buffer_((std::istreambuf_iterator<char>(file_)), std::istreambuf_iterator<char>()){
       
@@ -158,15 +158,6 @@ namespace pseudopotential {
       if(functional == "SLA  PW   NOGX NOGC") return pseudopotential::correlation::LDA_PW;
       if(functional == "BLYP") return pseudopotential::correlation::LYP;
       return pseudopotential::correlation::UNKNOWN;
-    }
-
-    
-    int nquad() const {
-      return 0;
-    }
-
-    double rquad() const {
-      return 0.0;
     }
 
     double mesh_spacing() const {
@@ -306,23 +297,7 @@ namespace pseudopotential {
       }
     }
 
-    bool has_rinner() const {
-      return false;
-    }
-    
-    void rinner(std::vector<double> & val) const {
-      val.clear();
-    }
-
-    void qnm(int index, int & l1, int & l2, int & n, int & m, std::vector<double> & val) const {
-      val.clear();
-    }
-
-    void qfcoeff(int index, int ltot, std::vector<double> & val) const {
-      val.clear();
-    }
-
-    bool has_density(){
+    bool has_density() const {
       return root_node_->first_node("PP_RHOATOM");
     }
       

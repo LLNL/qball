@@ -178,14 +178,6 @@ namespace pseudopotential {
       return nc;
     }
     
-    int nquad() const {
-      return 0;
-    }
-
-    double rquad() const {
-      return 0.0;
-    }
-
     double mesh_spacing() const {
       return 0.01;
     }
@@ -265,25 +257,6 @@ namespace pseudopotential {
     void nlcc_density(std::vector<double> & val) const {
       read_function(root_node_->first_node("pseudocore-charge"), val);
       for(unsigned ii = 0; ii < val.size(); ii++) val[ii] /= 4.0*M_PI;
-    }
-    
-    void beta(int index, int & l, std::vector<double> & proj) const {
-    }
-
-    void dnm_zero(int nbeta, std::vector<std::vector<double> > & dnm) const {
-    }
-
-    bool has_rinner() const {
-      return false;
-    }
-    
-    void rinner(std::vector<double> & val) const {
-    }
-
-    void qnm(int index, int & l1, int & l2, int & n, int & m, std::vector<double> & val) const {
-    }
-
-    void qfcoeff(int index, int ltot, std::vector<double> & val) const {
     }
     
     bool has_density(){
