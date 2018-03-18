@@ -46,6 +46,7 @@ using namespace std;
 #include <sys/stat.h>
 #include <pseudo/psml.hpp>
 #include <pseudo/qso.hpp>
+#include <pseudo/upf1.hpp>
 #include <pseudo/upf2.hpp>
 #include <pseudo/detect_format.hpp>
 
@@ -73,9 +74,13 @@ void SpeciesReader::readSpecies(Species& sp, const string uri){
       cout << "  <!--   format: QSO -->" << endl;
       pseudo = new pseudopotential::qso(uri);
       break;
+    case pseudopotential::format::UPF1:
+      cout << "  <!--   format: UPF1 -->" << endl;
+      pseudo = new pseudopotential::upf1(uri);
+      break;
     case pseudopotential::format::UPF2:
       cout << "  <!--   format: UPF2 -->" << endl;
-      pseudo = new pseudopotential::upf(uri);
+      pseudo = new pseudopotential::upf2(uri);
       break;
     case pseudopotential::format::PSML:
       cout << "  <!--   format: PSML -->" << endl;
