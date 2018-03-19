@@ -4,6 +4,7 @@ lib_LIBRARIES =                             \
 	libpseudo.a
 
 noinst_HEADERS =                            \
+	anygrid.hpp                         \
 	base.hpp                            \
 	chemical_element.hpp                \
 	psml.hpp                            \

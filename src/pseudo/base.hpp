@@ -115,7 +115,7 @@ namespace pseudopotential {
     virtual void rinner(std::vector<double> & val) const { val.clear(); }
     virtual void qnm(int index, int & l1, int & l2, int & n, int & m, std::vector<double> & val) const { val.clear(); }
     virtual void qfcoeff(int index, int ltot, std::vector<double> & val) const { val.clear(); }
-    virtual bool has_density() const { assert(false); }
+    virtual bool has_density() const { return false; }
     virtual void density(std::vector<double> & val) const { val.clear(); }
     virtual int nwavefunctions() const { return 0; }
     virtual void wavefunction(int index, int & n, int & l, double & occ, std::vector<double> & val) const { val.clear(); }

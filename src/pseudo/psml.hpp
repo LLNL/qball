@@ -25,13 +25,14 @@
 #include <sstream>
 #include <iostream>
 
+#include "anygrid.hpp"
 #include "base.hpp"
 #include "chemical_element.hpp"
 #include <rapidxml.hpp>
 
 namespace pseudopotential {
 
-  class psml : public pseudopotential::base {
+  class psml : public pseudopotential::anygrid {
 
   public:
 
@@ -178,14 +179,6 @@ namespace pseudopotential {
       return nc;
     }
     
-    double mesh_spacing() const {
-      return 0.01;
-    }
-
-    int mesh_size() const {
-      return mesh_size_;
-    }
-    
     void local_potential(std::vector<double> & val) const {
       read_function(root_node_->first_node("local-potential"), val, true);
     }
@@ -289,18 +282,6 @@ namespace pseudopotential {
       interpolate(val);
     }
     
-    void interpolate(std::vector<double> & function) const {
-      std::vector<double> function_in_grid = function;
-      
-      Spline function_spline;
-      function_spline.fit(grid_.data(), function_in_grid.data(), function_in_grid.size(), SPLINE_FLAT_BC, SPLINE_NATURAL_BC);
-      
-      function.clear();
-      for(double rr = 0.0; rr <= grid_[grid_.size() - 1]; rr += mesh_spacing()){
-	function.push_back(function_spline.value(rr));
-      }
-    }
-    
     //for some stupid reason psml uses letters instead of numbers for angular momentum
     static int letter_to_l(const std::string & letter){
       if(letter == "s") return 0;
@@ -317,8 +298,6 @@ namespace pseudopotential {
     rapidxml::xml_document<> doc_;
     rapidxml::xml_node<> * root_node_;
     rapidxml::xml_node<> * spec_node_;
-    std::vector<double> grid_;
-    int mesh_size_;
     
   };
 
