@@ -346,19 +346,17 @@ namespace pseudopotential {
     }
 
     bool has_nlcc() const{
-      return false;     
       return doc_.first_node("PP_NLCC");
     }
 
     void nlcc_density(std::vector<double> & density) const {
       rapidxml::xml_node<> * node = doc_.first_node("PP_NLCC");
       assert(node);
-      
-      int size = value<int>(node->first_attribute("size"));
-      density.resize(size);
-
       std::istringstream stst(node->value());
-      for(int ii = 0; ii < size; ii++) stst >> density[start_point_ + ii];
+      
+      density.resize(grid_.size());
+
+      for(unsigned ii = 0; ii < grid_.size() - start_point_; ii++) stst >> density[start_point_ + ii];
       extrapolate_first_point(density);
       // this charge does not come multiplied by anything
       
