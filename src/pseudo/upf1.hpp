@@ -301,7 +301,7 @@ namespace pseudopotential {
 	proj.resize(grid_.size());
 
 	for(int ii = 0; ii < size; ii++) stst >> proj[ii + start_point_];
-	for(unsigned ii = size; ii < grid_.size(); ii++) proj[ii + start_point_] = 0.0; 
+	for(unsigned ii = size; ii < grid_.size() - start_point_; ii++) proj[ii + start_point_] = 0.0; 
 	    
 	break;
       }
@@ -401,7 +401,6 @@ namespace pseudopotential {
 	double tmp;
 
 	stst >> line;
-	std::cout << ii << " " << line << std::endl;
 	getline(stst, line);
 	for(unsigned ii = 0; ii < grid_.size() - start_point_; ii++) stst >> tmp;
       }
