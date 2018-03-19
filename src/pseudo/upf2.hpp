@@ -179,7 +179,7 @@ namespace pseudopotential {
       std::istringstream stst(node->value());
       for(int ii = 0; ii < size; ii++) {
 	stst >> potential[ii + start_point_];
-	potential[ii] *= 0.5; //Convert from Rydberg to Hartree
+	potential[ii + start_point_] *= 0.5; //Convert from Rydberg to Hartree
       }
       if(start_point_ > 0) extrapolate_first_point(potential);
 
