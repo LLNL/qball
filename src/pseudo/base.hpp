@@ -123,6 +123,9 @@ namespace pseudopotential {
     virtual void wavefunction(int index, int & n, int & l, double & occ, std::vector<double> & val) const { val.clear(); }
     virtual pseudopotential::exchange exchange() const { return pseudopotential::exchange::UNKNOWN; }
     virtual pseudopotential::correlation correlation() const { return pseudopotential::correlation::UNKNOWN; }
+
+    virtual bool has_total_angular_momentum() const { return false; }
+    virtual int total_angular_momentum(int l, int ic) const { return 0; } // returns j multiplied by 2
     
   protected:
 

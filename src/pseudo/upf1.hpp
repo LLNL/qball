@@ -409,6 +409,47 @@ namespace pseudopotential {
       interpolate(proj);
     }
     
+    virtual bool has_total_angular_momentum() const {
+      return doc_.first_node("PP_ADDINFO");
+    }
+
+    virtual int total_angular_momentum(int l, int ic) const {
+
+      if(l == 0) return 1;
+
+      rapidxml::xml_node<> * node = doc_.first_node("PP_ADDINFO");
+      assert(node);
+
+      std::istringstream stst(node->value());
+
+      for(int iwf = 0; iwf < nwavefunctions_; iwf++){
+	std::string line;
+	stst >> line;
+	getline(stst, line);
+      }
+
+      for(int iproj = 0; iproj < nprojectors_; iproj++){
+	int read_l;
+
+	stst  >> read_l;
+
+	assert(read_l == proj_l_[iproj]);
+	
+	if(proj_l_[iproj] == l && proj_c_[iproj] == ic){
+	  double read_j;
+	  stst  >> read_j;
+	  return std::lrint(read_j*2.0);
+	} else {
+	  std::string line;
+	  getline(stst, line);
+	}
+      }
+
+      assert(false);
+
+    }
+
+    
   private:
 
     std::ifstream file_;
