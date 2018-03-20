@@ -23,6 +23,8 @@
 #include <string>
 #include <rapidxml.hpp>
 
+#define MAX_L 10 
+
 namespace pseudopotential {
 
   enum class type {

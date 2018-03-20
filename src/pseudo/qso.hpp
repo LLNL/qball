@@ -63,7 +63,7 @@ namespace pseudopotential {
       if(pseudo_node_->first_node("lmax")) {
 	lmax_ = value<int>(pseudo_node_->first_node("lmax"));
       } else {
-	for(int l = 0; l <= 10; l++ ){
+	for(int l = 0; l <= MAX_L; l++ ){
 	  if(!has_projectors(l)){
 	    lmax_ = l - 1;
 	    break;
@@ -71,7 +71,7 @@ namespace pseudopotential {
 	}
       }
       assert(lmax_ >= 0);
-      assert(lmax_ < 9);
+      assert(lmax_ < MAX_L);
       
     }
 
