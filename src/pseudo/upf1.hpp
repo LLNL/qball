@@ -409,11 +409,11 @@ namespace pseudopotential {
       interpolate(proj);
     }
     
-    virtual bool has_total_angular_momentum() const {
+    bool has_total_angular_momentum() const {
       return doc_.first_node("PP_ADDINFO");
     }
 
-    virtual int total_angular_momentum(int l, int ic) const {
+    int projector_2j(int l, int ic) const {
 
       if(l == 0) return 1;
 
@@ -447,6 +447,27 @@ namespace pseudopotential {
 
       assert(false);
 
+    }
+
+    int wavefunction_2j(int ii) const {
+
+      assert(ii >= 0 && ii <= nwavefunctions_);
+      
+      rapidxml::xml_node<> * node = doc_.first_node("PP_ADDINFO");
+      assert(node);
+
+      std::istringstream stst(node->value());
+
+      double j;
+      for(int iwf = 0; iwf < ii; iwf++){
+	std::string label;
+	int n, l;
+	double occ;
+	stst >> label >> n >> l >> j >> occ;
+      }
+
+      return std::lrint(j*2.0);
+      
     }
 
     

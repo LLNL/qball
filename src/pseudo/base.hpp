@@ -125,7 +125,8 @@ namespace pseudopotential {
     virtual pseudopotential::correlation correlation() const { return pseudopotential::correlation::UNKNOWN; }
 
     virtual bool has_total_angular_momentum() const { return false; }
-    virtual int total_angular_momentum(int l, int ic) const { return 0; } // returns j multiplied by 2
+    virtual int projector_2j(int l, int ic) const { return 0; } // returns j multiplied by 2
+    virtual int wavefunction_2j(int ii) const { return 0; } // returns j multiplied by 2
     
   protected:
 
