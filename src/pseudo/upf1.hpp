@@ -136,6 +136,7 @@ namespace pseudopotential {
 	std::vector<bool> has_l(MAX_L, false);
 
 	lmax_ = 0;
+	nchannels_ = 0;
 	int iproj = 0;
 	while(node){
 	  
@@ -155,6 +156,8 @@ namespace pseudopotential {
 	  proj_l_[iproj] = read_l;
 	  proj_c_[iproj] = 0;
 	  for(int jproj = 0; jproj < iproj; jproj++) if(read_l == proj_l_[jproj]) proj_c_[iproj]++;
+
+	  nchannels_ = std::max(nchannels_, proj_c_[iproj] + 1);
 	  
 	  node = node->next_sibling("PP_BETA");
 	  iproj++;
@@ -247,11 +250,7 @@ namespace pseudopotential {
     }
 
     int nchannels() const {
-      if(llocal() >= 0){
-	return nprojectors()/lmax();
-      } else {
-	return nprojectors()/(lmax() + 1);
-      }
+      return nchannels_;
     }
     
     void local_potential(std::vector<double> & potential) const {
@@ -395,8 +394,12 @@ namespace pseudopotential {
       std::string label;
       stst >> label >> l >> occ;
       getline(stst, line);
-      
-      n = std::stoi(label.substr(0, 1));
+
+      if(label == "s"){
+	n = 1;
+      } else {
+	n = std::stoi(label.substr(0, 1));
+      }
       
       proj.resize(grid_.size());
 
@@ -485,6 +488,7 @@ namespace pseudopotential {
     int nprojectors_;
     std::vector<int> proj_l_;
     std::vector<int> proj_c_;
+    int nchannels_;
     
   };
 

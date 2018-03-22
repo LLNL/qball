@@ -96,6 +96,7 @@ namespace pseudopotential {
       std::vector<bool> has_l(MAX_L, false);
       
       lmax_ = 0;
+      nchannels_ = 0;
 
       std::vector<int> proj_l(nprojectors());
       std::vector<int> proj_c(nprojectors());
@@ -117,9 +118,12 @@ namespace pseudopotential {
 	proj_c[iproj] = 0;
 	for(int jproj = 0; jproj < iproj; jproj++) if(read_l == proj_l[jproj]) proj_c[iproj]++;
 
+	nchannels_ = std::max(nchannels_, proj_c[iproj] + 1);
+
       }
 
       assert(lmax_ >= 0);
+      
       llocal_ = -1;
       for(int l = 0; l <= lmax_; l++) if(!has_l[l]) llocal_ = l;
 
@@ -130,7 +134,7 @@ namespace pseudopotential {
 
 	assert(node);
 
-	dij_.resize((lmax_ + 1)*nchannels()*nchannels());
+	dij_.resize((lmax_ + 1)*nchannels_*nchannels_);
 	
 	for(unsigned kk = 0; kk < dij_.size(); kk++) dij_[kk] = 0.0;
 	
@@ -146,7 +150,6 @@ namespace pseudopotential {
 	    }
 	    
 	    val *= 0.5; //convert from Rydberg to Hartree
-
 	    d_ij(proj_l[ii], proj_c[ii], proj_c[jj]) = val;
 	  }
 	}
@@ -204,11 +207,7 @@ namespace pseudopotential {
     }
 
     int nchannels() const {
-      if(llocal() >= 0){
-	return nprojectors()/lmax();
-      } else {
-	return nprojectors()/(lmax() + 1);
-      }
+      return nchannels_;
     }
     
     void local_potential(std::vector<double> & potential) const {
@@ -334,7 +333,7 @@ namespace pseudopotential {
       assert(node);
       
       int size = value<int>(node->first_attribute("size"));
-      val.resize(size);
+      val.resize(size + start_point_);
       
       std::istringstream stst(node->value());
       for(int ii = 0; ii < size; ii++) stst >> val[start_point_ + ii];
@@ -389,6 +388,8 @@ namespace pseudopotential {
     rapidxml::xml_document<> doc_;
     rapidxml::xml_node<> * root_node_;
     int start_point_;
+    int nchannels_;
+    
     
   };
 
