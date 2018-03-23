@@ -195,10 +195,6 @@ namespace pseudopotential {
       return value<int>(root_node_->first_node("PP_HEADER")->first_attribute("z_valence"));
     }
 
-    int llocal() const {
-      return llocal_;
-    }
-
     pseudopotential::exchange exchange() const {
       std::string functional = root_node_->first_node("PP_HEADER")->first_attribute("functional")->value();
       if(functional == "PBE") return pseudopotential::exchange::PBE;
@@ -217,10 +213,6 @@ namespace pseudopotential {
       return pseudopotential::correlation::UNKNOWN;
     }
 
-    int nchannels() const {
-      return nchannels_;
-    }
-    
     void local_potential(std::vector<double> & potential) const {
       rapidxml::xml_node<> * node = root_node_->first_node("PP_LOCAL");
 
@@ -398,8 +390,6 @@ namespace pseudopotential {
     std::vector<char> buffer_;
     rapidxml::xml_document<> doc_;
     rapidxml::xml_node<> * root_node_;
-    int start_point_;
-    int nchannels_;
     
     
   };
