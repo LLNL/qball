@@ -9,7 +9,6 @@ bin_PROGRAMS  =                             \
 	qball-nruns                         \
 	qball-setupkpts                     \
 	qballdiff                           \
-	xmlSpecies                          \
 	xmlget                              \
 	xmlextract
 
@@ -236,10 +235,6 @@ qball_setupkpts_LDADD =                      \
 
 qballdiff_SOURCES =                          \
 	qbdiff.cc
-
-xmlSpecies_SOURCES =                         \
-	xmlSpecies.cc                        \
-	qbox_xmlns.cc
 
 xmlget_SOURCES =                             \
 	xmlget.cc
