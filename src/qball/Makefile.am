@@ -213,23 +213,18 @@ libqbLink_a_SOURCES =                        \
 	clooper.c                            \
 	qbLink.cc
 
-qball$(EXEEXT): $(lib_LIBRARIES)
-
 qball_SOURCES =                              \
 	qb.cc
 
 qball_LDADD =                                \
 	$(all_LIBS)
 
-qball_nruns$(EXEEXT): $(lib_LIBRARIES)
 
 qball_nruns_SOURCES =                        \
 	qb-nruns.cc
 
 qball_nruns_LDADD =                          \
 	$(all_LIBS)
-
-qball_setupkpts$(EXEEXT): $(lib_LIBRARIES)
 
 qball_setupkpts_SOURCES =                    \
 	qb-setupkpts.cc                      \
