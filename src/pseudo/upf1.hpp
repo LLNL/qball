@@ -124,7 +124,18 @@ namespace pseudopotential {
 
       }
 
-          
+      {
+	rapidxml::xml_node<> * node = doc_.first_node("PP_MESH")->first_node("PP_R");
+	assert(node);
+
+	std::istringstream stst(node->value());
+
+	grid_weights_.resize(size + start_point_);
+
+	grid_weights_[0] = 0.5*(grid_[1] - grid_[0]);
+	for(int ii = 0; ii < size; ii++) stst >> grid_weights_[start_point_ + ii];
+      }
+      
       //lmax and lloc
       {
 

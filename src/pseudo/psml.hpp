@@ -107,7 +107,13 @@ namespace pseudopotential {
 
 	mesh_size_ = 0;
 	for(double rr = 0.0; rr <= grid_[grid_.size() - 1]; rr += mesh_spacing()) mesh_size_++;
-	
+
+	grid_weights_.resize(grid_.size());
+ 
+	// the integration weights are not available, we approximate them
+	grid_weights_[0] = 0.5*(grid_[1] - grid_[0]);
+	for(unsigned ii = 1; ii < grid_.size() - 1; ii++) grid_weights_[ii] = grid_[ii + 1] - grid_[ii - 1];
+	grid_weights_[grid_.size() - 1] = 0.5*(grid_[grid_.size() - 1] - grid_[grid_.size() - 2]);
       }
       
     }

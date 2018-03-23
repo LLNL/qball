@@ -30,31 +30,59 @@ namespace pseudopotential {
 
   public:
 
+    anygrid(bool uniform_grid = true):
+      uniform_grid_(uniform_grid){
+    }
+    
     double mesh_spacing() const {
       return 0.01;
     }
     
     int mesh_size() const {
-      return mesh_size_;
+      if(uniform_grid_) {
+	return mesh_size_;
+      } else {
+	return grid_.size();
+      }
     }
     
+    virtual void grid(std::vector<double> & val) const {
+      if(uniform_grid_){
+	pseudopotential::base::grid(val);
+      } else {
+	val = grid_;
+      }
+    }
+
+    virtual void grid_weights(std::vector<double> & val) const {
+      if(uniform_grid_){
+	pseudopotential::base::grid(val);
+      } else {
+	val = grid_weights_;
+      }
+    }
+
   protected:
 
     void interpolate(std::vector<double> & function) const {
-      std::vector<double> function_in_grid = function;
+      if(!uniform_grid_) return;
 
+      std::vector<double> function_in_grid = function;
+      
       assert(function.size() == grid_.size());
       
       Spline function_spline;
       function_spline.fit(grid_.data(), function_in_grid.data(), function_in_grid.size(), SPLINE_FLAT_BC, SPLINE_NATURAL_BC);
-
+      
       function.clear();
       for(double rr = 0.0; rr <= grid_[grid_.size() - 1]; rr += mesh_spacing()){
 	function.push_back(function_spline.value(rr));
       }
     }
-    
+
+    bool uniform_grid_;
     std::vector<double> grid_;
+    std::vector<double> grid_weights_;
     int mesh_size_;
     
   };

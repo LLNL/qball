@@ -106,6 +106,18 @@ namespace pseudopotential {
     virtual void radial_function(int l, std::vector<double> & function) const = 0;
     virtual void radial_potential(int l, std::vector<double> & function) const = 0;
 
+    virtual void grid(std::vector<double> & val) const {
+      val.resize(mesh_size());
+      for(unsigned ii = 0; ii < val.size(); ii++) val[ii] = ii*mesh_spacing();
+    }
+
+    virtual void grid_weights(std::vector<double> & val) const {
+      val.resize(mesh_size());
+      for(unsigned ii = 1; ii < val.size() - 1; ii++) val[ii] = mesh_spacing();
+      val[0] = 0.5*mesh_spacing();
+      val[val.size() - 1] = 0.5*mesh_spacing();
+    }
+
     //Functions for things that might not be provided
     virtual int nquad() const { return 0; }
     virtual double rquad() const { return 0.0; }

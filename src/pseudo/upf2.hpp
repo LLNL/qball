@@ -83,9 +83,19 @@ namespace pseudopotential {
 	for(int ii = 0; ii < size; ii++) stst >> grid_[start_point_ + ii];
 	
 	assert(fabs(grid_[0]) <= 1e-10);
+      }
 
-	mesh_size_ = start_point_ + value<int>(root_node_->first_node("PP_HEADER")->first_attribute("mesh_size"));
-
+      {
+	rapidxml::xml_node<> * node = root_node_->first_node("PP_MESH")->first_node("PP_RAB");
+	
+	assert(node);
+	
+	int size = value<int>(node->first_attribute("size"));
+	grid_weights_.resize(size + start_point_);
+	std::istringstream stst(node->value());
+	grid_weights_[0] = 0.5*(grid_[1] - grid_[0]);
+	for(int ii = 0; ii < size; ii++) stst >> grid_weights_[start_point_ + ii];
+	
 	mesh_size_ = 0;
 	for(double rr = 0.0; rr <= grid_[grid_.size() - 1]; rr += mesh_spacing()) mesh_size_++;
 	
