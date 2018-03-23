@@ -210,38 +210,44 @@ libqbLink_a_SOURCES =                        \
 	FCPStepper.cc                        \
 	ExponentialWavefunctionStepper.cc    \
 	SelfConsistentPotential.cc           \
-	clooper.c                           \
+	clooper.c                            \
 	qbLink.cc
 
-qball_SOURCES =                             \
+qball$(EXEEXT): $(lib_LIBRARIES)
+
+qball_SOURCES =                              \
 	qb.cc
 
-qball_LDADD =                               \
+qball_LDADD =                                \
 	$(all_LIBS)
 
-qball_nruns_SOURCES =                       \
+qball_nruns$(EXEEXT): $(lib_LIBRARIES)
+
+qball_nruns_SOURCES =                        \
 	qb-nruns.cc
 
-qball_nruns_LDADD =                         \
+qball_nruns_LDADD =                          \
 	$(all_LIBS)
 
-qball_setupkpts_SOURCES =                   \
+qball_setupkpts$(EXEEXT): $(lib_LIBRARIES)
+
+qball_setupkpts_SOURCES =                    \
 	qb-setupkpts.cc                      \
 	SymOpSet.cc                          \
 	SymOp.cc
 
-qball_setupkpts_LDADD =                     \
+qball_setupkpts_LDADD =                      \
 	$(all_LIBS)
 
-qballdiff_SOURCES =                         \
+qballdiff_SOURCES =                          \
 	qbdiff.cc
 
-xmlSpecies_SOURCES =                        \
+xmlSpecies_SOURCES =                         \
 	xmlSpecies.cc                        \
 	qbox_xmlns.cc
 
-xmlget_SOURCES =                            \
+xmlget_SOURCES =                             \
 	xmlget.cc
 
-xmlextract_SOURCES =                        \
+xmlextract_SOURCES =                         \
 	xmlextract.cc
