@@ -38,7 +38,8 @@ namespace pseudopotential {
 
   public:
     
-    upf2(const std::string & filename):
+    upf2(const std::string & filename, bool uniform_grid = false):
+      pseudopotential::upf(uniform_grid),
       file_(filename),
       buffer_((std::istreambuf_iterator<char>(file_)), std::istreambuf_iterator<char>()){
       

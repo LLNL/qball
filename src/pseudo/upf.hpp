@@ -34,6 +34,10 @@ namespace pseudopotential {
 
   public:
 
+    upf(bool uniform_grid):
+      pseudopotential::anygrid(uniform_grid){
+    }
+    
     double d_ij(int l, int i, int j) const {
       assert(l >= 0 && l <= lmax_);
       assert(i >= 0 && i <= nchannels());

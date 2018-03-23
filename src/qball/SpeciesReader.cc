@@ -76,15 +76,15 @@ void SpeciesReader::readSpecies(Species& sp, const string uri){
       break;
     case pseudopotential::format::UPF1:
       cout << "  <!--   format: UPF1 -->" << endl;
-      pseudo = new pseudopotential::upf1(uri);
+      pseudo = new pseudopotential::upf1(uri, /*uniform_grid = */ true);
       break;
     case pseudopotential::format::UPF2:
       cout << "  <!--   format: UPF2 -->" << endl;
-      pseudo = new pseudopotential::upf2(uri);
+      pseudo = new pseudopotential::upf2(uri, /*uniform_grid = */ true);
       break;
     case pseudopotential::format::PSML:
       cout << "  <!--   format: PSML -->" << endl;
-      pseudo = new pseudopotential::psml(uri);
+      pseudo = new pseudopotential::psml(uri, /*uniform_grid = */ true);
       break;
     default:
       Messages::fatal("unsupported format for pseudopotential file '" + uri + "'");
