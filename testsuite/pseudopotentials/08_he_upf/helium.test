@@ -1,0 +1,23 @@
+# -*- coding: utf-8 mode: shell-script -*-
+# $Id: 01-carbon_atom.test 13244 2015-02-28 23:19:28Z dstrubbe $
+
+Test       : Helium
+Program    : qball
+TestGroups : short-run
+Enabled    : Yes
+
+ExtraFile  : He_pbe-mt.UPF
+Input      : helium.inp
+Reference  : helium_reference.xml
+
+match ; ekin    ; GREPFIELD(out, '<ekin>',   2) ;  2.53729872
+match ; econf   ; GREPFIELD(out, '<econf>',  2) ;  0.00000000 
+match ; eps     ; GREPFIELD(out, '<eps>',    2) ; -2.40353316
+match ; enl     ; GREPFIELD(out, '<enl>',    2) ;  0.00000000
+match ; ecoul   ; GREPFIELD(out, '<ecoul>',  2) ; -1.97136134
+match ; exc     ; GREPFIELD(out, '<exc>',    2) ; -1.02258527
+match ; esr     ; GREPFIELD(out, '<esr>',    2) ;  0.00000000
+match ; eself   ; GREPFIELD(out, '<eself>',  2) ;  1.99471140
+match ; ets     ; GREPFIELD(out, '<ets>',    2) ;  0.00000000
+match ; etotal  ; GREPFIELD(out, '<etotal>', 2) ; -2.86018105 
+

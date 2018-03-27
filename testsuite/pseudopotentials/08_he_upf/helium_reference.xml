@@ -1,0 +1,358 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+                   ___________________________
+                   |                         |
+                   | qball alsos             |
+                   |                         |
+                   |                         |
+                   |                         |
+                   |                         |
+                   |                         |
+                   |                         |
+                   |                         |
+                   |                         |
+                   |      Lawrence Livermore |
+                   |     National Laboratory |
+                   |                         |
+                   | Copyright (c) 2003-2016 |
+                   |_________________________|
+
+-->
+<qbox:simulation xmlns:qbox="http://www.quantum-simulation.org/ns/fpmd/fpmd-1.0">
+<release> qball alsos </release>
+<npes> 4 </npes>
+<nthreads> 1 </nthreads>
+<user> xavier </user>
+<sysname> Linux </sysname>
+<nodename> refri </nodename>
+<start_time> 2018-03-27T04:58:15Z </start_time>
+<!-- [qball] set cell 20 0 0 0 20 0 0 0 20 bohr -->
+  <unitcell>
+<unit_cell 
+    a="20.00000000  0.00000000   0.00000000  "
+    b="0.00000000   20.00000000  0.00000000  "
+    c="0.00000000   0.00000000   20.00000000 " />
+  </unitcell>
+<!-- [qball] species helium He_pbe-mt.UPF -->
+  <!-- SpeciesCmd: defining species helium as He_pbe-mt.UPF -->
+  <!-- SpeciesReader opening file He_pbe-mt.UPF -->
+  <!--   format: UPF1 -->
+  <!--   size:   41262 -->
+  <!-- SpeciesReader::readSpecies: potential type:  Kleinman-Bylander norm-conserving -->
+  <!-- SpeciesReader::readSpecies: read description 
+Generated using Fritz-Haber code                                                
+Author: Nicola Marzari Generation date: 11 Oct 2008
+Info: FHI Troullier-Martins input
+    1        The Pseudo was generated with a Scalar-Relativistic Calculation
+nl pn  l   occ               Rcut            Rcut US             E pseu
+s   0  0  2.00      0.00000000000      0.00000000000      0.00000000000
+ -->
+  <!-- SpeciesReader::readSpecies: read symbol He -->
+  <!-- SpeciesReader::readSpecies: read atomic_number 2 -->
+  <!-- SpeciesReader::readSpecies: read mass 4.00260220 -->
+  <!-- SpeciesReader::readSpecies: read valence_charge 2 -->
+  <!-- SpeciesReader::readSpecies: read lmax 0 -->
+  <!-- SpeciesReader::readSpecies: read llocal 0 -->
+  <!-- SpeciesReader::readSpecies: read mesh_spacing 0.01000000 -->
+  <!-- SpeciesReader::readSpecies: read local_potential size=7620 -->
+  <!-- SpeciesReader::readSpecies: read d_ij l=0 -->
+<!-- Species helium:  extending grid to rmax = 40.00000000 to increase vnlg resolution (16384 pts) -->
+SPECIES.ndft = 16384, np = 7620, rmax = 163.84000000, gmax = 314.14009060, hubbard_l = -1
+
+ species helium:
+ name_ = helium
+ description_ = 
+Generated using Fritz-Haber code                                                
+Author: Nicola Marzari Generation date: 11 Oct 2008
+Info: FHI Troullier-Martins input
+    1        The Pseudo was generated with a Scalar-Relativistic Calculation
+nl pn  l   occ               Rcut            Rcut US             E pseu
+s   0  0  2.00      0.00000000000      0.00000000000      0.00000000000
+
+ uri_ = He_pbe-mt.UPF
+ symbol_ = He
+ atomic_number_ = 2
+ local potential
+ valence charge = 2 / ionic mass_ = 4.00260220 (amu)
+ lmax_ =   0
+ llocal_ = 0
+ rcps_ =   1.50000000
+<!-- [qball] atom He helium 0.0 0.0 0.0 -->
+
+<WARNING>
+Units missing for the atom command, assuming 'bohr'.
+</WARNING>
+
+<!-- [qball] set xc PBE -->
+<!-- [qball] set ecut 50 rydberg -->
+<!-- [qball] set wf_dyn PSD -->
+<!-- [qball] set ecutprec 4 rydberg -->
+<!-- [qball] set threshold_scf 1.E-7 10 -->
+<!-- [qball] randomize_wf -->
+<!-- Randomize_wf:  allocating wavefunction... -->
+<!-- Creating SlaterDet context 4x1 from spincontext, ispin = 0 -->
+SlaterDet.resize:  new c dimensions = 23984x1   (5996x1 blocks, local data size on pe 0 = 5996x1) -->
+<!-- Updated occupation of wf -->
+<!-- [qball] run 0 200 -->
+SlaterDet.resize:  new c dimensions = 23984x1   (5996x1 blocks, local data size on pe 0 = 5996x1) -->
+ChargeDensity:  vbasis = 96 96 96, resize to 110 110 110
+  <!-- EnergyFunctional: charge density basis: 191162 plane waves, ngloc = 47777 -->
+  <!-- EnergyFunctional: np0v,np1v,np2v: 110 110 110 -->
+  <!-- EnergyFunctional: vft->np012(): 1331000 -->
+<!-- AtomSet.set_rcps:  Ewald width for species helium is too small for reciprocal sum convergence, increasing rcps from 1.50000000 to 0.80000000 -->
+<!-- Species helium:  extending grid to rmax = 40.00000000 to increase vnlg resolution (16384 pts) -->
+SPECIES.ndft = 16384, np = 7620, rmax = 163.84000000, gmax = 314.14009060, hubbard_l = -1
+<!-- AtomSet.set_rcps:  Ewald width for species helium = 0.80000000 -->
+<!-- EnergyFunctional:  number of images in real-space ewald sum = 0 for rckj = 1.13137085 -->
+<run niter_ionic="0" niter_scf="200" niter_nonscf="0">
+<wavefunction ecut="25.00000000" nspin="1" nel="2" nempty="0">
+<cell a0="20.000000 0.000000 0.000000"
+      a1="0.000000 20.000000 0.000000"
+      a2="0.000000 0.000000 20.000000"/>
+<reciprocal_lattice b0="0.314159 0.000000 0.000000"
+      b1="0.000000 0.314159 0.000000"
+      b2="0.000000 0.000000 0.314159"/>
+<refcell a0="0.000000 0.000000 0.000000"
+         a1="0.000000 0.000000 0.000000"
+         a2="0.000000 0.000000 0.000000"/>
+<slater_determinant kpoint="0.000000 0.000000 0.000000"  weight="1.000000" size="1">
+ <!-- sdcontext: 4x1 -->
+<grid nx="48" ny="48" nz="48"/>
+ <!-- basis size: 23917 -->
+ <!-- c dimensions: 23984x1   (5996x1 blocks) -->
+ <density_matrix form="diagonal" size="1">
+ </density_matrix>
+</slater_determinant>
+</wavefunction>
+<!-- BOSampleStepper:  fractional occupation not detected. -->
+<iteration count="1">
+  <!-- total_electronic_charge: 2.00000000, spin = 0 -->
+  <eigenvalue_sum> 11.43618807 </eigenvalue_sum>
+  <etotal_int scf_iter="0">     21.42999410 </etotal_int>
+  <!-- total_electronic_charge: 2.00000000, spin = 0 -->
+  <eigenvalue_sum> 2.87844888 </eigenvalue_sum>
+  <etotal_int scf_iter="1">      4.83688478 </etotal_int>
+  <!-- total_electronic_charge: 2.00000000, spin = 0 -->
+  <eigenvalue_sum> 0.18676078 </eigenvalue_sum>
+  <etotal_int scf_iter="2">     -0.31489009 </etotal_int>
+  <!-- total_electronic_charge: 2.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.36444074 </eigenvalue_sum>
+  <etotal_int scf_iter="3">     -1.53358746 </etotal_int>
+  <!-- total_electronic_charge: 2.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.54798151 </eigenvalue_sum>
+  <etotal_int scf_iter="4">     -2.08681880 </etotal_int>
+  <!-- total_electronic_charge: 2.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.60875603 </eigenvalue_sum>
+  <etotal_int scf_iter="5">     -2.39231290 </etotal_int>
+  <!-- total_electronic_charge: 2.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.62102529 </eigenvalue_sum>
+  <etotal_int scf_iter="6">     -2.56739706 </etotal_int>
+  <!-- total_electronic_charge: 2.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.61620112 </eigenvalue_sum>
+  <etotal_int scf_iter="7">     -2.66978249 </etotal_int>
+  <!-- total_electronic_charge: 2.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.60737429 </eigenvalue_sum>
+  <etotal_int scf_iter="8">     -2.73191709 </etotal_int>
+  <!-- total_electronic_charge: 2.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.59918442 </eigenvalue_sum>
+  <etotal_int scf_iter="9">     -2.77137435 </etotal_int>
+  <!-- total_electronic_charge: 2.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.59280138 </eigenvalue_sum>
+  <etotal_int scf_iter="10">     -2.79748977 </etotal_int>
+  <!-- total_electronic_charge: 2.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.58818607 </eigenvalue_sum>
+  <etotal_int scf_iter="11">     -2.81534160 </etotal_int>
+  <!-- total_electronic_charge: 2.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.58497841 </eigenvalue_sum>
+  <etotal_int scf_iter="12">     -2.82782819 </etotal_int>
+  <!-- total_electronic_charge: 2.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.58280303 </eigenvalue_sum>
+  <etotal_int scf_iter="13">     -2.83669939 </etotal_int>
+  <!-- total_electronic_charge: 2.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.58135344 </eigenvalue_sum>
+  <etotal_int scf_iter="14">     -2.84306859 </etotal_int>
+  <!-- total_electronic_charge: 2.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.58040082 </eigenvalue_sum>
+  <etotal_int scf_iter="15">     -2.84767461 </etotal_int>
+  <!-- total_electronic_charge: 2.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.57978188 </eigenvalue_sum>
+  <etotal_int scf_iter="16">     -2.85102274 </etotal_int>
+  <!-- total_electronic_charge: 2.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.57938323 </eigenvalue_sum>
+  <etotal_int scf_iter="17">     -2.85346558 </etotal_int>
+  <!-- total_electronic_charge: 2.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.57912761 </eigenvalue_sum>
+  <etotal_int scf_iter="18">     -2.85525264 </etotal_int>
+  <!-- total_electronic_charge: 2.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.57896321 </eigenvalue_sum>
+  <etotal_int scf_iter="19">     -2.85656238 </etotal_int>
+  <!-- total_electronic_charge: 2.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.57885575 </eigenvalue_sum>
+  <etotal_int scf_iter="20">     -2.85752344 </etotal_int>
+  <!-- total_electronic_charge: 2.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.57878297 </eigenvalue_sum>
+  <etotal_int scf_iter="21">     -2.85822918 </etotal_int>
+  <!-- total_electronic_charge: 2.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.57873067 </eigenvalue_sum>
+  <etotal_int scf_iter="22">     -2.85874761 </etotal_int>
+  <!-- total_electronic_charge: 2.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.57869001 </eigenvalue_sum>
+  <etotal_int scf_iter="23">     -2.85912851 </etotal_int>
+  <!-- total_electronic_charge: 2.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.57865568 </eigenvalue_sum>
+  <etotal_int scf_iter="24">     -2.85940834 </etotal_int>
+  <!-- total_electronic_charge: 2.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.57862466 </eigenvalue_sum>
+  <etotal_int scf_iter="25">     -2.85961390 </etotal_int>
+  <!-- total_electronic_charge: 2.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.57859531 </eigenvalue_sum>
+  <etotal_int scf_iter="26">     -2.85976487 </etotal_int>
+  <!-- total_electronic_charge: 2.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.57856689 </eigenvalue_sum>
+  <etotal_int scf_iter="27">     -2.85987571 </etotal_int>
+  <!-- total_electronic_charge: 2.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.57853914 </eigenvalue_sum>
+  <etotal_int scf_iter="28">     -2.85995709 </etotal_int>
+  <!-- total_electronic_charge: 2.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.57851210 </eigenvalue_sum>
+  <etotal_int scf_iter="29">     -2.86001680 </etotal_int>
+  <!-- total_electronic_charge: 2.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.57848591 </eigenvalue_sum>
+  <etotal_int scf_iter="30">     -2.86006062 </etotal_int>
+  <!-- total_electronic_charge: 2.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.57846077 </eigenvalue_sum>
+  <etotal_int scf_iter="31">     -2.86009276 </etotal_int>
+  <!-- total_electronic_charge: 2.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.57843684 </eigenvalue_sum>
+  <etotal_int scf_iter="32">     -2.86011633 </etotal_int>
+  <!-- total_electronic_charge: 2.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.57841429 </eigenvalue_sum>
+  <etotal_int scf_iter="33">     -2.86013362 </etotal_int>
+  <!-- total_electronic_charge: 2.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.57839320 </eigenvalue_sum>
+  <etotal_int scf_iter="34">     -2.86014629 </etotal_int>
+  <!-- total_electronic_charge: 2.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.57837365 </eigenvalue_sum>
+  <etotal_int scf_iter="35">     -2.86015558 </etotal_int>
+  <!-- total_electronic_charge: 2.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.57835565 </eigenvalue_sum>
+  <etotal_int scf_iter="36">     -2.86016238 </etotal_int>
+  <!-- total_electronic_charge: 2.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.57833918 </eigenvalue_sum>
+  <etotal_int scf_iter="37">     -2.86016737 </etotal_int>
+  <!-- total_electronic_charge: 2.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.57832420 </eigenvalue_sum>
+  <etotal_int scf_iter="38">     -2.86017103 </etotal_int>
+  <!-- total_electronic_charge: 2.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.57831065 </eigenvalue_sum>
+  <etotal_int scf_iter="39">     -2.86017371 </etotal_int>
+  <!-- total_electronic_charge: 2.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.57829844 </eigenvalue_sum>
+  <etotal_int scf_iter="40">     -2.86017567 </etotal_int>
+  <!-- total_electronic_charge: 2.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.57828750 </eigenvalue_sum>
+  <etotal_int scf_iter="41">     -2.86017711 </etotal_int>
+  <!-- total_electronic_charge: 2.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.57827772 </eigenvalue_sum>
+  <etotal_int scf_iter="42">     -2.86017816 </etotal_int>
+  <!-- total_electronic_charge: 2.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.57826902 </eigenvalue_sum>
+  <etotal_int scf_iter="43">     -2.86017894 </etotal_int>
+  <!-- total_electronic_charge: 2.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.57826129 </eigenvalue_sum>
+  <etotal_int scf_iter="44">     -2.86017950 </etotal_int>
+  <!-- total_electronic_charge: 2.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.57825445 </eigenvalue_sum>
+  <etotal_int scf_iter="45">     -2.86017992 </etotal_int>
+  <!-- total_electronic_charge: 2.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.57824841 </eigenvalue_sum>
+  <etotal_int scf_iter="46">     -2.86018022 </etotal_int>
+  <!-- total_electronic_charge: 2.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.57824309 </eigenvalue_sum>
+  <etotal_int scf_iter="47">     -2.86018044 </etotal_int>
+  <!-- total_electronic_charge: 2.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.57823841 </eigenvalue_sum>
+  <etotal_int scf_iter="48">     -2.86018061 </etotal_int>
+  <!-- total_electronic_charge: 2.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.57823431 </eigenvalue_sum>
+  <etotal_int scf_iter="49">     -2.86018073 </etotal_int>
+  <!-- total_electronic_charge: 2.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.57823071 </eigenvalue_sum>
+  <etotal_int scf_iter="50">     -2.86018081 </etotal_int>
+  <!-- total_electronic_charge: 2.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.57822756 </eigenvalue_sum>
+  <etotal_int scf_iter="51">     -2.86018088 </etotal_int>
+  <!-- total_electronic_charge: 2.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.57822481 </eigenvalue_sum>
+  <etotal_int scf_iter="52">     -2.86018093 </etotal_int>
+  <!-- total_electronic_charge: 2.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.57822242 </eigenvalue_sum>
+  <etotal_int scf_iter="53">     -2.86018096 </etotal_int>
+  <!-- total_electronic_charge: 2.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.57822033 </eigenvalue_sum>
+  <etotal_int scf_iter="54">     -2.86018099 </etotal_int>
+  <!-- total_electronic_charge: 2.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.57821851 </eigenvalue_sum>
+  <etotal_int scf_iter="55">     -2.86018100 </etotal_int>
+  <!-- total_electronic_charge: 2.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.57821692 </eigenvalue_sum>
+  <etotal_int scf_iter="56">     -2.86018102 </etotal_int>
+  <!-- total_electronic_charge: 2.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.57821555 </eigenvalue_sum>
+  <etotal_int scf_iter="57">     -2.86018103 </etotal_int>
+  <!-- total_electronic_charge: 2.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.57821436 </eigenvalue_sum>
+  <etotal_int scf_iter="58">     -2.86018104 </etotal_int>
+  <!-- total_electronic_charge: 2.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.57821332 </eigenvalue_sum>
+  <etotal_int scf_iter="59">     -2.86018104 </etotal_int>
+  <!-- total_electronic_charge: 2.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.57821242 </eigenvalue_sum>
+  <etotal_int scf_iter="60">     -2.86018104 </etotal_int>
+  <!-- total_electronic_charge: 2.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.57821165 </eigenvalue_sum>
+  <etotal_int scf_iter="61">     -2.86018105 </etotal_int>
+  <!-- total_electronic_charge: 2.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.57821097 </eigenvalue_sum>
+  <etotal_int scf_iter="62">     -2.86018105 </etotal_int>
+  <!-- total_electronic_charge: 2.00000000, spin = 0 -->
+  <eigenvalue_sum> -0.57821039 </eigenvalue_sum>
+  <etotal_int scf_iter="63">     -2.86018105 </etotal_int>
+  <!-- BOSampleStepper: scf convergence at itscf = 64, scf energy varied by less than 1.00e-07 a.u. over 10 scf steps. -->
+  <!-- total_electronic_charge: 2.00000000, spin = 0 -->
+  <ekin>        2.53729872 </ekin>
+  <econf>       0.00000000 </econf>
+  <eps>        -2.40353316 </eps>
+  <enl>         0.00000000 </enl>
+  <ecoul>      -1.97136134 </ecoul>
+  <exc>        -1.02258527 </exc>
+  <evdw>        0.00000000 </evdw>
+  <esr>         0.00000000 </esr>
+  <eself>       1.99471140 </eself>
+  <ets>         0.00000000 </ets>
+  <etotal>     -2.86018105 </etotal>
+<atomset>
+<unit_cell 
+    a=" 20.00000000   0.00000000   0.00000000"
+    b="  0.00000000  20.00000000   0.00000000"
+    c="  0.00000000   0.00000000  20.00000000" />
+  <atom name="He" species="helium">
+    <position> 0.00000000 0.00000000 0.00000000 </position>
+    <velocity> 0.00000000 0.00000000 0.00000000 </velocity>
+    <force> -0.00000062 -0.00000027 -0.00000019 </force>
+  </atom>
+</atomset>
+<timing where="run"                name=" iteration"       min="24.519   " max="24.534   " count="1        "/>
+</iteration>
+<!-- memory sd.psi      :    0.365 MB  (0.091 MB local) -->
+<!-- memory sd.hpsi     :    0.365 MB  (0.091 MB local) -->
+<!-- memory cd.rhor     :   10.155 MB  (2.585 MB local) -->
+<!-- memory cd.rhog     :    2.917 MB  (0.729 MB local) -->
+<!-- memory total       :   13.802 MB  (3.497 MB local) -->
+</run>
+<!-- [qball]  -->
+<!-- end of command stream -->
+<real_time> 24.816 </real_time>
+<end_time> 2018-03-27T04:58:40Z </end_time>
+</qbox:simulation>
