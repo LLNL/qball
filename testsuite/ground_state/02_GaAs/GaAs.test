@@ -6,15 +6,15 @@ Enabled    : Yes
 ExtraFile  : Ga_HSCV_PBE-1.0.xml
 ExtraFile  : As_HSCV_PBE-1.0.xml
 Input      : GaAs.inp
-Reference  : GaAs.reference.xml
+Reference  : GaAs_reference.xml
 
-match ; ekin    ; GREPFIELD(out, '<ekin>',   2) ;  140.60430787
+match ; ekin    ; GREPFIELD(out, '<ekin>',   2) ;  140.60105287
 match ; econf   ; GREPFIELD(out, '<econf>',  2) ;    0.00000000
-match ; eps     ; GREPFIELD(out, '<eps>',    2) ;   72.83737251
-match ; enl     ; GREPFIELD(out, '<enl>',    2) ; -139.96932679
-match ; ecoul   ; GREPFIELD(out, '<ecoul>',  2) ; -196.34210087
-match ; exc     ; GREPFIELD(out, '<exc>',    2) ;  -21.01578820
+match ; eps     ; GREPFIELD(out, '<eps>',    2) ;   72.83611590
+match ; enl     ; GREPFIELD(out, '<enl>',    2) ; -139.96595631
+match ; ecoul   ; GREPFIELD(out, '<ecoul>',  2) ; -196.34121694
+match ; exc     ; GREPFIELD(out, '<exc>',    2) ;  -21.01551156
 match ; esr     ; GREPFIELD(out, '<esr>',    2) ;    0.03254859
 match ; eself   ; GREPFIELD(out, '<eself>',  2) ;  211.62024765
 match ; ets     ; GREPFIELD(out, '<ets>',    2) ;    0.00000000
-match ; etotal  ; GREPFIELD(out, '<etotal>', 2) ; -143.88553548
+match ; etotal  ; GREPFIELD(out, '<etotal>', 2) ; -143.88551604

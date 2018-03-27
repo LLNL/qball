@@ -153,7 +153,7 @@ if(!$opt_s) {
 }
 
 # default number of processors for MPI runs is 2
-$np = 2;
+$np = 4;
 $enabled = ""; # FIXME: should Enabled be optional?
 $options_required = "";
 $options_required_mpi = "";
