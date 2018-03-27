@@ -155,7 +155,6 @@ void  SpeciesReader::fill_species(Species& sp, pseudopotential::base & pseudo){
   cout << "  <!-- SpeciesReader::readSpecies: read mesh_spacing " << sp.deltar_ << " -->" << endl;
   
   sp.nchannels_ = pseudo.nchannels();
-  assert(sp.nchannels_ > 0);
 
   // read the local potential
   if(pseudo.type() == pseudopotential::type::KLEINMAN_BYLANDER){

@@ -89,7 +89,7 @@ bool Species::initialize(double rcpsval)
     if(!oncv_) {
       initsize_ = vps_[0].size();
     } else {
-      initsize_ = projectors_[0][0].size();
+      initsize_ = vloc_.size();
     }
   }
   
