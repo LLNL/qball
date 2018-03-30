@@ -15,5 +15,4 @@ noinst_HEADERS =                            \
 	upf2.hpp
 
 libpseudo_a_SOURCES =                       \
-	spline.cc                           \
-	chemical_element.cc
+	spline.cc
