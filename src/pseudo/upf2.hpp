@@ -114,7 +114,7 @@ namespace pseudopotential {
 
       //projector info
       for(int iproj = 0; iproj < nprojectors(); iproj++){
-	std::string tag = "PP_BETA." + std::to_string(iproj + 1);
+	std::string tag = "PP_BETA." + std::to_string(static_cast<long long>(iproj + 1));
 	rapidxml::xml_node<> * node = root_node_->first_node("PP_NONLOCAL")->first_node(tag.c_str());
 
 	assert(node);
@@ -240,7 +240,7 @@ namespace pseudopotential {
       rapidxml::xml_node<> * node = NULL;
 
       for(int iproj = 1; iproj <= nprojectors(); iproj++){
-	std::string tag = "PP_BETA." + std::to_string(iproj);
+	std::string tag = "PP_BETA." + std::to_string(static_cast<long long>(iproj));
 	node = root_node_->first_node("PP_NONLOCAL")->first_node(tag.c_str());
 
 	assert(node);
@@ -298,7 +298,7 @@ namespace pseudopotential {
     void beta(int iproj, int & l, std::vector<double> & proj) const {
       rapidxml::xml_node<> * node = NULL;
 
-      std::string tag = "PP_BETA." + std::to_string(iproj + 1);
+      std::string tag = "PP_BETA." + std::to_string(static_cast<long long>(iproj + 1));
       node = root_node_->first_node("PP_NONLOCAL")->first_node(tag.c_str());
 
       assert(node);
@@ -355,7 +355,7 @@ namespace pseudopotential {
     void wavefunction(int index, int & n, int & l, double & occ, std::vector<double> & proj) const {
       rapidxml::xml_node<> * node = NULL;
       
-      std::string tag = "PP_CHI." + std::to_string(index + 1);
+      std::string tag = "PP_CHI." + std::to_string(static_cast<long long>(index + 1));
       node = root_node_->first_node("PP_PSWFC")->first_node(tag.c_str());
       
       assert(node);
