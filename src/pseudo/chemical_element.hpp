@@ -73,14 +73,21 @@ namespace pseudopotential {
       static std::unordered_map<std::string, properties> map;
 
       if(map.empty()){
+
+	std::string filename = std::string(SHARE_DIR) + "/pseudopotentials/chemical_elements.dat";
 	
-	std::ifstream file(std::string(SHARE_DIR) + "pseudopotentials/chemical_elements.dat");
+	std::ifstream file(filename);
+
+	if(!file){
+	  std::cerr << "Internal error: cannot open file '" << filename << "'." << std::endl;
+	  exit(1);
+	}
 	
 	while(true){
 	  std::string symbol;
 	  
 	  file >> symbol;
-	  
+
 	  if(file.eof()) break;
 	  
 	  if(symbol[0] == '#'){
@@ -91,17 +98,15 @@ namespace pseudopotential {
 	  properties prop;
 	  
 	  file >> prop.z_ >> prop.mass_ >> prop.vdw_radius_;
-	  
+
 	  if(file.eof()) break;
 	  
 	  map[symbol] = prop;
 	  
 	}
-
       }
 
       return map;
-
     }
     
     static std::string & ltrim(std::string& str, const std::string& chars = "\t\n\v\f\r "){
