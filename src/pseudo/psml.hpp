@@ -27,7 +27,7 @@
 
 #include "anygrid.hpp"
 #include "base.hpp"
-#include "chemical_element.hpp"
+#include "element.hpp"
 #include <rapidxml.hpp>
 
 namespace pseudopotential {
@@ -136,7 +136,7 @@ namespace pseudopotential {
     }
 
     double mass() const {
-      chemical_element el(symbol());
+      element el(symbol());
       return el.mass();
     }
     

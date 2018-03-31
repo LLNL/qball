@@ -6,7 +6,7 @@ lib_LIBRARIES =                             \
 noinst_HEADERS =                            \
 	anygrid.hpp                         \
 	base.hpp                            \
-	chemical_element.hpp                \
+	element.hpp                \
 	psml.hpp                            \
 	qso.hpp                             \
 	spline.h                            \

@@ -1,5 +1,5 @@
-#ifndef PSEUDO_CHEMICALELEMENT_HPP
-#define PSEUDO_CHEMICALELEMENT_HPP
+#ifndef PSEUDO_ELEMENT_HPP
+#define PSEUDO_ELEMENT_HPP
 
 /*
  Copyright (C) 2018 Xavier Andrade
@@ -27,11 +27,11 @@
 
 namespace pseudopotential {
   
-  class chemical_element {
+  class element {
 
   public:
 
-    chemical_element(const std::string & symbol = "none"):symbol_(symbol){
+    element(const std::string & symbol = "none"):symbol_(symbol){
       trim(symbol_);
       symbol_[0] = std::toupper(symbol_[0]);
       for(unsigned ii = 1; ii < symbol_.size(); ii++) symbol_[ii] = std::tolower(symbol_[ii]);
@@ -74,7 +74,7 @@ namespace pseudopotential {
 
       if(map.empty()){
 
-	std::string filename = std::string(SHARE_DIR) + "/pseudopotentials/chemical_elements.dat";
+	std::string filename = std::string(SHARE_DIR) + "/pseudopotentials/elements.dat";
 	
 	std::ifstream file(filename);
 

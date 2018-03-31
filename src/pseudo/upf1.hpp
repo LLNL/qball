@@ -30,7 +30,7 @@
 #include "base.hpp"
 #include <rapidxml.hpp>
 
-#include "chemical_element.hpp"
+#include "element.hpp"
 
 namespace pseudopotential {
 
@@ -228,12 +228,12 @@ namespace pseudopotential {
     }
 
     int atomic_number() const {
-      chemical_element el(symbol());
+      element el(symbol());
       return el.atomic_number();
     }
 
     double mass() const {
-      chemical_element el(symbol());
+      element el(symbol());
       return el.mass();
     }
     
