@@ -12,4 +12,5 @@ internal_LIBS =                                              \
 
 all_LIBS = $(internal_LIBS) $(external_LIBS)
 
-AM_CXXFLAGS = -I$(top_srcdir)/src/ -I$(top_srcdir)/external_libs/rapidxml
+AM_CXXFLAGS = -I$(top_srcdir)/src/ -I$(top_srcdir)/external_libs/rapidxml -DSHARE_DIR='"$(pkgdatadir)"'
+
