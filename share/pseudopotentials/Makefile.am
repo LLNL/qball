@@ -23,7 +23,7 @@ SUBDIRS = pseudo-dojo.org quantum-simulation.org
 ppdir = $(pkgdatadir)/pseudopotentials
 
 dist_pp_DATA =                            \
-	chemical_elements.dat
+	elements.dat
 
 # In order to get `make check' working with a `VPATH' build (e. g. to use
 # the `distcheck' target) the pseudopotential files have to be accessible
