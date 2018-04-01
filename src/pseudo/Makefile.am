@@ -6,9 +6,10 @@ lib_LIBRARIES =                             \
 noinst_HEADERS =                            \
 	anygrid.hpp                         \
 	base.hpp                            \
-	element.hpp                \
+	element.hpp                         \
 	psml.hpp                            \
 	qso.hpp                             \
+	share_directory.hpp                 \
 	spline.h                            \
 	upf.hpp                             \
 	upf1.hpp                            \
