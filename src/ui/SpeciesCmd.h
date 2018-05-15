@@ -40,6 +40,7 @@ using namespace std;
 #include <qball/Sample.h>
 #include <qball/SpeciesReader.h>
 #include <qball/Species.h>
+#include <qball/Messages.h>
 
 class SpeciesCmd : public Cmd
 {
@@ -56,51 +57,75 @@ class SpeciesCmd : public Cmd
     return 
     "\n species\n\n"
     " syntax: species <name> <filename>\n\n"
-    "   The species command defines a species name based on a file.\n\n";
+    "     or: species collection <collection_name>\n\n"
+    "   The species command defines a species name based on a file, or\n";
+    "   if the 'collection' keyword is specified it will load a group of\n";
+    "   species. Valid options are 'sg15', 'HSCV_LDA' and 'HSCV_PBE'.\n";
   }
 
   int action(int argc, char **argv) {
     if (! (argc == 3 || argc == 4)) {
-      if ( ui->oncoutpe() )
+      if ( ui->oncoutpe() ) {
 	cout << "  <!-- use: species <name> <filename> [ewald_width] -->" << endl;
+      	cout << "  <!--  or: species collection <collection_name> [ewald_width] -->" << endl;
+      }
       return 1;
     }
-  
-    if ( ui->oncoutpe() )
-      cout << "  <!-- SpeciesCmd: defining species " << argv[1]
-	   << " as " << argv[2] << " -->" << endl;
 
-    SpeciesReader sp_reader(s->ctxt_);
-  
-    Species* sp = new Species(s->ctxt_,argv[1]);
-  
-    try {
-      sp_reader.readSpecies(*sp,argv[2]);
-      sp_reader.bcastSpecies(*sp);
-      if (argc == 4) {
-	const double rcpsin = atof(argv[3]);
-	s->atoms.addSpecies(sp,argv[1],rcpsin);
-      }
-      else
-	s->atoms.addSpecies(sp,argv[1]);
-
-      if (sp->ultrasoft()) {
-	s->ctrl.ultrasoft = true;
-	s->wf.set_ultrasoft(true);
-      }
+    if(argv[1] != std::string("collection")){
     
-      if (sp->nlcc()) {
-	s->ctrl.nlcc = true;
+      if ( ui->oncoutpe() ) cout << "  <!-- SpeciesCmd: defining species " << argv[1] << " as " << argv[2] << " -->" << endl;
+      
+      SpeciesReader sp_reader(s->ctxt_);
+      
+      Species* sp = new Species(s->ctxt_, argv[1]);
+      
+      try {
+	sp_reader.readSpecies(*sp, argv[2]);
+	sp_reader.bcastSpecies(*sp);
+	if (argc == 4) {
+	  const double rcpsin = atof(argv[3]);
+	  s->atoms.addSpecies(sp, argv[1], rcpsin);
+	} else {
+	  s->atoms.addSpecies(sp,argv[1]);
+	}
+	
+	if (sp->ultrasoft()) {
+	  s->ctrl.ultrasoft = true;
+	  s->wf.set_ultrasoft(true);
+	}
+	
+	if (sp->nlcc()) {
+	  s->ctrl.nlcc = true;
+	}
+	
       }
+      catch ( const SpeciesReaderException& e ) {
+	cout << " SpeciesReaderException caught in SpeciesCmd" << endl;
+	cout << " SpeciesReaderException: cannot define Species" << endl;
+      }
+      catch (...) {
+	cout << " SpeciesCmd: cannot define Species" << endl;
+      }
+
+    } else {
+      
+      std::string colname(argv[2]);
+      std::string dirname = std::string(SHARE_DIR) + "/pseudopotentials/";
+
+      if(colname == "SG15" || colname == "sg15") {
+	dirname += "quantum-simulation.org/sg15/";
+      } else if(colname == "HSCV_LDA" || colname == "hscv_lda") {
+	dirname += "quantum-simulation.org/hscv/lda/";
+      } else if(colname == "HSCV_PBE" || colname == "hscv_pbe") {
+	dirname += "quantum-simulation.org/hscv/pbe/";
+      } else {
+	ui->error("Unknown species collection '" + colname + "'");
+	return 1;
+      }
+      std::cout << dirname << "\n"; 
     }
-    catch ( const SpeciesReaderException& e ) {
-      cout << " SpeciesReaderException caught in SpeciesCmd" << endl;
-      cout << " SpeciesReaderException: cannot define Species" << endl;
-    }
-    catch (...) {
-      cout << " SpeciesCmd: cannot define Species" << endl;
-    }
-  
+      
     return 0;
   }
 
