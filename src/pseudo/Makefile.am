@@ -9,6 +9,7 @@ noinst_HEADERS =                            \
 	element.hpp                         \
 	psml.hpp                            \
 	qso.hpp                             \
+	set.hpp                             \
 	share_directory.hpp                 \
 	spline.h                            \
 	upf.hpp                             \

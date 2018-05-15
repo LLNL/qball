@@ -41,6 +41,7 @@ using namespace std;
 #include <qball/SpeciesReader.h>
 #include <qball/Species.h>
 #include <qball/Messages.h>
+#include <pseudo/set.hpp>
 
 class SpeciesCmd : public Cmd
 {
@@ -123,7 +124,8 @@ class SpeciesCmd : public Cmd
 	ui->error("Unknown species collection '" + colname + "'");
 	return 1;
       }
-      std::cout << dirname << "\n"; 
+
+      pseudopotential::set collection(dirname);
     }
       
     return 0;
