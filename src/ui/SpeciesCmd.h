@@ -55,14 +55,14 @@ class SpeciesCmd : public Cmd
   {
     return 
     "\n species\n\n"
-    " syntax: species name uri\n\n"
-    "   The species command defines a species name.\n\n";
+    " syntax: species <name> <filename>\n\n"
+    "   The species command defines a species name based on a file.\n\n";
   }
 
   int action(int argc, char **argv) {
     if (! (argc == 3 || argc == 4)) {
       if ( ui->oncoutpe() )
-	cout << "  <!-- use: species name uri [ewald_width] -->" << endl;
+	cout << "  <!-- use: species <name> <filename> [ewald_width] -->" << endl;
       return 1;
     }
   
