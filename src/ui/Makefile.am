@@ -61,5 +61,4 @@ libui_a_SOURCES =                           \
 	SavedenCmd.cc \
 	SaveESPCmd.cc \
 	SavesysCmd.cc \
-	SpeciesCmd.cc \
 	UserInterface.cc
