@@ -24,7 +24,9 @@
 #include <cctype>
 #include <iostream>
 #include <fstream>
-#include <unordered_map>
+#include <cstdlib>
+#include <map>
+#include <cstdlib>
 
 #include "share_directory.hpp"
 
@@ -74,19 +76,19 @@ namespace pseudopotential {
       double vdw_radius_;
     };
     
-    static std::unordered_map<std::string, properties> & map(){
+    static std::map<std::string, properties> & map(){
       
-      static std::unordered_map<std::string, properties> map;
+      static std::map<std::string, properties> map;
 
       if(map.empty()){
 
 	std::string filename = pseudopotential::share_directory::get() + "/pseudopotentials/elements.dat";
 	
-	std::ifstream file(filename);
+	std::ifstream file(filename.c_str());
 
 	if(!file){
 	  std::cerr << "Internal error: cannot open file '" << filename << "'." << std::endl;
-	  exit(1);
+	  exit(EXIT_FAILURE);
 	}
 	
 	while(true){

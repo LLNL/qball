@@ -28,7 +28,7 @@ namespace pseudopotential {
 
   pseudopotential::format detect_format(const std::string & filename){
 
-    std::ifstream  file(filename);
+    std::ifstream file(filename.c_str());
 
     if(!file) return pseudopotential::format::FILE_NOT_FOUND;
     

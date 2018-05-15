@@ -35,7 +35,7 @@ namespace pseudopotential {
   public:
 
     qso(const std::string & filename):
-      file_(filename),
+      file_(filename.c_str()),
       buffer_((std::istreambuf_iterator<char>(file_)), std::istreambuf_iterator<char>()){
 
       buffer_.push_back('\0');
