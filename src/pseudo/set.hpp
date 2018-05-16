@@ -26,7 +26,12 @@
 #include "element.hpp"
 
 #include <iostream>
-
+#include <dirent.h>
+#include "detect_format.hpp"
+#include "psml.hpp"
+#include "qso.hpp"
+#include "upf1.hpp"
+#include "upf2.hpp"
 
 namespace pseudopotential {
 
@@ -34,28 +39,57 @@ namespace pseudopotential {
 
   public:
     
-    set(const std::string & filename){
-      std::ifstream file(filename);
+    set(const std::string & dirname){
+      DIR * dir = opendir(dirname.c_str());
 
-      if(!file){
-	std::cerr << "Internal error: cannot open file '" << filename << "'." << std::endl;
-	exit(1);
-      }
+      struct dirent *ent;
+      while ((ent = readdir(dir)) != NULL) {
+	const std::string filename(ent->d_name);
+	const std::string fullname = dirname + "/" + filename;
+
+	if(filename == "." || filename == "..") continue;
+
+	pseudopotential::format format = detect_format(fullname);
 	
-      std::string line, symbol;
-      element_values vals;
-      int zz;
+	if(format == pseudopotential::format::FILE_NOT_FOUND || format == pseudopotential::format::UNKNOWN) continue;
+
+
+	// we open the pseudo just to get the species symbol, this could be done in a better way
+	pseudopotential::base * pseudo = NULL;
+ 
+	switch(format){
+	case pseudopotential::format::QSO:
+	  pseudo = new pseudopotential::qso(fullname);
+	  break;
+	case pseudopotential::format::UPF1:
+	  pseudo = new pseudopotential::upf1(fullname, /*uniform_grid = */ true);
+	  break;
+	case pseudopotential::format::UPF2:
+	  pseudo = new pseudopotential::upf2(fullname, /*uniform_grid = */ true);
+	  break;
+	case pseudopotential::format::PSML:
+	  pseudo = new pseudopotential::psml(fullname, /*uniform_grid = */ true);
+	  break;
+	default:
+	  continue;
+	}
 	
-      getline(file, line);
+	std::string symbol = pseudo->symbol();
+	
+	delete pseudo;
+	
+	element_values vals;
 
-      while(true){
-	file >> symbol >> vals.file_path_ >> zz >> vals.lmax_ >> vals.llocal_ >> vals.spacing_ >> vals.radius_;
-
-	if(file.eof()) break;
+	vals.file_path_ = fullname;
+	vals.lmax_ = INVALID_L;
+	vals.llocal_ = INVALID_L;
+	vals.spacing_ = -1.0;
+	vals.radius_ = -1.0;
 
 	map_[symbol] = vals;
+
       }
-	  
+
     }
     
     bool has(const element & el) const {

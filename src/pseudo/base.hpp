@@ -24,7 +24,8 @@
 #include <rapidxml.hpp>
 #include <sstream>
 
-#define MAX_L 10 
+#define MAX_L 10
+#define INVALID_L 333
 
 namespace pseudopotential {
 
