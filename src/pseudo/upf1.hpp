@@ -55,6 +55,7 @@ namespace pseudopotential {
       getline(header, line);
       
       header >> symbol_;
+      symbol_ = element::trim(symbol_);
       getline(header, line);
       
       std::string pseudo_type;

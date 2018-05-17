@@ -36,8 +36,7 @@ namespace pseudopotential {
 
   public:
 
-    element(const std::string & symbol = "none"):symbol_(symbol){
-      trim(symbol_);
+    element(const std::string & symbol = "none"):symbol_(trim(symbol)){
       symbol_[0] = std::toupper(symbol_[0]);
       for(unsigned ii = 1; ii < symbol_.size(); ii++) symbol_[ii] = std::tolower(symbol_[ii]);
 
@@ -126,10 +125,14 @@ namespace pseudopotential {
       str.erase(str.find_last_not_of(chars) + 1);
       return str;
     }
- 
-    static std::string & trim(std::string& str, const std::string& chars = "\t\n\v\f\r "){
+
+  public:
+    
+    static std::string trim(std::string str, const std::string& chars = "\t\n\v\f\r "){
       return ltrim(rtrim(str, chars), chars);
     }
+    
+  private:
     
     std::string symbol_;
   

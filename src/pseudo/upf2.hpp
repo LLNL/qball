@@ -179,7 +179,7 @@ namespace pseudopotential {
     }
     
     std::string symbol() const {
-      return root_node_->first_node("PP_HEADER")->first_attribute("element")->value();
+      return element::trim(root_node_->first_node("PP_HEADER")->first_attribute("element")->value());
     }
 
     int atomic_number() const {

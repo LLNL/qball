@@ -128,7 +128,7 @@ namespace pseudopotential {
     }
     
     std::string symbol() const {
-      return spec_node_->first_attribute("atomic-label")->value();
+      return element::trim(spec_node_->first_attribute("atomic-label")->value());
     }
 
     int atomic_number() const {

@@ -84,7 +84,7 @@ namespace pseudopotential {
     }
     
     std::string symbol() const {
-      return root_node_->first_node("symbol")->value();
+      return element::trim(root_node_->first_node("symbol")->value());
     }
 
     int atomic_number() const {
