@@ -37,6 +37,20 @@ namespace pseudopotential {
 
   class set{
 
+  private:
+
+    struct element_values {
+      std::string file_path_;
+      int lmax_;
+      int llocal_;
+      double spacing_;
+      double radius_;
+    };
+
+    typedef std::map<std::string, element_values> element_map;
+    
+    element_map map_;
+    
   public:
     
     set(const std::string & dirname){
@@ -116,18 +130,34 @@ namespace pseudopotential {
       return map_.at(el.symbol()).radius_;
     }
 
-  private:
+    //Iterator interface
 
-    struct element_values {
-      std::string file_path_;
-      int lmax_;
-      int llocal_;
-      double spacing_;
-      double radius_;
+    class iterator {
+
+    private:
+      element_map::iterator map_it_;
+
+    public:
+      iterator(const element_map::iterator & map_it):map_it_(map_it){
+      }
+
+      iterator & operator++(){
+	++map_it_;
+	return *this;
+      }
+
+      friend bool operator!=(const iterator & a, const iterator & b){
+	return a.map_it_ != b.map_it_;
+      }
+      
+      element operator*(){
+	return element(map_it_->first);
+      }
+
     };
     
-    std::map<std::string, element_values> map_;
-
+    iterator begin(){ return iterator(map_.begin()); }
+    iterator end(){ return iterator(map_.end()); }
     
   };
 

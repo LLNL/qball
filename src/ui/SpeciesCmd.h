@@ -126,6 +126,13 @@ class SpeciesCmd : public Cmd
       }
 
       pseudopotential::set collection(dirname);
+
+      for(pseudopotential::set::iterator it = collection.begin(); it != collection.end(); ++it){
+	pseudopotential::element el = *it;
+	std::cout << el.symbol() << '\t' << collection.file_path(el) << std::endl;
+	collection.file_path(el);
+      }
+      
     }
       
     return 0;
