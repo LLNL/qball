@@ -1,0 +1,13 @@
+species collection sg15
+coordinates methyloxirane.xyz
+
+set cell 10 0 0 0 10 0 0 0 10
+set xc PBE
+set ecut 30 rydberg
+set wf_dyn PSDA
+set ecutprec 4 rydberg
+set threshold_scf 1.E-8 10
+
+randomize_wf
+
+run 0 200
