@@ -129,8 +129,36 @@ class SpeciesCmd : public Cmd
 
       for(pseudopotential::set::iterator it = collection.begin(); it != collection.end(); ++it){
 	pseudopotential::element el = *it;
-	std::cout << el.symbol() << '\t' << collection.file_path(el) << std::endl;
-	collection.file_path(el);
+
+	if ( ui->oncoutpe() ) cout << "  <!-- SpeciesCmd: defining species " << argv[1] << " as " << argv[2] << " -->" << endl;
+	
+	SpeciesReader sp_reader(s->ctxt_);
+	
+	Species* sp = new Species(s->ctxt_, el.symbol());
+	
+	try {
+	  sp_reader.readSpecies(*sp, collection.file_path(el));
+	  sp_reader.bcastSpecies(*sp);
+	  s->atoms.addSpecies(sp, el.symbol());
+	  
+	  if (sp->ultrasoft()) {
+	    s->ctrl.ultrasoft = true;
+	    s->wf.set_ultrasoft(true);
+	  }
+	  
+	  if (sp->nlcc()) {
+	    s->ctrl.nlcc = true;
+	  }
+	  
+	}
+	catch ( const SpeciesReaderException& e ) {
+	  cout << " SpeciesReaderException caught in SpeciesCmd" << endl;
+	  cout << " SpeciesReaderException: cannot define Species" << endl;
+	}
+	catch (...) {
+	  cout << " SpeciesCmd: cannot define Species" << endl;
+	}
+       
       }
       
     }
