@@ -61,7 +61,16 @@ class SpeciesCmd : public Cmd
     "     or: species collection <collection_name>\n\n"
     "   The species command defines a species name based on a file, or\n";
     "   if the 'collection' keyword is specified it will load a group of\n";
-    "   species. Valid options are 'sg15', 'HSCV_LDA' and 'HSCV_PBE'.\n";
+    "   species. Valid options are:\n";
+    "      sg15\n";
+    "      hscv_lda\n";
+    "      hscv_pbe\n";
+    "      pseudodojo_pbe\n";
+    "      pseudodojo_pbe_stringent\n";
+    "      pseudodojo_pbesol\n";
+    "      pseudodojo_pbesol_stringent\n";
+    "      pseudodojo_lda\n";
+    "      pseudodojo_lda_stringent\n";
   }
 
   int action(int argc, char **argv) {
@@ -120,6 +129,18 @@ class SpeciesCmd : public Cmd
 	dirname += "quantum-simulation.org/hscv/lda/";
       } else if(colname == "HSCV_PBE" || colname == "hscv_pbe") {
 	dirname += "quantum-simulation.org/hscv/pbe/";
+      } else if(colname == "pseudodojo_pbe" || colname == "PSEUDODOJO_PBE") {
+	dirname += "pseudo-dojo.org/nc-sr-04_pbe_standard/";
+      } else if(colname == "pseudodojo_pbe_stringent" || colname == "PSEUDODOJO_PBE_STRINGENT") {
+	dirname += "pseudo-dojo.org/nc-sr-04_pbe_stringent/";
+      } else if(colname == "pseudodojo_pbesol" || colname == "PSEUDODOJO_PBESOL") {
+	dirname += "pseudo-dojo.org/nc-sr-04_pbesol_standard/";
+      } else if(colname == "pseudodojo_pbesol_stringent" || colname == "PSEUDODOJO_PBESOL_STRINGENT") {
+	dirname += "pseudo-dojo.org/nc-sr-04_pbesol_stringent/";
+      } else if(colname == "pseudodojo_lda" || colname == "PSEUDODOJO_LDA") {
+	dirname += "pseudo-dojo.org/nc-sr-04_pw_standard/";
+      } else if(colname == "pseudodojo_lda_stringent" || colname == "PSEUDODOJO_LDA_STRINGENT") {
+	dirname += "pseudo-dojo.org/nc-sr-04_pw_stringent/";
       } else {
 	ui->error("Unknown species collection '" + colname + "'");
 	return 1;
