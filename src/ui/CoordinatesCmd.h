@@ -71,12 +71,6 @@ private:
 
     Format file_format = XYZ;   
     
-    
-    
-    
-
-    
-    
     string filename(argv[1]);
     
     // coordinates must be defined with either 2 or 3 arguments
