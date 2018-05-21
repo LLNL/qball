@@ -46,9 +46,9 @@ class LoaddenCmd : public Cmd {
 
   LoaddenCmd(Sample *sample) : s(sample) {};
 
-  char *name(void) const { return "loadden"; }
+  const char *name(void) const { return "loadden"; }
 
-  char *help_msg(void) const {
+  const char *help_msg(void) const {
     return 
     "\n loadden\n\n"
     " syntax: loadden filename \n\n"

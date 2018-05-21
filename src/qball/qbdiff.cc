@@ -62,11 +62,11 @@ int main(int argc, char** argv)
 
   rapidxml::xml_document<> docu1, docu2;
     
-  std::ifstream file1(filename1);
+  std::ifstream file1(filename1.c_str());
   std::vector<char> buffer1((istreambuf_iterator<char>(file1)), istreambuf_iterator<char>());
   docu1.parse<0>(buffer1.data());
   
-  std::ifstream file2(filename2);
+  std::ifstream file2(filename2.c_str());
   std::vector<char> buffer2((istreambuf_iterator<char>(file2)), istreambuf_iterator<char>());
   docu2.parse<0>(buffer2.data());
 

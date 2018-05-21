@@ -91,7 +91,7 @@ private:
       pos_unit_name = "bohr";
     }
     
-    std::ifstream file(filename);
+    std::ifstream file(filename.c_str());
 
     if(!file){
       ui->error("CoordinateCmd: Cannot open coordinates file '" + filename + "'.");
