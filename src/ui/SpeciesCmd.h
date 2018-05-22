@@ -125,22 +125,31 @@ class SpeciesCmd : public Cmd
 
       if(colname == "SG15" || colname == "sg15") {
 	dirname += "quantum-simulation.org/sg15/";
+
       } else if(colname == "HSCV_LDA" || colname == "hscv_lda") {
 	dirname += "quantum-simulation.org/hscv/lda/";
+	
       } else if(colname == "HSCV_PBE" || colname == "hscv_pbe") {
 	dirname += "quantum-simulation.org/hscv/pbe/";
+	
       } else if(colname == "pseudodojo_pbe" || colname == "PSEUDODOJO_PBE") {
 	dirname += "pseudo-dojo.org/nc-sr-04_pbe_standard/";
+	
       } else if(colname == "pseudodojo_pbe_stringent" || colname == "PSEUDODOJO_PBE_STRINGENT") {
 	dirname += "pseudo-dojo.org/nc-sr-04_pbe_stringent/";
+	
       } else if(colname == "pseudodojo_pbesol" || colname == "PSEUDODOJO_PBESOL") {
 	dirname += "pseudo-dojo.org/nc-sr-04_pbesol_standard/";
+	
       } else if(colname == "pseudodojo_pbesol_stringent" || colname == "PSEUDODOJO_PBESOL_STRINGENT") {
 	dirname += "pseudo-dojo.org/nc-sr-04_pbesol_stringent/";
+	
       } else if(colname == "pseudodojo_lda" || colname == "PSEUDODOJO_LDA") {
 	dirname += "pseudo-dojo.org/nc-sr-04_pw_standard/";
+	
       } else if(colname == "pseudodojo_lda_stringent" || colname == "PSEUDODOJO_LDA_STRINGENT") {
 	dirname += "pseudo-dojo.org/nc-sr-04_pw_stringent/";
+	
       } else {
 	ui->error("Unknown species collection '" + colname + "'");
 	return 1;
