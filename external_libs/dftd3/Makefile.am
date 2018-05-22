@@ -20,6 +20,8 @@
 
 noinst_LIBRARIES = libdftd3.a
 
+dftd3dir = $(pkgdatadir)/dftd3
+
 libdftd3_a_SOURCES =            \
 	api.f90                 \
 	common.f90              \
@@ -28,9 +30,26 @@ libdftd3_a_SOURCES =            \
 	sizes.f90               \
 	interface.f90
 
+dist_dftd3_DATA =               \
+	pars.dat
+
 interface.o: interface.f90 api.o
 api.o: api.f90 sizes.o core.o common.o
 core.o: core.f90 pars.o sizes.o common.o
 pars.o: pars.f90 common.o sizes.o
+
+check:
+	for f in $(dist_dftd3_DATA); do \
+	  if [ ! -e $$f -o $$f -ot $(srcdir)/$$f ]; then \
+	    cp $(srcdir)/$$f $$f; \
+	  fi \
+	done
+
+clean-local:
+	if [ -n "$(top_builddir)" -a "$(top_builddir)" != "$(top_srcdir)" ]; then \
+	  rm -f $(dist_dftd3_DATA); \
+	fi
+
+.PHONY: check
 
 CLEANFILES = *~ *.bak *.mod *.MOD *.il *.d *.pc* ifc*
