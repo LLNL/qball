@@ -37,6 +37,9 @@ contains
 
   subroutine init_pars()
 
+    integer :: ii
+    real(8) :: tmp1, tmp2, tmp3, tmp4, tmp5
+
     pars(      1:    100)=(/&
         & 0.30267000D+01,0.100D+01,0.100D+01,0.91180000D+00,0.91180000D+00&
         &,0.20835000D+01,0.200D+01,0.100D+01,0.00000000D+00,0.91180000D+00&
@@ -35663,6 +35666,24 @@ contains
         &,0.45528540D+03,0.482D+03,0.482D+03,0.39098000D+01,0.39098000D+01&
         &/)
 
+    open(unit = 77, file = SHARE_DIR//'/dftd3/pars.dat') 
+
+    do ii = 1, 161925, 5
+      tmp1 = pars(ii)
+      tmp2 = pars(ii + 1)
+      tmp3 = pars(ii + 2)
+      tmp4 = pars(ii + 3)
+      tmp5 = pars(ii + 4)
+      read(77, *) pars(ii), pars(ii + 1), pars(ii + 2), pars(ii + 3), pars(ii + 4)
+      if(tmp1 /= pars(ii)) stop "error"
+      if(tmp2 /= pars(ii + 1)) stop "error"
+      if(tmp3 /= pars(ii + 2)) stop "error"
+      if(tmp4 /= pars(ii + 3)) stop "error"
+      if(tmp5 /= pars(ii + 4)) stop "error"
+    end do
+    
+    close(unit = 77)
+    
   end subroutine init_pars
 
 end module dftd3_pars
