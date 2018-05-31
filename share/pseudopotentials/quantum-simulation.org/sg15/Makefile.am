@@ -18,6 +18,8 @@
 ## 02110-1301, USA.
 ##
 
+SUBDIRS = convergence
+
 sg15dir = $(pkgdatadir)/pseudopotentials/quantum-simulation.org/sg15
 
 dist_sg15_DATA =                      \

@@ -240,6 +240,7 @@ AC_CONFIG_FILES([Makefile
    		 share/pseudopotentials/quantum-simulation.org/hscv/lda/Makefile
    		 share/pseudopotentials/quantum-simulation.org/hscv/pbe/Makefile
  		 share/pseudopotentials/quantum-simulation.org/sg15/Makefile
+ 		 share/pseudopotentials/quantum-simulation.org/sg15/convergence/Makefile
                  src/Makefile
 		 src/math/Makefile
                  src/pseudo/Makefile
