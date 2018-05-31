@@ -11,3 +11,4 @@ install-sh
 missing
 src/Makefile.in
 testsuite/Makefile.in
+*~
