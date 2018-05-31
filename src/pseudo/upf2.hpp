@@ -42,6 +42,8 @@ namespace pseudopotential {
       pseudopotential::upf(uniform_grid),
       file_(filename.c_str()),
       buffer_((std::istreambuf_iterator<char>(file_)), std::istreambuf_iterator<char>()){
+
+      filename_ = filename;
       
       buffer_.push_back('\0');
       doc_.parse<0>(&buffer_[0]);
