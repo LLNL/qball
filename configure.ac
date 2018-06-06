@@ -109,6 +109,8 @@ if test x$HAVE_XERCES == xyes ; then
    LDFLAGS="$LDFLAGS $XERCES_LDFLAGS"
    LIBS="$LIBS $XERCES_LIBS"
    AC_DEFINE(HAVE_XERCES, 1, [have the Xerces-C library])
+else
+   AC_MSG_ERROR([Xerces C++ is required but it was not found. Specify valid prefix of Xerces C++ using --with-xerces-prefix=@<:@DIR@:>@ or provide include directory and linker flags using --with-xerces-inc and --with-xerces-lib])
 fi
 
 AC_DEFINE(ARCH, "autotools", [architecture])
