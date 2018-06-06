@@ -101,7 +101,7 @@ fi
 
 AC_MSG_NOTICE([
 ================================================================================
-  CHECKING FOR THE OPTIONAL XERCES-C LIBRARY (USED TO PARSE XML)
+  CHECKING FOR THE XERCES-C LIBRARY (USED TO PARSE XML)
 ================================================================================])
 AX_LIB_XERCES
 if test x$HAVE_XERCES == xyes ; then
