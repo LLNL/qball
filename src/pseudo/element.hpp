@@ -34,8 +34,13 @@ namespace pseudopotential {
   
   class element {
 
-  public:
+  private:
 
+    struct properties;
+    typedef std::map<std::string, properties> map_type;
+    
+  public:
+    
     element(const std::string & symbol = "none"):symbol_(trim(symbol)){
       symbol_[0] = std::toupper(symbol_[0]);
       for(unsigned ii = 1; ii < symbol_.size(); ii++) symbol_[ii] = std::tolower(symbol_[ii]);
@@ -43,6 +48,22 @@ namespace pseudopotential {
       map(); //make sure the map is initialized
     }
 
+    element(int atomic_number){
+
+      //special case: avoid ambiguity between isotopes
+      if(atomic_number == 1){
+	symbol_ = 'H';
+	return;
+      }
+      
+      for(map_type::iterator it = map().begin(); it != map().end(); ++it){
+	if(it->second.z_ == atomic_number) {
+	  symbol_ = it->first;
+	  break;
+	}
+      }
+    }
+    
     bool valid() const {
       return map().find(symbol_) != map().end();
     }
@@ -75,9 +96,9 @@ namespace pseudopotential {
       double vdw_radius_;
     };
     
-    static std::map<std::string, properties> & map(){
+    static map_type & map(){
       
-      static std::map<std::string, properties> map;
+      static map_type map;
 
       if(map.empty()){
 
