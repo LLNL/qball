@@ -48,6 +48,7 @@ using namespace std;
 #include <pseudo/qso.hpp>
 #include <pseudo/upf1.hpp>
 #include <pseudo/upf2.hpp>
+#include <pseudo/psp8.hpp>
 #include <pseudo/detect_format.hpp>
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -85,6 +86,10 @@ void SpeciesReader::readSpecies(Species& sp, const string uri){
     case pseudopotential::format::PSML:
       cout << "  <!--   format: PSML -->" << endl;
       pseudo = new pseudopotential::psml(uri, /*uniform_grid = */ true);
+      break;
+    case pseudopotential::format::PSP8:
+      cout << "  <!--   format: PSP8 -->" << endl;
+      pseudo = new pseudopotential::psp8(uri);
       break;
     default:
       Messages::fatal("unsupported format for pseudopotential file '" + uri + "'");

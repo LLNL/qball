@@ -56,7 +56,8 @@ namespace pseudopotential {
     PSF                        = 779,
     CPI                        = 780,
     FHI                        = 781,
-    HGH                        = 782
+    HGH                        = 782,
+    PSP8                       = 783
   };
 
   // these values match libxc convention
@@ -74,7 +75,9 @@ namespace pseudopotential {
     UNKNOWN                    =  -2,
     ANY                        =  -1,
     NONE                       =   0,
+    LDA_PZ                     =   9,
     LDA_PW                     =  12,
+    LDA_XC_TETER93             =  20,
     PBE                        = 130,
     PBE_SOL                    = 133,
     LYP                        = 131

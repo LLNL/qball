@@ -64,10 +64,12 @@ namespace pseudopotential {
     std::string extension = filename.substr(filename.find_last_of(".") + 1);
     std::transform(extension.begin(), extension.end(), extension.begin(), ::tolower);
 
-    if(extension == "psf") return pseudopotential::format::PSF;
-    if(extension == "cpi") return pseudopotential::format::CPI;
-    if(extension == "fhi") return pseudopotential::format::FHI;
-    if(extension == "hgh") return pseudopotential::format::HGH;
+    if(extension == "psp8") return pseudopotential::format::PSP8;
+    if(extension == "drh")  return pseudopotential::format::PSP8;
+    if(extension == "psf")  return pseudopotential::format::PSF;
+    if(extension == "cpi")  return pseudopotential::format::CPI;
+    if(extension == "fhi")  return pseudopotential::format::FHI;
+    if(extension == "hgh")  return pseudopotential::format::HGH;
     
     return pseudopotential::format::UNKNOWN;
   }

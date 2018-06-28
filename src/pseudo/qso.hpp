@@ -25,7 +25,9 @@
 #include <sstream>
 #include <iostream>
 
+#include "element.hpp"
 #include "base.hpp"
+
 #include <rapidxml.hpp>
 
 namespace pseudopotential {
