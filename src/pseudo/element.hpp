@@ -58,7 +58,7 @@ namespace pseudopotential {
       
       for(map_type::iterator it = map().begin(); it != map().end(); ++it){
 	if(it->second.z_ == atomic_number) {
-	  symbol_ = it->first;
+	  symbol_ = trim(it->first);
 	  break;
 	}
       }
@@ -99,7 +99,6 @@ namespace pseudopotential {
     static map_type & map(){
       
       static map_type map;
-
       if(map.empty()){
 
 	std::string filename = pseudopotential::share_directory::get() + "/pseudopotentials/elements.dat";

@@ -32,6 +32,7 @@
 #include "qso.hpp"
 #include "upf1.hpp"
 #include "upf2.hpp"
+#include "psp8.hpp"
 
 namespace pseudopotential {
 
@@ -67,10 +68,11 @@ namespace pseudopotential {
 	
 	if(format == pseudopotential::format::FILE_NOT_FOUND || format == pseudopotential::format::UNKNOWN) continue;
 
-
 	// we open the pseudo just to get the species symbol, this could be done in a better way
 	pseudopotential::base * pseudo = NULL;
- 
+
+	std::string symbol;
+   
 	switch(format){
 	case pseudopotential::format::QSO:
 	  pseudo = new pseudopotential::qso(fullname);
@@ -84,11 +86,20 @@ namespace pseudopotential {
 	case pseudopotential::format::PSML:
 	  pseudo = new pseudopotential::psml(fullname, /*uniform_grid = */ true);
 	  break;
+	case pseudopotential::format::PSP8:
+	  pseudo = new pseudopotential::psp8(fullname);
+	  break;
 	default:
-	  continue;
+	  //get the symbol from the name
+	  for(int ii = 0; ii < 3; ii++){
+	    char cc = filename[ii];
+	    bool is_letter = (cc >= 'a' && cc <= 'z') || (cc >= 'A' && cc <= 'Z');
+	    if(!is_letter) break;
+	    symbol.push_back(cc);
+	  }
 	}
-	
-	std::string symbol = pseudo->symbol();
+
+	if(pseudo) symbol = pseudo->symbol();
 	
 	delete pseudo;
 	
@@ -104,6 +115,37 @@ namespace pseudopotential {
 
       }
 
+      std::ifstream defaults_file((dirname + "/set_defaults").c_str() );
+
+      if(defaults_file){
+	std::string line;
+
+	//first line are comments
+	getline(defaults_file, line);
+
+	while(true){
+	  std::string symbol;
+	  defaults_file >> symbol;
+	  if(defaults_file.eof()) break;
+
+	  if(has(symbol)){
+	    int z;
+	    std::string fname;
+	    
+	    defaults_file >> fname;
+	    defaults_file >> z;
+	    defaults_file >> map_[symbol].lmax_;
+	    defaults_file >> map_[symbol].llocal_;
+	    defaults_file >> map_[symbol].spacing_;
+	    defaults_file >> map_[symbol].radius_;
+	  }
+
+	  getline(defaults_file, line);
+	}
+	
+	defaults_file.close();
+      }      
+      
     }
     
     bool has(const element & el) const {

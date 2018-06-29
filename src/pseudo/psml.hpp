@@ -24,6 +24,7 @@
 #include <cassert>
 #include <sstream>
 #include <iostream>
+#include <cmath>
 
 #include "anygrid.hpp"
 #include "base.hpp"
