@@ -105,7 +105,6 @@ noinst_HEADERS =                            \
 	Symmetry.h                          \
 	SymmetrySet.h                       \
 	TDEULERWavefunctionStepper.h        \
-	TestHandler.h                       \
 	Timer.h                             \
 	TorsionConstraint.h                 \
 	Unit.h                              \
