@@ -29,7 +29,6 @@
 #include <config.h>
 
 #include "LoadCmd.h"
-#include <qball/SampleReader.h>
 #include <qball/Sample.h>
 #include <qball/Timer.h>
 #include <qball/Context.h>
@@ -664,53 +663,7 @@ int LoadCmd::action(int argc, char **argv) {
     }
   /////  XML CHECKPOINTING  /////
   else {
-
-    if ( ui->oncoutpe() )
-      cout << " <!-- LoadCmd: loading from " << filename << " -->" << endl;
-    
-    if (!s->wf.hasdata())
-      s->wf.set_hasdata(true);
-    
-    SampleReader s_reader(s->ctxt_);
-  
-    if ( ui->oncoutpe() )
-      cout << " <!--" << endl;
-    
-    try {
-      s_reader.readSample(*s,filename,serial);
-    }
-    catch ( const SampleReaderException& e ) {
-      cout << " SampleReaderException caught in LoadCmd:" << endl;
-      cout << e.msg << endl;
-    }
-    catch (...) {
-      cout << " LoadCmd: cannot load Sample" << endl;
-    }
-    s->ctxt_.barrier();
-
-    // If only <atomset> was read, set nel for the wavefunction
-    //cout << " LoadCmd: atoms.nel() = " << s->atoms.nel() << endl;
-    //cout << " LoadCmd: wf.nel() =    " << s->wf.nel() << endl;
-    if ( s->wf.nel() != s->atoms.nel() ) {
-      s->wf.set_nel(s->atoms.nel());
-      s->wf.update_occ(0.0,0);
-    }
-    //cout << " LoadCmd: atoms.nel() = " << s->atoms.nel() << endl;
-    //cout << " LoadCmd: wf.nel() =    " << s->wf.nel() << endl;
-
-    if ( ui->oncoutpe() )
-      cout << " -->" << endl;
-
-    if (s->ctrl.tddft_involved)
-    {
-       string hamwffile = filestr + "hamwf";
-       if ( s->hamil_wf == 0 ) {
-          s->hamil_wf = new Wavefunction(s->wf);
-          (*s->hamil_wf) = s->wf;
-          (*s->hamil_wf).update_occ(0.0,0);
-       }
-    }
-    
+    if( ui->oncoutpe() ) ui->error("LoadCmd: XML checkpointing is deprecated.");
   }
 
   if (s->ctrl.extra_memory >= 3)

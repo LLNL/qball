@@ -15,7 +15,6 @@ noinst_HEADERS =                            \
 	AngleConstraint.h                   \
 	Atom.h                              \
 	AtomSet.h                           \
-	AtomSetHandler.h                    \
 	Base64Transcoder.h                  \
 	Basis.h                             \
 	BasisMapping.h                      \
@@ -79,8 +78,6 @@ noinst_HEADERS =                            \
 	readTSC.h                           \
 	release.h                           \
 	Sample.h                            \
-	SampleHandler.h                     \
-	SampleReader.h                      \
 	SampleStepper.h                     \
 	SampleWriter.h                      \
 	SDAIonicStepper.h                   \
@@ -111,10 +108,8 @@ noinst_HEADERS =                            \
 	UnitCell.h                          \
 	uuid_str.h                          \
 	Wavefunction.h                      \
-	WavefunctionHandler.h               \
 	WavefunctionStepper.h               \
-	XCPotential.h                       \
-	XMLGFPreprocessor.h
+	XCPotential.h
 
 libqbLink_a_SOURCES =                        \
 	AtomSet.cc                           \
@@ -140,13 +135,8 @@ libqbLink_a_SOURCES =                        \
 	SpeciesHandler.cc                    \
 	XCPotential.cc                       \
 	NonLocalPotential.cc                 \
-	SampleReader.cc                      \
 	SampleWriter.cc                      \
 	StructuredDocumentHandler.cc         \
-	SampleHandler.cc                     \
-	AtomSetHandler.cc                    \
-	WavefunctionHandler.cc               \
-	XMLGFPreprocessor.cc                 \
 	Base64Transcoder.cc                  \
 	CPSampleStepper.cc                   \
 	BOSampleStepper.cc                   \

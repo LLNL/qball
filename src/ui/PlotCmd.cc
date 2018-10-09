@@ -40,7 +40,6 @@
 
 #include <qball/Context.h>
 #include <qball/Sample.h>
-#include <qball/SampleReader.h>
 #include <qball/Basis.h>
 #include <qball/FourierTransform.h>
 #include <qball/SlaterDet.h>
