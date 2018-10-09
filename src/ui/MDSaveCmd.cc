@@ -30,7 +30,6 @@
 
 
 #include "MDSaveCmd.h"
-#include <qball/SampleWriter.h>
 #include "fstream"
 #include <qball/isodate.h>
 #include <qball/release.h>

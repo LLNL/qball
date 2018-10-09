@@ -30,7 +30,6 @@
 
 
 #include "SaveCmd.h"
-#include <qball/SampleWriter.h>
 #include "fstream"
 #include <qball/isodate.h>
 #include <qball/release.h>
@@ -487,10 +486,7 @@ int SaveCmd::action(int argc, char **argv) {
 
   // xml output
   else if (encoding == "xml" ) {
-    SampleWriter swriter(s->ctxt_);
-    string description = string(" Created ") + isodate() +
-      string(" by qbox-") + release() + string(" ");
-    swriter.writeSample(*s, filename, description, base64, atomsonly, serial);
+    if( ui->oncoutpe() ) ui->error("SaveCmd: XML checkpointing is deprecated.");
   }
   else if (encoding == "casino" ) {
     // need to recalculate energy from wavefunction

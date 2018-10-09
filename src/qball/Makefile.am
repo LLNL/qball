@@ -79,7 +79,6 @@ noinst_HEADERS =                            \
 	release.h                           \
 	Sample.h                            \
 	SampleStepper.h                     \
-	SampleWriter.h                      \
 	SDAIonicStepper.h                   \
 	SDCellStepper.h                     \
 	SDIonicStepper.h                    \
@@ -135,7 +134,6 @@ libqbLink_a_SOURCES =                        \
 	SpeciesHandler.cc                    \
 	XCPotential.cc                       \
 	NonLocalPotential.cc                 \
-	SampleWriter.cc                      \
 	StructuredDocumentHandler.cc         \
 	Base64Transcoder.cc                  \
 	CPSampleStepper.cc                   \
