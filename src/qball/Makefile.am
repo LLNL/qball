@@ -241,3 +241,5 @@ xmlget_SOURCES =                             \
 
 xmlextract_SOURCES =                         \
 	xmlextract.cc
+
+qball$(EXEEXT): libqbLink.a
