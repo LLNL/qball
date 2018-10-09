@@ -248,7 +248,7 @@ echo " to more than two hours."
 echo
 
 if [ "${local_run}" == "yes" ]; then
-    bin_directory=`pwd`/../src/qball
+    bin_directory=`pwd`/../src/main
 else
     bin_directory=$prefix/bin
 fi

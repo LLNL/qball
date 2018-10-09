@@ -36,7 +36,7 @@
 #include<sstream>
 #include<stdlib.h>
 
-#include "Sample.h"
+#include <qball/Sample.h>
 
 // Iprint variable is used to control the output of eigenvalues and occupation
 // numbers (which can be substantial for many states and/or k-points)

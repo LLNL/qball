@@ -4,12 +4,6 @@
 
 include $(srcdir)/../common-rules.make
 
-bin_PROGRAMS  =                             \
-	qball                               \
-	qball-nruns                         \
-	qball-setupkpts                     \
-	qballdiff
-
 lib_LIBRARIES =                             \
 	libqbLink.a
 
@@ -110,8 +104,6 @@ noinst_HEADERS =                            \
 	StrX.h                              \
 	Symmetry.h                          \
 	SymmetrySet.h                       \
-	SymOp.h                             \
-	SymOpSet.h                          \
 	TDEULERWavefunctionStepper.h        \
 	TestHandler.h                       \
 	Timer.h                             \
@@ -209,30 +201,3 @@ libqbLink_a_SOURCES =                        \
 	SelfConsistentPotential.cc           \
 	clooper.c                            \
 	qbLink.cc
-
-qball_SOURCES =                              \
-	qb.cc
-
-qball_LDADD =                                \
-	$(all_LIBS)
-
-
-qball_nruns_SOURCES =                        \
-	qb-nruns.cc
-
-qball_nruns_LDADD =                          \
-	$(all_LIBS)
-
-qball_setupkpts_SOURCES =                    \
-	qb-setupkpts.cc                      \
-	SymOpSet.cc                          \
-	SymOp.cc
-
-qball_setupkpts_LDADD =                      \
-	$(all_LIBS)
-
-qballdiff_SOURCES =                          \
-	qbdiff.cc
-
-
-qball$(EXEEXT): libqbLink.a

@@ -39,7 +39,7 @@ using namespace std;
 #include <ui/UserInterface.h>
 #include <qball/Sample.h>
 #include <qball/Species.h>
-#include "MMSpecies.h"
+#include <qball/MMSpecies.h>
 #include <qball/Atom.h>
 
 class LockCmd : public Cmd {

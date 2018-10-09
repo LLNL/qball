@@ -37,7 +37,7 @@
 #include<sstream>
 #include<stdlib.h>
 
-#include "Sample.h"
+#include <qball/Sample.h>
 #include "StandardVar.h"
 
 // AS: this class implements tddt as status variable

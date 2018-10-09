@@ -36,8 +36,8 @@
 #include<sstream>
 #include<stdlib.h>
 
-#include "Sample.h"
-#include "Unit.h"
+#include <qball/Sample.h>
+#include <qball/Unit.h>
 
 class Ecut : public StandardVar {
   Sample *s;

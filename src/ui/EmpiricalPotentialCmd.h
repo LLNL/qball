@@ -38,7 +38,7 @@ using namespace std;
 
 #include <ui/UserInterface.h>
 #include <qball/Sample.h>
-#include "EmpiricalPotential.h"
+#include <qball/EmpiricalPotential.h>
 
 class EmpiricalPotentialCmd : public Cmd {
   public:

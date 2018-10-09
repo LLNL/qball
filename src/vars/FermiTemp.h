@@ -40,7 +40,7 @@
 #include<sstream>
 #include<stdlib.h>
 
-#include "Sample.h"
+#include <qball/Sample.h>
 
 class FermiTemp : public Var {
   Sample *s;

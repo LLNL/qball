@@ -36,8 +36,8 @@
 #include<sstream>
 #include<stdlib.h>
 
-#include "Sample.h"
-#include "Unit.h"
+#include <qball/Sample.h>
+#include <qball/Unit.h>
 #include "StandardVar.h"
 
 class Cell : public StandardVar {

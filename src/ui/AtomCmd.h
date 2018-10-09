@@ -38,7 +38,7 @@ using namespace std;
 
 #include <ui/UserInterface.h>
 #include <qball/Sample.h>
-#include "Unit.h"
+#include <qball/Unit.h>
 
 class AtomCmd : public Cmd
 {

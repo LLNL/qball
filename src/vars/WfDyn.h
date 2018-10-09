@@ -36,9 +36,9 @@
 #include<sstream>
 #include<stdlib.h>
 
-#include "Sample.h"
-#include "Wavefunction.h"
-#include "SlaterDet.h"
+#include <qball/Sample.h>
+#include <qball/Wavefunction.h>
+#include <qball/SlaterDet.h>
 
 class WfDyn : public Var
 {

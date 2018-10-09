@@ -248,6 +248,7 @@ AC_CONFIG_FILES([Makefile
 		 src/ui/Makefile
 		 src/vars/Makefile
 		 src/qball/Makefile
+ 		 src/main/Makefile
 		 src/tests/Makefile
                  testsuite/Makefile])
 

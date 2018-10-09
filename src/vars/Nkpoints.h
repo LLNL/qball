@@ -36,7 +36,7 @@
 #include<sstream>
 #include<stdlib.h>
 
-#include "Sample.h"
+#include <qball/Sample.h>
 
 // Nkpoints variable is used solely to avoid Wavefunction deallocate and allocate calls 
 // after each Kpoint is defined, which can be quite expensive on large platforms like BG/L

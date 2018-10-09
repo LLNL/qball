@@ -37,7 +37,7 @@
 #include<sstream>
 #include<stdlib.h>
 
-#include "Sample.h"
+#include <qball/Sample.h>
 
 // AS: this class implements na_overlap_min and na_overlap_max as status variables
 // AS: they specify the minimum and maximum band index to calculate (non-adiabatic) overlaps for

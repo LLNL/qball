@@ -37,7 +37,7 @@
 #include<sstream>
 #include<stdlib.h>
 
-#include "Sample.h"
+#include <qball/Sample.h>
 
 // AS: this class implements a status variable to force complex basis [even if kpoint == (0,0,0)]
 // AS: necessary for time propagation of wave functions

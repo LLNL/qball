@@ -37,7 +37,7 @@
 #include<sstream>
 #include<stdlib.h>
 
-#include "Sample.h"
+#include <qball/Sample.h>
 
 // AS: this class implements a status variable to control the calculation of the total energy
 // AS: also during non-selfconsistent electronic steps

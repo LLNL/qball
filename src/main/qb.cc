@@ -44,14 +44,14 @@ using namespace std;
 #endif
 
 #include "omp.h"
-#include "isodate.h"
-#include "release.h"
-#include "qbox_xmlns.h"
-#include "Context.h"
+#include <qball/isodate.h>
+#include <qball/release.h>
+#include <qball/qbox_xmlns.h>
+#include <qball/Context.h>
 #include <ui/UserInterface.h>
-#include "Sample.h"
-#include "Timer.h"
-#include "profile.h"
+#include <qball/Sample.h>
+#include <qball/Timer.h>
+#include <qball/profile.h>
 
 #include <ui/AtomCmd.h>
 #include <ui/MMAtomCmd.h>

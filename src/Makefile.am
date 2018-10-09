@@ -5,4 +5,5 @@ SUBDIRS =              \
 	ui             \
 	vars           \
 	qball          \
+	main           \
 	tests

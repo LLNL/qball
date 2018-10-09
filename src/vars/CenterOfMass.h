@@ -35,7 +35,7 @@
 #include <iostream>
 #include <cstdlib>
 
-#include "Sample.h"
+#include <qball/Sample.h>
 
 // CenterOfMass variable determines whether or not to subtract the
 // center of mass velocity from particle velocities.  The default

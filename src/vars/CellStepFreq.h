@@ -36,7 +36,7 @@
 #include<sstream>
 #include<stdlib.h>
 
-#include "Sample.h"
+#include <qball/Sample.h>
 
 class CellStepFreq : public Var {
   Sample *s;

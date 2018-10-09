@@ -30,9 +30,9 @@
 #include <config.h>
 
 #include <ui/UserInterface.h>
-#include "Context.h"
-#include "Sample.h"
-#include "AtomSet.h"
+#include <qball/Context.h>
+#include <qball/Sample.h>
+#include <qball/AtomSet.h>
 #include "SymOpSet.h"
 #include "SymOp.h"
 
@@ -42,7 +42,7 @@
 #include <vars/Cell.h>
 #include <vars/RefCell.h>
 #include <qball/UnitCell.h>
-#include "Basis.h"
+#include <qball/Basis.h>
 
 #include <cassert>
 #include <cstdlib>

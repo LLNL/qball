@@ -33,7 +33,7 @@
 #include <vector>
 using namespace std;
 
-#include "qbLink.h"
+#include <qball/qbLink.h>
 
 int main(int argc, char **argv) {
 

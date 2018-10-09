@@ -36,10 +36,10 @@
 #include<sstream>
 #include<stdlib.h>
 
-#include "Sample.h"
-#include "ChargeDensity.h"
-#include "FourierTransform.h"
-#include "Context.h"
+#include <qball/Sample.h>
+#include <qball/ChargeDensity.h>
+#include <qball/FourierTransform.h>
+#include <qball/Context.h>
 
 class Nrowmax : public Var
 {

@@ -36,7 +36,7 @@
 #include<sstream>
 #include<stdlib.h>
 
-#include "Sample.h"
+#include <qball/Sample.h>
 
 class HugoniostatVar : public Var {
   Sample *s;

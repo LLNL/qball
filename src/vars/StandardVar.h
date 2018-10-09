@@ -33,7 +33,7 @@
 #define STANDARDVAR_H
 
 #include <string>
-#include "Dimensions.h"
+#include <qball/Dimensions.h>
 
 using namespace std;
 

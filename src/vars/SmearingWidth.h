@@ -36,7 +36,7 @@
 #include<sstream>
 #include<stdlib.h>
 
-#include "Sample.h"
+#include <qball/Sample.h>
 #include "StandardVar.h"
 
 class SmearingWidth : public StandardVar {

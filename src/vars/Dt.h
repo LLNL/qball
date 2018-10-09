@@ -37,7 +37,7 @@
 #include<stdlib.h>
 
 #include "StandardVar.h"
-#include "Sample.h"
+#include <qball/Sample.h>
 
 class Dt : public StandardVar
 {
