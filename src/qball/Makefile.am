@@ -8,9 +8,7 @@ bin_PROGRAMS  =                             \
 	qball                               \
 	qball-nruns                         \
 	qball-setupkpts                     \
-	qballdiff                           \
-	xmlget                              \
-	xmlextract
+	qballdiff
 
 lib_LIBRARIES =                             \
 	libqbLink.a
@@ -236,10 +234,5 @@ qball_setupkpts_LDADD =                      \
 qballdiff_SOURCES =                          \
 	qbdiff.cc
 
-xmlget_SOURCES =                             \
-	xmlget.cc
-
-xmlextract_SOURCES =                         \
-	xmlextract.cc
 
 qball$(EXEEXT): libqbLink.a
