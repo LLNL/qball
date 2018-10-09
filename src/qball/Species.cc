@@ -1604,7 +1604,7 @@ double Species::rhopsg( double g )
 ////////////////////////////////////////////////////////////////////////////////
 ostream& operator << ( ostream &os, Species &s )
 {
-  // XML output of species
+  // Output of species
   // If the uri is known, use href to refer to it
   if ( s.uri() != "" )
   {

@@ -91,13 +91,9 @@ noinst_HEADERS =                            \
 	SORKTDWavefunctionStepper.h         \
 	SOTDWavefunctionStepper.h           \
 	Species.h                           \
-	SpeciesHandler.h                    \
 	SpeciesReader.h                     \
 	SphericalIntegration.h              \
-	StructuredDocumentHandler.h         \
 	StructureFactor.h                   \
-	StructureHandler.h                  \
-	StrX.h                              \
 	Symmetry.h                          \
 	SymmetrySet.h                       \
 	TDEULERWavefunctionStepper.h        \
@@ -131,10 +127,8 @@ libqbLink_a_SOURCES =                        \
 	StructureFactor.cc                   \
 	ChargeDensity.cc                     \
 	SpeciesReader.cc                     \
-	SpeciesHandler.cc                    \
 	XCPotential.cc                       \
 	NonLocalPotential.cc                 \
-	StructuredDocumentHandler.cc         \
 	Base64Transcoder.cc                  \
 	CPSampleStepper.cc                   \
 	BOSampleStepper.cc                   \
