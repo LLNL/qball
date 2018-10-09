@@ -251,7 +251,6 @@ C++ compiler     :  $CXX $CXXFLAGS
 Fortran compiler :  $FC $FCFLAGS
 Big endian       :  $acx_bigendian
 MPI              :  $acx_mpi_ok
-Xerces-C         :  $HAVE_XERCES
 FFT library      :  $fft_lib
 BLAS             :  $LIBS_BLAS
 LAPACK           :  $LIBS_LAPACK
