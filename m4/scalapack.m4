@@ -56,8 +56,7 @@ if test x"$acx_scalapack_ok" = xyes; then
   AC_DEFINE(HAVE_SCALAPACK,1,[Defined if you have SCALAPACK library.])
 else
   if test "x$acx_blacs_ok" == xyes; then
-  AC_MSG_WARN([Could not find Scalapack library. 
-               *** Will compile without Scalapack support])
+  AC_MSG_ERROR([Could not find the Scalapack library.])
   fi
 fi
 ])dnl ACX_SCALAPACK

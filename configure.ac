@@ -170,7 +170,7 @@ ACX_LAPACK([], AC_MSG_ERROR([could not find required LAPACK library]))
 
 AC_MSG_NOTICE([
 ================================================================================
-  CHECKING FOR OPTIONAL PARALLEL LINEAR ALGEBRA LIBRARIES (BLACS AND SCALAPACK)
+  CHECKING FOR REQUIRED PARALLEL LINEAR ALGEBRA LIBRARIES (BLACS AND SCALAPACK)
 ================================================================================])
 
 ACX_BLACS

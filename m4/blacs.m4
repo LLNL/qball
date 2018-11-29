@@ -56,8 +56,7 @@ dnl Finally, execute ACTION-IF-FOUND/ACTION-IF-NOT-FOUND:
 if test x"$acx_blacs_ok" = xyes; then
   AC_DEFINE(HAVE_BLACS,1,[Defined if you have BLACS library.])
 else
-  AC_MSG_WARN([Could not find BLACS library (required for ScaLAPACK). 
-               *** Will compile without ScaLAPACK support])
+  AC_MSG_ERROR([Could not find the BLACS library (part of scalapack)])
   LIBS_BLACS=""
 fi
 
