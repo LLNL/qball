@@ -40,6 +40,7 @@
 #include "StructureFactor.h"
 #include "SelfConsistentPotential.h"
 #include "Timer.h"
+#include "VectorPotential.h"
 using namespace std;
 
 class Sample;
@@ -70,6 +71,7 @@ class EnergyFunctional
   vector<vector<FourierTransform*> > ft;
   StructureFactor sf;
   XCPotential* xcp;
+  VectorPotential * vp;
   EnthalpyFunctional* epvf;
   vector<vector<NonLocalPotential*> > nlp;
   vector<vector<ConfinementPotential*> > cfp; // cfp[ispin][ikp]

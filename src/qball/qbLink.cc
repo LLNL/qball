@@ -162,6 +162,7 @@ using namespace std;
 #include <vars/NetCharge.h>
 #include <vars/EsmBC.h>
 #include <vars/EsmW.h>
+#include <vars/VectorPotentialVar.h>
 #include <vars/VdW.h>
 
 #ifdef USE_JAGGEMM
@@ -424,6 +425,7 @@ void qbLink::init(void) {
   ui->addVar(new NetCharge(s));
   ui->addVar(new EsmBC(s));
   ui->addVar(new EsmW(s));
+  ui->addVar(new VectorPotentialVar(s));
   ui->addVar(new VdW(s));
 
 #ifdef USE_JAGGEMM

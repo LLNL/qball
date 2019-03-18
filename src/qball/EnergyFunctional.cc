@@ -262,8 +262,13 @@ EnergyFunctional::EnergyFunctional(const Sample& s, const Wavefunction& wf, Char
 
     dftd3_init(&functional);
   }
-  
+
+  if(norm(s.ctrl.initial_vector_potential) > 1e-15){
+    vp = new VectorPotential(s.ctrl.initial_vector_potential);
+  }
+
 }
+
 
 ////////////////////////////////////////////////////////////////////////////////
 EnergyFunctional::~EnergyFunctional(void) {
@@ -287,6 +292,8 @@ EnergyFunctional::~EnergyFunctional(void) {
   if (s_.ctrl.tddft_involved)
      delete hamil_cd_;
   hamil_cd_ = 0;
+
+  if(vp) delete vp;
 }
 ////////////////////////////////////////////////////////////////////////////////
 void EnergyFunctional::update_hamiltonian(void)

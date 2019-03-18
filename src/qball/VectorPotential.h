@@ -27,14 +27,27 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include <config.h>
+#include <math/d3vector.h>
 
 #ifndef VECTORPOTENTIAL_H
 #define VECTORPOTENTIAL_H
 
 using namespace std;
 
-class VectorPotential
-{
+class VectorPotential {
+
+public:
+  VectorPotential(const D3vector & initial_value):
+    value_(initial_value)
+  {
+  }
+
+  const D3vector & value() const {
+    return value_;
+  }
+  
+private:
+  D3vector value_;
 
 };
 #endif

@@ -34,6 +34,8 @@
 #include <string>
 #include <vector>
 
+#include <math/d3vector.h>
+
 struct Control
 {
   // control variables
@@ -133,6 +135,9 @@ struct Control
   double fcp_th_width;
   double fcp_pmass;
   double fcp_mu;
+
+  D3vector initial_vector_potential;
+
 };
 #endif
 
