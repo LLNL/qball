@@ -512,33 +512,33 @@ void ChargeDensity::update_density() {
     
     // check integral of charge density
     // compute Fourier coefficients of the charge density
-    double sum = 0.0;
+    nelectrons_ = 0.0;
     const int rhor_size = rhor[ispin].size();
     const double *const prhor = &rhor[ispin][0];
     tmap["charge_integral"].start();
     //#pragma omp parallel for
     for ( int i = 0; i < rhor_size; i++ ) {
       const double prh = prhor[i];
-      sum += prh;
+      nelectrons_ += prh;
       rhotmp[i] = complex<double>(omega * prh, 0.0);
     }
-    sum *= omega / vft_->np012();
+    nelectrons_ *= omega / vft_->np012();
     
     if ( wf_.spinactive(ispin)) {
       wf_.spincontext(ispin)->dsum('c',1,1,&sum,1);
       if ( wf_.spincontext(ispin)->myproc() == 0 ) {
         cout.setf(ios::fixed,ios::floatfield);
         cout.setf(ios::right,ios::adjustfield);
-        cout << "  <!-- total_electronic_charge: " << setprecision(8) << sum 
+        cout << "  <!-- total_electronic_charge: " << setprecision(8) << nelectrons_ 
              << ", spin = " << ispin << " -->" << endl;
         // print out warning if total charge is not an integer value
         const double chgthresh = 1.E-7;
-        int chgint = (int) (sum+chgthresh);
-        double nonint = abs( sum - (double) chgint);
+        int chgint = (int) (nelectrons_+chgthresh);
+        double nonint = abs( nelectrons_ - (double) chgint);
 	if (nonint > chgthresh && !tddft_involved_) {
 	  cout << "<WARNING>"<< endl;
           cout << "  Total electronic charge has non-integer value!" << endl;
-	  cout << "    sum     = " << sum << endl;
+	  cout << "    sum     = " << nelectrons_ << endl;
 	  cout << "    chgint  = " << chgint << endl;
 	  cout << "    nonint  = " << nonint << endl;
           cout << "</WARNING>" << endl;	  
