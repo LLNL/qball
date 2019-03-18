@@ -1634,9 +1634,19 @@ double EnergyFunctional::energy(Wavefunction& psi, bool compute_hpsi, Wavefuncti
 
             ComplexMatrix& cp = dwf.sd(ispin,ikp)->c();
             const int mloc = cp.mloc();
-            const double* kpg2 = wfbasis.kpg2_ptr();
+            double* kpg2 = const_cast<double *>(wfbasis.kpg2_ptr());
             const int ngwloc = wfbasis.localsize();
-          
+
+	    if(vp){
+	      kpg2 = new double[ngwloc];
+	      for(int ig = 0; ig < ngwloc; ig++ ) {
+		kpg2[ig] += vp->value2();
+		kpg2[ig] += vp->value()[0]*vbasis_->kpgx_ptr(0)[ig];
+		kpg2[ig] += vp->value()[1]*vbasis_->kpgx_ptr(1)[ig];
+		kpg2[ig] += vp->value()[2]*vbasis_->kpgx_ptr(2)[ig];
+	      }
+	    }
+	    
             // Laplacian
             if ( use_confinement ) {
               for ( int n = 0; n < sd.nstloc(); n++ ) {
@@ -1670,6 +1680,9 @@ double EnergyFunctional::energy(Wavefunction& psi, bool compute_hpsi, Wavefuncti
                 }
               }
             }
+
+	    if(vp) delete [] kpg2;
+	    
             sd.rs_mul_add(*ft[ispin][ikp], &v_r[ispin][0], sdp);
           }
         }

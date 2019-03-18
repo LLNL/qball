@@ -38,17 +38,23 @@ class VectorPotential {
 
 public:
   VectorPotential(const D3vector & initial_value):
-    value_(initial_value)
+    value_(initial_value),
+    value2_(norm(value_))
   {
   }
 
   const D3vector & value() const {
     return value_;
   }
+
+  const double & value2() const {
+    return value2_;
+  }
   
 private:
   D3vector value_;
-
+  double value2_;
+  
 };
 #endif
 
