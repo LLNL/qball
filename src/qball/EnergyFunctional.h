@@ -71,7 +71,6 @@ class EnergyFunctional
   vector<vector<FourierTransform*> > ft;
   StructureFactor sf;
   XCPotential* xcp;
-  VectorPotential * vp;
   EnthalpyFunctional* epvf;
   vector<vector<NonLocalPotential*> > nlp;
   vector<vector<ConfinementPotential*> > cfp; // cfp[ispin][ikp]
@@ -101,6 +100,7 @@ class EnergyFunctional
 
   public:
 
+  VectorPotential * vp;
   vector<vector<double> > v_r;
   vector<vector<complex<double> > > vxc_g;
   vector<vector<complex<double> > > veff_g;
