@@ -263,6 +263,7 @@ EnergyFunctional::EnergyFunctional(const Sample& s, const Wavefunction& wf, Char
     dftd3_init(&functional);
   }
 
+  vp = NULL;
   if(norm(s.ctrl.initial_vector_potential) > 1e-15){
     vp = new VectorPotential(s.ctrl.initial_vector_potential);
   }
