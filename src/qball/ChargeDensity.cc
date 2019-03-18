@@ -525,7 +525,7 @@ void ChargeDensity::update_density() {
     nelectrons_ *= omega / vft_->np012();
     
     if ( wf_.spinactive(ispin)) {
-      wf_.spincontext(ispin)->dsum('c',1,1,&sum,1);
+      wf_.spincontext(ispin)->dsum('c',1,1,&nelectrons_,1);
       if ( wf_.spincontext(ispin)->myproc() == 0 ) {
         cout.setf(ios::fixed,ios::floatfield);
         cout.setf(ios::right,ios::adjustfield);
