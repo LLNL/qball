@@ -1642,9 +1642,9 @@ double EnergyFunctional::energy(Wavefunction& psi, bool compute_hpsi, Wavefuncti
 	      kpg2 = new double[ngwloc];
 	      for(int ig = 0; ig < ngwloc; ig++ ) {
 		kpg2[ig] = wfbasis.kpg2_ptr()[ig] + vp->value2();
-		kpg2[ig] += vp->value()[0]*wfbasis.kpgx_ptr(0)[ig];
-		kpg2[ig] += vp->value()[1]*wfbasis.kpgx_ptr(1)[ig];
-		kpg2[ig] += vp->value()[2]*wfbasis.kpgx_ptr(2)[ig];
+		kpg2[ig] -= vp->value()[0]*wfbasis.kpgx_ptr(0)[ig];
+		kpg2[ig] -= vp->value()[1]*wfbasis.kpgx_ptr(1)[ig];
+		kpg2[ig] -= vp->value()[2]*wfbasis.kpgx_ptr(2)[ig];
 	      }
 	    }
 	    
