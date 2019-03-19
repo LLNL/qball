@@ -44,7 +44,7 @@ public:
   {
   }
 
-  const double * get_kpgpa(const Basis & basis) const {
+  double * get_kpgpa(const Basis & basis) const {
     const double * kpgpa2 = get_kpgpa2(basis);
     double * kpgpa = new double[basis.localsize()];
     for(int ig = 0; ig < basis.localsize(); ig++){
@@ -54,7 +54,7 @@ public:
     return kpgpa;
   }
   
-  const double * get_kpgpa2(const Basis & basis) const {
+  double * get_kpgpa2(const Basis & basis) const {
     double * kpgpa2 = new double[basis.localsize()];
     for(int ig = 0; ig < basis.localsize(); ig++){
       kpgpa2[ig] = basis.kpg2_ptr()[ig] + value2();
@@ -65,7 +65,7 @@ public:
     return kpgpa2;
   }
 
-  const double * get_kpgpai(const Basis & basis) const {
+  double * get_kpgpai(const Basis & basis) const {
     const double * kpgpa2 = get_kpgpa2(basis);
     double * kpgpai = new double[basis.localsize()];
     for(int ig = 0; ig < basis.localsize(); ig++){
@@ -79,14 +79,24 @@ public:
     return kpgpai;
   }
   
-  const double * get_kpgpax(const Basis & basis, int j) const {
-    double * kpgpax = new double[basis.localsize()];
-    for(int ig = 0; ig < basis.localsize(); ig++){
-      kpgpax[ig] = basis.kpgx_ptr(j)[ig] - value_[j];
+  double * get_kpgpax(const Basis & basis, int j) const {
+    if(j == 0){ 
+      double * kpgpax = new double[3*basis.localsize()];
+      for(int j2 = 0; j2 < 3; j2++){
+	for(int ig = 0; ig < basis.localsize(); ig++){
+	  kpgpax[j2*basis.localsize() + ig] = basis.kpgx_ptr(j2)[ig] - value_[j2];
+	}
+      }
+      return kpgpax;
+    } else {
+      double * kpgpax = new double[basis.localsize()];
+      for(int ig = 0; ig < basis.localsize(); ig++){
+	kpgpax[ig] = basis.kpgx_ptr(j)[ig] - value_[j];
+      }
+      return kpgpax;
     }
-    return kpgpax;
   }
-
+  
   const D3vector & value() const {
     return value_;
   }
