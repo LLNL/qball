@@ -2642,6 +2642,10 @@ void NonLocalPotential::update_usfns(SlaterDet& sd, Basis* cdbasis) {
   cdbasis_ = cdbasis;
   sd.init_usfns(&atoms_);
   //ewd:12-21-2011 sd.calc_betag();
+
+
+  // this code does not work with vector potentials
+  assert(!vp);
   
   vector<vector<double> > tau;
   atoms_.get_positions(tau,true);
