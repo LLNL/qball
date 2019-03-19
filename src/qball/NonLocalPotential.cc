@@ -1944,9 +1944,8 @@ double NonLocalPotential::energy(SlaterDet& sd, bool compute_hpsi, SlaterDet& ds
 
         // next line: const cast is ok since dgemm_ does not modify argument 
         double* kpgx = const_cast<double*>(basis_.kpgx_ptr(0));
-        dgemm(&cn,&cn,(int*)&ngwl,(int*)&ia_block_size,&k,&mone,             
-              kpgx,(int*)&ngwl, &tau[is][3*iastart],&k,                        
-              &zero,&kpgr[0],(int*)&ngwl);                                     
+	
+        dgemm(&cn, &cn, (int*)&ngwl, (int*)&ia_block_size, &k, &mone, kpgx, (int*)&ngwl, &tau[is][3*iastart], &k, &zero,&kpgr[0], (int*)&ngwl);
 
         int len = ia_block_size * ngwl;                                      
 #if HAVE_MASSV  
