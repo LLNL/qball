@@ -58,9 +58,9 @@ public:
     double * kpgpa2 = new double[basis.localsize()];
     for(int ig = 0; ig < basis.localsize(); ig++){
       kpgpa2[ig] = basis.kpg2_ptr()[ig] + value2();
-      kpgpa2[ig] -= value_[0]*basis.kpgx_ptr(0)[ig];
-      kpgpa2[ig] -= value_[1]*basis.kpgx_ptr(1)[ig];
-      kpgpa2[ig] -= value_[2]*basis.kpgx_ptr(2)[ig];
+      kpgpa2[ig] -= 2 * value_[0]*basis.kpgx_ptr(0)[ig];
+      kpgpa2[ig] -= 2 * value_[1]*basis.kpgx_ptr(1)[ig];
+      kpgpa2[ig] -= 2 * value_[2]*basis.kpgx_ptr(2)[ig];
     }
     return kpgpa2;
   }
