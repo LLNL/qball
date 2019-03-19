@@ -35,6 +35,7 @@
 #include "Basis.h"
 #include "SlaterDet.h"
 #include "Context.h"
+#include "VectorPotential.h"
 #include <math/matrix.h>
 
 class StructureFactor;
@@ -76,11 +77,13 @@ class NonLocalPotential
   
   mutable TimerMap tmap;
   void init(const bool compute_stress);
-   
+
+  VectorPotential * vp;
+  
   public:
   
- NonLocalPotential(AtomSet& as, const Context& ctxt, const Basis & basis, const bool compute_stress) :  
-    ctxt_(ctxt), atoms_(as), basis_(basis) { init(compute_stress); }
+  NonLocalPotential(AtomSet& as, const Context& ctxt, const Basis & basis, VectorPotential * vparg, const bool compute_stress) :  
+    ctxt_(ctxt), atoms_(as), basis_(basis), vp(vparg) { init(compute_stress); }
   ~NonLocalPotential(void);
                
   void update_twnl(const bool compute_stress);

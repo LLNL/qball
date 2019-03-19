@@ -132,6 +132,11 @@ EnergyFunctional::EnergyFunctional(const Sample& s, const Wavefunction& wf, Char
      xcp = new XCPotential(cd_,s_.ctrl.xc);
   }
 
+  vp = NULL;
+  if(norm(s.ctrl.initial_vector_potential) > 1e-15){
+    vp = new VectorPotential(s.ctrl.initial_vector_potential);
+  }
+ 
   nlp.resize(wf_.nspin());
   for ( int ispin = 0; ispin < wf_.nspin(); ispin++ )
     nlp[ispin].resize(wf_.nkptloc());
@@ -143,7 +148,7 @@ EnergyFunctional::EnergyFunctional(const Sample& s, const Wavefunction& wf, Char
   for ( int ispin = 0; ispin < wf_.nspin(); ispin++ )
     if (wf_.spinactive(ispin)) 
       for (int kloc=0; kloc<wf_.nkptloc(); kloc++) 
-	nlp[ispin][kloc] = new NonLocalPotential((AtomSet&)s_.atoms, wf_.sdloc(ispin, kloc)->context(), wf_.sdloc(ispin, kloc)->basis(), compute_stress);
+	nlp[ispin][kloc] = new NonLocalPotential((AtomSet&)s_.atoms, wf_.sdloc(ispin, kloc)->context(), wf_.sdloc(ispin, kloc)->basis(), vp, compute_stress);
 
   if (s_.ctrl.extra_memory >= 5) // use extra memory in large, huge mode
     for ( int ispin = 0; ispin < wf_.nspin(); ispin++ )
@@ -261,11 +266,6 @@ EnergyFunctional::EnergyFunctional(const Sample& s, const Wavefunction& wf, Char
     }
 
     dftd3_init(&functional);
-  }
-
-  vp = NULL;
-  if(norm(s.ctrl.initial_vector_potential) > 1e-15){
-    vp = new VectorPotential(s.ctrl.initial_vector_potential);
   }
 
 }
