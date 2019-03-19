@@ -1192,11 +1192,19 @@ double EnergyFunctional::energy(Wavefunction& psi, bool compute_hpsi, Wavefuncti
               const int mloc = c.mloc();
               const int nloc = c.nloc();
               const double * const occ = sd.occ_ptr();
-              const double *const kpg2  = wfbasis.kpg2_ptr();
-              const double *const kpg_x = wfbasis.kpgx_ptr(0);
-              const double *const kpg_y = wfbasis.kpgx_ptr(1);
-              const double *const kpg_z = wfbasis.kpgx_ptr(2);
-              tsum = 0.0;
+              const double * kpg2  = wfbasis.kpg2_ptr();
+              const double * kpg_x = wfbasis.kpgx_ptr(0);
+              const double * kpg_y = wfbasis.kpgx_ptr(1);
+              const double * kpg_z = wfbasis.kpgx_ptr(2);
+
+	      if(vp){
+		kpg2 = vp->get_kpgpa2(wfbasis);		
+		kpg_x = vp->get_kpgpax(wfbasis, 0);
+		kpg_y = vp->get_kpgpax(wfbasis, 1);
+		kpg_z = vp->get_kpgpax(wfbasis, 2);
+	      }
+	      
+	      tsum = 0.0;
 
               for ( int lj=0; lj < c.nblocks(); lj++ )
               {
@@ -1235,7 +1243,7 @@ double EnergyFunctional::energy(Wavefunction& psi, bool compute_hpsi, Wavefuncti
                     tsum[4]  += fac_ekin * tkpgx * tkpgy;
                     tsum[5]  += fac_ekin * tkpgy * tkpgz;
                     tsum[6]  += fac_ekin * tkpgx * tkpgz;
-              
+		    
                  }
                  // tsum[0-6] contains the contributions to
                  // ekin, sigma_ekin, from vector ig
@@ -1267,6 +1275,14 @@ double EnergyFunctional::energy(Wavefunction& psi, bool compute_hpsi, Wavefuncti
                  } // ig
               }
               sum += weight * tsum;
+
+	      if(vp){
+		delete [] kpg2;
+		delete [] kpg_x;
+		delete [] kpg_y;
+		delete [] kpg_z;
+	      }
+	      
            }
         }
      }
