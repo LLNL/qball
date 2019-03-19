@@ -287,6 +287,15 @@ void NonLocalPotential::update_twnl(const bool compute_stress) {
   const double *kpg_y = basis_.kpgx_ptr(1);
   const double *kpg_z = basis_.kpgx_ptr(2);
 
+  if(vp){
+    kpg = vp->get_kpgpa(basis_);
+    kpg2 = vp->get_kpgpa2(basis_);
+    kpgi = vp->get_kpgpai(basis_);
+    kpg_x = vp->get_kpgpax(basis_, 0);
+    kpg_y = vp->get_kpgpax(basis_, 1);
+    kpg_z = vp->get_kpgpax(basis_, 2);
+  }
+  
   // compute twnl and dtwnl
   for ( int is = 0; is < nsp; is++ ) {
     Species *s = atoms_.species_list[is];
@@ -1498,6 +1507,17 @@ void NonLocalPotential::update_twnl(const bool compute_stress) {
       }
     }
   }
+
+  
+  if(vp){
+    delete [] kpg;
+    delete [] kpg2;
+    delete [] kpgi;
+    delete [] kpg_x;
+    delete [] kpg_y;
+    delete [] kpg_z;
+  }
+
   tmap["update_twnl"].stop();
 }
 

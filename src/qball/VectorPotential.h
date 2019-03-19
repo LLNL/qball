@@ -44,6 +44,16 @@ public:
   {
   }
 
+  const double * get_kpgpa(const Basis & basis) const {
+    const double * kpgpa2 = get_kpgpa2(basis);
+    double * kpgpa = new double[basis.localsize()];
+    for(int ig = 0; ig < basis.localsize(); ig++){
+      kpgpa[ig] = sqrt(kpgpa2[ig]);
+    }
+    delete [] kpgpa2;
+    return kpgpa;
+  }
+  
   const double * get_kpgpa2(const Basis & basis) const {
     double * kpgpa2 = new double[basis.localsize()];
     for(int ig = 0; ig < basis.localsize(); ig++){
@@ -55,6 +65,20 @@ public:
     return kpgpa2;
   }
 
+  const double * get_kpgpai(const Basis & basis) const {
+    const double * kpgpa2 = get_kpgpa2(basis);
+    double * kpgpai = new double[basis.localsize()];
+    for(int ig = 0; ig < basis.localsize(); ig++){
+      if(kpgpa2[ig] > 0.0){
+	kpgpai[ig] = 1.0/sqrt(kpgpa2[ig]);
+      } else {
+	kpgpai[ig] = 0.0;
+      }
+    }
+    delete [] kpgpa2;
+    return kpgpai;
+  }
+  
   const double * get_kpgpax(const Basis & basis, int j) const {
     double * kpgpax = new double[basis.localsize()];
     for(int ig = 0; ig < basis.localsize(); ig++){
