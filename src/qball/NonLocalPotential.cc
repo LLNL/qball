@@ -2182,8 +2182,10 @@ double NonLocalPotential::energy(SlaterDet& sd, bool compute_hpsi, SlaterDet& ds
             dfnl_loc.resize(npr[is]*na_block_size*nstloc);
 
           for ( int j = 0; j < 3; j++ ) {
-            const double *const kpgxj = basis_.kpgx_ptr(j);                      
-                                
+            const double * kpgxj = basis_.kpgx_ptr(j);                      
+
+	    if(vp) kpgxj = vp->get_kpgpax(basis_, j);
+	    
             // compute anl_loc  
             for ( int ipr = 0; ipr < npr[is]; ipr++ ) {
               // twnl[is][ig+ngwl*ipr]                                       
@@ -2233,7 +2235,7 @@ double NonLocalPotential::energy(SlaterDet& sd, bool compute_hpsi, SlaterDet& ds
                 }               
               }                 
             } // ipr            
- 
+
             // array anl_loc is complete                                     
                                 
             // compute dfnl     
@@ -2312,6 +2314,9 @@ double NonLocalPotential::energy(SlaterDet& sd, bool compute_hpsi, SlaterDet& ds
                   }
                }
             }
+
+	    if(vp) delete [] kpgxj;
+
           } // j                
  
           tmap["enl_fion"].stop();                                           
