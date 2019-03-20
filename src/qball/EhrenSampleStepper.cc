@@ -473,7 +473,7 @@ void EhrenSampleStepper::step(int niter)
     wf_stepper->preupdate();
     tmap["preupdate"].stop();
 
-    if(ef_.vp) ef_.vp->propagate(s_.ctrl.tddt);
+    if(ef_.vp) ef_.vp->propagate(s_.ctrl.tddt*iter, s_.ctrl.tddt);
     
     tmap["ionic"].start();
     if ( atoms_move )

@@ -68,7 +68,7 @@ class LaserAmp : public Var
     return st.str();
   }
   
-  Laseramp(Sample *sample) : s(sample) { s->ctrl.laser_amp= D3vector(0.0, 0.0, 0.0); }
+  LaserAmp(Sample *sample) : s(sample) { s->ctrl.laser_amp= D3vector(0.0, 0.0, 0.0); }
 
 };
 

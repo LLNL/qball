@@ -30,6 +30,7 @@
 #include <math/d3vector.h>
 #include <qball/Basis.h>
 #include "UnitCell.h"
+#include "Messages.h"
 
 #ifndef VECTORPOTENTIAL_H
 #define VECTORPOTENTIAL_H
@@ -45,11 +46,24 @@ public:
     POLARIZATION
   };
 
-  VectorPotential(Dynamics dyn, const D3vector & initial_value):
+  VectorPotential(Dynamics dyn, const D3vector & initial_value, double laser_freq, D3vector laser_amp):
     dynamics_(dyn),
-    value_(initial_value),
-    value2_(norm(value_))
+    external_(initial_value),
+    laser_freq_(laser_freq),
+    laser_amp_(laser_amp)
   {
+
+    if(norm(external_) > 1e-15 && norm(laser_amp) > 1e-15) {
+      Messages::fatal("Cannot specify a vector potential and a laser at the same time.");
+    }
+    
+    if(fabs(laser_freq) < 1e-15 && norm(laser_amp) > 1e-15) {
+      Messages::fatal("The laser_freq cannot be zero.");
+    }
+        
+    induced_ =  D3vector(0.0, 0.0, 0.0);
+    value_ = induced_ + external_;
+    value2_ = norm(value_);
     velocity_ = D3vector(0.0, 0.0, 0.0);
     accel_ = D3vector(0.0, 0.0, 0.0);
   }
@@ -129,17 +143,28 @@ public:
     velocity_ += 0.5*dt*accel_;
   }
   
-  void propagate(const double & dt){
-    value_ += dt*velocity_ + 0.5*dt*dt*accel_;
+  void propagate(double time, const double & dt){
+    induced_ += dt*velocity_ + 0.5*dt*dt*accel_;
+
+    if(norm(laser_amp_) > 0.0) external_ = -sin(laser_freq_*time)*laser_amp_/laser_freq_;
+
+    value_ = induced_ + external_;
+    value2_ = norm(value_);
   }
 
   
 private:
   Dynamics dynamics_;
+
+  D3vector external_;
+  D3vector induced_;
   D3vector value_;
   D3vector velocity_;
   D3vector accel_;
   double value2_;
+
+  double laser_freq_;
+  D3vector laser_amp_;
   
 };
 #endif

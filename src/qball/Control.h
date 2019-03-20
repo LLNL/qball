@@ -140,7 +140,7 @@ struct Control
   VectorPotential::Dynamics vector_potential_dynamics;
   D3vector initial_vector_potential;
   double laser_freq;
-  double laser_amp;
+  D3vector laser_amp;
 
 };
 #endif

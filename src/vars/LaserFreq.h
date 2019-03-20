@@ -51,7 +51,7 @@ class LaserFreq : public StandardVar {
     int error = parse(argc, argv, value, StandardVar::non_negative);
     if(error != 0) return error;
 
-    s->ctrl.laserfreq() = value;
+    s->ctrl.laser_freq = value;
 
     return 0;
   }
@@ -62,11 +62,11 @@ class LaserFreq : public StandardVar {
      st.setf(ios::left,ios::adjustfield);
      st << setw(10) << name() << " = ";
      st.setf(ios::right,ios::adjustfield);
-     st << setw(10) << 2 * s->ctrl.laserfreq();
+     st << setw(10) << s->ctrl.laser_freq;
      return st.str();
   }
 
-  Laserfreq(Sample *sample) : StandardVar("laser_freq", Dimensions::energy, "hartree"), s(sample) {};
+  LaserFreq(Sample *sample) : StandardVar("laser_freq", Dimensions::energy, "hartree"), s(sample) {};
 };
 #endif
 
