@@ -48,7 +48,10 @@ class VectorPotentialDynamics : public Var
   char const*name ( void ) const { return "vector_potential_dynamics"; };
 
   int set ( int argc, char **argv ) {
-    if (argc != 2) ui->error("vector_potential_dynamics takes only one value.");
+    if (argc != 2){
+      ui->error("vector_potential_dynamics takes only one value.");
+      return 1;
+    }
     
     string v = argv[1];
 
@@ -58,6 +61,7 @@ class VectorPotentialDynamics : public Var
       s->ctrl.vector_potential_dynamics = VectorPotential::Dynamics::POLARIZATION;
     } else {
       ui->error("vector_potential_dynamics must be \"none\" or \"polarization\"");
+      return 1;
     }
     
     return 0;
