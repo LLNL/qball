@@ -144,7 +144,8 @@ class EnergyFunctional
   
   void atoms_moved(void);
   void cell_moved(const bool compute_stress);
-  
+  void vector_potential_changed(const bool compute_stress);
+    
   void print(ostream& os) const;
   void print_memory(ostream&os, double& totsum, double& locsum) const;
   void print_timing();

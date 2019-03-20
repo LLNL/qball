@@ -2044,6 +2044,19 @@ void EnergyFunctional::cell_moved(const bool compute_stress) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+void EnergyFunctional::vector_potential_changed(const bool compute_stress) {
+  // update non-local potential
+  for ( int ispin = 0; ispin < wf_.nspin(); ispin++ ) {
+    if (wf_.spinactive(ispin)) 
+      for (int k=0; k<nlp[ispin].size(); k++) {
+        nlp[ispin][k]->update_twnl(compute_stress);
+        if (s_.ctrl.ultrasoft)
+          nlp[ispin][k]->update_usfns(*wf_.sdloc(ispin, k), vbasis_);
+      }
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
 double EnergyFunctional::casino_ewald(void)
 {
    //ewd:  calculate Ewald energy term

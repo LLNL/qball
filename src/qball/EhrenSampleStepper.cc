@@ -539,6 +539,7 @@ void EhrenSampleStepper::step(int niter)
     // AS: update the Hamiltonian, the potential, and the energy before propagation
     // starts and/or after the mixing
     tmap["efn"].start();
+    if(ef_.vp) ef_.vector_potential_changed(compute_stress);
     ef_.update_hamiltonian();
     ef_.update_vhxc();
     //ef_.update_exc_ehart_eps();
