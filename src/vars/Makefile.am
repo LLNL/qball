@@ -66,6 +66,7 @@ noinst_HEADERS =                            \
 	ThTemp.h                            \
 	ThTime.h                            \
 	ThWidth.h                           \
+	VectorPotentialDynamics.h           \
 	VectorPotentialVar.h                \
 	VdW.h                               \
 	WfDiag.h                            \

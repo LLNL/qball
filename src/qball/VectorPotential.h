@@ -39,7 +39,14 @@ using namespace std;
 class VectorPotential {
 
 public:
-  VectorPotential(const D3vector & initial_value):
+
+  enum class Dynamics {
+    NONE,
+    POLARIZATION
+  };
+
+  VectorPotential(Dynamics dyn, const D3vector & initial_value):
+    dynamics_(dyn),
     value_(initial_value),
     value2_(norm(value_))
   {
@@ -111,9 +118,12 @@ public:
   void calculate_acceleration(const double & dt, const D3vector& total_current, const UnitCell & cell){
     //update the velocity to time t - dt/2
     velocity_ += 0.5*dt*accel_;
-    
-    //calculate the current
-    accel_ = -4.0*M_PI*total_current/cell.volume();
+
+    if(dynamics_ == Dynamics::POLARIZATION){
+      accel_ = -4.0*M_PI*total_current/cell.volume();
+    } else {
+      accel_ = D3vector(0.0, 0.0, 0.0);
+    }
 
     //update the velocity to time t
     velocity_ += 0.5*dt*accel_;
@@ -125,6 +135,7 @@ public:
 
   
 private:
+  Dynamics dynamics_;
   D3vector value_;
   D3vector velocity_;
   D3vector accel_;

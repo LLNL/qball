@@ -35,6 +35,7 @@
 #include <vector>
 
 #include <math/d3vector.h>
+#include <qball/VectorPotential.h>
 
 struct Control
 {
@@ -136,6 +137,7 @@ struct Control
   double fcp_pmass;
   double fcp_mu;
 
+  VectorPotential::Dynamics vector_potential_dynamics;
   D3vector initial_vector_potential;
 
 };

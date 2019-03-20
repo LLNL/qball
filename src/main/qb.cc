@@ -165,6 +165,7 @@ using namespace std;
 #include <vars/FcpThWidth.h>
 #include <vars/FcpPmass.h>
 #include <vars/FcpMu.h>
+#include <vars/VectorPotentialDynamics.h>
 #include <vars/VectorPotentialVar.h>
 #include <vars/VdW.h>
 
@@ -420,6 +421,7 @@ int main(int argc, char **argv, char **envp)
   ui->addVar(new FcpThWidth(s));
   ui->addVar(new FcpPmass(s));
   ui->addVar(new FcpMu(s));
+  ui->addVar(new VectorPotentialDynamics(s));
   ui->addVar(new VectorPotentialVar(s));
   ui->addVar(new VdW(s));
   
