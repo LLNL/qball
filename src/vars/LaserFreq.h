@@ -39,7 +39,7 @@
 #include <qball/Sample.h>
 #include <qball/Unit.h>
 
-class Laserfreq : public StandardVar {
+class LaserFreq : public StandardVar {
   Sample *s;
 
   public:
@@ -66,7 +66,7 @@ class Laserfreq : public StandardVar {
      return st.str();
   }
 
-  Laserfreq(Sample *sample) : StandardVar("laserfreq", Dimensions::energy, "hartree"), s(sample) {};
+  Laserfreq(Sample *sample) : StandardVar("laser_freq", Dimensions::energy, "hartree"), s(sample) {};
 };
 #endif
 

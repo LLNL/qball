@@ -38,7 +38,7 @@
 
 #include <qball/Sample.h>
 
-class Laseramp : public Var
+class LaserAmp : public Var
 {
   Sample *s;
 
