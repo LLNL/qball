@@ -29,6 +29,7 @@
 #include <config.h>
 #include <math/d3vector.h>
 #include <qball/Basis.h>
+#include "UnitCell.h"
 
 #ifndef VECTORPOTENTIAL_H
 #define VECTORPOTENTIAL_H
@@ -42,6 +43,8 @@ public:
     value_(initial_value),
     value2_(norm(value_))
   {
+    velocity_ = D3vector(0.0, 0.0, 0.0);
+    accel_ = D3vector(0.0, 0.0, 0.0);
   }
 
   double * get_kpgpa(const Basis & basis) const {
@@ -104,9 +107,27 @@ public:
   const double & value2() const {
     return value2_;
   }
+
+  void calculate_acceleration(const double & dt, const D3vector& total_current, const UnitCell & cell){
+    //update the velocity to time t - dt/2
+    velocity_ += 0.5*dt*accel_;
+    
+    //calculate the current
+    accel_ = -4.0*M_PI*total_current/cell.volume();
+
+    //update the velocity to time t
+    velocity_ += 0.5*dt*accel_;
+  }
+  
+  void propagate(const double & dt){
+    value_ += dt*velocity_ + 0.5*dt*dt*accel_;
+  }
+
   
 private:
   D3vector value_;
+  D3vector velocity_;
+  D3vector accel_;
   double value2_;
   
 };

@@ -35,7 +35,7 @@ class CurrentDensity : private ChargeDensity
   public:
   
   std::vector<std::vector<std::vector<double> > > current;
-  std::vector<double> total_current;
+  D3vector total_current;
  
   CurrentDensity (const Sample& s, const Wavefunction & wf);
   ~CurrentDensity (){

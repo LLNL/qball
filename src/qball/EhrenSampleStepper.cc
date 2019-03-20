@@ -435,6 +435,8 @@ void EhrenSampleStepper::step(int niter)
        temp_ion = ionic_stepper->temp();
     }
 
+    if(ef_.vp) ef_.vp->calculate_acceleration(s_.ctrl.tddt, currd_.total_current, cell);
+    
     // print positions, velocities and forces at time t0
     if ( oncoutpe && iter%s_.ctrl.iprint == 0)
     {
@@ -470,6 +472,8 @@ void EhrenSampleStepper::step(int niter)
     tmap["preupdate"].start();
     wf_stepper->preupdate();
     tmap["preupdate"].stop();
+
+    if(ef_.vp) ef_.vp->propagate(s_.ctrl.tddt);
     
     tmap["ionic"].start();
     if ( atoms_move )
