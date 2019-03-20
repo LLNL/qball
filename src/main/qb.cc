@@ -141,6 +141,8 @@ using namespace std;
 #include <vars/Nparallelkpts.h>
 #include <vars/Nkpoints.h>
 #include <vars/IPrint.h>
+#include <vars/LaserAmp.h>
+#include <vars/LaserFreq.h>
 #include <vars/CellStepFreq.h>
 #include <vars/EnthalpyPressure.h>
 #include <vars/EnthalpyThreshold.h>
@@ -392,6 +394,8 @@ int main(int argc, char **argv, char **envp)
   ui->addVar(new Nparallelkpts(s));
   ui->addVar(new Nkpoints(s));
   ui->addVar(new IPrint(s));
+  ui->addVar(new LaserAmp(s));
+  ui->addVar(new LaserFreq(s));
   ui->addVar(new CellStepFreq(s));
   ui->addVar(new EnthalpyPressure(s));
   ui->addVar(new EnthalpyThreshold(s));
