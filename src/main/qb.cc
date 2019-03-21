@@ -143,6 +143,7 @@ using namespace std;
 #include <vars/IPrint.h>
 #include <vars/LaserAmp.h>
 #include <vars/LaserFreq.h>
+#include <vars/LaserEnvelope.h>
 #include <vars/CellStepFreq.h>
 #include <vars/EnthalpyPressure.h>
 #include <vars/EnthalpyThreshold.h>
@@ -396,6 +397,7 @@ int main(int argc, char **argv, char **envp)
   ui->addVar(new IPrint(s));
   ui->addVar(new LaserAmp(s));
   ui->addVar(new LaserFreq(s));
+  ui->addVar(new LaserEnvelope(s));
   ui->addVar(new CellStepFreq(s));
   ui->addVar(new EnthalpyPressure(s));
   ui->addVar(new EnthalpyThreshold(s));

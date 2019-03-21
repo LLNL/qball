@@ -47,6 +47,9 @@ struct Control
     
   string smearing;        // method to use for smearing (fermi or gaussian)
   double smearing_width;  // smearing width (default = 0.0, i.e. no smearing)
+  string envelope_type;     // The shape of envelope for laser
+  double envelope_center;   // The center of the envelope in unit of time
+  double envelope_width;    // The width of the envelope in unit of time
   int smearing_ngauss;    // order of Methfessel-Paxton expansion
   double ecutprec;
 
