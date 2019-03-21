@@ -70,7 +70,8 @@ class ChargeDensity {
   vector<vector<complex<double> > > qnmg_;
   vector<vector<complex<double> > > sfactloc_;
   vector<double> rhornlcc_; 
-
+  double nelectrons_;
+    
   void initialize(const Sample& s);
   void initializeSymmetries(const Sample& s);
   
@@ -84,6 +85,10 @@ class ChargeDensity {
   vector<complex<double> > rhognlcc; 
   vector<vector<complex<double> > > xcrhog; 
 
+  const double & nelectrons() const {
+    return nelectrons_;
+  }
+  
   void update_density();
   void update_rhor(void);
   

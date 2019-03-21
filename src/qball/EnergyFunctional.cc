@@ -132,6 +132,11 @@ EnergyFunctional::EnergyFunctional(const Sample& s, const Wavefunction& wf, Char
      xcp = new XCPotential(cd_,s_.ctrl.xc);
   }
 
+  vp = NULL;
+  if(s.ctrl.vector_potential_dynamics != VectorPotential::Dynamics::NONE || norm(s.ctrl.initial_vector_potential) > 1e-15 || norm(s.ctrl.laser_amp) > 1e-15) {
+    vp = new VectorPotential(s.ctrl.vector_potential_dynamics, s.ctrl.initial_vector_potential, s.ctrl.laser_freq, s.ctrl.laser_amp);
+  }
+ 
   nlp.resize(wf_.nspin());
   for ( int ispin = 0; ispin < wf_.nspin(); ispin++ )
     nlp[ispin].resize(wf_.nkptloc());
@@ -143,7 +148,7 @@ EnergyFunctional::EnergyFunctional(const Sample& s, const Wavefunction& wf, Char
   for ( int ispin = 0; ispin < wf_.nspin(); ispin++ )
     if (wf_.spinactive(ispin)) 
       for (int kloc=0; kloc<wf_.nkptloc(); kloc++) 
-	nlp[ispin][kloc] = new NonLocalPotential((AtomSet&)s_.atoms, wf_.sdloc(ispin, kloc)->context(), wf_.sdloc(ispin, kloc)->basis(), compute_stress);
+	nlp[ispin][kloc] = new NonLocalPotential((AtomSet&)s_.atoms, wf_.sdloc(ispin, kloc)->context(), wf_.sdloc(ispin, kloc)->basis(), vp, compute_stress);
 
   if (s_.ctrl.extra_memory >= 5) // use extra memory in large, huge mode
     for ( int ispin = 0; ispin < wf_.nspin(); ispin++ )
@@ -262,8 +267,9 @@ EnergyFunctional::EnergyFunctional(const Sample& s, const Wavefunction& wf, Char
 
     dftd3_init(&functional);
   }
-  
+
 }
+
 
 ////////////////////////////////////////////////////////////////////////////////
 EnergyFunctional::~EnergyFunctional(void) {
@@ -287,6 +293,8 @@ EnergyFunctional::~EnergyFunctional(void) {
   if (s_.ctrl.tddft_involved)
      delete hamil_cd_;
   hamil_cd_ = 0;
+
+  if(vp) delete vp;
 }
 ////////////////////////////////////////////////////////////////////////////////
 void EnergyFunctional::update_hamiltonian(void)
@@ -1184,11 +1192,19 @@ double EnergyFunctional::energy(Wavefunction& psi, bool compute_hpsi, Wavefuncti
               const int mloc = c.mloc();
               const int nloc = c.nloc();
               const double * const occ = sd.occ_ptr();
-              const double *const kpg2  = wfbasis.kpg2_ptr();
-              const double *const kpg_x = wfbasis.kpgx_ptr(0);
-              const double *const kpg_y = wfbasis.kpgx_ptr(1);
-              const double *const kpg_z = wfbasis.kpgx_ptr(2);
-              tsum = 0.0;
+              const double * kpg2  = wfbasis.kpg2_ptr();
+              const double * kpg_x = wfbasis.kpgx_ptr(0);
+              const double * kpg_y = wfbasis.kpgx_ptr(1);
+              const double * kpg_z = wfbasis.kpgx_ptr(2);
+
+	      if(vp){
+		kpg2 = vp->get_kpgpa2(wfbasis);		
+		kpg_x = vp->get_kpgpax(wfbasis, 0);
+		kpg_y = vp->get_kpgpax(wfbasis, 1);
+		kpg_z = vp->get_kpgpax(wfbasis, 2);
+	      }
+	      
+	      tsum = 0.0;
 
               for ( int lj=0; lj < c.nblocks(); lj++ )
               {
@@ -1227,7 +1243,7 @@ double EnergyFunctional::energy(Wavefunction& psi, bool compute_hpsi, Wavefuncti
                     tsum[4]  += fac_ekin * tkpgx * tkpgy;
                     tsum[5]  += fac_ekin * tkpgy * tkpgz;
                     tsum[6]  += fac_ekin * tkpgx * tkpgz;
-              
+		    
                  }
                  // tsum[0-6] contains the contributions to
                  // ekin, sigma_ekin, from vector ig
@@ -1259,6 +1275,14 @@ double EnergyFunctional::energy(Wavefunction& psi, bool compute_hpsi, Wavefuncti
                  } // ig
               }
               sum += weight * tsum;
+
+	      if(vp){
+		delete [] kpg2;
+		delete [] kpg_x;
+		delete [] kpg_y;
+		delete [] kpg_z;
+	      }
+	      
            }
         }
      }
@@ -1629,7 +1653,9 @@ double EnergyFunctional::energy(Wavefunction& psi, bool compute_hpsi, Wavefuncti
             const int mloc = cp.mloc();
             const double* kpg2 = wfbasis.kpg2_ptr();
             const int ngwloc = wfbasis.localsize();
-          
+
+	    if(vp) kpg2 = vp->get_kpgpa2(wfbasis);
+	    
             // Laplacian
             if ( use_confinement ) {
               for ( int n = 0; n < sd.nstloc(); n++ ) {
@@ -1663,6 +1689,9 @@ double EnergyFunctional::energy(Wavefunction& psi, bool compute_hpsi, Wavefuncti
                 }
               }
             }
+
+	    if(vp) delete [] kpg2;
+	    
             sd.rs_mul_add(*ft[ispin][ikp], &v_r[ispin][0], sdp);
           }
         }
@@ -2012,6 +2041,19 @@ void EnergyFunctional::cell_moved(const bool compute_stress) {
   // update Hubbard potential
   if (s_.ctrl.dft_plus_u)
     hubp_->update_phiylm();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+void EnergyFunctional::vector_potential_changed(const bool compute_stress) {
+  // update non-local potential
+  for ( int ispin = 0; ispin < wf_.nspin(); ispin++ ) {
+    if (wf_.spinactive(ispin)) 
+      for (int k=0; k<nlp[ispin].size(); k++) {
+        nlp[ispin][k]->update_twnl(compute_stress);
+        if (s_.ctrl.ultrasoft)
+          nlp[ispin][k]->update_usfns(*wf_.sdloc(ispin, k), vbasis_);
+      }
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////

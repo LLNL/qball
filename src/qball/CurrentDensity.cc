@@ -46,7 +46,6 @@ void CurrentDensity::update_current(EnergyFunctional & energy_functional, const 
   std::valarray<double> sigma;
   std::vector<std::complex<double> > tmp(vft()->np012loc(), 0.0);
 
-  total_current.resize(3);
   current.resize(3);
   double volume_element = vbasis()->cell().volume()/vft()->np012();
 
@@ -92,6 +91,8 @@ void CurrentDensity::update_current(EnergyFunctional & energy_functional, const 
 
       wf_.spincontext(ispin)->dsum('c', 1, 1, &total_current[idir], 1);
 
+      if(energy_functional.vp) total_current[idir] += energy_functional.vp->value()[idir]*energy_functional.hamil_cd()->nelectrons();
+      
     }
     
   }

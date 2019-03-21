@@ -359,6 +359,10 @@ void EhrenSampleStepper::step(int niter)
     currd_.update_current(ef_, dwf);
     tmap["current"].start();
 
+    if(ef_.vp && oncoutpe){
+      std::cout << "<!-- vector_potential: " << ef_.vp->value() << " -->\n";
+    }
+    
     // average forces over symmetric atoms
     if ( compute_forces && s_.symmetries.nsym() > 0) {
        const int nsym_ = s_.symmetries.nsym();
@@ -435,6 +439,8 @@ void EhrenSampleStepper::step(int niter)
        temp_ion = ionic_stepper->temp();
     }
 
+    if(ef_.vp) ef_.vp->calculate_acceleration(s_.ctrl.tddt, currd_.total_current, cell);
+    
     // print positions, velocities and forces at time t0
     if ( oncoutpe && iter%s_.ctrl.iprint == 0)
     {
@@ -470,6 +476,8 @@ void EhrenSampleStepper::step(int niter)
     tmap["preupdate"].start();
     wf_stepper->preupdate();
     tmap["preupdate"].stop();
+
+    if(ef_.vp) ef_.vp->propagate(s_.ctrl.tddt*(iter + 1), s_.ctrl.tddt);
     
     tmap["ionic"].start();
     if ( atoms_move )
@@ -535,6 +543,7 @@ void EhrenSampleStepper::step(int niter)
     // AS: update the Hamiltonian, the potential, and the energy before propagation
     // starts and/or after the mixing
     tmap["efn"].start();
+    if(ef_.vp) ef_.vector_potential_changed(compute_stress);
     ef_.update_hamiltonian();
     ef_.update_vhxc();
     //ef_.update_exc_ehart_eps();

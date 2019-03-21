@@ -102,6 +102,7 @@ noinst_HEADERS =                            \
 	Unit.h                              \
 	UnitCell.h                          \
 	uuid_str.h                          \
+	VectorPotential.h                   \
 	Wavefunction.h                      \
 	WavefunctionStepper.h               \
 	XCPotential.h

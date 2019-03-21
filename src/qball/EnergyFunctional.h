@@ -40,6 +40,7 @@
 #include "StructureFactor.h"
 #include "SelfConsistentPotential.h"
 #include "Timer.h"
+#include "VectorPotential.h"
 using namespace std;
 
 class Sample;
@@ -99,6 +100,7 @@ class EnergyFunctional
 
   public:
 
+  VectorPotential * vp;
   vector<vector<double> > v_r;
   vector<vector<complex<double> > > vxc_g;
   vector<vector<complex<double> > > veff_g;
@@ -142,7 +144,8 @@ class EnergyFunctional
   
   void atoms_moved(void);
   void cell_moved(const bool compute_stress);
-  
+  void vector_potential_changed(const bool compute_stress);
+    
   void print(ostream& os) const;
   void print_memory(ostream&os, double& totsum, double& locsum) const;
   void print_timing();

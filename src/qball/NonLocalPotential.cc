@@ -287,6 +287,15 @@ void NonLocalPotential::update_twnl(const bool compute_stress) {
   const double *kpg_y = basis_.kpgx_ptr(1);
   const double *kpg_z = basis_.kpgx_ptr(2);
 
+  if(vp){
+    kpg = vp->get_kpgpa(basis_);
+    kpg2 = vp->get_kpgpa2(basis_);
+    kpgi = vp->get_kpgpai(basis_);
+    kpg_x = vp->get_kpgpax(basis_, 0);
+    kpg_y = vp->get_kpgpax(basis_, 1);
+    kpg_z = vp->get_kpgpax(basis_, 2);
+  }
+  
   // compute twnl and dtwnl
   for ( int is = 0; is < nsp; is++ ) {
     Species *s = atoms_.species_list[is];
@@ -1498,6 +1507,17 @@ void NonLocalPotential::update_twnl(const bool compute_stress) {
       }
     }
   }
+
+  
+  if(vp){
+    delete [] kpg;
+    delete [] kpg2;
+    delete [] kpgi;
+    delete [] kpg_x;
+    delete [] kpg_y;
+    delete [] kpg_z;
+  }
+
   tmap["update_twnl"].stop();
 }
 
@@ -1943,11 +1963,13 @@ double NonLocalPotential::energy(SlaterDet& sd, bool compute_hpsi, SlaterDet& ds
         char cn='n';
 
         // next line: const cast is ok since dgemm_ does not modify argument 
-        double* kpgx = const_cast<double*>(basis_.kpgx_ptr(0));
-        dgemm(&cn,&cn,(int*)&ngwl,(int*)&ia_block_size,&k,&mone,             
-              kpgx,(int*)&ngwl, &tau[is][3*iastart],&k,                        
-              &zero,&kpgr[0],(int*)&ngwl);                                     
+        double * kpgx = const_cast<double*>(basis_.kpgx_ptr(0));
+	if(vp) kpgx = vp->get_kpgpax(basis_, 0);
+	
+        dgemm(&cn, &cn, (int*)&ngwl, (int*)&ia_block_size, &k, &mone, kpgx, (int*)&ngwl, &tau[is][3*iastart], &k, &zero,&kpgr[0], (int*)&ngwl);
 
+	if(vp) delete [] kpgx;
+	
         int len = ia_block_size * ngwl;                                      
 #if HAVE_MASSV  
         vsincos(&skpgr[0],&ckpgr[0],&kpgr[0],&len);
@@ -2160,8 +2182,10 @@ double NonLocalPotential::energy(SlaterDet& sd, bool compute_hpsi, SlaterDet& ds
             dfnl_loc.resize(npr[is]*na_block_size*nstloc);
 
           for ( int j = 0; j < 3; j++ ) {
-            const double *const kpgxj = basis_.kpgx_ptr(j);                      
-                                
+            const double * kpgxj = basis_.kpgx_ptr(j);                      
+
+	    if(vp) kpgxj = vp->get_kpgpax(basis_, j);
+	    
             // compute anl_loc  
             for ( int ipr = 0; ipr < npr[is]; ipr++ ) {
               // twnl[is][ig+ngwl*ipr]                                       
@@ -2211,7 +2235,7 @@ double NonLocalPotential::energy(SlaterDet& sd, bool compute_hpsi, SlaterDet& ds
                 }               
               }                 
             } // ipr            
- 
+
             // array anl_loc is complete                                     
                                 
             // compute dfnl     
@@ -2290,6 +2314,9 @@ double NonLocalPotential::energy(SlaterDet& sd, bool compute_hpsi, SlaterDet& ds
                   }
                }
             }
+
+	    if(vp) delete [] kpgxj;
+
           } // j                
  
           tmap["enl_fion"].stop();                                           
@@ -2623,6 +2650,10 @@ void NonLocalPotential::update_usfns(SlaterDet& sd, Basis* cdbasis) {
   cdbasis_ = cdbasis;
   sd.init_usfns(&atoms_);
   //ewd:12-21-2011 sd.calc_betag();
+
+
+  // this code does not work with vector potentials
+  assert(!vp);
   
   vector<vector<double> > tau;
   atoms_.get_positions(tau,true);

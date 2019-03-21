@@ -37,6 +37,8 @@ noinst_HEADERS =                            \
 	HugFreq.h                           \
 	HugoniostatVar.h                    \
 	IPrint.h                            \
+        LaserFreq.h                         \
+        LaserAmp.h                          \
 	MatrixLoc.h                         \
 	MDIter.h                            \
 	Memory.h                            \
@@ -66,6 +68,8 @@ noinst_HEADERS =                            \
 	ThTemp.h                            \
 	ThTime.h                            \
 	ThWidth.h                           \
+	VectorPotentialDynamics.h           \
+	VectorPotentialVar.h                \
 	VdW.h                               \
 	WfDiag.h                            \
 	WfDyn.h                             \
