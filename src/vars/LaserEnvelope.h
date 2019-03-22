@@ -44,11 +44,11 @@ class LaserEnvelope : public Var
 
   public:
 
-  char const*name ( void ) const { return "laser_envolope"; };
+  char const*name ( void ) const { return "laser_envelope"; };
   
   int set ( int argc, char **argv ) {
     if ( argc != 2 || argc != 4 ) {
-      ui->error("laser_envolpe must be [type] [center of envolope] [width of envelope]. type can be: constant or gaussian. ");
+      ui->error("laser_envelope must be [type] [center of envolope] [width of envelope]. type can be: constant or gaussian. ");
       return 1;
     }
 

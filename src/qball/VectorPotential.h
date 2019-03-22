@@ -46,11 +46,14 @@ public:
     POLARIZATION
   };
 
-  VectorPotential(Dynamics dyn, const D3vector & initial_value, double laser_freq, D3vector laser_amp):
+  VectorPotential(Dynamics dyn, const D3vector & initial_value, double laser_freq, D3vector laser_amp, string envelope_type, double envelope_center, double envelope_width):
     dynamics_(dyn),
     external_(initial_value),
     laser_freq_(laser_freq),
-    laser_amp_(laser_amp)
+    laser_amp_(laser_amp),
+    envelope_type_(envelope_type),
+    envelope_center_(envelope_center),
+    envelope_width_(envelope_width)
   {
 
     if(norm(external_) > 1e-15 && norm(laser_amp) > 1e-15) {
@@ -145,8 +148,12 @@ public:
   
   void propagate(double time, const double & dt){
     induced_ += dt*velocity_ + 0.5*dt*dt*accel_;
+     
+    // evaluation of analytic form
+    if(norm(laser_amp_) > 0.0 && envelope_type_ == "constant") external_ = -sin(laser_freq_*time)*laser_amp_/laser_freq_;
 
-    if(norm(laser_amp_) > 0.0) external_ = -sin(laser_freq_*time)*laser_amp_/laser_freq_;
+    // Numerical integration for guassian d(A/c)/dt = - E = - Amp * Normalization_factor * cos(wt) * Gaussing(center,width)
+    if(norm(laser_amp_) > 0.0 && envelope_type_ == "gaussian") external_ +=  - dt*(laser_amp_/(envelope_width_ * sqrt(M_PI*2.0))) * cos(laser_freq_*time) * exp(-((time-envelope_center_)*(time-envelope_center_))/(2.0*envelope_width_*envelope_width_)) ;
 
     value_ = induced_ + external_;
     value2_ = norm(value_);
@@ -165,6 +172,9 @@ private:
 
   double laser_freq_;
   D3vector laser_amp_;
+  string envelope_type_;
+  double envelope_width_;
+  double envelope_center_;
   
 };
 #endif
