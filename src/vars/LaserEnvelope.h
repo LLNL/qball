@@ -47,21 +47,25 @@ class LaserEnvelope : public Var
   char const*name ( void ) const { return "laser_envelope"; };
   
   int set ( int argc, char **argv ) {
-    if ( argc != 2 || argc != 4 ) {
-      ui->error("laser_envelope must be [type] [center of envolope] [width of envelope]. type can be: constant or gaussian. ");
-      return 1;
-    }
-
     if ( argc == 2 ) {
       s->ctrl.envelope_type = argv[1];
-      s->ctrl.envelope_center = 0.0;
-      s->ctrl.envelope_width = 0.0;
+
+      if ( s->ctrl.envelope_type != "constant" ){ 
+        ui->error(argv[1]);
+        ui->error("laser_envelope must be [type] [center of envelope] [width of envelope]. type can be: constant or gaussian. ");
+        return 1;
+      }
     }
 
-    if ( argc == 4 ) { 
+    else if ( argc == 4 ) { 
     s->ctrl.envelope_type = argv[1];
     s->ctrl.envelope_center = atof(argv[2]);
     s->ctrl.envelope_width = atof(argv[3]);
+    }
+
+    else {
+      ui->error("laser_envelope must be [type] [center of envelope] [width of envelope]. type can be: constant or gaussian. ");
+      return 1;
     }
 
     return 0;
