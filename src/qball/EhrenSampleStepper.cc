@@ -38,6 +38,7 @@
 #include "FORKTDWavefunctionStepper.h"
 #include "TDEULERWavefunctionStepper.h"
 #include "ExponentialWavefunctionStepper.h"
+#include "PETSCWavefunctionStepper.h"
 #include "SDIonicStepper.h"
 #include "SDAIonicStepper.h"
 #include "CGIonicStepper.h"
@@ -200,6 +201,8 @@ void EhrenSampleStepper::step(int niter)
      wf_stepper = new ExponentialWavefunctionStepper(wf,s_.ctrl.tddt,tmap,ef_,s_,false);
   else if ( wf_dyn == "AETRS" )
      wf_stepper = new ExponentialWavefunctionStepper(wf,s_.ctrl.tddt,tmap,ef_,s_,true);
+  else if ( wf_dyn == "PETSC")
+     wf_stepper = new PETSCWavefunctionStepper(wf,s_.ctrl.tddt,tmap,ef_,s_,fion,sigma_eks);
   else
   {
      if ( oncoutpe )
@@ -600,10 +603,14 @@ void EhrenSampleStepper::step(int niter)
        // AS: initialize wfdeque[4] with wf, to keep a copy
        *wfdeque[4]=s_.wf;
     }
-             
-    tmap["efn"].start();
-    energy = ef_.energy(s_.wf, true,dwf,false,fion,false,sigma_eks);
-    tmap["efn"].stop();
+           
+    // AK: with PETSC, all H*Psi evaluations will occur within PETSCWavefunctionStepper::RHS 
+    if ( wf_dyn!="PETSC" ) { 
+      tmap["efn"].start();
+      energy = ef_.energy(s_.wf, true,dwf,false,fion,false,sigma_eks);
+      tmap["efn"].stop();
+    }
+
     // compute the sum of eigenvalues (with fixed weight)
     // to measure convergence of the subspace update
     // compute trace of the Hamiltonian matrix Y^T H Y
@@ -975,7 +982,7 @@ void EhrenSampleStepper::step(int niter)
        s_.wf.printocc(); 
     
     // AS: for the correct output of the energy
-    if ( s_.ctrl.non_selfc_energy && (wf_dyn!="SORKTD") && (wf_dyn!="FORKTD") )
+    if ( s_.ctrl.non_selfc_energy && (wf_dyn!="SORKTD") && (wf_dyn!="FORKTD") && (wf_dyn!="PETSC"))
     {
        // AS: the wave functions used in the Hamiltonian are NOT updated here
        tmap["charge"].start();

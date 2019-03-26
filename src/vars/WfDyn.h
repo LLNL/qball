@@ -52,9 +52,14 @@ class WfDyn : public Var
   {
     if ( argc != 2 )
     {
-      if ( ui->oncoutpe() )
-      cout << " <ERROR> wf_dyn takes only one value </ERROR>" << endl;
-      return 1;
+      // AK: for PETSC, accept integrator type as later args 
+      string v = argv[1];
+      if ( v != "PETSC" )
+      {
+        if ( ui->oncoutpe() )
+          cout << " <ERROR> wf_dyn takes only one value </ERROR>" << endl;
+        return 1;
+      }
     }
     
     string v = argv[1];
@@ -72,14 +77,15 @@ class WfDyn : public Var
 	    v == "SORKTD"  ||
             v == "FORKTD"  ||
 	    v == "ETRS"    ||
-	    v == "AETRS" ) )
+	    v == "AETRS"   ||
+            v == "PETSC") )
     {
        if ( ui->oncoutpe() )
-          cout << " wf_dyn must be in [LOCKED,SD,PSD,PSDA,RMMDIIS,JD,MD,TDEULER,SOTD,SORKTD,FORKTD,ETRS,AETRS]" << endl;
+          cout << " wf_dyn must be in [LOCKED,SD,PSD,PSDA,RMMDIIS,JD,MD,TDEULER,SOTD,SORKTD,FORKTD,ETRS,AETRS,PETSC]" << endl;
        return 1;
     }
 
-    if (v == "TDEULER" || v == "SOTD" || v == "SORKTD" || v == "FORKTD" || v == "ETRS" || v == "AETRS") {
+    if (v == "TDEULER" || v == "SOTD" || v == "SORKTD" || v == "FORKTD" || v == "ETRS" || v == "AETRS" || v == "PETSC") {
        s->ctrl.tddft_involved = true;
        if (!( s->wf.force_complex_set() )) {
           cout << "WfDyn::wave functions must be complex to propagate them in time" << endl
@@ -92,6 +98,41 @@ class WfDyn : public Var
     }
 
     s->ctrl.wf_dyn = v;
+
+
+    // AK: set PETSC time stepper type and subtype
+    if (v=="PETSC")
+    {
+      if (argc < 3)
+      {
+        if ( ui->oncoutpe() )
+          cout << " <ERROR> wf_dyn PETSC needs more values to set the time stepper type</ERROR>" << endl;
+        return 1;        
+      }
+
+      string ts_type = argv[2];
+
+      // AK: check for valid time stepper type. not comprehensive
+      if ( !( ts_type == "rk" || ts_type == "euler" || ts_type == "beuler" || ts_type == "pseudo" ||
+              ts_type == "cn" || ts_type == "sundials" || ts_type == "python" || ts_type == "theta" || ts_type == "alpha" ||
+              ts_type == "alpha2" || ts_type == "glle" || ts_type == "glee" || ts_type == "ssp" || ts_type == "arkimex" ||
+              ts_type == "rosw" || ts_type == "eimex" || ts_type == "mimex" || ts_type == "bdf" || ts_type == "radau5" ) )
+      {
+        if ( ui->oncoutpe() )
+          cout << " <ERROR> invalid PETSc time stepper type</ERROR>" << endl;
+        return 1;
+      }
+
+      s->ctrl.petsc_ts_type = ts_type;
+
+      // AK: if there is an additional value, use it as subtype 
+      // To do: input validation
+      if (argc > 3)
+        s->ctrl.petsc_ts_subtype = argv[3];
+      else
+        s->ctrl.petsc_ts_subtype="";
+    }
+
     
 //     if ( v == "MD" )
 //     {

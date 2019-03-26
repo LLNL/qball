@@ -3759,6 +3759,76 @@ void Wavefunction::phase_real(bool new_wf_phase_real)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+//AK: compute size of flat array and allocate
+void Wavefunction::allocate_flat()
+{
+  // AK: is the size always the same for each spin and kpoints?
+  // if so, could just do totsize = nkpoint * nspin * sd_[0][0]->c().size()
+  flatarrsize=0;
+  for (int ispin=0; ispin<nspin_; ispin++)
+    for (int ikp=0; ikp < sdcontext_[ispin].size(); ikp++)
+      flatarrsize+=sd_[ispin][ikp]->c().size();
+
+  // AK: allocate the flattened array
+  flatarr = new complex<double> [flatarrsize];
+}
+
+// AK: flatten sd[ispin][ikp] into single array
+void Wavefunction::flatten()
+{
+  // AK: copy the elements
+  int iflat=0;
+  for (int ispin=0; ispin<nspin_; ispin++)
+    for (int ikp=0; ikp < sdcontext_[ispin].size(); ikp++)
+    {
+      for (int i=0; i<sd_[ispin][ikp]->c().size(); i++)
+        flatarr[iflat+i]=sd_[ispin][ikp]->c().valptr()[i];
+      iflat+=sd_[ispin][ikp]->c().size();
+      // AK: could maybe make sd_ point to appropriate part of new array to reduce memory usage
+      // something like sd_[ispin][kpoint]->c().setvalptr(flatarray+index);
+    }
+}
+
+// AK: copy contents of flat array back into sd[ispin][ikp]
+void Wavefunction::unflatten()
+{
+  int iflat=0;
+  for (int ispin=0; ispin<nspin_; ispin++)
+    for (int ikp=0; ikp < sdcontext_[ispin].size(); ikp++)
+    {
+      for (int i=0; i<sd_[ispin][ikp]->c().size(); i++)
+        sd_[ispin][ikp]->c().valptr()[i]=flatarr[iflat+i];
+      iflat+=sd_[ispin][ikp]->c().size();
+    }
+}
+
+// AK: copy contents of a PETSc Vec into sd[ispin][ikp]
+void Wavefunction::set_from_vec(const Vec & petsc_vec)
+{
+  // AK: check that local sizes are the same
+  int petsc_vec_size;
+  VecGetLocalSize(petsc_vec, &petsc_vec_size);
+  assert (flatarrsize == petsc_vec_size);
+
+  // AK: get pointer to array held by petsc_vec
+  const complex<double> * petsc_vec_arr;
+  VecGetArrayRead(petsc_vec, &petsc_vec_arr);
+
+  // AK: copy contents
+  int iflat=0;
+  for (int ispin=0; ispin<nspin_; ispin++)
+    for (int ikp=0; ikp < sdcontext_[ispin].size(); ikp++)
+    {
+      for (int i=0; i<sd_[ispin][ikp]->c().size(); i++)
+        sd_[ispin][ikp]->c().valptr()[i]=petsc_vec_arr[iflat+i];
+      iflat+=sd_[ispin][ikp]->c().size();
+    }
+
+  // AK: must restore array once no longer need access
+  VecRestoreArrayRead(petsc_vec, &petsc_vec_arr);
+}
+
+////////////////////////////////////////////////////////////////////////////////
 ostream& operator<<(ostream& os, Wavefunction& wf)
 {
   wf.print(os,"text","wavefunction");

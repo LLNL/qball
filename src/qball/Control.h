@@ -42,6 +42,7 @@ struct Control
   // control variables
   string debug, timing;
   string wf_dyn, atoms_dyn; // dynamics string flags 
+  string petsc_ts_type, petsc_ts_subtype;     // petsc time stepper type
   int nite;
   double emass;       // electron mass
     

@@ -37,6 +37,7 @@
 #include "SharedFilePtr.h"
 #include "Timer.h"
 #include <vector>
+#include <petsc.h>
 #if USE_CSTDIO_LFS
 #include <cstdio>
 #endif
@@ -223,6 +224,14 @@ class Wavefunction {
   bool phase_real_set(void) const;
   // AS: change phase of the wave function to make it real for Gamma only
   void phase_real(bool new_wf_phase_real);
+
+  // AK: data/methods to reorganize data into flat, contiguous array and back
+  int flatarrsize;                  // AK: local size of array
+  complex<double> * flatarr = 0;    // AK: pointer to array
+  void allocate_flat();             // AK: computes size and allocates memory
+  void flatten();                   // AK: copy from sd_ into flatarr
+  void unflatten();                 // AK: copy from flatarr into sd_
+  void set_from_vec(const Vec & petsc_vec);   // AK: copy from array held by petsc_vec into sd_
 };
 ostream& operator << ( ostream& os, Wavefunction& wf );
 #endif

@@ -67,6 +67,7 @@ noinst_HEADERS =                            \
 	NonLocalPotential.h                 \
 	NonLocalPotential.save.h            \
 	ParallelOptimizer.h                 \
+	PETSCWavefunctionStepper.h          \
 	PositionConstraint.h                \
 	Preconditioner.h                    \
 	PrintMem.h                          \
@@ -178,6 +179,7 @@ libqbLink_a_SOURCES =                        \
 	FORKTDWavefunctionStepper.cc         \
 	TDEULERWavefunctionStepper.cc        \
 	EhrenSampleStepper.cc                \
+        PETSCWavefunctionStepper.cc          \
 	FCPStepper.cc                        \
 	ExponentialWavefunctionStepper.cc    \
 	SelfConsistentPotential.cc           \
