@@ -55,6 +55,7 @@ namespace pseudopotential {
       
       if(is_xml){
 	if(doc.first_node("fpmd:species")) return pseudopotential::format::QSO;
+	if(doc.first_node("qbox:species")) return pseudopotential::format::QSO;
 	if(doc.first_node("PP_INFO")) return pseudopotential::format::UPF1;
 	if(doc.first_node("UPF")) return pseudopotential::format::UPF2;
 	if(doc.first_node("psml")) return pseudopotential::format::PSML;
