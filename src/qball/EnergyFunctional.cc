@@ -134,7 +134,7 @@ EnergyFunctional::EnergyFunctional(const Sample& s, const Wavefunction& wf, Char
 
   vp = NULL;
   if(s.ctrl.vector_potential_dynamics != VectorPotential::Dynamics::NONE || norm(s.ctrl.initial_vector_potential) > 1e-15 || norm(s.ctrl.laser_amp) > 1e-15) {
-    vp = new VectorPotential(s.ctrl.vector_potential_dynamics, s.ctrl.initial_vector_potential, s.ctrl.laser_freq, s.ctrl.laser_amp);
+    vp = new VectorPotential(s.ctrl.vector_potential_dynamics, s.ctrl.initial_vector_potential, s.ctrl.laser_freq, s.ctrl.laser_amp, s.ctrl.envelope_type,s.ctrl.envelope_center,s.ctrl.envelope_width);
   }
  
   nlp.resize(wf_.nspin());
