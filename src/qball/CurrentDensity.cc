@@ -94,18 +94,6 @@ void CurrentDensity::update_current(EnergyFunctional & energy_functional, const 
 
       wf_.spincontext(ispin)->dsum('c', 1, 1, &total_current[idir], 1);
 
-      // kN term, not sure if needed 
-      /*
-      for ( int ispin = 0; ispin < wf_.nspin(); ispin++){ 
-        for ( int ikp = 0; ikp < wf_.nkp(); ikp++ ){
-          cout << "kpt " << ikp << endl;
-          double wt = wf_.weight(ikp)/wf_.weightsum();
-          cout << "weight = " << wt << endl;
-          total_current[idir] += wt * wf_.sd(ispin, ikp)->kpoint()[idir]*energy_functional.hamil_cd()->nelectrons();
-        }
-      }
-      */
-
       if(energy_functional.vp) total_current[idir] += energy_functional.vp->value()[idir]*energy_functional.hamil_cd()->nelectrons();
       
     }
