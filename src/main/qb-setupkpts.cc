@@ -415,8 +415,19 @@ int main(int argc, char **argv) {
         symop->print(cout);
       }
       cout << endl;
+      cout << "set nkpoints" << " " << kptsym.size() << endl;
+      cout << "set nparallelkpts 1" << endl;
+      cout << endl; 
+
+      // calculate weight before printout
+      double weightsum_ = 0.0;
+      for ( int i = 0; i < kptwt.size(); i++ )
+        weightsum_ += kptwt[i];
+
+      //cout << "weightsum = " << weightsum_   << endl;
+   
       for (int j=0; j<kptsym.size(); j++) 
-        cout << "kpoint " << kptsym[j] << " " << kptwt[j] << endl;
+        cout << "kpoint " << setw(12) << setprecision(8) << kptsym[j] << " " << kptwt[j]/weightsum_ << "  crystal" <<endl;
     }
 
     fullset.clear(); // deletes SymOp objects used by both fullset and sysset

@@ -184,9 +184,9 @@ void SymOp::print(ostream &os) {
     for (int j=0; j<3; j++) {
       const double stmp = abs(symxtal_[i][j]);
       if (abs(stmp-1.0) < thresh || abs(stmp-0.0) < thresh || abs(stmp-0.25) < thresh || abs(stmp-0.50) < thresh || abs(stmp-0.75) < thresh)
-        os << setprecision(2) << symxtal_[i][j] << "  ";
+        os << setw(5) << setprecision(2) << symxtal_[i][j] << "  ";
       else
-        os << setprecision(10) << symxtal_[i][j] << "  ";
+        os << setw(13) << setprecision(10) << symxtal_[i][j] << "  ";
     }
   }
   if (ftrans1_ != 0.0 || ftrans2_ != 0.0 || ftrans3_ != 0.0) 
