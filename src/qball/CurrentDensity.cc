@@ -65,6 +65,7 @@ void CurrentDensity::update_current(EnergyFunctional & energy_functional, const 
 
 	const int ngwloc = wf_.sd(ispin, ikp)->basis().localsize();
 	const int mloc = wf_.sd(ispin, ikp)->c().mloc();
+        double wt = wf_.weight(ikp)/wf_.weightsum();
 
 	for ( int n = 0; n < wf_.sd(ispin, ikp)->nstloc(); n++ ){
 	  for ( int ig = 0; ig < ngwloc; ig++ ){
@@ -76,7 +77,9 @@ void CurrentDensity::update_current(EnergyFunctional & energy_functional, const 
 	  tmp[ip] = 0.0;
 	}
 
-	wf_.sd(ispin, ikp)->compute_density(*ft(ispin, ikp), wf_.weight(ikp), &tmp[0], *rwf.sd(ispin, ikp));
+
+	//wf_.sd(ispin, ikp)->compute_density(*ft(ispin, ikp), wf_.weight(ikp), &tmp[0], *rwf.sd(ispin, ikp));
+	wf_.sd(ispin, ikp)->compute_density(*ft(ispin, ikp), wt, &tmp[0], *rwf.sd(ispin, ikp));
 	
 	for(int ip = 0; ip < vft()->np012loc(); ip++){
 	  current[idir][ispin][ip] += -std::imag(tmp[ip]);
@@ -90,6 +93,18 @@ void CurrentDensity::update_current(EnergyFunctional & energy_functional, const 
       }
 
       wf_.spincontext(ispin)->dsum('c', 1, 1, &total_current[idir], 1);
+
+      // kN term, not sure if needed 
+      /*
+      for ( int ispin = 0; ispin < wf_.nspin(); ispin++){ 
+        for ( int ikp = 0; ikp < wf_.nkp(); ikp++ ){
+          cout << "kpt " << ikp << endl;
+          double wt = wf_.weight(ikp)/wf_.weightsum();
+          cout << "weight = " << wt << endl;
+          total_current[idir] += wt * wf_.sd(ispin, ikp)->kpoint()[idir]*energy_functional.hamil_cd()->nelectrons();
+        }
+      }
+      */
 
       if(energy_functional.vp) total_current[idir] += energy_functional.vp->value()[idir]*energy_functional.hamil_cd()->nelectrons();
       
