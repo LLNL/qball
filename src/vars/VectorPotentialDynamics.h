@@ -73,7 +73,10 @@ class VectorPotentialDynamics : public Var
      st.setf(ios::left,ios::adjustfield);
      st << setw(10) << name() << " = ";
      st.setf(ios::right,ios::adjustfield);
-     st << setw(10) << s->ctrl.xc;
+     if (s->ctrl.vector_potential_dynamics == VectorPotential::Dynamics::NONE)
+       st << setw(10) << "none";
+     else if (s->ctrl.vector_potential_dynamics == VectorPotential::Dynamics::POLARIZATION)
+       st << setw(10) << "polarization";
      return st.str();
   }
 
