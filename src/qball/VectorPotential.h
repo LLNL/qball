@@ -152,6 +152,9 @@ public:
     // evaluation of analytic form
     if(norm(laser_amp_) > 0.0 && envelope_type_ == "constant") external_ = -sin(laser_freq_*time)*laser_amp_/laser_freq_;
 
+    // Static external field
+    if(norm(laser_amp_) > 0.0 && envelope_type_ == "constant" && laser_freq_ == 0.0) external_ = -laser_amp_ * time;
+
     // Numerical integration for guassian d(A/c)/dt = - E = - Amp * Normalization_factor * cos(wt) * Gaussing(center,width)
     if(norm(laser_amp_) > 0.0 && envelope_type_ == "gaussian") external_ +=  - dt*(laser_amp_/(envelope_width_ * sqrt(M_PI*2.0))) * cos(laser_freq_*time) * exp(-((time-envelope_center_)*(time-envelope_center_))/(2.0*envelope_width_*envelope_width_)) ;
 
