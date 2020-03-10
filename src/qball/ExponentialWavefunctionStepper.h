@@ -35,6 +35,7 @@
 #include "EnergyFunctional.h"
 #include "SelfConsistentPotential.h"
 #include "Wavefunction.h"
+#include "CurrentDensity.h"
 #include "WavefunctionStepper.h"
 
 #include <deque>
@@ -53,6 +54,8 @@ class ExponentialWavefunctionStepper : public WavefunctionStepper
   Wavefunction expwf_;
   Wavefunction wfhalf_;
   Wavefunction newwf_; 
+  CurrentDensity & currd_;
+  VectorPotential tempvp_;
 
   protected:
 
@@ -64,7 +67,7 @@ class ExponentialWavefunctionStepper : public WavefunctionStepper
   void preupdate();
   void update(Wavefunction& dwf);
 
-  ExponentialWavefunctionStepper(Wavefunction& wf, double tddt, TimerMap& tmap, EnergyFunctional & ef, Sample & s, bool approximated);
+  ExponentialWavefunctionStepper(Wavefunction& wf, CurrentDensity & currd, double tddt, TimerMap& tmap, EnergyFunctional & ef, Sample & s, bool approximated);
   ~ExponentialWavefunctionStepper() {};
 };
 #endif

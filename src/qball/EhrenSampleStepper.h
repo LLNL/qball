@@ -50,6 +50,7 @@ class EhrenSampleStepper : public SampleStepper
   Wavefunction dwf;
   Wavefunction* wfv;
   deque<Wavefunction*> wfdeque;
+  VectorPotential* tempvp_;
   
   int nitscf_;
   int nite_;

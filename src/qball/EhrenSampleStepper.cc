@@ -87,6 +87,8 @@ EhrenSampleStepper::EhrenSampleStepper(Sample& s, int nitscf, int nite) :
    wfdeque.push_back ( wf3 );
    wfdeque.push_back ( wf4 );
 
+   tempvp_=new VectorPotential(*ef_.vp);
+
 }
 ////////////////////////////////////////////////////////////////////////////////
 EhrenSampleStepper::~EhrenSampleStepper()
@@ -197,9 +199,9 @@ void EhrenSampleStepper::step(int niter)
   else if ( wf_dyn == "FORKTD" )
      wf_stepper = new FORKTDWavefunctionStepper(wf,s_.ctrl.tddt,tmap,&wfdeque);
   else if ( wf_dyn == "ETRS" )
-     wf_stepper = new ExponentialWavefunctionStepper(wf,s_.ctrl.tddt,tmap,ef_,s_,false);
+     wf_stepper = new ExponentialWavefunctionStepper(wf,currd_,s_.ctrl.tddt,tmap,ef_,s_,false);
   else if ( wf_dyn == "AETRS" )
-     wf_stepper = new ExponentialWavefunctionStepper(wf,s_.ctrl.tddt,tmap,ef_,s_,true);
+     wf_stepper = new ExponentialWavefunctionStepper(wf,currd_,s_.ctrl.tddt,tmap,ef_,s_,true);
   else
   {
      if ( oncoutpe )
@@ -356,8 +358,8 @@ void EhrenSampleStepper::step(int niter)
     tmap["efn"].stop();
 
     tmap["current"].start();
-    currd_.update_current(ef_, dwf);
-    tmap["current"].start();
+    currd_.update_current(ef_);
+    tmap["current"].stop();
 
     if(ef_.vp && oncoutpe){
       std::cout << "<!-- vector_potential: " << ef_.vp->value() << " -->\n";
@@ -797,6 +799,18 @@ void EhrenSampleStepper::step(int niter)
        ( ef_.hamil_cd() )->update_density();
        tmap["charge"].stop();
 
+       // AK: update current and vector potential
+       if (ef_.vp)
+       {
+         tmap["current"].start();
+         currd_.update_current(ef_, false);
+         tmap["current"].stop();
+
+         *tempvp_ = *ef_.vp;
+         ef_.vp->calculate_acceleration(s_.ctrl.tddt, currd_.total_current, cell);
+         ef_.vp->propagate(s_.ctrl.tddt*(iter+1), s_.ctrl.tddt);
+       }
+
        tmap["efn"].start();
        ef_.update_hamiltonian();
        ef_.update_vhxc();
@@ -806,6 +820,8 @@ void EhrenSampleStepper::step(int niter)
 
        // AS: setting wf back to |psi(t)>
        s_.wf=(*wfdeque[4]);
+       // AK: restore vp
+       if(ef_.vp) *ef_.vp = *tempvp_;
 
        for ( int ispin = 0; ispin < wf.nspin(); ispin++ )
        {
@@ -838,6 +854,18 @@ void EhrenSampleStepper::step(int niter)
        ( ef_.hamil_cd() )->update_density();
        tmap["charge"].stop();
 
+       // AK: update current and vector potential
+       if (ef_.vp)
+       {
+         tmap["current"].start();
+         currd_.update_current(ef_, false);
+         tmap["current"].stop();
+
+         *tempvp_ = *ef_.vp;
+         ef_.vp->calculate_acceleration(s_.ctrl.tddt, currd_.total_current, cell);
+         ef_.vp->propagate(s_.ctrl.tddt*(iter+1), s_.ctrl.tddt);
+       }
+
        tmap["efn"].start();
        ef_.update_hamiltonian();
        ef_.update_vhxc();
@@ -847,6 +875,8 @@ void EhrenSampleStepper::step(int niter)
 
        // AS: setting wf back to |psi(t)>
        s_.wf=(*wfdeque[4]);
+       // AK: restore vp
+       if(ef_.vp) *ef_.vp = *tempvp_;
 
        for ( int ispin = 0; ispin < wf.nspin(); ispin++ )
        {
@@ -878,6 +908,18 @@ void EhrenSampleStepper::step(int niter)
        ( ef_.hamil_cd() )->update_density();
        tmap["charge"].stop();
 
+       // AK: update current and vector potential
+       if (ef_.vp)
+       {
+         tmap["current"].start();
+         currd_.update_current(ef_, false);
+         tmap["current"].stop();
+
+         *tempvp_ = *ef_.vp;
+         ef_.vp->calculate_acceleration(s_.ctrl.tddt, currd_.total_current, cell);
+         ef_.vp->propagate(s_.ctrl.tddt*(iter+1), s_.ctrl.tddt);
+       }
+
        tmap["efn"].start();
        ef_.update_hamiltonian();
        ef_.update_vhxc();
@@ -893,6 +935,10 @@ void EhrenSampleStepper::step(int niter)
              ((*wfdeque[3]).sd(ispin,ikp)->c()).axpy(-1.0*s_.ctrl.tddt*(complex<double>(0,1)), dwf.sd(ispin,ikp)->c() );
           }
        }
+
+       // AK: restore vp
+       if(ef_.vp) *ef_.vp = *tempvp_;
+
        tmap["forktd_tot"].stop();
     }
 

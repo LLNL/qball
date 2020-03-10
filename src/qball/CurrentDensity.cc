@@ -36,7 +36,7 @@ CurrentDensity::CurrentDensity(const Sample& s, const Wavefunction & wf):
   
 }
 
-void CurrentDensity::update_current(EnergyFunctional & energy_functional, const Wavefunction & dwf){
+void CurrentDensity::update_current(EnergyFunctional & energy_functional, bool output){
 
   Wavefunction rwf(wf_);
   Wavefunction rdwf(wf_);
@@ -102,9 +102,10 @@ void CurrentDensity::update_current(EnergyFunctional & energy_functional, const 
 
   // TODO: Reduce total current over spin
   assert(wf_.nspin() == 1);
-	 
+
   if ( wf_.context().onpe0() ){
-    std::cout << "  total_electronic_current:\t" << std::fixed << std::setw( 20 ) << std::setprecision( 12 ) << total_current[0] << '\t' << total_current[1] << '\t' << total_current[2] << std::endl;
+    if (output)
+      std::cout << "  total_electronic_current:\t" << std::fixed << std::setw( 20 ) << std::setprecision( 12 ) << total_current[0] << '\t' << total_current[1] << '\t' << total_current[2] << std::endl;
   }
 
 }

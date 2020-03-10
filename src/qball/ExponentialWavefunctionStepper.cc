@@ -38,8 +38,8 @@
 using namespace std;
 
 ////////////////////////////////////////////////////////////////////////////////
-ExponentialWavefunctionStepper::ExponentialWavefunctionStepper(Wavefunction& wf, double tddt, TimerMap& tmap, EnergyFunctional & ef, Sample & s, bool approximated)
-    : tddt_(tddt), WavefunctionStepper(wf,tmap), ef_(ef), s_(s), approximated_(approximated), expwf_(s.wf), wfhalf_(s.wf), newwf_(s.wf) 
+ExponentialWavefunctionStepper::ExponentialWavefunctionStepper(Wavefunction& wf, CurrentDensity& currd, double tddt, TimerMap& tmap, EnergyFunctional & ef, Sample & s, bool approximated)
+    : tddt_(tddt), WavefunctionStepper(wf,tmap), ef_(ef), s_(s), approximated_(approximated), expwf_(s.wf), wfhalf_(s.wf), newwf_(s.wf), currd_(currd), tempvp_(*ef.vp)
 {
   order_ = 4;
   potential_.resize(3);
@@ -261,6 +261,18 @@ void ExponentialWavefunctionStepper::update(Wavefunction& dwf)
      ef_.update_vhxc();
      tmap_["expowf_ef"].stop();
 
+     // AK: also update current and vp to estimate at t + dt
+     if(ef_.vp) {
+       tmap_["current"].start();
+       currd_.update_current(ef_, false);
+       tmap_["current"].stop(); 
+
+       tempvp_ = *ef_.vp;
+       ef_.vp->calculate_acceleration(tddt_, currd_.total_current, wf_.cell());
+       // first argument is wrong for laser; need to get time from somewhere
+       ef_.vp->propagate(0, tddt_);
+     }
+
      // Copy the wavefunctions at t + dt/2 (currently in newwf_) to wf_
      tmap_["expowf_copy"].start();
      for ( int ispin = 0; ispin < wf_.nspin(); ispin++)
@@ -271,6 +283,10 @@ void ExponentialWavefunctionStepper::update(Wavefunction& dwf)
      // Propagate the wavefunctions in wf_ from t + dt/2 to t + dt
      // using H(t + dt)
      exponential(num_exp, dt1, dt2);
+
+     // AK: restore vp to state at t
+     if(ef_.vp) *ef_.vp = tempvp_;
+
    }
    
 }
