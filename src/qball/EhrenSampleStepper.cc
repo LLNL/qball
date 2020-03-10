@@ -807,8 +807,8 @@ void EhrenSampleStepper::step(int niter)
          tmap["current"].stop();
 
          *tempvp_ = *ef_.vp;
-         ef_.vp->calculate_acceleration(s_.ctrl.tddt, currd_.total_current, cell);
-         ef_.vp->propagate(s_.ctrl.tddt*(iter+1), s_.ctrl.tddt);
+         ef_.vp->calculate_acceleration(0.5*s_.ctrl.tddt, currd_.total_current, cell);
+         ef_.vp->propagate(s_.ctrl.tddt*(iter+0.5), 0.5*s_.ctrl.tddt);
        }
 
        tmap["efn"].start();
@@ -862,8 +862,8 @@ void EhrenSampleStepper::step(int niter)
          tmap["current"].stop();
 
          *tempvp_ = *ef_.vp;
-         ef_.vp->calculate_acceleration(s_.ctrl.tddt, currd_.total_current, cell);
-         ef_.vp->propagate(s_.ctrl.tddt*(iter+1), s_.ctrl.tddt);
+         ef_.vp->calculate_acceleration(0.5*s_.ctrl.tddt, currd_.total_current, cell);
+         ef_.vp->propagate(s_.ctrl.tddt*(iter+0.5), 0.5*s_.ctrl.tddt);
        }
 
        tmap["efn"].start();
