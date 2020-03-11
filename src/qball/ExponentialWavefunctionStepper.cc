@@ -238,7 +238,7 @@ void ExponentialWavefunctionStepper::preupdate()
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-void ExponentialWavefunctionStepper::update(Wavefunction& dwf)
+void ExponentialWavefunctionStepper::update_t(Wavefunction& dwf,int time)
 {
    // Define time step args for both AETRS and ETRS 
    int num_exp = 1;
@@ -270,7 +270,7 @@ void ExponentialWavefunctionStepper::update(Wavefunction& dwf)
        tempvp_ = *ef_.vp;
        ef_.vp->calculate_acceleration(tddt_, currd_.total_current, wf_.cell());
        // first argument is wrong for laser; need to get time from somewhere
-       ef_.vp->propagate(0, tddt_);
+       ef_.vp->propagate(time, tddt_);
      }
 
      // Copy the wavefunctions at t + dt/2 (currently in newwf_) to wf_

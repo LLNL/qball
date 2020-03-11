@@ -65,7 +65,7 @@ class ExponentialWavefunctionStepper : public WavefunctionStepper
 
   public:
   void preupdate();
-  void update(Wavefunction& dwf);
+  void update_t(Wavefunction& dwf,int time);
 
   ExponentialWavefunctionStepper(Wavefunction& wf, CurrentDensity & currd, double tddt, TimerMap& tmap, EnergyFunctional & ef, Sample & s, bool approximated);
   ~ExponentialWavefunctionStepper() {};
