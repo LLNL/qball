@@ -47,9 +47,9 @@ class LoadReferenceWFCmd : public Cmd
 
   LoadReferenceWFCmd(Sample *sample) : s(sample) {};
 
-  char *name(void) const { return "load_reference_wf"; }
+  char const*name(void) const { return "load_reference_wf"; }
 
-  char *help_msg(void) const
+  char const*help_msg(void) const
   {
     return 
     "\n load_reference_wf\n\n"

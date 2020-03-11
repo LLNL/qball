@@ -28,7 +28,7 @@
 
 #include <config.h>
 
-#include "LoadReferenceWFCmd.h>
+#include "LoadReferenceWFCmd.h"
 #include <qball/Sample.h>
 #include <qball/Context.h>
 #include <qball/ChargeDensity.h>

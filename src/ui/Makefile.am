@@ -53,7 +53,7 @@ noinst_HEADERS =                            \
 libui_a_SOURCES =                           \
 	ComputeMLWFCmd.cc \
 	LoadCmd.cc \
-        LoadReferenceWFCmd \
+        LoadReferenceWFCmd.cc \
 	LoaddenCmd.cc \
 	MDSaveCmd.cc \
 	ParOptCmd.cc \
