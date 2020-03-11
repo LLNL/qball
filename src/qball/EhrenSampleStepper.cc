@@ -475,6 +475,51 @@ void EhrenSampleStepper::step(int niter)
     }
     tmap["ionic"].stop();
 
+    if ((s_.previous_wf != 0) && ( s_.ctrl.na_overlap_min < 0 ))
+    {
+      for ( int ispin = 0; ispin < (wf).nspin(); ispin++ )
+      {
+        for ( int ikp = 0; ikp < (wf).nkp(); ikp++ )
+        {
+          ComplexMatrix ortho(wf.sd(ispin,ikp)->context(),(wf.sd(ispin,ikp)->c()).n(),(wf.sd(ispin,ikp)->c()).n(),(wf.sd(ispin,ikp)->c()).nb(),(wf.sd(ispin,ikp)->c()).nb());
+          
+          //CW: 1.0 *  <current wf | previous_wf > + 0.0 * ortho and stored in ortho
+          ortho.gemm('c','n',1.0,(wf).sd(ispin,ikp)->c(),(*s_.previous_wf).sd(ispin,ikp)->c(),0.0);
+
+          std::vector<double> occ_result, occ_current;
+          occ_result.resize((wf.sd(ispin,ikp)->c()).n());
+          occ_current.resize((wf.sd(ispin,ikp)->c()).n());
+          occ_result.clear();
+          occ_current.clear();
+          
+          double electron_hole_pair_count=0.0;
+          // CW: store information about occ of current wf in occ_current
+          if ( oncoutpe )
+          {
+            cout << "occupation numbers: " << endl;
+
+            for (int i=0; i<(wf.sd(ispin,ikp)->c()).n(); i++)
+            {
+              occ_current[i]=(wf.sd(ispin,ikp))->occ(i);
+            }
+          }
+
+          // CW: calculate the projected occupation numbers and stored in occ_result; details --> Matrix.C 
+          ortho.sum_columns_square_occ(occ_result, occ_current);
+
+          // CW: calculate the electron-hole pair, i.e., the sume of the difference between occ_current and 0K fermi_distribution
+          if ( oncoutpe )
+          {
+            for (int i=0; i<(wf.sd(ispin,ikp)->c()).n(); i++)
+            {
+               cout << occ_result[i] << endl;
+            }
+            cout << " Number of electron-hole pairs: " << electron_hole_pair_count << endl;
+          }
+        }
+      }
+    }
+
     tmap["preupdate"].start();
     wf_stepper->preupdate();
     tmap["preupdate"].stop();

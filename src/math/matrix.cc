@@ -3611,6 +3611,41 @@ void ComplexMatrix::print_norm(ostream& os) const
   }
 }
 ////////////////////////////////////////////////////////////////////////////////
+void ComplexMatrix::sum_columns_square_occ(std::vector<double>& occ_result, std::vector<double> const & occ_current) const
+{
+  // Copy blocks of <blocksize> columns and print them on process (0,0)
+  if ( m_ == 0 || n_ == 0 ) return;
+  Context ctxtl(1,1);
+  const int blockmemsize = 32768; // maximum memory size of a block in bytes
+  // compute maximum block size: must be at least 1
+  int maxbs = max(1, (int) ((blockmemsize/sizeof(complex<double>))/m_));
+  ComplexMatrix t(ctxtl,m_,maxbs);
+  int nblocks = n_ / maxbs + ( (n_%maxbs == 0) ? 0 : 1 );
+  int ia = 0;
+  int ja = 0;
+  for ( int jb = 0; jb < nblocks; jb++ )
+  {
+    int blocksize = ( (jb+1) * maxbs > n_ ) ? n_ % maxbs : maxbs;
+    //get submatrix A(ia:ia+m,ja:ja+n) of A
+    t.getsub(*this,t.m(),blocksize,ia,ja);
+    ja += blocksize;
+    if ( t.active() )
+    {
+      // this is done only on pe 0
+      //  ortho is done by <TDDFT wf | previous wf> 
+      for ( int jj = 0; jj < blocksize; jj++ )   // j ->  n -> previous wf
+      {
+        for ( int ii = 0; ii < m_; ii++ )   // i -> m  -> TDDFT wf
+        {
+          // occ_result[ii]+=norm(t.val[ii+t.mloc()*jj])*occ_current[jj+jb*maxbs];  //old version
+          occ_result[jj+jb*maxbs]+=norm(t.val[ii+t.mloc()*jj])*occ_current[ii];  // for each n, sum over m  
+        }
+      }
+    }
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
 ostream& operator<<(ostream& os, const DoubleMatrix& a)
 {
   a.print(os);
