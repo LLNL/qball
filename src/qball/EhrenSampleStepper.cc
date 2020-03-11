@@ -481,7 +481,12 @@ void EhrenSampleStepper::step(int niter)
       {
         for ( int ikp = 0; ikp < (wf).nkp(); ikp++ )
         {
-          ComplexMatrix ortho(wf.sd(ispin,ikp)->context(),(wf.sd(ispin,ikp)->c()).n(),(wf.sd(ispin,ikp)->c()).n(),(wf.sd(ispin,ikp)->c()).nb(),(wf.sd(ispin,ikp)->c()).nb());
+          const int nst = (*s_.previous_wf).sd(ispin,ikp)->nst();
+          const int nb = (wf.sd(ispin,ikp)->c()).nb();
+          const int nprow = wf.sd(ispin,ikp)->context().nprow();
+          int mb = nst/nprow + (nst%nprow > 0 ? 1 : 0);
+          ComplexMatrix ortho(wf.sd(ispin,ikp)->context(),(wf.sd(ispin,ikp)->c()).n(),(wf.sd(ispin,ikp)->c()).n(),mb,nb);
+          //ComplexMatrix ortho(wf.sd(ispin,ikp)->context(),(wf.sd(ispin,ikp)->c()).n(),(wf.sd(ispin,ikp)->c()).n(),(wf.sd(ispin,ikp)->c()).nb(),(wf.sd(ispin,ikp)->c()).nb());
           
           //CW: 1.0 *  <current wf | previous_wf > + 0.0 * ortho and stored in ortho
           ortho.gemm('c','n',1.0,(wf).sd(ispin,ikp)->c(),(*s_.previous_wf).sd(ispin,ikp)->c(),0.0);
@@ -497,11 +502,12 @@ void EhrenSampleStepper::step(int niter)
           if ( oncoutpe )
           {
             cout << "occupation numbers: " << endl;
-
-            for (int i=0; i<(wf.sd(ispin,ikp)->c()).n(); i++)
-            {
-              occ_current[i]=(wf.sd(ispin,ikp))->occ(i);
-            }
+          }
+   
+          for (int i=0; i<(wf.sd(ispin,ikp)->c()).n(); i++)
+          {
+            occ_current[i]=(wf.sd(ispin,ikp))->occ(i);
+            //cout << "occ at " << i << " = " << occ_current[i];
           }
 
           // CW: calculate the projected occupation numbers and stored in occ_result; details --> Matrix.C 
@@ -514,6 +520,11 @@ void EhrenSampleStepper::step(int niter)
             {
                cout << occ_result[i] << endl;
             }
+            for (int i=0; i<(wf.sd(ispin,ikp)->c()).n(); i++)
+            {
+              electron_hole_pair_count += std::max( (*s_.previous_wf).sd(ispin,ikp)->occ(i) - occ_result[i], 0.);
+            }
+
             cout << " Number of electron-hole pairs: " << electron_hole_pair_count << endl;
           }
         }
