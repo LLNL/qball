@@ -22,60 +22,43 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Sample.h
+// LoadReferenceWFCmd.h:
 //
 ////////////////////////////////////////////////////////////////////////////////
 
 #include <config.h>
 
-#ifndef SAMPLE_H
-#define SAMPLE_H
+#ifndef LOADREFERENCEWFCMD_H
+#define LOADREFERENCEWFCMD_H
 
-#include "AtomSet.h"
-#include "Wavefunction.h"
-#include "Control.h"
-#include "ConstraintSet.h"
-#include "SymmetrySet.h"
-#include <vector>
-#include <complex>
+#include <iostream>
+#include <cstdlib>
+#include <string>
+using namespace std;
 
-class Context;
+#include <ui/UserInterface.h>
+#include <qball/Sample.h>
 
-class Sample {
-  private:
-  
+class LoadReferenceWFCmd : public Cmd
+{
   public:
-  
-  const Context& ctxt_;
 
-  AtomSet atoms;
-  ConstraintSet constraints;
-  Wavefunction wf;
-  // AS: hamil_wf is a pointer which by default points to wf.
-  // AS: in order to construct an Hamiltonian from different wave functions (charge densities)
-  // AS: than wf, make hamil_wf point to these wave functions instead
-  Wavefunction* hamil_wf;
-  // AS: keep a copy of the wave function during Born-Oppenheimer MD when non-adiabatic overlaps are to be calculated
-  Wavefunction* previous_wf;
-  Wavefunction* wfv; // wavefunction velocity
-  Control ctrl;
-  SymmetrySet symmetries;
-  vector<vector<complex<double> > > rhog_last; // previous charge density (to avoid discontinuity in restart)
+  Sample *s;
 
- Sample(const Context& ctxt) : ctxt_(ctxt), atoms(ctxt), constraints(ctxt), wf(ctxt), hamil_wf(0), previous_wf(0), wfv(0),
-      symmetries(ctxt) { ctrl.sigmas = 0.5; ctrl.facs = 2.0; }
-  ~Sample(void) { delete wfv; }
-  void reset(void)
+  LoadReferenceWFCmd(Sample *sample) : s(sample) {};
+
+  char *name(void) const { return "load_reference_wf"; }
+
+  char *help_msg(void) const
   {
-    atoms.reset();
-    constraints.reset();
-    //extforces.reset();
-    wf.reset();
-    delete wfv;
+    return 
+    "\n load_reference_wf\n\n"
+    " syntax: load_reference_wf -states filename \n\n"
+    "   The load_reference_wf command loads a sample from the file filename.\n";
   }
 
+  int action(int argc, char **argv);
 };
-
 #endif
 
 // Local Variables:

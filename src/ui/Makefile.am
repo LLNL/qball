@@ -18,6 +18,7 @@ noinst_HEADERS =                            \
         ListConstraintsCmd.h                \
 	ListSpeciesCmd.h                    \
 	LoadCmd.h                           \
+	LoadReferenceWFCmd.h                \
 	LoaddenCmd.h                        \
 	LockCmd.h                           \
 	MDSaveCmd.h                         \
@@ -52,6 +53,7 @@ noinst_HEADERS =                            \
 libui_a_SOURCES =                           \
 	ComputeMLWFCmd.cc \
 	LoadCmd.cc \
+        LoadReferenceWFCmd \
 	LoaddenCmd.cc \
 	MDSaveCmd.cc \
 	ParOptCmd.cc \

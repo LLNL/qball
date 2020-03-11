@@ -59,6 +59,7 @@ using namespace std;
 #include <ui/ListAtomsCmd.h>
 #include <ui/ListSpeciesCmd.h>
 #include <ui/LoadCmd.h>
+#include <ui/LoadReferenceWFCmd.h>
 #include <ui/PrintCmd.h>
 #include <ui/PromoteOccCmd.h>
 #include <ui/QuitCmd.h>
@@ -324,6 +325,7 @@ int main(int argc, char **argv, char **envp)
   ui->addCmd(new ListAtomsCmd(s));
   ui->addCmd(new ListSpeciesCmd(s));
   ui->addCmd(new LoadCmd(s));
+  ui->addCmd(new LoadReferenceWFCmd(s));
   ui->addCmd(new PrintCmd(s));
   ui->addCmd(new PromoteOccCmd(s));
   ui->addCmd(new QuitCmd(s));
