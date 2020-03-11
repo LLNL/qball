@@ -45,7 +45,7 @@ TDEULERWavefunctionStepper::TDEULERWavefunctionStepper(Wavefunction& wf, double 
 {}
 
 ////////////////////////////////////////////////////////////////////////////////
-void TDEULERWavefunctionStepper::update(Wavefunction& dwf)
+void TDEULERWavefunctionStepper::update(Wavefunction& dwf,int time)
 {
   for ( int ispin = 0; ispin < wf_.nspin(); ispin++ )
   {

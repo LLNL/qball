@@ -238,7 +238,7 @@ void ExponentialWavefunctionStepper::preupdate()
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-void ExponentialWavefunctionStepper::update_t(Wavefunction& dwf,int time)
+void ExponentialWavefunctionStepper::update(Wavefunction& dwf,int time)
 {
    // Define time step args for both AETRS and ETRS 
    int num_exp = 1;

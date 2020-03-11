@@ -40,7 +40,7 @@ SDWavefunctionStepper::SDWavefunctionStepper(Wavefunction& wf, double alpha, Tim
 {}
 
 ////////////////////////////////////////////////////////////////////////////////
-void SDWavefunctionStepper::update(Wavefunction& dwf) {
+void SDWavefunctionStepper::update(Wavefunction& dwf,int time) {
   for ( int ispin = 0; ispin < wf_.nspin(); ispin++ ) {
     if (wf_.spinactive(ispin)) {
       for ( int ikp=0; ikp<wf_.nkp(); ikp++) {

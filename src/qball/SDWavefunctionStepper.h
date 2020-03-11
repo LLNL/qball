@@ -41,7 +41,7 @@ class SDWavefunctionStepper : public WavefunctionStepper
 
   public:
 
-  void update(Wavefunction& dwf);
+  void update(Wavefunction& dwf,int time = 0.0);
 
   SDWavefunctionStepper(Wavefunction& wf, double alpha, TimerMap& tmap);
   ~SDWavefunctionStepper() {};

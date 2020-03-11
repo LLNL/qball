@@ -46,7 +46,7 @@ SOTDWavefunctionStepper::SOTDWavefunctionStepper(Wavefunction& wf, double tddt,
 { }
 
 ////////////////////////////////////////////////////////////////////////////////
-void SOTDWavefunctionStepper::update(Wavefunction& dwf)
+void SOTDWavefunctionStepper::update(Wavefunction& dwf,int time)
 {
   // AS: create some space for the new wave function
   (*wfdeque_).push_back( &wf_ );

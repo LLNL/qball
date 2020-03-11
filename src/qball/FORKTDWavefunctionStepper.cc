@@ -53,7 +53,7 @@ FORKTDWavefunctionStepper::FORKTDWavefunctionStepper(Wavefunction& wf, double td
 { }
 
 ////////////////////////////////////////////////////////////////////////////////
-void FORKTDWavefunctionStepper::update(Wavefunction& dwf)
+void FORKTDWavefunctionStepper::update(Wavefunction& dwf,int time)
 {
   wf_ = (*(*wfdeque_)[4]);
 

@@ -47,7 +47,7 @@ class JDWavefunctionStepper : public WavefunctionStepper
 
   public:
 
-  void update(Wavefunction& dwf);
+  void update(Wavefunction& dwf,int time = 0.0);
   virtual void preprocess(void) {}
 
   JDWavefunctionStepper(Wavefunction& wf, Preconditioner& p,

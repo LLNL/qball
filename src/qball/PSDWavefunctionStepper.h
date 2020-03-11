@@ -42,7 +42,7 @@ class PSDWavefunctionStepper : public WavefunctionStepper
 
   public:
 
-  void update(Wavefunction& dwf);
+  void update(Wavefunction& dwf,int time = 0.0);
   
   PSDWavefunctionStepper(Wavefunction& wf, Preconditioner& p, TimerMap& tmap);
   ~PSDWavefunctionStepper() {};

@@ -44,7 +44,7 @@ MDWavefunctionStepper::MDWavefunctionStepper(Wavefunction& wf,
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-void MDWavefunctionStepper::update(Wavefunction& dwf)
+void MDWavefunctionStepper::update(Wavefunction& dwf,int time)
 {
   // Verlet update of wf using force dwf and wfm stored in *wfv
   for ( int ispin = 0; ispin < wf_.nspin(); ispin++ )

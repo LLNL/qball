@@ -52,7 +52,7 @@ SORKTDWavefunctionStepper::SORKTDWavefunctionStepper(Wavefunction& wf, double td
 { }
 
 ////////////////////////////////////////////////////////////////////////////////
-void SORKTDWavefunctionStepper::update(Wavefunction& dwf)
+void SORKTDWavefunctionStepper::update(Wavefunction& dwf,int time)
 {
   wf_ = (*(*wfdeque_)[2]);
 

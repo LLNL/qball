@@ -45,7 +45,7 @@ class TDEULERWavefunctionStepper : public WavefunctionStepper
 
   public:
 
-  void update(Wavefunction& dwf);
+  void update(Wavefunction& dwf,int time = 0.0);
 
   TDEULERWavefunctionStepper(Wavefunction& wf, double tddt, TimerMap& tmap);
   ~TDEULERWavefunctionStepper() {};

@@ -46,7 +46,7 @@ class MDWavefunctionStepper : public WavefunctionStepper
 
   public:
 
-  void update(Wavefunction& dwf);
+  void update(Wavefunction& dwf,int time =0.0);
   void compute_wfm(Wavefunction& dwf);
   void compute_wfv(Wavefunction& dwf);
   double ekin(void) const { return 0.5*(ekin_ep_ + ekin_em_); }

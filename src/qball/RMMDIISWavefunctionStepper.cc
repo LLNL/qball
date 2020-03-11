@@ -47,7 +47,7 @@ void RMMDIISWavefunctionStepper::preprocess(void) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-void RMMDIISWavefunctionStepper::update(Wavefunction& dwf) {
+void RMMDIISWavefunctionStepper::update(Wavefunction& dwf,int time) {
   for ( int ispin = 0; ispin < wf_.nspin(); ispin++ ) {
     if (wf_.spinactive(ispin)) {
       for ( int ikp=0; ikp<wf_.nkp(); ikp++) {

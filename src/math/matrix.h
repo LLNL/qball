@@ -398,6 +398,7 @@ class ComplexMatrix
     
     void print(ostream& os) const;
     void print_norm(std::ostream& os) const;                  
+    void sum_columns_square_occ(std::vector<double>& occ_result, std::vector<double> const & occ_current) const;
     
     explicit ComplexMatrix(const Context& ctxt) : ctxt_(ctxt),
         m_(0), n_(0), mb_(0), nb_(0), size_(0), reference_(false), val(0) {}

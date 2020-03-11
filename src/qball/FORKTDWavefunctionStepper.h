@@ -59,7 +59,7 @@ class FORKTDWavefunctionStepper : public WavefunctionStepper
 
   public:
 
-  void update(Wavefunction& dwf);
+  void update(Wavefunction& dwf, int time = 0.0);
 
   FORKTDWavefunctionStepper(Wavefunction& wf, double tddt, TimerMap& tmap, deque<Wavefunction*> *wfdeque);
   ~FORKTDWavefunctionStepper() {};

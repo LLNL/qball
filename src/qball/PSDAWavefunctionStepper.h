@@ -49,7 +49,7 @@ class PSDAWavefunctionStepper : public WavefunctionStepper
   
   public:
 
-  void update(Wavefunction& dwf);
+  void update(Wavefunction& dwf,int time = 0.0);
   virtual void preprocess(void)
   {
     for (int i=0; i<nspin_; i++)

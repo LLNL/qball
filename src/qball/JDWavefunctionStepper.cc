@@ -44,7 +44,7 @@ JDWavefunctionStepper::JDWavefunctionStepper(Wavefunction& wf,
 {}
 
 ////////////////////////////////////////////////////////////////////////////////
-void JDWavefunctionStepper::update(Wavefunction& dwf)
+void JDWavefunctionStepper::update(Wavefunction& dwf,int time)
 {
 
   if (wf_.ultrasoft()) {
