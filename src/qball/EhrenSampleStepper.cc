@@ -1013,9 +1013,7 @@ void EhrenSampleStepper::step(int niter)
     // }    
 
     tmap["wfupdate"].start();
-    wf_stepper->update(dwf);
-    if (wf_dyn=="ETRS" || wf_dyn=="AETRS") 
-      wf_stepper->update(dwf,s_.ctrl.tddt*(iter+1));
+    wf_stepper->update(dwf,s_.ctrl.tddt*(iter+1));
     tmap["wfupdate"].stop();
 
 
