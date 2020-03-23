@@ -269,7 +269,6 @@ void ExponentialWavefunctionStepper::update(Wavefunction& dwf,int time)
 
        tempvp_ = *ef_.vp;
        ef_.vp->calculate_acceleration(tddt_, currd_.total_current, wf_.cell());
-       // first argument is wrong for laser; need to get time from somewhere
        ef_.vp->propagate(time, tddt_);
      }
 
