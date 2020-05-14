@@ -78,7 +78,7 @@ class SetVelCmd : public Cmd {
     Unit vel_unit(Dimensions::velocity, vel_unit_name);
     
     if(!vel_unit.exists()) {
-      ui->error("Unknown energy unit '" + vel_unit_name + "'.");
+      ui->error("Unknown velocity unit '" + vel_unit_name + "'.");
       return 1;
     }
     
