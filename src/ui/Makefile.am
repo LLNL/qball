@@ -39,6 +39,7 @@ noinst_HEADERS =                            \
 	SavesysCmd.h \
 	SetCmd.h \
 	SetVelCmd.h \
+	SetPosCmd.h \
 	ShiftWFCmd.h \
 	SpeciesCmd.h \
 	StatusCmd.h \
