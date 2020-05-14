@@ -28,8 +28,8 @@
 
 #include <config.h>
 
-#ifndef SETVELCMD_H
-#define SETVELCMD_H
+#ifndef SETPOSCMD_H
+#define SETPOSCMD_H
 
 #include <iostream>
 #include <cstdlib>
@@ -42,71 +42,73 @@ using namespace std;
 #include <qball/MMSpecies.h>
 #include <qball/Atom.h>
 
-class SetVelCmd : public Cmd {
+class SetPosCmd : public Cmd {
   public:
 
   Sample *s;
 
-  SetVelCmd(Sample *sample) : s(sample) { };
+  SetPosCmd(Sample *sample) : s(sample) { };
 
-  char const*name(void) const { return "set_velocity"; }
+  char const*name(void) const { return "set_position"; }
 
   char const*help_msg(void) const {
     return 
     "\n lock\n\n"
-    " syntax: set_velocity [atom name] [vx] [vy] [vz]\n\n"
-    "   The set_velocity command sets the velocity for a given atom.\n\n";
+    " syntax: set_position [atom name] [x] [y] [z]\n\n"
+    "   The set_position command sets the velocity for a given atom.\n\n";
   }
 
 
   int action(int argc, char **argv) {
     string name;
 
-    string vel_unit_name = "atomicvelocity";
+    string pos_unit_name = "bohr";
+//    string vel_unit_name = "atomicvelocity";
  
     if ( argc != 5 && argc != 6) {
-      ui->error("<!-- use: set_velocity [atom name] [vx] [vy] [vz] [units] -->");
+      ui->error("<!-- use: set_position [atom name] [x] [y] [z] [units] -->");
       return 1;
     }
 
     if (argc == 5) {
       ui->warning("Units missing for the set_velocity command, assuming 'atomicvelocity'.");
     } else {
-      vel_unit_name = string(argv[5]);
+      pos_unit_name = string(argv[5]);
     }
     
-    Unit vel_unit(Dimensions::velocity, vel_unit_name);
+    Unit pos_unit(Dimensions::length, pos_unit_name);
+//    Unit vel_unit(Dimensions::velocity, vel_unit_name);
     
-    if(!vel_unit.exists()) {
-      ui->error("Unknown velocity unit '" + vel_unit_name + "'.");
+    if(!pos_unit.exists()) {
+      ui->error("Unknown position unit '" + pos_unit_name + "'.");
       return 1;
     }
     
     name = argv[1];
-    double vx = atof(argv[2]);
-    double vy = atof(argv[3]);
-    double vz = atof(argv[4]);
-    D3vector newvel(vx,vy,vz);
+    double x = atof(argv[2]);
+    double y = atof(argv[3]);
+    double z = atof(argv[4]);
+    D3vector newpos(x,y,z);
 
-    newvel = vel_unit.to_atomic(newvel);
+    newpos = pos_unit.to_atomic(newpos);
     
     if (s->atoms.findAtom(name) ) {
       Atom *a = s->atoms.findAtom(name);
 
-      a->set_velocity(newvel);
+      a->set_position(newpos);
       if ( ui->oncoutpe() )
-        cout << "<!-- Atom " << a->name() << " velocity set to " << newvel << " -->" << endl;
+        cout << "<!-- Atom " << a->name() << " position set to " << newpos << " -->" << endl;
     }
     else if (s->atoms.findMMAtom(name) ) {
       Atom *a = s->atoms.findMMAtom(name);
 
-      a->set_velocity(newvel);
+      a->set_position(newpos);
       if ( ui->oncoutpe() )
-        cout << "<!-- Atom " << a->name() << " velocity set to " << newvel << " -->" << endl;
+        cout << "<!-- Atom " << a->name() << " position set to " << newpos << " -->" << endl;
     }
     else {
       if ( ui->oncoutpe() )
-        cout << "<ERROR>SetVelCmd:  " << name << " not found!</ERROR>" << endl;
+        cout << "<ERROR>SetPosCmd:  " << name << " not found!</ERROR>" << endl;
       return 1;
     }
     return 0;

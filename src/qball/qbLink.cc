@@ -87,6 +87,7 @@ using namespace std;
 #include <ui/LockCmd.h>
 #include <ui/UnlockCmd.h>
 #include <ui/SetVelCmd.h>
+#include <ui/SetPosCmd.h>
 #include <ui/ComputeMLWFCmd.h>
 #include <ui/AngleCmd.h>
 #include <ui/ConstraintCmd.h>
