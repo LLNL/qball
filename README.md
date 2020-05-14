@@ -2,7 +2,7 @@
 
 ## Installing
 
-To compile Qbox:
+To compile Qball we use a GNU Autools procedure:
 
 1. Generate the configure script (you need autoconf and automake). 
 
