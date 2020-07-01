@@ -277,6 +277,10 @@ void EhrenSampleStepper::step(int niter)
   QB_Pstart(14,scfloop);
 #endif
   tmap["total_niter"].start();
+  //yyf: Update vector field and current from where it stops
+  if(ef_.vp) ef_.vp->propagate(s_.ctrl.tddt*(s_.ctrl.mditer-1), s_.ctrl.tddt);
+    if (ef_.vp) ef_.vector_potential_changed(compute_stress);
+    currd_.update_current(ef_, dwf,false);
   for ( int iter = 0; iter < niter; iter++ )
   {
 
@@ -357,7 +361,7 @@ void EhrenSampleStepper::step(int niter)
 
     tmap["current"].start();
     currd_.update_current(ef_, dwf);
-    tmap["current"].start();
+    tmap["current"].stop();
 
     if(ef_.vp && oncoutpe){
       std::cout << "<!-- vector_potential: " << ef_.vp->value() << " -->\n";
@@ -477,7 +481,7 @@ void EhrenSampleStepper::step(int niter)
     wf_stepper->preupdate();
     tmap["preupdate"].stop();
 
-    if(ef_.vp) ef_.vp->propagate(s_.ctrl.tddt*(iter + 1), s_.ctrl.tddt);
+    if(ef_.vp) ef_.vp->propagate(s_.ctrl.tddt*s_.ctrl.mditer, s_.ctrl.tddt);
     
     tmap["ionic"].start();
     if ( atoms_move )
