@@ -25,6 +25,8 @@
 #include "Wavefunction.h"
 #include "EnergyFunctional.h"
 #include "Sample.h"
+#include <config.h>
+#include <iomanip>
 
 class CurrentDensity : private ChargeDensity
 {
@@ -41,7 +43,7 @@ class CurrentDensity : private ChargeDensity
   ~CurrentDensity (){
   }
 
-  void update_current(EnergyFunctional & energy, const Wavefunction & dwf);
+  void update_current(EnergyFunctional & energy, const Wavefunction & dwf, bool output=true);
 
   void plot(const Sample *, const std::string &);
   void plot_vtk(const Sample *, const std::string &);
