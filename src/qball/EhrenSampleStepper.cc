@@ -278,9 +278,12 @@ void EhrenSampleStepper::step(int niter)
 #endif
   tmap["total_niter"].start();
   //yyf: Update vector field and current from where it stops
-  if(ef_.vp) ef_.vp->propagate(s_.ctrl.tddt*(s_.ctrl.mditer-1), s_.ctrl.tddt);
-    if (ef_.vp) ef_.vector_potential_changed(compute_stress);
+  if(ef_.vp) {
+    ef_.vp->propagate(s_.ctrl.tddt*(s_.ctrl.mditer-1), s_.ctrl.tddt);
+    ef_.vector_potential_changed(compute_stress);
     currd_.update_current(ef_, dwf,false);
+  }
+
   for ( int iter = 0; iter < niter; iter++ )
   {
 
