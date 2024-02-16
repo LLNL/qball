@@ -74,8 +74,10 @@ Base64Transcoder::Base64Transcoder()
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-int Base64Transcoder::encode(int nbytes, const byte* const from, char* const to)
+int Base64Transcoder::encode(int nbytes, const ::byte* const from, char* const to)
 {
+  using ::byte;
+  
   const byte* fptr = from;
   char* tptr = to;
   
@@ -122,7 +124,7 @@ int Base64Transcoder::encode(int nbytes, const byte* const from, char* const to)
 
 ////////////////////////////////////////////////////////////////////////////////
 int Base64Transcoder::decode(const int nchars, const char* const from, 
-  byte* const to)  
+  ::byte* const to)  
 {
   // Decode Base64 chars in array "from" into bytes in array "to"
   // White space and new lines are skipped
@@ -130,7 +132,9 @@ int Base64Transcoder::decode(const int nchars, const char* const from,
   // ignored.
   // nchars: number of chars in array "from"
   // the number of bytes successfully translated is returned
-  
+
+  using ::byte;
+
   byte a0,a1,a2,a3,b0,b1,b2,b3;
   int c;
   const char* fptr = from;

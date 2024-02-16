@@ -40,13 +40,13 @@ typedef unsigned char byte;
 class Base64Transcoder
 {
   char etable[64];  // encode table
-  byte dtable[256]; // decode table
+  ::byte dtable[256]; // decode table
 
   public:
   
   Base64Transcoder();
-  int encode(int nbytes, const byte* const from, char* const to);
-  int decode(int nchars, const char* const from, byte* const to);
+  int encode(int nbytes, const ::byte* const from, char* const to);
+  int decode(int nchars, const char* const from, ::byte* const to);
   void byteswap_double(size_t n, double* const x);
   void byteswap_int(size_t n, int* const x);
   int print(int nchars, const char* const buf, ostream& o);
